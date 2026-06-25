@@ -1,0 +1,1319 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Single-agent ATC arrival sequencing with sb3-contrib MaskablePPO">
+      
+      
+      
+      
+        <link rel="prev" href="../reward/">
+      
+      
+        <link rel="next" href="../instrumentation/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Training - TADA Single-Agent RL</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#training-setup" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="TADA Single-Agent RL" class="md-header__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TADA Single-Agent RL
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Training
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="TADA Single-Agent RL" class="md-nav__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    TADA Single-Agent RL
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mdp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MDP & Environment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../observations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reward/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reward
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Training
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Training
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#run-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run command
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Run command">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#experiment-directory-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Experiment directory layout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-wrappers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment wrappers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment wrappers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-scenario-episode-horizon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-scenario episode horizon
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ppo-hyperparameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PPO hyperparameters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PPO hyperparameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shared-hyperparameters-both-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shared hyperparameters (both paths)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resume-lr-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resume LR schedule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy network
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy network">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#autoregressive-path-default-atcautoregressivepolicy-networkautoregressive_policypy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Autoregressive path (default): ATCAutoregressivePolicy (network/autoregressive_policy.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#legacy-path-maskableppo-atcfeatureextractor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Legacy path: MaskablePPO + ATCFeatureExtractor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#callbacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Callbacks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eval-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eval configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../instrumentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instrumentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../experiments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiment log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#run-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run command
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Run command">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#cli-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        CLI arguments
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#experiment-directory-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Experiment directory layout
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-wrappers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Environment wrappers
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment wrappers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#per-scenario-episode-horizon" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-scenario episode horizon
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ppo-hyperparameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PPO hyperparameters
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="PPO hyperparameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#shared-hyperparameters-both-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shared hyperparameters (both paths)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resume-lr-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Resume LR schedule
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy network
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy network">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#autoregressive-path-default-atcautoregressivepolicy-networkautoregressive_policypy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Autoregressive path (default): ATCAutoregressivePolicy (network/autoregressive_policy.py)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#legacy-path-maskableppo-atcfeatureextractor" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Legacy path: MaskablePPO + ATCFeatureExtractor
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#callbacks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Callbacks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eval-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eval configuration
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="training-setup">Training Setup<a class="headerlink" href="#training-setup" title="Permanent link">&para;</a></h1>
+<p>Source: <code>main.py</code>, <code>network/rlm.py</code>, <code>network/autoregressive_policy.py</code>, <code>config/config.py</code></p>
+<hr />
+<h2 id="run-command">Run command<a class="headerlink" href="#run-command" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>reinforcement_learning/single_agent_rllib
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Fresh run (default 2 M steps)</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>/home/leander/miniconda3/envs/tada/bin/python<span class="w"> </span>main.py
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># Resume from latest checkpoint of an existing run</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>/home/leander/miniconda3/envs/tada/bin/python<span class="w"> </span>main.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span>--resume<span class="w"> </span>experiments/atc_run_1_16
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="c1"># Resume with a custom step target and final LR</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>/home/leander/miniconda3/envs/tada/bin/python<span class="w"> </span>main.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">  </span>--resume<span class="w"> </span>experiments/atc_run_1_16<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">  </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">  </span>--final-lr<span class="w"> </span>1e-5
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="c1"># Resume but restart the LR schedule from a fresh starting LR (warm restart)</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>/home/leander/miniconda3/envs/tada/bin/python<span class="w"> </span>main.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">  </span>--resume<span class="w"> </span>experiments/atc_run_1_16<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">  </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">  </span>--initial-lr<span class="w"> </span>3e-4<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">  </span>--final-lr<span class="w"> </span>1e-5
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="c1"># Spinoff from latest checkpoint into a new auto-labelled directory (e.g. atc_run_1_16_a)</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>/home/leander/miniconda3/envs/tada/bin/python<span class="w"> </span>main.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">  </span>--resume<span class="w"> </span>experiments/atc_run_1_16<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">  </span>--new-run<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">  </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a><span class="w">  </span>--final-lr<span class="w"> </span>1e-5
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="c1"># Spinoff from a specific checkpoint step (implies --new-run)</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>/home/leander/miniconda3/envs/tada/bin/python<span class="w"> </span>main.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">  </span>--resume<span class="w"> </span>experiments/atc_run_1_16<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="w">  </span>--checkpoint<span class="w"> </span><span class="m">1500000</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">  </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">  </span>--final-lr<span class="w"> </span>1e-5
+</code></pre></div>
+<p>Conda env: <code>tada</code>, Python 3.12.</p>
+<h3 id="cli-arguments">CLI arguments<a class="headerlink" href="#cli-arguments" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--resume DIR</code></td>
+<td><em>(none — fresh run)</em></td>
+<td>Experiment directory to resume from. Auto-detects the latest checkpoint unless <code>--checkpoint</code> is given.</td>
+</tr>
+<tr>
+<td><code>--checkpoint STEP</code></td>
+<td><em>(latest)</em></td>
+<td>Resume from a specific step count (e.g. <code>1500000</code>). Implies <code>--new-run</code>.</td>
+</tr>
+<tr>
+<td><code>--new-run</code></td>
+<td><code>False</code></td>
+<td>Write to a new spinoff directory (e.g. <code>atc_run_1_16_a</code>) instead of continuing in-place. Name is auto-incremented (<code>_a</code>, <code>_b</code>, …) by scanning existing dirs.</td>
+</tr>
+<tr>
+<td><code>--total-timesteps N</code></td>
+<td>2 000 000 (fresh) / 3 000 000 (resume)</td>
+<td>Cumulative timestep target.</td>
+</tr>
+<tr>
+<td><code>--final-lr F</code></td>
+<td><code>3e-5</code></td>
+<td>LR at end of training. On resume, the schedule decays <strong>linearly from the starting LR</strong> to this value. Set equal to the starting LR for a flat schedule.</td>
+</tr>
+<tr>
+<td><code>--initial-lr F</code></td>
+<td><em>(checkpoint LR)</em></td>
+<td>Override the LR the resumed schedule <strong>starts</strong> from. If unset, it starts from the LR reached at the checkpoint (read from the optimizer state). Ignored for fresh runs.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="experiment-directory-layout">Experiment directory layout<a class="headerlink" href="#experiment-directory-layout" title="Permanent link">&para;</a></h2>
+<p>Each run writes to a self-contained directory <code>experiments/atc_run_1_N/</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>experiments/atc_run_1_N/
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── checkpoints/          # ppo_tada_&lt;step&gt;_steps.zip + vecnormalize *.pkl
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├── best/                 # best model by eval reward
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>├── eval_logs/            # eval callback numpy logs
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>├── tb/                   # TensorBoard + CSV logs
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>├── snapshot/             # source files copied at launch (reproducibility)
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>├── run_meta.json         # run name, timestamp, git commit, total_timesteps [, resumed_from]
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>└── git_diff.patch        # uncommitted diff at launch
+</code></pre></div>
+<p>Point TensorBoard at <code>experiments/</code> to see all runs together:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>tensorboard<span class="w"> </span>--logdir<span class="w"> </span>reinforcement_learning/single_agent_rllib/experiments
+</code></pre></div>
+<p>On resume, new checkpoints, TB events, and CSV rows append to the same directory so the run appears continuous.</p>
+<p>On spinoff (<code>--new-run</code> or <code>--checkpoint</code>), a fresh directory is created; <code>run_meta.json</code> gains a <code>resumed_from</code> field recording the source directory, checkpoint filename, and step count. The original run's <code>run_meta.json</code> is also annotated with <code>resumed_from</code> and <code>extended_total_timesteps</code> so the lineage is traceable from both sides.</p>
+<hr />
+<h2 id="environment-wrappers">Environment wrappers<a class="headerlink" href="#environment-wrappers" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ATCSingleAgentEnv
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  └── Monitor          # records raw episodic returns (rollout/ep_rew_mean)
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        └── DummyVecEnv
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>              └── VecNormalize   # normalizes the reward stream only (norm_obs=False)
+</code></pre></div>
+<p>Two separate env stacks:</p>
+<table>
+<thead>
+<tr>
+<th>Stack</th>
+<th><code>norm_reward</code></th>
+<th><code>training</code></th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>train_env</code></td>
+<td><code>True</code></td>
+<td><code>True</code> (default)</td>
+<td>Reward normalization for stable value targets</td>
+</tr>
+<tr>
+<td><code>eval_env</code></td>
+<td><code>False</code></td>
+<td><code>False</code></td>
+<td>Raw reward scale — keeps eval metrics interpretable</td>
+</tr>
+</tbody>
+</table>
+<p>Both use <code>gamma=0.995</code> for VecNormalize's running-return estimator.
+<code>norm_obs=False</code> on both because observations are already in <code>[-1, 1]</code>.</p>
+<p>On resume, <code>train_env</code> is restored via <code>VecNormalize.load()</code> from the checkpoint's paired <code>.pkl</code> file so the running statistics continue rather than re-initialising.</p>
+<h3 id="per-scenario-episode-horizon">Per-scenario episode horizon<a class="headerlink" href="#per-scenario-episode-horizon" title="Permanent link">&para;</a></h3>
+<p>Instead of a fixed 128-step cap, the episode length is sized to each scenario's latest arrival ETA (<code>Config.USE_PER_SCENARIO_HORIZON = True</code>):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>max_steps = clip(ceil(max_arrival_eta / TIME_BETWEEN_ACTIONS) + HORIZON_STEP_MARGIN,
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>                 MIN_EPISODE_STEPS, MAX_EPISODE_STEPS)
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Value</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>HORIZON_STEP_MARGIN</code></td>
+<td>12</td>
+<td>Extra steps for the last aircraft to land and settle (≈ 264 s)</td>
+</tr>
+<tr>
+<td><code>MIN_EPISODE_STEPS</code></td>
+<td>96</td>
+<td>Floor</td>
+</tr>
+<tr>
+<td><code>MAX_EPISODE_STEPS</code></td>
+<td>260</td>
+<td>Cap; covers the ~242-step worst-case eval scenario</td>
+</tr>
+</tbody>
+</table>
+<p>This prevents structural timeouts (all five eval scenarios have a latest ETA beyond the 128 × 22 s = 2816 s fixed horizon).</p>
+<div class="admonition note">
+<p class="admonition-title">Interval halved — <code>TIME_BETWEEN_ACTIONS</code> 45 → 22 s</p>
+<p>The simulation interval (sim seconds advanced per env step) was halved so the agent can act
+~twice as often within the same scenario — it needs the extra decision points to switch
+between aircraft on the hardest scenarios, where only one aircraft can be commanded per step.
+Every step-count constant that encodes an <strong>absolute duration</strong> (<code>EPISODE_STEPS</code>, the three
+horizon caps above, <code>NEIGHBOR_LOOKAHEAD_MULTIPLIER</code>, <code>SCENARIO_INITIAL_CONFLICT_FREE_STEPS</code>,
+<code>SUCCESS_NEAR_CONFLICT_CLEAR_STEPS</code>) was <strong>doubled in tandem</strong> to preserve its wall-clock
+meaning. Net effect: episodes now span ~2× the env-steps (so <code>gamma = 0.995</code> matters more for
+credit-assignment reach) and per-episode rollout compute roughly doubles.</p>
+</div>
+<hr />
+<h2 id="ppo-hyperparameters">PPO hyperparameters<a class="headerlink" href="#ppo-hyperparameters" title="Permanent link">&para;</a></h2>
+<p><code>Config.USE_AUTOREGRESSIVE_ACTIONS = True</code> (default) uses vanilla <code>PPO</code> with <code>ATCAutoregressivePolicy</code>.
+The legacy flat <code>Discrete(220)</code> + <code>MaskablePPO</code> path is selected by setting the flag to <code>False</code>.</p>
+<h3 id="shared-hyperparameters-both-paths">Shared hyperparameters (both paths)<a class="headerlink" href="#shared-hyperparameters-both-paths" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>learning_rate</code></td>
+<td><code>linear_schedule(3e-4 → 3e-5)</code></td>
+<td>Decays to tame rising late-training KL</td>
+</tr>
+<tr>
+<td><code>n_epochs</code></td>
+<td>5</td>
+<td>Was SB3 default 10 → too much policy drift per rollout</td>
+</tr>
+<tr>
+<td><code>target_kl</code></td>
+<td>0.03</td>
+<td>Early-stop once <code>approx_kl</code> exceeds this</td>
+</tr>
+<tr>
+<td><code>ent_coef</code></td>
+<td>0.01</td>
+<td>Was 0.0 → entropy collapsed and policy plateaued</td>
+</tr>
+<tr>
+<td><code>max_grad_norm</code></td>
+<td>1.5</td>
+<td>Was 0.5 → grads saturated the clip (<code>clip_frac</code> ≈ 1.0)</td>
+</tr>
+<tr>
+<td><code>gamma</code></td>
+<td>0.995</td>
+<td>Raised from 0.99 for credit-assignment reach over longer per-scenario episodes</td>
+</tr>
+<tr>
+<td><code>total_timesteps</code></td>
+<td>2 000 000 (default)</td>
+<td>Overridden by <code>--total-timesteps</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="resume-lr-schedule">Resume LR schedule<a class="headerlink" href="#resume-lr-schedule" title="Permanent link">&para;</a></h3>
+<p>On <code>--resume</code>, the schedule's <strong>starting LR</strong> (<code>start_lr</code>) is either <code>--initial-lr</code> (if given) or
+the LR read from the saved optimizer state (<code>model.policy.optimizer.param_groups[0]["lr"]</code>, frozen
+as a <code>float</code> immediately after <code>PPO.load()</code>). SB3 re-evaluates the schedule on the first optimizer
+update, so <code>--initial-lr</code> also overwrites the LR loaded from the optimizer state. The schedule then:</p>
+<ul>
+<li>at <code>progress_remaining = p_start = 1 − steps_done / new_total</code> → returns <code>start_lr</code></li>
+<li>at <code>progress_remaining = 0</code> (end of the resumed run) → returns <code>--final-lr</code></li>
+<li>is <strong>clamped to <code>[final_lr, start_lr]</code></strong> — the LR can never exceed <code>start_lr</code> even
+  if SB3 evaluates the schedule at a <code>progress_remaining</code> fractionally above <code>p_start</code></li>
+</ul>
+<p>Unlike a backward-extrapolated <code>linear_schedule(new_initial)</code>, this approach never
+produces a visible spike at the resume boundary. Setting <code>--final-lr</code> equal to <code>start_lr</code>
+gives a <strong>flat schedule</strong> for the remainder. The chosen <code>start_lr</code>, the checkpoint LR, and
+<code>--final-lr</code> are recorded under <code>lr_schedule</code> in <code>run_meta.json</code>.</p>
+<hr />
+<h2 id="policy-network">Policy network<a class="headerlink" href="#policy-network" title="Permanent link">&para;</a></h2>
+<h3 id="autoregressive-path-default-atcautoregressivepolicy-networkautoregressive_policypy">Autoregressive path (default): <code>ATCAutoregressivePolicy</code> (<code>network/autoregressive_policy.py</code>)<a class="headerlink" href="#autoregressive-path-default-atcautoregressivepolicy-networkautoregressive_policypy" title="Permanent link">&para;</a></h3>
+<p>The policy owns its encoder and both action heads; no separate <code>features_extractor_class</code> is configured.</p>
+<p><strong>Encoding</strong> — shared <code>ATCEncoder</code> (from <code>network/rlm.py</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Module</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Per-aircraft scalars</td>
+<td>Linear(12→128) + LayerNorm + ReLU</td>
+<td></td>
+</tr>
+<tr>
+<td>Flight plan</td>
+<td><code>FlightPlanConvEncoder</code> (1D CNN, output 64)</td>
+<td></td>
+</tr>
+<tr>
+<td>Action history</td>
+<td>GRU(input=23, hidden=64), last hidden</td>
+<td></td>
+</tr>
+<tr>
+<td>Fuse per-aircraft</td>
+<td>Linear(256→128) + LayerNorm + ReLU</td>
+<td></td>
+</tr>
+<tr>
+<td>Masked mean-pool</td>
+<td>weighted sum / valid count</td>
+<td>→ <code>[B, 128]</code></td>
+</tr>
+<tr>
+<td>Global features</td>
+<td>Linear(4→128) + ReLU</td>
+<td></td>
+</tr>
+<tr>
+<td>Final fusion</td>
+<td>Linear(256→128) + LayerNorm + ReLU</td>
+<td>→ <code>[B, 128]</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Aircraft head</strong> — <code>Linear(128 → N_aircraft)</code> + softmax over valid aircraft (mask from obs).</p>
+<p><strong>Clearance head</strong> — <code>Linear(128 + aircraft_embed → N_clearances)</code> conditioned on the sampled aircraft embedding; masked over valid clearances for that aircraft.</p>
+<h3 id="legacy-path-maskableppo-atcfeatureextractor">Legacy path: <code>MaskablePPO</code> + <code>ATCFeatureExtractor</code><a class="headerlink" href="#legacy-path-maskableppo-atcfeatureextractor" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">policy_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">features_extractor_class</span><span class="o">=</span><span class="n">ATCFeatureExtractor</span><span class="p">,</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">features_extractor_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">features_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">),</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">net_arch</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pi</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span> <span class="n">vf</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">]),</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">)</span>
+</code></pre></div>
+<p>Same <code>ATCEncoder</code> backbone; the latent vector feeds separate policy (<code>pi</code>) and value (<code>vf</code>) heads with two 64-unit hidden layers each.</p>
+<hr />
+<h2 id="callbacks">Callbacks<a class="headerlink" href="#callbacks" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Callback</th>
+<th>Class</th>
+<th>Frequency</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ATCEpisodeMetricsCallback</code></td>
+<td><code>metrics_callback.py</code></td>
+<td>Every episode end</td>
+<td>Training-env episode metrics → <code>custom_metrics/*</code></td>
+</tr>
+<tr>
+<td><code>ATCInstrumentationCallback</code></td>
+<td><code>instrumentation_callback.py</code></td>
+<td>Every rollout end</td>
+<td>Obs / reward / action / grad diagnostics → <code>instr/*</code></td>
+</tr>
+<tr>
+<td><code>CheckpointCallback</code></td>
+<td>SB3 built-in</td>
+<td>Every 10 000 steps</td>
+<td>Save model + VecNormalize to <code>experiments/&lt;run&gt;/checkpoints/</code></td>
+</tr>
+<tr>
+<td><code>ATCEvalMetricsCallback</code></td>
+<td><code>eval_metrics_callback.py</code></td>
+<td>Every 5 000 steps</td>
+<td>Deterministic eval (10 episodes) → <code>eval_custom/*</code>, <code>eval_instr/*</code>, <code>eval_success/*</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="eval-configuration">Eval configuration<a class="headerlink" href="#eval-configuration" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>eval_freq</code></td>
+<td>5 000 steps</td>
+</tr>
+<tr>
+<td><code>n_eval_episodes</code></td>
+<td>10</td>
+</tr>
+<tr>
+<td><code>deterministic</code></td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>rolling_window</code></td>
+<td>100 episodes</td>
+</tr>
+<tr>
+<td>Eval seeds</td>
+<td><code>Config.SCENARIO_EVAL_SEEDS</code> — 5 built-in defaults, overridden by <code>config/eval_seeds.txt</code> if present</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Larger eval-seed pools</p>
+<p>Drop your seeds into <strong><code>config/eval_seeds.txt</code></strong> (one int per line; <code>#</code> comments, commas, and
+<code>[ ]</code> brackets tolerated — a pasted Python/JSON list works) to evaluate on a bigger set without
+touching <code>config.py</code>. A missing / seedless / malformed file falls back to the built-in defaults.</p>
+<p><code>n_eval_episodes</code> governs <strong>per-pass coverage</strong>, and the eval seed index <em>persists across
+passes</em>. With <strong>fewer episodes than seeds</strong> (e.g. 10 episodes over ~100 seeds) each eval pass
+walks a <strong>rolling window</strong> of the pool, so the full set is covered across ~10 passes and the
+<code>*_rolling</code> metrics (<code>rolling_window = 100</code>) aggregate it. The trade-off: per-pass
+<code>eval/mean_reward</code> and <strong>best-model selection</strong> then see only that pass's subset — raise
+<code>n_eval_episodes</code> toward <code>len(seeds)</code> if you need every pass to score the whole pool.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1111 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Single-agent ATC arrival sequencing with sb3-contrib MaskablePPO">
+      
+      
+      
+      
+        <link rel="prev" href="../mdp/">
+      
+      
+        <link rel="next" href="../reward/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Observations - TADA Single-Agent RL</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#observations" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="TADA Single-Agent RL" class="md-header__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TADA Single-Agent RL
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Observations
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="TADA Single-Agent RL" class="md-nav__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    TADA Single-Agent RL
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mdp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MDP & Environment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observations
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#observation-space-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Observation space at a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#global-4-global-features-modelsobservationspy62" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        global — 4 global features (models/observations.py:62)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aircraft-12-per-aircraft-scalar-features-modelsobservationspy18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        aircraft — 12 per-aircraft scalar features (models/observations.py:18)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mask_aircraft-and-mask_action_per_ac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mask_aircraft and mask_action_per_ac
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flight_plans_rel-relative-waypoint-sequences-modelsobservationspy92" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        flight_plans_rel — relative waypoint sequences (models/observations.py:92)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#action_histories-recent-actions-per-aircraft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        action_histories — recent actions per aircraft
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#normalization-helpers-modelsobservationspy167" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalization helpers (models/observations.py:167)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reward/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reward
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../training/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Training
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../instrumentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instrumentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../experiments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiment log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#observation-space-at-a-glance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Observation space at a glance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#global-4-global-features-modelsobservationspy62" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        global — 4 global features (models/observations.py:62)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#aircraft-12-per-aircraft-scalar-features-modelsobservationspy18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        aircraft — 12 per-aircraft scalar features (models/observations.py:18)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mask_aircraft-and-mask_action_per_ac" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        mask_aircraft and mask_action_per_ac
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#flight_plans_rel-relative-waypoint-sequences-modelsobservationspy92" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        flight_plans_rel — relative waypoint sequences (models/observations.py:92)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#action_histories-recent-actions-per-aircraft" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        action_histories — recent actions per aircraft
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#normalization-helpers-modelsobservationspy167" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Normalization helpers (models/observations.py:167)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="observations">Observations<a class="headerlink" href="#observations" title="Permanent link">&para;</a></h1>
+<p>Source: <code>models/observations.py</code>, <code>config/config.py</code>, <code>atc_env/single_agent_env.py</code></p>
+<hr />
+<h2 id="observation-space-at-a-glance">Observation space at a glance<a class="headerlink" href="#observation-space-at-a-glance" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Shape</th>
+<th>Range</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>global</code></td>
+<td>Box</td>
+<td><code>(4,)</code></td>
+<td>[-1, 1]</td>
+<td>Episode-level context</td>
+</tr>
+<tr>
+<td><code>aircraft</code></td>
+<td>Box</td>
+<td><code>(10, 12)</code></td>
+<td>[-1, 1]</td>
+<td>Per-aircraft scalar state</td>
+</tr>
+<tr>
+<td><code>mask_aircraft</code></td>
+<td>MultiBinary</td>
+<td><code>(10,)</code></td>
+<td>{0,1}</td>
+<td>Valid aircraft slots</td>
+</tr>
+<tr>
+<td><code>mask_action_per_ac</code></td>
+<td>MultiBinary</td>
+<td><code>(10, 22)</code></td>
+<td>{0,1}</td>
+<td>Valid clearances per aircraft</td>
+</tr>
+<tr>
+<td><code>flight_plans_rel</code></td>
+<td>Box</td>
+<td><code>(10, 20, 11)</code></td>
+<td>[-1, 1]</td>
+<td>Per-aircraft relative waypoint sequences</td>
+</tr>
+<tr>
+<td><code>flight_plan_mask</code></td>
+<td>MultiBinary</td>
+<td><code>(10, 20)</code></td>
+<td>{0,1}</td>
+<td>Valid waypoints per aircraft</td>
+</tr>
+<tr>
+<td><code>action_histories</code></td>
+<td>Box</td>
+<td><code>(10, 8, 23)</code></td>
+<td>[0, 1]</td>
+<td>Recent actions per aircraft (one-hot)</td>
+</tr>
+</tbody>
+</table>
+<p>Shapes follow: <code>N_AIRCRAFT_MAX=10</code>, <code>AIRCRAFT_SCALAR_LEN=12</code>, <code>N_CLEARANCES=22</code>,
+<code>MAX_WAYPOINTS=20</code>, <code>FLIGHT_PLAN_WAYPOINT_DIM=11</code>, <code>MAX_HISTORY=8</code>.</p>
+<hr />
+<h2 id="global-4-global-features-modelsobservationspy62"><code>global</code> — 4 global features (<code>models/observations.py:62</code>)<a class="headerlink" href="#global-4-global-features-modelsobservationspy62" title="Permanent link">&para;</a></h2>
+<p>All four are normalized to <strong>[-1, 1]</strong> via <code>map_to_sym_unit(v, vmin, vmax)</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Index</th>
+<th>Field</th>
+<th>Raw range</th>
+<th>Normalization</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>World age (s)</td>
+<td>[0, 2880]</td>
+<td><code>map_to_sym_unit(t, 0, EPISODE_STEPS×TIME_BETWEEN_ACTIONS)</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>Active aircraft count</td>
+<td>[0, 10]</td>
+<td><code>map_to_sym_unit(n, 0, N_AIRCRAFT_MAX)</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Mean absolute schedule deviation (s)</td>
+<td>[0, 900]</td>
+<td><code>map_to_sym_unit(dev, 0, TIME_DEVIATION_MAX)</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Max predicted infringement severity</td>
+<td>[0, 1]</td>
+<td><code>map_to_sym_unit(infr, 0, 1)</code></td>
+</tr>
+</tbody>
+</table>
+<p>Horizon for time normalization: <code>64 × 45 = 2880 s</code>.</p>
+<hr />
+<h2 id="aircraft-12-per-aircraft-scalar-features-modelsobservationspy18"><code>aircraft</code> — 12 per-aircraft scalar features (<code>models/observations.py:18</code>)<a class="headerlink" href="#aircraft-12-per-aircraft-scalar-features-modelsobservationspy18" title="Permanent link">&para;</a></h2>
+<p><code>AIRCRAFT_SCALAR_LEN = 12</code> (<code>config.py:60</code>). Feature 11 (<code>time_to_conflict</code>) was
+added in the current codebase. All values are in <code>[-1, 1]</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Index</th>
+<th>Field</th>
+<th>Raw unit</th>
+<th>Normalization</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><code>pos_x</code></td>
+<td>NM</td>
+<td><code>map_sym(v, 150.0)</code></td>
+<td>After episode translation matrix</td>
+</tr>
+<tr>
+<td>1</td>
+<td><code>pos_y</code></td>
+<td>NM</td>
+<td><code>map_sym(v, 150.0)</code></td>
+<td>After episode translation matrix</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>pos_z</code></td>
+<td>ft</td>
+<td><code>map_sym(v, 45000.0)</code></td>
+<td></td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>vel_xy</code></td>
+<td>kts</td>
+<td><code>map_to_sym_unit(v, 0, 350.0)</code></td>
+<td>Horizontal speed magnitude</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>vz</code></td>
+<td>fpm</td>
+<td><code>map_sym(v, 3000.0)</code></td>
+<td>Vertical speed</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>heading_sin</code></td>
+<td>—</td>
+<td>raw (from vel vector)</td>
+<td></td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>heading_cos</code></td>
+<td>—</td>
+<td>raw (from vel vector)</td>
+<td></td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>time_to_target</code></td>
+<td>s</td>
+<td><code>map_to_sym_unit(v, 0, 900)</code></td>
+<td>Time to arrival target</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>time_deviation</code></td>
+<td>s</td>
+<td><code>map_sym(v, 900)</code></td>
+<td>Schedule deviation from rollout</td>
+</tr>
+<tr>
+<td>9</td>
+<td><code>predicted_infringement</code></td>
+<td>[0,1]</td>
+<td><code>map_to_sym_unit(v, 0, 1)</code></td>
+<td>Max conflict severity in look-ahead</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>time_to_conflict</code></td>
+<td>[0,1]</td>
+<td><code>_map01_to_sym(v)</code></td>
+<td>1=imminent, 0=none/far</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>under_control</code></td>
+<td>{0,1}</td>
+<td>raw float</td>
+<td>Under ATC control flag</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>time_to_conflict</code> (<code>tcf</code>) is computed as
+<code>max(0, 1 - ttc / NEAR_CONFLICT_TIME_S)</code> where <code>ttc</code> is the timestamp of the
+earliest predicted loss-of-separation for this aircraft minus the current world
+time (<code>observations.py:521-524</code>). <code>NEAR_CONFLICT_TIME_S = 1200 s</code> (20 min).</p>
+</div>
+<p>Schedule deviation (<code>time_deviation</code>, field 8) comes exclusively from
+<code>MISS_TIMED_LANDING</code> events in the <strong>NOOP rollout world</strong> (<code>get_time_deviations</code>).
+<code>compute_dynamic_deviation</code> was removed — see <code>observations.py:412</code>.</p>
+<hr />
+<h2 id="mask_aircraft-and-mask_action_per_ac"><code>mask_aircraft</code> and <code>mask_action_per_ac</code><a class="headerlink" href="#mask_aircraft-and-mask_action_per_ac" title="Permanent link">&para;</a></h2>
+<ul>
+<li><code>mask_aircraft[i]</code> = 1 if slot <code>i</code> contains a live aircraft (under control and
+  not completed, or at least not completed if none are under control).</li>
+<li><code>mask_action_per_ac[i, j]</code> = 1 if clearance <code>j</code> is geometrically/structurally
+  valid for the aircraft in slot <code>i</code> (computed by <code>action_mask.compute_action_mask</code>).</li>
+</ul>
+<p>These two masks are combined in <code>action_masks()</code> to produce the flat <code>bool[220]</code>
+mask consumed by <code>MaskablePPO</code>.</p>
+<hr />
+<h2 id="flight_plans_rel-relative-waypoint-sequences-modelsobservationspy92"><code>flight_plans_rel</code> — relative waypoint sequences (<code>models/observations.py:92</code>)<a class="headerlink" href="#flight_plans_rel-relative-waypoint-sequences-modelsobservationspy92" title="Permanent link">&para;</a></h2>
+<p>Shape <code>(10, 20, 11)</code>. Each waypoint vector has <code>FLIGHT_PLAN_WAYPOINT_DIM = 11</code>
+features, all in <code>[-1, 1]</code> (or raw sin/cos/flag):</p>
+<table>
+<thead>
+<tr>
+<th>Index</th>
+<th>Field</th>
+<th>Normalization</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>Waypoint global x (NM)</td>
+<td><code>map_sym(v, 150.0)</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>Waypoint global y (NM)</td>
+<td><code>map_sym(v, 150.0)</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Waypoint global z (ft)</td>
+<td><code>map_sym(v, 45000.0)</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>dx to waypoint (NM)</td>
+<td><code>map_sym(v, 150.0)</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>dy to waypoint (NM)</td>
+<td><code>map_sym(v, 150.0)</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>dz to waypoint (ft)</td>
+<td><code>map_sym(v, 40000.0)</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Horizontal distance (NM)</td>
+<td><code>map_to_sym_unit(v, 0, 150.0)</code></td>
+</tr>
+<tr>
+<td>7</td>
+<td>Bearing sin</td>
+<td>raw</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Bearing cos</td>
+<td>raw</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Target speed (kts)</td>
+<td><code>map_to_sym_unit(v, 0, 350.0)</code> if available else 0</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Target speed available flag</td>
+<td>raw 0/1</td>
+</tr>
+</tbody>
+</table>
+<p>Coordinates are expressed after the <strong>episode translation matrix</strong> (<code>T_obs</code>), a
+random uniform translation sampled at <code>reset()</code> to avoid positional overfitting
+(<code>single_agent_env.py:275</code>).</p>
+<p><code>flight_plan_mask[i, j]</code> = 1 if waypoint slot <code>j</code> is a real waypoint for aircraft <code>i</code>.</p>
+<hr />
+<h2 id="action_histories-recent-actions-per-aircraft"><code>action_histories</code> — recent actions per aircraft<a class="headerlink" href="#action_histories-recent-actions-per-aircraft" title="Permanent link">&para;</a></h2>
+<p>Shape <code>(10, 8, 23)</code> = <code>(N_AIRCRAFT_MAX, MAX_HISTORY, 1 + N_CLEARANCES)</code>.</p>
+<p>Each history step is a vector of length 23:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>[valid_flag, one_hot_clearance_0, ..., one_hot_clearance_21]
+</code></pre></div>
+<ul>
+<li><code>valid_flag = 1.0</code> if this slot holds a real past action, <code>0.0</code> if padding.</li>
+<li>The one-hot portion encodes the clearance index.</li>
+<li>History is in <strong>reverse chronological order</strong> (most recent first).</li>
+<li>Slots without history are zero-padded.</li>
+</ul>
+<p>Values are in <code>[0, 1]</code> (hence the Box bounds differ from other keys).</p>
+<hr />
+<h2 id="normalization-helpers-modelsobservationspy167">Normalization helpers (<code>models/observations.py:167</code>)<a class="headerlink" href="#normalization-helpers-modelsobservationspy167" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Formula</th>
+<th>Output range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>map_sym(v, half_range)</code></td>
+<td><code>clip(v / half_range, -1, 1)</code></td>
+<td>[-1, 1]</td>
+</tr>
+<tr>
+<td><code>map_to_sym_unit(v, vmin, vmax)</code></td>
+<td><code>_map01_to_sym(clip((v-vmin)/(vmax-vmin), 0, 1))</code></td>
+<td>[-1, 1]</td>
+</tr>
+<tr>
+<td><code>_map01_to_sym(x)</code></td>
+<td><code>2 * clip(x, 0, 1) - 1</code></td>
+<td>[-1, 1]</td>
+</tr>
+<tr>
+<td><code>_normalize(v, vmin, vmax)</code></td>
+<td><code>clip((v-vmin)/(vmax-vmin), 0, 1)</code></td>
+<td>[0, 1]</td>
+</tr>
+<tr>
+<td><code>_normalize_sym(v, scale)</code></td>
+<td><code>clip(v / scale, -1, 1)</code></td>
+<td>[-1, 1]</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>under_control</code> (field 11 of aircraft scalars) and the action history
+<code>valid_flag</code> are passed as raw floats without further normalization.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,1244 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Single-agent ATC arrival sequencing with sb3-contrib MaskablePPO">
+      
+      
+      
+      
+        <link rel="prev" href="../instrumentation/">
+      
+      
+        <link rel="next" href="../roadmap/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Experiment log - TADA Single-Agent RL</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#experiment-log" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="TADA Single-Agent RL" class="md-header__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TADA Single-Agent RL
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Experiment log
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="TADA Single-Agent RL" class="md-nav__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    TADA Single-Agent RL
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mdp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MDP & Environment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../observations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reward/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reward
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../training/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Training
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../instrumentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instrumentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiment log
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiment log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-1-baseline-atc_run_1_4-50k" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 1 — Baseline (atc_run_1_4, 50k)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-2-rewardobs-redesign-atc_run_1_5-50k" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 2 — Reward/obs redesign (atc_run_1_5, 50k)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-3-rebalance-relaxed-gate-atc_run_1_8-500k" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 3 — Rebalance + relaxed gate (atc_run_1_8, 500k)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-4-simulator-only-deviation-stability-fixes-atc_run_1_9-500k" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 4 — Simulator-only deviation + stability fixes (atc_run_1_9, 500k)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-5-larger-grad-clip-atc_run_1_10-500k" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 5 — Larger grad clip (atc_run_1_10, 500k)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-6-dense-goal-bonus-experiment-scaffolding-atc_run_1_12-5m-stopped-314m" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 6 — Dense goal bonus + experiment scaffolding (atc_run_1_12, 5M → stopped ~3.14M)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-7-kl-control-atc_run_1_13-1m" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 7 — KL control (atc_run_1_13, 1M)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-8-5-tier-success-autoregressive-policy-atc_run_1_16-191m" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 8 — 5-tier success + autoregressive policy (atc_run_1_16, 1.91M†)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-9-finer-temporal-control-22-s-interval-atc_run_1_16_a-45-s-control-vs-atc_run_1_16_b-22-s" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 9 — Finer temporal control: 22 s interval (atc_run_1_16_a 45 s control vs atc_run_1_16_b 22 s)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-10-fresh-22-s-run-atc_run_1_17-5-m-target-in-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 10 — Fresh 22 s run (atc_run_1_17, 5 M target) — in progress
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-1-baseline-atc_run_1_4-50k" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 1 — Baseline (atc_run_1_4, 50k)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-2-rewardobs-redesign-atc_run_1_5-50k" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 2 — Reward/obs redesign (atc_run_1_5, 50k)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-3-rebalance-relaxed-gate-atc_run_1_8-500k" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 3 — Rebalance + relaxed gate (atc_run_1_8, 500k)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-4-simulator-only-deviation-stability-fixes-atc_run_1_9-500k" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 4 — Simulator-only deviation + stability fixes (atc_run_1_9, 500k)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-5-larger-grad-clip-atc_run_1_10-500k" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 5 — Larger grad clip (atc_run_1_10, 500k)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-6-dense-goal-bonus-experiment-scaffolding-atc_run_1_12-5m-stopped-314m" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 6 — Dense goal bonus + experiment scaffolding (atc_run_1_12, 5M → stopped ~3.14M)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-7-kl-control-atc_run_1_13-1m" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 7 — KL control (atc_run_1_13, 1M)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-8-5-tier-success-autoregressive-policy-atc_run_1_16-191m" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 8 — 5-tier success + autoregressive policy (atc_run_1_16, 1.91M†)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-9-finer-temporal-control-22-s-interval-atc_run_1_16_a-45-s-control-vs-atc_run_1_16_b-22-s" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 9 — Finer temporal control: 22 s interval (atc_run_1_16_a 45 s control vs atc_run_1_16_b 22 s)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-10-fresh-22-s-run-atc_run_1_17-5-m-target-in-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 10 — Fresh 22 s run (atc_run_1_17, 5 M target) — in progress
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="experiment-log">Experiment log<a class="headerlink" href="#experiment-log" title="Permanent link">&para;</a></h1>
+<p>A chronological record of the PPO training runs on branch <code>UM-lg</code>, what
+changed in each, and what we learned. Runs 1–5 logged to <code>tb_logs/atc_run_1_N</code>;
+from run <code>atc_run_1_11</code> onward each run is a <strong>self-contained directory</strong> under
+<code>experiments/atc_run_1_N/</code> (TensorBoard + CSV in <code>tb/</code>, <code>checkpoints/</code>, <code>best/</code>, a
+<code>snapshot/</code> of the source, plus <code>run_meta.json</code> and <code>git_diff.patch</code> for provenance).
+The <code>atc_run_1_N</code> suffix increments each launch; the relevant ones are noted per run
+(aborted/throwaway launches are skipped).</p>
+<div class="admonition note">
+<p class="admonition-title">How to read this</p>
+<p>Each run isolates a small set of changes from the previous one. The <strong>Finding</strong>
+line is the takeaway that motivated the next run.</p>
+</div>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>TB run</th>
+<th>Steps</th>
+<th>Headline change</th>
+<th>eval reward</th>
+<th>Binding blocker</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>atc_run_1_4</code></td>
+<td>50k</td>
+<td>SB3 baseline (original reward)</td>
+<td>−35 → <strong>−20</strong></td>
+<td>acts every step; deviation ≫ conflict; global obs 27% saturated</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>atc_run_1_5</code></td>
+<td>50k</td>
+<td>Reward/obs <strong>redesign</strong></td>
+<td>−176 → <strong>−66</strong></td>
+<td>success gate unsatisfiable; deviation crowded out</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>atc_run_1_8</code></td>
+<td>500k</td>
+<td><strong>Rebalance</strong> + relaxed gate</td>
+<td>−156 → <strong>−60</strong> (plateau ~150k)</td>
+<td>deviation stuck; entropy collapse; value_loss huge</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>atc_run_1_9</code></td>
+<td>500k</td>
+<td>Simulator-only deviation + <strong>stability fixes</strong></td>
+<td>−136 → <strong>−51</strong></td>
+<td>deviation <strong>still</strong> stuck; grads saturate clip (<code>clip_frac</code>≈1.0)</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>atc_run_1_10</code></td>
+<td>500k</td>
+<td><strong><code>max_grad_norm</code> 0.5 → 1.5</strong></td>
+<td>−123 → <strong>−45</strong></td>
+<td><code>clip_frac</code> unsaturated ✓; deviation ceiling persists</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>atc_run_1_12</code></td>
+<td>5M†</td>
+<td><strong>Dense goal bonus</strong> + per-run experiment dirs</td>
+<td>−151 → <strong>−33</strong></td>
+<td><strong>best yet</strong>, but late <code>approx_kl</code>→0.22 → regresses; deviation ceiling holds</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>atc_run_1_13</code></td>
+<td>1M</td>
+<td>+ <strong>KL control</strong> (LR decay, <code>n_epochs</code> 5, <code>target_kl</code> 0.03)</td>
+<td>−117 → <strong>−37</strong></td>
+<td>KL tamed ✓; peaks @425k then regresses to −60; <code>all_under_threshold</code>=0</td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>atc_run_1_16</code></td>
+<td>→7.1M†</td>
+<td><strong>5-tier success</strong> + autoregressive policy + per-scenario horizon + DOF action cost</td>
+<td><strong>50% success peak</strong> (@5.7M), ~30% plateau</td>
+<td>worst-aircraft dev → <strong>99 s</strong> (ceiling broken); oscillates, not monotone</td>
+</tr>
+<tr>
+<td>9a</td>
+<td><code>atc_run_1_16_a</code></td>
+<td>2→4M</td>
+<td>45 s <strong>control</strong> (Run 8 ckpt @2M continued)</td>
+<td>~40% peak, then drifts</td>
+<td>reproduces Run 8 plateau/oscillation</td>
+</tr>
+<tr>
+<td>9b</td>
+<td><code>atc_run_1_16_b</code></td>
+<td>2→4M</td>
+<td><strong>½ interval 45→22 s</strong> + warm-restart LR (<code>--initial-lr 1e-4</code>)</td>
+<td>best per-AC dev (worst 99 s, tier1 0.98) but <strong>regresses to ~0–10%</strong></td>
+<td>22 s transfer mid-run destabilising; inconclusive</td>
+</tr>
+<tr>
+<td>10</td>
+<td><code>atc_run_1_17</code></td>
+<td>5M (running)</td>
+<td><strong>fresh</strong> 22 s run (clean interval test)</td>
+<td>— <em>(early training)</em></td>
+<td>results pending</td>
+</tr>
+</tbody>
+</table>
+<p>† Run 6 targeted 5M but was stopped at ~3.14M. <code>atc_run_1_11</code> (the launch that introduced
+the goal bonus + experiment-dir scaffolding) aborted at ~2k steps and was relaunched as run 6.
+<code>success_rate = 0</code> for runs 1–7: no episode ever gets <em>all</em> aircraft within the old ±30 s gate.
+Run 8 replaces that gate with a 5-tier system; extended in-place to ~7.1M it reaches a <strong>50% success
+peak</strong> (~30% plateau) with the worst-aircraft deviation down to ~99 s. Runs 9a/9b spin off its 2M
+checkpoint to test the halved 22 s interval against a 45 s control; Run 10 (<code>atc_run_1_17</code>) is a
+fresh 22 s run still in early training.</p>
+<hr />
+<h2 id="run-1-baseline-atc_run_1_4-50k">Run 1 — Baseline (<code>atc_run_1_4</code>, 50k)<a class="headerlink" href="#run-1-baseline-atc_run_1_4-50k" title="Permanent link">&para;</a></h2>
+<p>First real run after the RLlib → sb3-contrib <strong>MaskablePPO</strong> migration, with the
+<em>original</em> reward.</p>
+<p><strong>Config:</strong> reward <code>total = deviation + conflict</code> only (action penalty &amp; bonus
+<strong>excluded</strong>); conflict = flat weight 1.0 within a 6-min lookahead then exponential
+decay; deviation from the rollout <code>MISS_TIMED_LANDING</code>; <code>Discrete(220)</code> action space;
+<strong>11</strong> per-aircraft obs features; global features normalized to <code>[0,1]</code>; <strong>no</strong> terminal
+success.</p>
+<p><strong>Results:</strong> <code>ep_rew_mean</code> −60.6 → −25.4; <code>eval/mean_reward</code> −35.5 → −19.5 (best) → −22;
+value function recovered (EV ≈ 0.74); eval conflict −0.086 → −0.042, eval deviation
+−0.62 → −0.50; eval <code>do_nothing_frac</code> 0.04 → <strong>0.00</strong>; <code>global</code> obs saturation <strong>~27%</strong>.</p>
+<p><strong>Finding:</strong> it learns to roughly halve both delay and conflict, but (a) it intervenes
+<strong>every step</strong>, (b) <strong>deviation dominates conflict ~10:1</strong> so safety is under-weighted,
+(c) <code>global</code> obs are mis-scaled (pinned at the bound 27% of the time), and (d) there is
+no terminal/success notion at all.</p>
+<p><img alt="Run 1 eval metrics" src="../assets/eval/run_1.png" /></p>
+<hr />
+<h2 id="run-2-rewardobs-redesign-atc_run_1_5-50k">Run 2 — Reward/obs redesign (<code>atc_run_1_5</code>, 50k)<a class="headerlink" href="#run-2-rewardobs-redesign-atc_run_1_5-50k" title="Permanent link">&para;</a></h2>
+<p>Implemented the target-policy design: imminent conflicts must dominate, schedule
+deviation is secondary, fewer actions are better.</p>
+<p><strong>Changes vs Run 1:</strong></p>
+<ul>
+<li><strong>Conflict:</strong> imminence-dominant ramp <code>w(ttc)=max(floor, ((T_near−ttc)/T_near)^p)</code>,
+  <code>weight 1→10</code>, <code>T_near=1200 s</code>, <code>p=2</code>, <code>floor=0.005</code>; dedup pairs by earliest ttc.</li>
+<li><strong>Deviation:</strong> rollout deviation weighted linearly by <strong>landing proximity</strong>
+  (baseline 0.2 → 1.0 at landing); scale 4000.</li>
+<li><strong>Action penalty:</strong> <code>0.5 → 0.02</code> per command and <strong>included</strong> in <code>total()</code>.</li>
+<li><strong>Terminal success:</strong> all-landed AND each <code>|dev|≤30 s</code> AND total <code>≤ n·30 s</code> AND
+  <strong>no near-conflict ever</strong> + success bonus in <code>total()</code>.</li>
+<li><strong>Obs:</strong> added per-aircraft <code>time_to_conflict</code> (<strong>11 → 12</strong> features); global
+  renormalized <code>[0,1] → [-1,1]</code>; infringement horizon 6 min → full 48-min rollout.</li>
+</ul>
+<p><strong>Results:</strong> <code>eval/mean_reward</code> −176 → <strong>−65.9</strong>; eval conflict −2.66 → −1.04
+(dominates <em>and</em> learns down); eval <code>do_nothing_frac</code> 0.16 → <strong>0.52</strong> (fewer actions ✓);
+<code>global</code> saturation 27% → <strong>17%</strong>; <code>success_rate = 0</code>. Sub-criteria: <code>all_landed → 1.0</code>,
+but <code>no_near_conflicts = 0</code> <strong>always</strong>, <code>frac_under_30s</code> 0.13 → 0.30, <code>max_aircraft_dev</code>
+1060 → ~435 s.</p>
+<p><strong>Finding:</strong> imminence-dominant conflict + the "fewer actions" objective worked. But the
+<strong>"no near-conflict <em>ever</em>" success gate is unsatisfiable</strong> (one near-conflict anywhere
+fails it), and the conflict term so dominates that <strong>deviation barely gets optimized</strong>.</p>
+<p><img alt="Run 2 eval metrics" src="../assets/eval/run_2.png" /></p>
+<hr />
+<h2 id="run-3-rebalance-relaxed-gate-atc_run_1_8-500k">Run 3 — Rebalance + relaxed gate (<code>atc_run_1_8</code>, 500k)<a class="headerlink" href="#run-3-rebalance-relaxed-gate-atc_run_1_8-500k" title="Permanent link">&para;</a></h2>
+<p>First long run, addressing Run 2's two blockers.</p>
+<p><strong>Changes vs Run 2:</strong></p>
+<ul>
+<li><code>REWARD_SCALE_DEVIATION</code> <strong>4000 → 2000</strong> (give deviation real gradient).</li>
+<li><code>CONFLICT_TIME_EXPONENT</code> <strong>2 → 3</strong> (cheaper mid-range conflicts so deviation matters
+  when conflicts aren't imminent; &lt;5 min still dominates).</li>
+<li>Success near-conflict gate relaxed from "ever" to <strong>"clear for the final 3 steps"</strong>
+  (<code>SUCCESS_NEAR_CONFLICT_CLEAR_STEPS=3</code>); added <code>ever_near_conflict</code> /
+  <code>steps_since_near_conflict</code> diagnostics.</li>
+<li><code>total_timesteps</code> 50k → <strong>500k</strong>.</li>
+</ul>
+<p><strong>Results:</strong> <code>eval/mean_reward</code> −156 → −60 but <strong>plateaus by ~150k</strong>; <code>no_near_conflicts</code>
+→ <strong>~1.0</strong> (relaxed gate works ✓); <code>all_landed → 1.0</code>; conflict −4.2 → −1.3. <strong>But</strong>
+<code>frac_under_30s ≈ 0.2</code> and <code>max_aircraft_dev ≈ 500 s</code> stay <strong>flat</strong>; <code>success_rate = 0</code>.
+Two pathologies surfaced: <strong><code>value_loss</code> initialises ~7210</strong> (returns reach ±390), and
+<strong>entropy collapses</strong> 3.17 → 0.70 with <code>approx_kl → 0.005</code> (the SB3 default <code>ent_coef=0</code>).</p>
+<p><strong>Finding:</strong> the conflict side is solved (all land, near-conflict gate satisfied), so the
+<strong>binding constraint is now schedule deviation — and it's stuck</strong>. The policy converges by
+~150k and stops exploring (entropy collapse) → plateau.</p>
+<p><img alt="Run 3 eval metrics" src="../assets/eval/run_3.png" /></p>
+<hr />
+<h2 id="run-4-simulator-only-deviation-stability-fixes-atc_run_1_9-500k">Run 4 — Simulator-only deviation + stability fixes (<code>atc_run_1_9</code>, 500k)<a class="headerlink" href="#run-4-simulator-only-deviation-stability-fixes-atc_run_1_9-500k" title="Permanent link">&para;</a></h2>
+<p>Hygiene pass targeting Run 3's plateau + value-loss + observation consistency.</p>
+<p><strong>Changes vs Run 3:</strong></p>
+<ul>
+<li><strong>Removed <code>compute_dynamic_deviation</code></strong>: the observation's schedule deviation now comes
+  <em>only</em> from the simulator rollout (<code>MISS_TIMED_LANDING</code>), matching the reward.</li>
+<li><code>ent_coef</code> <strong>0.0 → 0.01</strong> (combat entropy collapse).</li>
+<li><strong><code>VecNormalize(norm_reward=True)</code></strong> around the train env (value targets ~O(1)).</li>
+<li>Added <strong>pre-clip gradient-norm logging</strong> (<code>instr/grad/*</code>).</li>
+</ul>
+<p><strong>Results (@120k):</strong> <code>value_loss</code> <strong>7210 → ~0.03</strong> (✓ <code>returns_absmax</code> 390 → ~3);
+entropy retained better (<code>entropy_norm</code> 0.72 vs Run 3's 0.59 at the same step), <code>approx_kl</code>
+~0.04 (actively updating, not frozen). <strong>But</strong> <code>frac_under_30s ≈ 0.2</code> and
+<code>max_aircraft_dev ≈ 470 s</code> are <strong>still flat</strong>, and <code>eval/mean_reward</code> hovers ~−65.
+New signal: <strong><code>grad/clip_frac ≈ 0.95–1.0</code></strong> — gradients saturate the <code>max_grad_norm=0.5</code>
+clip on nearly every update.</p>
+<p><strong>Final (@500k):</strong> <code>eval/mean_reward</code> −136 → best <strong>−51</strong> (@385k) → −63; <code>clip_frac</code> stayed
+pinned at <strong>0.85–1.0</strong> the whole run; <code>frac_under_30s</code> peaked 0.30 then drifted to 0.21;
+<code>max_aircraft_dev</code> floored ~400 s; <code>success_rate = 0</code>.</p>
+<p><strong>Finding:</strong> the value/entropy fixes are healthy hygiene but do <strong>not</strong> move the deviation
+ceiling — strong evidence the bottleneck is <strong>action granularity + a flat reward gradient
+near the goal</strong>, not exploration or value learning.</p>
+<p><img alt="Run 4 eval metrics" src="../assets/eval/run_4.png" /></p>
+<hr />
+<h2 id="run-5-larger-grad-clip-atc_run_1_10-500k">Run 5 — Larger grad clip (<code>atc_run_1_10</code>, 500k)<a class="headerlink" href="#run-5-larger-grad-clip-atc_run_1_10-500k" title="Permanent link">&para;</a></h2>
+<p>The change staged at the end of Run 4, run on its own to isolate the effect.</p>
+<p><strong>Change vs Run 4:</strong></p>
+<ul>
+<li><code>max_grad_norm</code> <strong>0.5 → 1.5</strong> (Run 4's gradients were saturating the clip, so every
+  update was effectively halved). Nothing else changed.</li>
+</ul>
+<p><strong>Results:</strong> <code>instr/grad/clip_frac</code> <strong>0.95–1.0 → 0.15–0.28</strong> (peak 0.28) — gradients no
+longer clipped on most updates ✓, and <code>grad/norm_mean</code> 1.5 → ~1.0. <code>eval/mean_reward</code>
+−123 → best <strong>−45</strong> (@350k) → −63, a clear lift over Run 4's −51 best. Conflict side stays
+solved (<code>no_near_conflicts</code> 0.8 → 1.0, <code>all_landed</code> → 1.0). Value learning healthy
+(<code>value_loss</code> 0.41 → 0.05, <code>explained_variance</code> −0.34 → 0.77). <strong>But</strong> the deviation metrics
+barely budge: <code>frac_under_30s</code> 0.17 → 0.20 (peak 0.31), <code>max_aircraft_dev</code> floors ~388 s,
+<code>total_abs_dev</code> ~1500 s; <code>success_rate = 0</code>.</p>
+<p><strong>Finding:</strong> the grad clip <em>was</em> a real handbrake — releasing it improved reward by ~6 pts —
+but it does <strong>not</strong> break the deviation ceiling. As predicted, this confirms the
+<a href="../roadmap/">roadmap</a> thesis: the bottleneck is <strong>action granularity + a flat reward gradient
+near the goal</strong>, not optimisation hygiene. Motivates a reward "carrot" near the goal (Run 6).</p>
+<p><img alt="Run 5 eval metrics" src="../assets/eval/run_5.png" /></p>
+<hr />
+<h2 id="run-6-dense-goal-bonus-experiment-scaffolding-atc_run_1_12-5m-stopped-314m">Run 6 — Dense goal bonus + experiment scaffolding (<code>atc_run_1_12</code>, 5M → stopped ~3.14M)<a class="headerlink" href="#run-6-dense-goal-bonus-experiment-scaffolding-atc_run_1_12-5m-stopped-314m" title="Permanent link">&para;</a></h2>
+<p>First attempt at the roadmap's "reward peaking" idea, plus a longer horizon. Also the first
+run on the new self-contained <code>experiments/</code> layout (the launch that introduced it,
+<code>atc_run_1_11</code>, aborted at ~2k steps and was relaunched as this run).</p>
+<p><strong>Changes vs Run 5:</strong></p>
+<ul>
+<li><strong>Dense goal-closeness bonus</strong> (<code>actions/rewards.py::_goal_bonus</code>): a positive, saturating
+  term <code>bonus = REWARD_GOAL_BONUS_MAX · exp(−total_abs_dev / REWARD_GOAL_BONUS_SCALE)</code>
+  (<code>MAX=2.0</code>, <code>SCALE=400 s</code>), added to <code>total()</code>. It sharpens the gradient exactly as the
+  predicted schedule deviation approaches zero — the only positive term besides the
+  (never-firing) full-success bonus.</li>
+<li><code>total_timesteps</code> 500k → <strong>5M</strong> (test whether the plateau is just under-training).</li>
+<li>Per-run experiment directory + source snapshot + git provenance; <code>n_eval_episodes</code> 20 → 10.</li>
+</ul>
+<p><strong>Results:</strong> <code>eval/mean_reward</code> −151 → best <strong>−33</strong> (@1.25M) — the <strong>best of any run</strong> — then
+<strong>regresses to −45</strong> by 3.14M. The goal term behaves as designed: <code>reward_goal_mean</code>
+0.035 → 0.21 (peak 0.29) as deviation falls. Conflicts solved (<code>no_near_conflicts</code> → 1.0,
+<code>all_landed</code> 0.5 → 1.0). Deviation improves <em>slightly</em> past the ceiling — <code>frac_under_30s</code>
+peak <strong>0.35</strong>, <code>max_aircraft_dev</code> floor <strong>367 s</strong>, <code>total_abs_dev</code> floor <strong>1433 s</strong> — the best
+deviation numbers so far, but still far from "all within ±30 s" (<code>success_rate = 0</code>). The
+regression has a clear cause: <strong><code>approx_kl</code> climbs 0.015 → 0.11 (peak 0.22)</strong> and
+<code>clip_fraction</code> 0.17 → 0.39 (peak 0.47) — the policy drifts too far per update in late
+training and degrades after its peak.</p>
+<p><strong>Finding:</strong> the goal bonus + more steps give the best reward and the best deviation yet, so
+the carrot helps — but <strong>long-horizon training is unstable</strong>: KL/clip blow up after ~1.25M and
+the policy regresses. Need to cap policy drift before pushing the horizon further.</p>
+<p><img alt="Run 6 eval metrics" src="../assets/eval/run_6.png" /></p>
+<hr />
+<h2 id="run-7-kl-control-atc_run_1_13-1m">Run 7 — KL control (<code>atc_run_1_13</code>, 1M)<a class="headerlink" href="#run-7-kl-control-atc_run_1_13-1m" title="Permanent link">&para;</a></h2>
+<p>Targets Run 6's late-training instability with three standard PPO drift controls.</p>
+<p><strong>Changes vs Run 6:</strong></p>
+<ul>
+<li><strong>LR linear decay</strong> <code>3e-4 → 3e-5</code> over training (<code>main.py::linear_schedule</code>) — smaller steps
+  late, when KL was rising.</li>
+<li><code>n_epochs</code> <strong>10 → 5</strong> — fewer passes over each rollout ⇒ less policy drift per update.</li>
+<li><code>target_kl = 0.03</code> — hard early-stop of the update once <code>approx_kl</code> exceeds it.</li>
+<li><code>total_timesteps</code> 5M → <strong>1M</strong> (KL controls vetted at a shorter horizon first).</li>
+</ul>
+<p><strong>Results:</strong> the KL controls <strong>work</strong> — <code>approx_kl</code> peaks 0.117 early then settles to <strong>0.002</strong>
+(vs Run 6's 0.22), <code>clip_fraction</code> 0.15 → <strong>0.016</strong> (vs 0.39). Value learning fine
+(<code>value_loss</code> → 0.06, <code>explained_variance</code> → 0.74). <strong>But</strong> the eval curve still <strong>peaks early
+and regresses</strong>: <code>eval/mean_reward</code> −117 → best <strong>−37</strong> (@425k) → <strong>−60</strong> by 1M — a worse peak
+than Run 6's −33, and the same post-peak decline despite the tamed KL. Deviation ceiling
+unbroken: <code>frac_under_30s</code> peak 0.30, <code>max_aircraft_dev</code> floor <strong>361 s</strong>; crucially
+<strong><code>all_under_threshold = 0</code> for the entire run</strong> — no eval episode ever gets <em>every</em> aircraft
+within ±30 s, which is exactly why <code>success_rate</code> stays 0.</p>
+<p><strong>Finding:</strong> capping KL removes the <em>instability mechanism</em> but not the regression or the
+deviation ceiling — and the aggressive LR decay may itself cap late improvement (best at 425k,
+then nothing). Tellingly, <code>all_under_threshold = 0</code> everywhere: the success gate is now bound
+<strong>purely</strong> by per-aircraft deviation, not conflicts or optimisation. Across Runs 5–7 the
+deviation floor (<code>frac_under_30s ≈ 0.3</code>, worst aircraft ≈ 360–390 s) is essentially fixed —
+strong, repeated evidence that the dense bonus and tuning have hit their limit and the next
+lever must be <strong>action granularity</strong> (finer/continuous control) per the <a href="../roadmap/">roadmap</a>.</p>
+<p><img alt="Run 7 eval metrics" src="../assets/eval/run_7.png" /></p>
+<hr />
+<h2 id="run-8-5-tier-success-autoregressive-policy-atc_run_1_16-191m">Run 8 — 5-tier success + autoregressive policy (<code>atc_run_1_16</code>, 1.91M†)<a class="headerlink" href="#run-8-5-tier-success-autoregressive-policy-atc_run_1_16-191m" title="Permanent link">&para;</a></h2>
+<p>Bundles four simultaneous changes motivated by the Runs 5–7 deviation ceiling, plus the
+switch to finer-grained action control.</p>
+<p>† Interrupted at 1.91 M / 2.0 M steps. Resume/spinoff in progress; see <a href="../training/#resume-lr-schedule">training docs</a>.</p>
+<p><strong>Changes vs Run 7:</strong></p>
+<ul>
+<li><strong>5-tier graduated success bonus</strong> — replaces the all-or-nothing ±5.0 terminal. All tiers
+  require the relaxed near-conflict gate (conflicts clear for ≥ 3 final steps):<ul>
+<li><em>Tier 1</em> (+1.5): ≥ 50% of aircraft within ±120 s.</li>
+<li><em>Tier 2</em> (+3.0): ≥ 80% within ±100 s.</li>
+<li><em>Tier 3</em> (+6.0): ≥ 80% within ±70 s <strong>and</strong> <code>max_aircraft_dev</code> &lt; 200 s.</li>
+<li><em>Tier 4</em> (+9.0): ≥ 80% within ±60 s <strong>and</strong> <code>max_aircraft_dev</code> &lt; 120 s.</li>
+<li><em>Tier 5</em> (+13.0): all landed <strong>and</strong> every aircraft within ±60 s ("solved").
+  Tiers 3 and 4 add an explicit <code>max_dev</code> cap to provide terminal gradient signal for the
+  worst-case aircraft — the binding constraint observed in Runs 1–7. A hard violation applies
+  <code>−15.0</code> (<code>REWARD_VIOLATION_PENALTY</code> &gt; T5 bonus) and suppresses any tier. Highest tier wins; no stacking.</li>
+</ul>
+</li>
+<li><strong>Extended goal bonus</strong> — <code>_goal_bonus</code> now includes both <code>exp(−total_dev/400)</code> and
+  <code>exp(−max_dev/200)</code>, so the per-step dense signal also targets the worst aircraft.</li>
+<li><strong>Autoregressive policy</strong> (<code>ATCAutoregressivePolicy</code>) on vanilla <code>PPO</code> — aircraft head →
+  clearance head conditioned on the sampled aircraft index. Finer <code>MultiDiscrete([10, 22])</code>
+  action space vs the old flat <code>Discrete(220)</code>. <code>Config.USE_AUTOREGRESSIVE_ACTIONS = True</code>.</li>
+<li><strong>Per-scenario episode horizon</strong> (<code>Config.USE_PER_SCENARIO_HORIZON = True</code>) — each episode
+  is sized to the scenario's latest arrival ETA + margin rather than a fixed 64-step cap,
+  preventing the structural timeouts that affected all eval seeds.</li>
+<li><strong>DOF action cost</strong> (<code>REWARD_ACTION_DOF_K = 3.0</code>) — acting late (few remaining waypoints)
+  costs more than acting early, discouraging last-moment interventions.</li>
+</ul>
+<p><strong>Results (extended in-place to ~7.1 M steps):</strong> <code>success_rate</code> rises from <strong>0% → ~30%</strong> between
+1 M and 2 M and, with continued training, reaches a <strong>best of 50%</strong> (@5.7 M), averaging ~30% over the
+last 1 M — the first non-zero success rate across all runs and a clear validation of the tiered
+approach. Critically, the <strong>deviation ceiling is broken</strong>: the worst-aircraft deviation falls to
+<strong>~99 s</strong> (@6.4 M) and total absolute deviation to <strong>~305 s</strong>, versus the ~360–390 s worst-aircraft /
+~1430 s total floor that held across Runs 1–7; tier-1/tier-2 fractions reach <strong>0.98 / 0.96</strong>. The
+conflict side stays solved (<code>all_landed</code> and <code>no_near_conflicts</code> ≈ 1.0). Training is <strong>not monotone</strong>,
+though — <code>success_rate</code> oscillates ~0.2–0.5 rather than climbing steadily.</p>
+<p><strong>Finding:</strong> the tiered terminal bonus breaks <strong>both</strong> the 0%-success <em>and</em> the deviation ceiling —
+the <code>max_dev</code> caps at Tiers 3–4 give the agent explicit terminal feedback about the worst-case
+aircraft, not just the mean. What remains is <strong>stability</strong>: past ~3 M the policy oscillates instead
+of converging. This motivates the finer-temporal-control experiment (Run 9) and a clean longer
+run (Run 10).</p>
+<p><img alt="Run 8 eval metrics" src="../assets/eval/run_8.png" /></p>
+<hr />
+<h2 id="run-9-finer-temporal-control-22-s-interval-atc_run_1_16_a-45-s-control-vs-atc_run_1_16_b-22-s">Run 9 — Finer temporal control: 22 s interval (<code>atc_run_1_16_a</code> 45 s control vs <code>atc_run_1_16_b</code> 22 s)<a class="headerlink" href="#run-9-finer-temporal-control-22-s-interval-atc_run_1_16_a-45-s-control-vs-atc_run_1_16_b-22-s" title="Permanent link">&para;</a></h2>
+<p><strong>Motivation.</strong> On the hardest scenarios the binding limitation is <strong>structural to the action
+interface</strong>: only <strong>one aircraft can be commanded per env step</strong>. At a 45 s interval the agent
+runs out of decision points to issue all the clearances needed to interleave control across several
+converging aircraft, so it cannot both resolve conflicts <em>and</em> trim every landing time. Rather than
+widen the per-step choice to multiple aircraft, this run attacks the orthogonal <strong>temporal</strong>
+granularity — the agent simply gets to act more often. (Item 1 on the <a href="../roadmap/">roadmap</a>, by
+contrast, attacks action <em>magnitude</em> granularity.)</p>
+<p><strong>Design (A/B from one checkpoint).</strong> Both arms spin off Run 8's <strong>2 M checkpoint</strong> and add ~2 M
+steps (→4 M), differing only in the simulation interval:</p>
+<ul>
+<li><strong><code>atc_run_1_16_a</code> — 45 s control:</strong> continues unchanged (resume from the checkpoint LR).</li>
+<li><strong><code>atc_run_1_16_b</code> — 22 s:</strong> <code>TIME_BETWEEN_ACTIONS</code> 45 → 22 s with every step-count duration
+  doubled in tandem (<code>EPISODE_STEPS</code> 64→128, <code>MAX_EPISODE_STEPS</code> 130→260,
+  <code>SCENARIO_INITIAL_CONFLICT_FREE_STEPS</code> 6→12, <code>SUCCESS_NEAR_CONFLICT_CLEAR_STEPS</code> 3→6, …) so
+  wall-clock semantics are preserved. Warm-restarted with <code>--initial-lr 1e-4</code> (decaying to 1e-5).</li>
+</ul>
+<p><strong>Results (2 M → 4 M):</strong></p>
+<table>
+<thead>
+<tr>
+<th>Metric (best over the run)</th>
+<th>45 s control (<code>16_a</code>)</th>
+<th>22 s (<code>16_b</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>success_rate</code></td>
+<td><strong>0.40</strong> @2.7 M</td>
+<td>0.30 @2.1 M</td>
+</tr>
+<tr>
+<td>worst-aircraft dev</td>
+<td>113 s @2.9 M</td>
+<td><strong>99 s</strong> @3.8 M</td>
+</tr>
+<tr>
+<td>total abs dev</td>
+<td>363 s</td>
+<td><strong>333 s</strong></td>
+</tr>
+<tr>
+<td>frac ≤ tier1 / tier2</td>
+<td>0.95 / 0.91</td>
+<td><strong>0.98 / 0.94</strong></td>
+</tr>
+<tr>
+<td><code>success_rate</code> (final, oscillating)</td>
+<td>~0.3</td>
+<td><strong>~0.0–0.1 (collapsed)</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The 22 s arm <strong>transiently reaches the best per-aircraft deviation numbers of any run</strong> (worst
+aircraft 99 s, tier-1 0.98) — weak evidence that the extra decision points help the tail aircraft.
+But it is also <strong>less stable</strong>: re-entering a 45 s-trained policy into the 22 s regime (with the LR
+warm restart) is disruptive, and <code>16_b</code> regresses <em>harder</em> than the 45 s control — late
+<code>success_rate</code> collapses to ~0–10 %, <code>tier_mean</code> drifts to 1.5–2.5, and total deviation climbs to
+600–870 s. The 45 s control just reproduces Run 8's plateau/oscillation (~40 % peak, then drift).</p>
+<p><strong>Finding: inconclusive, leaning negative for the warm-restart path.</strong> Transferring a 45 s-trained
+policy into 22 s mid-run conflates a regime change with the interval benefit and destabilises
+training. The per-aircraft deviation gain is real but did not hold. The interval change needs a
+<strong>clean from-scratch test</strong> before any verdict — see Run 10.</p>
+<hr />
+<h2 id="run-10-fresh-22-s-run-atc_run_1_17-5-m-target-in-progress">Run 10 — Fresh 22 s run (<code>atc_run_1_17</code>, 5 M target) — <em>in progress</em><a class="headerlink" href="#run-10-fresh-22-s-run-atc_run_1_17-5-m-target-in-progress" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Early training — no results yet</p>
+<p>A fresh, from-scratch run on the 22 s regime (no warm restart), launched with a 5 M-step target
+to give a clean read on finer temporal control. At the time of writing it is only ~12 k steps
+in, so there are <strong>no eval results to report</strong> — this entry is a placeholder to fill once it has
+trained. The doubled per-episode env-steps make this the most compute-heavy run so far.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
