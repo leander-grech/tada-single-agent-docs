@@ -1,0 +1,48 @@
+site_name: TADA Single-Agent RL
+site_description: Single-agent ATC arrival sequencing with sb3-contrib MaskablePPO
+docs_dir: docs
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - content.code.copy
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - tables
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - MDP & Environment: mdp.md
+  - Observations: observations.md
+  - Reward: reward.md
+  - Training: training.md
+  - Instrumentation: instrumentation.md
+  - Experiment log: experiments.md
+  - Roadmap: roadmap.md
