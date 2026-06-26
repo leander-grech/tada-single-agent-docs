@@ -438,6 +438,67 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#eval-time-action-shield" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eval-time action shield (render_policy.py)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Eval-time action shield (render_policy.py)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#look-ahead-primitive-peek_action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Look-ahead primitive (peek_action)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refusal-checks-independently-toggleable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Refusal checks (independently toggleable)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-on-refusal-refuse-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback on refusal (--refuse-fallback)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#observation-space-summary" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -579,6 +640,33 @@
     
   
     Experiment log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../successful_results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Successful results
   
 
     
@@ -750,6 +838,67 @@
     <span class="md-ellipsis">
       
         _evaluate_success sub-metrics (logged in episode_metrics)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#eval-time-action-shield" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Eval-time action shield (render_policy.py)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Eval-time action shield (render_policy.py)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#look-ahead-primitive-peek_action" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Look-ahead primitive (peek_action)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refusal-checks-independently-toggleable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Refusal checks (independently toggleable)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fallback-on-refusal-refuse-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fallback on refusal (--refuse-fallback)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage
       
     </span>
   </a>
@@ -1051,17 +1200,127 @@ evaluated on the <strong>rollout world</strong> (<code>current_predicted_world</
 </tr>
 </tbody>
 </table>
+<h2 id="eval-time-action-shield">Eval-time action shield (<code>render_policy.py</code>)<a class="headerlink" href="#eval-time-action-shield" title="Permanent link">&para;</a></h2>
+<p>Source: <code>render_policy.py::apply_shield</code>, <code>single_agent_env.py::peek_action</code> / <code>peek_clearances</code></p>
+<p>An <strong>action shield</strong> is eval/render-time <strong>postprocessing</strong>: it can <em>refuse</em> the policy's chosen
+clearance and substitute another, decided by a live one-step look-ahead. It is <strong>not part of the
+MDP and plays no role in training</strong> — the environment dynamics, reward and the trained weights are
+untouched; the shield only changes which action is actually issued at inference. It exists to probe
+<em>how far the raw policy is from optimal</em> (and to clean up renders); the
+<a href="../successful_results/#run-8-atc_run_1_16">refusal-shield sweep</a> quantifies what it buys.</p>
+<div class="admonition warning">
+<p class="admonition-title">Postprocessing, not policy</p>
+<p>Nothing here changes the agent. A shielded rollout answers "could a cheap, greedy override
+recover performance the policy left on the table?" — if shields help a lot, the policy's first
+choices are far from optimal and the lever is better <em>training</em>, not more postprocessing.</p>
+</div>
+<h3 id="look-ahead-primitive-peek_action">Look-ahead primitive (<code>peek_action</code>)<a class="headerlink" href="#look-ahead-primitive-peek_action" title="Permanent link">&para;</a></h3>
+<p>The shield never mutates episode state — it evaluates candidates on the <strong>current committed world</strong>
+via two read-only, pure helpers (<code>simulate_candidate</code> / <code>simulate_n_next_states</code> are pure;
+<code>interpret_action</code> has no side effects on the trombone store):</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Returns</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>peek_action(a_air, a_clr)</code></td>
+<td><code>reward_delta</code>, <code>creates_critical_conflict</code> (+ raw parts)</td>
+<td>evaluates the candidate clearance <strong>and</strong> the <code>DO_NOTHING</code> baseline</td>
+</tr>
+<tr>
+<td><code>peek_clearances(a_air, clrs)</code></td>
+<td><code>{clr: {reward_delta, creates_critical_conflict}}</code></td>
+<td>batch; computes the <code>DO_NOTHING</code> baseline <strong>once</strong> (the <code>next_best</code> hot path)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong><code>reward_delta</code></strong> <code>= R(action) − R(DO_NOTHING)</code> on the rolled-out predicted world. Negative ⇒
+  issuing the clearance is <strong>worse than doing nothing</strong>.</li>
+<li><strong><code>creates_critical_conflict</code></strong> <code>= conflict(action) AND NOT conflict(DO_NOTHING)</code> — a near-horizon
+  conflict (<code>has_near_conflict</code> on the rollout) the action <strong>introduces</strong> that <code>DO_NOTHING</code> would
+  have avoided. (A conflict already present under <code>DO_NOTHING</code> is <em>not</em> attributed to the action.)</li>
+</ul>
+<h3 id="refusal-checks-independently-toggleable">Refusal checks (independently toggleable)<a class="headerlink" href="#refusal-checks-independently-toggleable" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>CLI flag</th>
+<th>Refuses the proposed clearance when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>reward-drop</td>
+<td><code>--refuse-on-reward-drop</code></td>
+<td><code>reward_delta &lt; −refuse_reward_eps</code> (<code>--refuse-reward-eps</code>, default <code>0.0</code>)</td>
+</tr>
+<tr>
+<td>critical-conflict</td>
+<td><code>--refuse-on-critical-conflict</code></td>
+<td><code>creates_critical_conflict</code> is true</td>
+</tr>
+<tr>
+<td>both</td>
+<td>both flags</td>
+<td><strong>either</strong> check fires</td>
+</tr>
+</tbody>
+</table>
+<p>A <code>DO_NOTHING</code> proposal is <strong>never</strong> shielded (early return). A candidate the action mask marks
+valid but that still fails to interpret/simulate (a latent mask/interpreter inconsistency the
+trained policy avoids) is refused with reason <code>interpret_error</code> rather than crashing the rollout.</p>
+<h3 id="fallback-on-refusal-refuse-fallback">Fallback on refusal (<code>--refuse-fallback</code>)<a class="headerlink" href="#fallback-on-refusal-refuse-fallback" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Fallback</th>
+<th>Behaviour</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>do_nothing</code> (default)</td>
+<td>issue <code>DO_NOTHING</code> for this step</td>
+</tr>
+<tr>
+<td><code>next_best</code></td>
+<td>among the aircraft's valid (masked) clearances, batch-peek and pick the <strong>highest <code>reward_delta</code></strong> clearance that passes the enabled checks; <code>DO_NOTHING</code> is the floor (the substitute must beat <code>DO_NOTHING</code>, else <code>DO_NOTHING</code> is issued)</td>
+</tr>
+</tbody>
+</table>
+<p><code>next_best</code> is what recovers tier/punctuality; <code>do_nothing</code> mostly only buys safety — see the
+<a href="../successful_results/#run-8-atc_run_1_16">sweep takeaways</a>.</p>
+<h3 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># render with the critical-conflict shield, next-best fallback, stochastic sampling</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>python<span class="w"> </span>render_policy.py<span class="w"> </span>--model<span class="w"> </span>experiments/atc_run_1_16/best/best_model.zip<span class="w"> </span>--out<span class="w"> </span>shielded.mp4<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span>--refuse-on-critical-conflict<span class="w"> </span>--refuse-fallback<span class="w"> </span>next_best<span class="w"> </span>--stochastic
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># both checks, next-best fallback, benchmark across all eval seeds (no video)</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>python<span class="w"> </span>render_policy.py<span class="w"> </span>--model<span class="w"> </span>experiments/atc_run_1_16/best/best_model.zip<span class="w"> </span>--all-eval-seeds<span class="w"> </span>--no-video<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span>--refuse-on-reward-drop<span class="w"> </span>--refuse-on-critical-conflict<span class="w"> </span>--refuse-fallback<span class="w"> </span>next_best
+</code></pre></div>
+<p><code>--stochastic</code> (sample vs. greedy) is orthogonal to shielding; <code>--legacy-interval</code> restores the 45 s
+interval + un-doubled horizon caps so a pre-22 s checkpoint is rendered under its training-time timing.
+The shield's effectiveness across the full eval set is reported in
+<a href="../successful_results/#run-8-atc_run_1_16">Successful results → refusal-shield sweep</a>.</p>
 <h2 id="observation-space-summary">Observation space (summary)<a class="headerlink" href="#observation-space-summary" title="Permanent link">&para;</a></h2>
 <p>See <a href="../observations/">observations.md</a> for full spec.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Dict(
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>  global:             Box(-1, 1, shape=(4,)),
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>  aircraft:           Box(-1, 1, shape=(10, 12)),
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  mask_aircraft:      MultiBinary(10),
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>  mask_action_per_ac: MultiBinary((10, 22)),
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>  flight_plans_rel:   Box(-1, 1, shape=(10, 20, 11)),
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>  flight_plan_mask:   MultiBinary((10, 20)),
-<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>  action_histories:   Box( 0, 1, shape=(10,  8, 23)),
-<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Dict(
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  global:             Box(-1, 1, shape=(4,)),
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  aircraft:           Box(-1, 1, shape=(10, 12)),
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  mask_aircraft:      MultiBinary(10),
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  mask_action_per_ac: MultiBinary((10, 22)),
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  flight_plans_rel:   Box(-1, 1, shape=(10, 20, 11)),
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>  flight_plan_mask:   MultiBinary((10, 20)),
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>  action_histories:   Box( 0, 1, shape=(10,  8, 23)),
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>)
 </code></pre></div>
 
 
