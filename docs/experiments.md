@@ -38,7 +38,7 @@ fresh 22 s run still in early training.
 
 ---
 
-## Run 1 — Baseline (`atc_run_1_4`, 50k)
+## Run 1 — Baseline (`atc_run_1_4`, 50k) { #run-1 }
 
 First real run after the RLlib → sb3-contrib **MaskablePPO** migration, with the
 *original* reward.
@@ -62,7 +62,7 @@ no terminal/success notion at all.
 
 ---
 
-## Run 2 — Reward/obs redesign (`atc_run_1_5`, 50k)
+## Run 2 — Reward/obs redesign (`atc_run_1_5`, 50k) { #run-2 }
 
 Implemented the target-policy design: imminent conflicts must dominate, schedule
 deviation is secondary, fewer actions are better.
@@ -93,7 +93,7 @@ fails it), and the conflict term so dominates that **deviation barely gets optim
 
 ---
 
-## Run 3 — Rebalance + relaxed gate (`atc_run_1_8`, 500k)
+## Run 3 — Rebalance + relaxed gate (`atc_run_1_8`, 500k) { #run-3 }
 
 First long run, addressing Run 2's two blockers.
 
@@ -121,7 +121,7 @@ Two pathologies surfaced: **`value_loss` initialises ~7210** (returns reach ±39
 
 ---
 
-## Run 4 — Simulator-only deviation + stability fixes (`atc_run_1_9`, 500k)
+## Run 4 — Simulator-only deviation + stability fixes (`atc_run_1_9`, 500k) { #run-4 }
 
 Hygiene pass targeting Run 3's plateau + value-loss + observation consistency.
 
@@ -152,7 +152,7 @@ near the goal**, not exploration or value learning.
 
 ---
 
-## Run 5 — Larger grad clip (`atc_run_1_10`, 500k)
+## Run 5 — Larger grad clip (`atc_run_1_10`, 500k) { #run-5 }
 
 The change staged at the end of Run 4, run on its own to isolate the effect.
 
@@ -178,7 +178,7 @@ near the goal**, not optimisation hygiene. Motivates a reward "carrot" near the 
 
 ---
 
-## Run 6 — Dense goal bonus + experiment scaffolding (`atc_run_1_12`, 5M → stopped ~3.14M)
+## Run 6 — Dense goal bonus + experiment scaffolding (`atc_run_1_12`, 5M → stopped ~3.14M) { #run-6 }
 
 First attempt at the roadmap's "reward peaking" idea, plus a longer horizon. Also the first
 run on the new self-contained `experiments/` layout (the launch that introduced it,
@@ -212,7 +212,7 @@ the policy regresses. Need to cap policy drift before pushing the horizon furthe
 
 ---
 
-## Run 7 — KL control (`atc_run_1_13`, 1M)
+## Run 7 — KL control (`atc_run_1_13`, 1M) { #run-7 }
 
 Targets Run 6's late-training instability with three standard PPO drift controls.
 
@@ -245,7 +245,7 @@ lever must be **action granularity** (finer/continuous control) per the [roadmap
 
 ---
 
-## Run 8 — 5-tier success + autoregressive policy (`atc_run_1_16`, 1.91M†)
+## Run 8 — 5-tier success + autoregressive policy (`atc_run_1_16`, 1.91M†) { #run-8 }
 
 Bundles four simultaneous changes motivated by the Runs 5–7 deviation ceiling, plus the
 switch to finer-grained action control.
@@ -294,7 +294,7 @@ run (Run 10).
 
 ---
 
-## Run 9 — Finer temporal control: 22 s interval (`atc_run_1_16_a` 45 s control vs `atc_run_1_16_b` 22 s)
+## Run 9 — Finer temporal control: 22 s interval (`atc_run_1_16_a` 45 s control vs `atc_run_1_16_b` 22 s) { #run-9 }
 
 **Motivation.** On the hardest scenarios the binding limitation is **structural to the action
 interface**: only **one aircraft can be commanded per env step**. At a 45 s interval the agent
@@ -337,7 +337,7 @@ training. The per-aircraft deviation gain is real but did not hold. The interval
 
 ---
 
-## Run 10 — Fresh 22 s run (`atc_run_1_17`, 5 M target) — *in progress*
+## Run 10 — Fresh 22 s run (`atc_run_1_17`, 5 M target) — *in progress* { #run-10 }
 
 !!! warning "Early training — no results yet"
     A fresh, from-scratch run on the 22 s regime (no warm restart), launched with a 5 M-step target

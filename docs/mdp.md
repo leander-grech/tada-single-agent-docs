@@ -145,6 +145,78 @@ evaluated on the **rollout world** (`current_predicted_world`) after each step.
 | `success_ever_near_conflict` | A near-conflict was present at some step |
 | `success_steps_since_near_conflict` | Steps elapsed since last near-conflict |
 
+## Eval-time action shield (`render_policy.py`) { #eval-time-action-shield }
+
+Source: `render_policy.py::apply_shield`, `single_agent_env.py::peek_action` / `peek_clearances`
+
+An **action shield** is eval/render-time **postprocessing**: it can *refuse* the policy's chosen
+clearance and substitute another, decided by a live one-step look-ahead. It is **not part of the
+MDP and plays no role in training** — the environment dynamics, reward and the trained weights are
+untouched; the shield only changes which action is actually issued at inference. It exists to probe
+*how far the raw policy is from optimal* (and to clean up renders); the
+[refusal-shield sweep](successful_results.md#run-8-atc_run_1_16) quantifies what it buys.
+
+!!! warning "Postprocessing, not policy"
+    Nothing here changes the agent. A shielded rollout answers "could a cheap, greedy override
+    recover performance the policy left on the table?" — if shields help a lot, the policy's first
+    choices are far from optimal and the lever is better *training*, not more postprocessing.
+
+### Look-ahead primitive (`peek_action`)
+
+The shield never mutates episode state — it evaluates candidates on the **current committed world**
+via two read-only, pure helpers (`simulate_candidate` / `simulate_n_next_states` are pure;
+`interpret_action` has no side effects on the trombone store):
+
+| Method | Returns | Notes |
+|---|---|---|
+| `peek_action(a_air, a_clr)` | `reward_delta`, `creates_critical_conflict` (+ raw parts) | evaluates the candidate clearance **and** the `DO_NOTHING` baseline |
+| `peek_clearances(a_air, clrs)` | `{clr: {reward_delta, creates_critical_conflict}}` | batch; computes the `DO_NOTHING` baseline **once** (the `next_best` hot path) |
+
+- **`reward_delta`** `= R(action) − R(DO_NOTHING)` on the rolled-out predicted world. Negative ⇒
+  issuing the clearance is **worse than doing nothing**.
+- **`creates_critical_conflict`** `= conflict(action) AND NOT conflict(DO_NOTHING)` — a near-horizon
+  conflict (`has_near_conflict` on the rollout) the action **introduces** that `DO_NOTHING` would
+  have avoided. (A conflict already present under `DO_NOTHING` is *not* attributed to the action.)
+
+### Refusal checks (independently toggleable)
+
+| Check | CLI flag | Refuses the proposed clearance when |
+|---|---|---|
+| reward-drop | `--refuse-on-reward-drop` | `reward_delta < −refuse_reward_eps` (`--refuse-reward-eps`, default `0.0`) |
+| critical-conflict | `--refuse-on-critical-conflict` | `creates_critical_conflict` is true |
+| both | both flags | **either** check fires |
+
+A `DO_NOTHING` proposal is **never** shielded (early return). A candidate the action mask marks
+valid but that still fails to interpret/simulate (a latent mask/interpreter inconsistency the
+trained policy avoids) is refused with reason `interpret_error` rather than crashing the rollout.
+
+### Fallback on refusal (`--refuse-fallback`)
+
+| Fallback | Behaviour |
+|---|---|
+| `do_nothing` (default) | issue `DO_NOTHING` for this step |
+| `next_best` | among the aircraft's valid (masked) clearances, batch-peek and pick the **highest `reward_delta`** clearance that passes the enabled checks; `DO_NOTHING` is the floor (the substitute must beat `DO_NOTHING`, else `DO_NOTHING` is issued) |
+
+`next_best` is what recovers tier/punctuality; `do_nothing` mostly only buys safety — see the
+[sweep takeaways](successful_results.md#run-8-atc_run_1_16).
+
+### Usage
+
+```bash
+# render with the critical-conflict shield, next-best fallback, stochastic sampling
+python render_policy.py --model experiments/atc_run_1_16/best/best_model.zip --out shielded.mp4 \
+    --refuse-on-critical-conflict --refuse-fallback next_best --stochastic
+
+# both checks, next-best fallback, benchmark across all eval seeds (no video)
+python render_policy.py --model experiments/atc_run_1_16/best/best_model.zip --all-eval-seeds --no-video \
+    --refuse-on-reward-drop --refuse-on-critical-conflict --refuse-fallback next_best
+```
+
+`--stochastic` (sample vs. greedy) is orthogonal to shielding; `--legacy-interval` restores the 45 s
+interval + un-doubled horizon caps so a pre-22 s checkpoint is rendered under its training-time timing.
+The shield's effectiveness across the full eval set is reported in
+[Successful results → refusal-shield sweep](successful_results.md#run-8-atc_run_1_16).
+
 ## Observation space (summary)
 
 See [observations.md](observations.md) for full spec.

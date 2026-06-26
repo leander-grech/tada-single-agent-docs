@@ -47,6 +47,7 @@ lightweight *inference* set; add `pip install -e .[train]` for the full training
 | [Training](training.md) | MaskablePPO + VecNormalize config, callbacks, network |
 | [Instrumentation](instrumentation.md) | every TensorBoard metric and what to watch |
 | [Experiment log](experiments.md) | what changed in each run and what we learned |
+| [Successful results](successful_results.md) | curated renders + refusal-shield sweeps for the best checkpoints, per run |
 | [Roadmap](roadmap.md) | what's next (finer actions, reward-peaking bonus) |
 
 ## Build the docs
