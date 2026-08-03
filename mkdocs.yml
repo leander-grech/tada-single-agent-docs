@@ -42,6 +42,7 @@ nav:
   - MDP & Environment: mdp.md
   - Observations: observations.md
   - Reward: reward.md
+  - Loss of separation: separation.md
   - Training: training.md
   - Instrumentation: instrumentation.md
   - Experiment log: experiments.md

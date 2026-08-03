@@ -26,15 +26,30 @@ The `atc_run_1_N` suffix increments each launch; the relevant ones are noted per
 | 8 | `atc_run_1_16` | →7.1M† | **5-tier success** + autoregressive policy + per-scenario horizon + DOF action cost | **50% success peak** (@5.7M), ~30% plateau | worst-aircraft dev → **99 s** (ceiling broken); oscillates, not monotone |
 | 9a | `atc_run_1_16_a` | 2→4M | 45 s **control** (Run 8 ckpt @2M continued) | ~40% peak, then drifts | reproduces Run 8 plateau/oscillation |
 | 9b | `atc_run_1_16_b` | 2→4M | **½ interval 45→22 s** + warm-restart LR (`--initial-lr 1e-4`) | best per-AC dev (worst 99 s, tier1 0.98) but **regresses to ~0–10%** | 22 s transfer mid-run destabilising; inconclusive |
-| 10 | `atc_run_1_17` | 5M (running) | **fresh** 22 s run (clean interval test) | — *(early training)* | results pending |
+| 10 | `atc_run_1_17` | 5.1M | **fresh** 22 s run (clean interval test) | −29.3 best | 22 s verdict: **negative**; success 0, worst dev 241 s |
+| 11 | `atc_run_1_18`, `atc_run_1_19` | 5.0M, 3.0M | 22 s continued (reward/obs redesign, `e5d64da`) | −35.3 / −29.6 | success still 0; worst dev 259–275 s |
+| 12 | `atc_run_1_20`, `atc_run_1_21` | 1.1M, 3.0M | **back to 45 s** + `4×SubprocVecEnv` | −33.9 / −41.8 | `1_21` resumed at a near-flat 3e-5 LR and stalled |
+| **13** | **`atc_run_1_22`** | **8M** | **fresh 8M at 45 s, warm-up→cosine LR 3e-4→3e-5** | **+43.8** | **success 1.00 peak / 0.41 sustained; worst dev 24 s — best run to date** |
+| 14 | `atc_run_1_23` | 1M (abandoned) | **T6 tier** (±30 s) + action penalty 0.02→0.05 | −24.6 | stopped early; superseded by the point-merge pivot |
+| 15 | `atc_run_1_24_pms`, `atc_run_1_24` | 8M, 7.1M | **BGY point-merge (PMS)** — new airspace | −10.0 / −21.6 | success 0.2 / 0.0; worst dev 211 / 158 s |
+| 16 | `atc_run_1_25_trombone_relaxed` | 8M *(running)* | **realised-only conflict gate**, 1_22 recipe restored | — | in progress |
 
 † Run 6 targeted 5M but was stopped at ~3.14M. `atc_run_1_11` (the launch that introduced
 the goal bonus + experiment-dir scaffolding) aborted at ~2k steps and was relaunched as run 6.
 `success_rate = 0` for runs 1–7: no episode ever gets *all* aircraft within the old ±30 s gate.
 Run 8 replaces that gate with a 5-tier system; extended in-place to ~7.1M it reaches a **50% success
 peak** (~30% plateau) with the worst-aircraft deviation down to ~99 s. Runs 9a/9b spin off its 2M
-checkpoint to test the halved 22 s interval against a 45 s control; Run 10 (`atc_run_1_17`) is a
-fresh 22 s run still in early training.
+checkpoint to test the halved 22 s interval against a 45 s control; Runs 10–11 give the 22 s regime
+a clean from-scratch trial and it **fails to beat 45 s**, which Run 12 reverts. Run 13
+(`atc_run_1_22`) is the breakthrough: the same code as `1_21`, but launched **fresh at 8M with a
+warm-up→cosine LR**, reaching the first `success_rate = 1.0` evaluations and a 24 s worst-aircraft
+deviation. Runs 14–15 pivot to a new airspace (BGY point-merge) and have not yet matched it.
+
+!!! tip "The conflict side has been solved since Run 3"
+    `eval_success/no_near_conflicts_mean` sits at **0.99–1.00 in every run from `1_17`
+    onward**. Every failure since has been a **schedule-deviation** failure. See
+    [Loss of separation](separation.md#measured-the-predicted-gate-never-bound) for the
+    measurement showing the conflict gate has never been the binding constraint.
 
 ---
 
@@ -337,10 +352,201 @@ training. The per-aircraft deviation gain is real but did not hold. The interval
 
 ---
 
-## Run 10 — Fresh 22 s run (`atc_run_1_17`, 5 M target) — *in progress* { #run-10 }
+## Run 10 — Fresh 22 s run (`atc_run_1_17`, 5.1 M) { #run-10 }
 
-!!! warning "Early training — no results yet"
-    A fresh, from-scratch run on the 22 s regime (no warm restart), launched with a 5 M-step target
-    to give a clean read on finer temporal control. At the time of writing it is only ~12 k steps
-    in, so there are **no eval results to report** — this entry is a placeholder to fill once it has
-    trained. The doubled per-episode env-steps make this the most compute-heavy run so far.
+The clean from-scratch test of the 22 s interval that Run 9 called for — no warm restart, no
+regime transfer, 5 M-step target. The doubled per-episode env-steps made it the most
+compute-heavy run to that point.
+
+**Results:** `eval/mean_reward` best **−29.3**. Conflict side solved as always
+(`no_near_conflicts` = 1.00 throughout). But the deviation numbers land squarely in the
+Runs 5–7 band: `max_aircraft_dev` floor **241 s**, `total_abs_dev` floor **956 s**,
+`tier_mean` peak **1.5**, and **`success_rate = 0` for the entire run**.
+
+**Finding: the 22 s verdict is negative.** Given a clean run, halving the action interval does
+**not** reproduce Run 9b's transient per-aircraft gains, and does not approach Run 8's 45 s
+results (worst dev ~99 s, 30–50 % success). More decision points are not the missing lever;
+the extra steps mostly dilute the per-step credit assignment. Temporal granularity is closed
+as a line of attack — action *magnitude* granularity (roadmap item 1) remains open.
+
+---
+
+## Run 11 — 22 s continued (`atc_run_1_18` 5 M, `atc_run_1_19` 3 M) { #run-11 }
+
+Two further 22 s runs on the `e5d64da` reward/obs redesign, both resumed and extended in place,
+to confirm Run 10 was not a single unlucky seed.
+
+**Results:** `atc_run_1_18` — best reward **−35.3**, worst dev floor **275 s**, `tier_mean`
+peak 1.7, success 0. `atc_run_1_19` — best reward **−29.6**, worst dev floor **259 s**,
+`tier_mean` peak 1.6, success 0.
+
+**Finding:** confirms Run 10. Three independent 22 s runs all floor at 240–275 s worst-aircraft
+deviation with zero successes, versus 45 s runs reaching 99 s and 30–50 % success. The interval
+change is reverted from here on.
+
+---
+
+## Run 12 — Back to 45 s + parallel envs (`atc_run_1_20` 1.1 M, `atc_run_1_21` 3 M) { #run-12 }
+
+Reverts `TIME_BETWEEN_ACTIONS` to **45 s** and lands the `9812215` parallelism work
+(`4 × SubprocVecEnv`, rollout buffer `4 × 1024 = 4096`, plus the per-env metrics-callback fix).
+
+**Results:** `atc_run_1_20` — 1.14 M steps, best reward −33.9, worst dev 334 s, success 0.
+`atc_run_1_21` — resumed from its own 3 M checkpoint at a **starting LR of 3.02e-5** decaying to
+3e-5, i.e. effectively flat and ~10× below peak; best reward −41.8, `tier_mean` peak 1.0,
+worst dev 354 s, success 0. It reached only 3.0 M of its 8 M target.
+
+**Finding:** neither run is a fair read on 45 s. `1_20` was stopped early and `1_21` was
+resumed onto a near-flat, near-minimum LR schedule — there was no headroom left to learn
+anything. The lesson is about **LR scheduling on resume**, not about the interval: a resume
+that inherits an end-of-schedule LR cannot make progress. This directly motivates Run 13.
+
+---
+
+## Run 13 — Fresh 8 M with warm-up→cosine LR (`atc_run_1_22`, 8 M) — **breakthrough** { #run-13 }
+
+!!! success "Best run to date"
+    The first run ever to reach `success_rate = 1.0` on an evaluation pass, and the first to
+    push worst-aircraft deviation below the ±30 s target.
+
+**Changes vs Run 12:** *none in the code.* `atc_run_1_21` and `atc_run_1_22` are
+**byte-identical** across `config.py`, `rewards.py`, `single_agent_env.py`, `observations.py`,
+`rlm.py` and `main.py`. The only differences are how it was launched:
+
+- **Fresh run**, not a resume — so the LR schedule starts from scratch.
+- **Warm-up → cosine LR**: ramp `0 → 3e-4` over the first `--warmup-frac 0.04` of training,
+  then half-period cosine `3e-4 → 3e-5` over the remainder.
+- **8 M steps**, and it actually completed them (`1_21` stalled at 3 M of 8 M).
+
+**Results:**
+
+| Metric | Best | Sustained (last 15 % of evals) | Final |
+|---|---|---|---|
+| `success_rate` | **1.00** | 0.41 | 0.00 |
+| `tier_mean` | **5.00** | 3.60 | 2.60 |
+| `max_aircraft_dev` | **24.3 s** | 172 s | 281 s |
+| `total_abs_dev` | **65.8 s** | — | 761 s |
+| `eval/mean_reward` | **+43.8** | — | −59.9 |
+
+The worst-aircraft deviation of **24.3 s** finally clears the ±30 s bar that had been
+unreachable since Run 1, and `eval/mean_reward` goes **positive** for the first time
+(+43.8 vs the previous best of −33).
+
+**Finding:** the deviation ceiling was never a reward-design problem or an action-interface
+problem — it was a **learning-rate-schedule and horizon** problem. A fresh warm-up→cosine
+schedule over a full 8 M steps at 45 s gets there with the *same code* that scored `tier_mean`
+1.0 when resumed onto a flat 3e-5 LR. **But the oscillation from Run 8 persists and is now the
+dominant issue**: `success_rate` swings between 0.0 and 1.0 across evaluation passes rather
+than converging, and the run ends on a trough. Peak performance is solved; *stability* is not.
+
+---
+
+## Run 14 — T6 tier + higher action cost (`atc_run_1_23`, 1 M of 8 M, abandoned) { #run-14 }
+
+Tightens the ladder now that Run 13 showed ±30 s is physically reachable.
+
+**Changes vs Run 13:**
+
+- **New Tier 6** — all landed **and** every aircraft within **±30 s**, which becomes the binary
+  `success` flag. The bonus ladder shifts up one slot (T6 takes the old T5 payout of +13.0;
+  T1–T5 drop to 0.75 / 1.5 / 3.0 / 6.0 / 9.0) so the top payout still lands on true success.
+- `REWARD_ACTION_PENALTY_WEIGHT` **0.02 → 0.05**, with per-action multipliers
+  (`DO_NOTHING` 0.001 up to 1.6 for the harder manoeuvres), to curb over-commanding once
+  `DO_NOTHING` had been made nearly free.
+- DOF factor normalised against each aircraft's **own route length** instead of the global
+  `MAX_WAYPOINTS` cap, so acting early is genuinely cheap.
+
+**Results:** stopped at **1 M of 8 M**. Best reward −24.6, `tier_mean` peak 1.6, worst dev
+floor 265 s, `success_rate` 0, `all_under_tier6` 0.
+
+**Finding:** too short to judge — 1 M steps is well inside the warm-up phase for an 8 M cosine
+schedule, and Run 13 did not reach its own peak until much later. Not evidence against T6.
+Abandoned in favour of the point-merge pivot rather than for any result it produced.
+
+!!! warning "Tier numbers are not comparable across the T5/T6 boundary"
+    Runs ≤ `1_22` use the 5-tier ladder where **T5 = success**. Runs `1_23`, `1_24` and
+    `1_24_pms` use the 6-tier ladder where **T6 = success** and every lower rung was
+    re-valued. A `tier_mean` of 2.2 under the 6-tier ladder is *not* worse than 2.6 under
+    the 5-tier one — they measure different things.
+
+---
+
+## Run 15 — Point-merge pivot: BGY (`atc_run_1_24_pms` 8 M, `atc_run_1_24` 7.1 M) { #run-15 }
+
+The first runs on a **completely new airspace**: Bergamo (BGY) with a **point-merge system**
+instead of MXP's trombone. `DEFAULT_TRAINING_DIFFICULTY` / `DEFAULT_EVALUATION_DIFFICULTY`
+switch to `VALIDATION_USE_CASE_2`. Both runs carry Run 14's T6 ladder and action costs.
+
+**Pre-flight sanity check.** `analysis/pms_mdp_sanity.py` verified the new MDP is well-posed
+before any training: aircraft radius 57 nm against the ±150 nm observation extent (more compact
+than MXP's 117 nm), **0 % off-map**, **0 NaN/Inf**, `observation_space.contains` **100 % over
+529 steps**, and saturation at or below MXP everywhere (global 7 % vs 16 %). Conclusion: no
+observation-normalisation retuning needed; `VecNormalize` adapts online from a fresh start.
+
+**`atc_run_1_24_pms`** — the first-ever BGY point-merge run. Launched 2026-07-27 for 8 M steps,
+interrupted at ~1.27 M when its parent CLI session died, resumed 2026-07-28 from
+`ppo_tada_1270000_steps.zip` (detached), and later resumed again from 5.25 M. LR on the final
+resume: linear **1.38e-4 → 1e-5**. Completed 8.0 M.
+
+**`atc_run_1_24`** — a fresh 10 M-step point-merge run launched 2026-07-30 with a much more
+aggressive schedule (`warmup_frac` 0.01, `lr_min` **3e-6**). Reached 7.12 M.
+
+**Results:**
+
+| Metric | `atc_run_1_24_pms` | `atc_run_1_24` |
+|---|---|---|
+| Steps | 8.0 M / 8 M | 7.12 M / 10 M |
+| `eval/mean_reward` best | **−10.0** | −21.6 |
+| `success_rate` best | **0.20** | 0.00 |
+| `tier_mean` best | **2.20** | 2.00 |
+| `all_under_tier6` best | 0.20 | 0.00 |
+| `max_aircraft_dev` floor | 211 s | **158 s** |
+| `total_abs_dev` floor | 751 s | **659 s** |
+| `no_near_conflicts_mean` | 1.00 | 1.00 |
+
+**Finding:** point-merge is **learnable but not yet solved**. The conflict side is clean from the
+start (`no_near_conflicts` = 1.00 throughout, exactly as on the trombone), and deviation improves
+steadily — but neither run approaches Run 13's trombone numbers. The shape is the same as the
+early MXP runs: *conflicts free, deviation wide open*. `1_24_pms` reaches a better reward and the
+only non-zero success; `1_24`'s more aggressive LR floor gets the better raw deviation but never
+converts it into a tier-6 episode.
+
+Both runs suffered launch fragility — `1_24_pms` died with its parent CLI session on the first
+attempt. **All long runs are now launched under `setsid nohup`.**
+
+---
+
+## Run 16 — Realised-only conflict gate (`atc_run_1_25_trombone_relaxed`, 8 M) — *in progress* { #run-16 }
+
+Returns to the **MXP trombone** to test one change against Run 13's breakthrough, with
+everything else restored to Run 13's exact code state.
+
+**Motivation.** A team review of what `LOSS_OF_SEPARATION` actually means concluded that a
+severity-≥-threshold conflict should count **only if it actually materialises** — both aircraft
+inside 3 NM at a real timestep — rather than being inferred from the NOOP-rollout forecast.
+See [Loss of separation](separation.md) for the full semantics.
+
+**Changes vs Run 13:**
+
+- **`Config.SUCCESS_CONFLICT_REALISED_ONLY = True`** — the tier gate now reads
+  `_episode_violations()` (live world, severity ≥ 0.7) instead of
+  `_steps_since_near_conflict >= 3` (NOOP forecast).
+- New `no_near_conflicts_predicted` metric logs the legacy gate alongside the new one, so both
+  regimes are measurable on identical episodes.
+- Everything else — `config.py`, `rewards.py`, `single_agent_env.py`, `observations.py`,
+  `rlm.py`, `autoregressive_policy.py`, the callbacks — restored **byte-identical** to Run 13's
+  snapshot. That means back to the **5-tier** ladder, `REWARD_ACTION_PENALTY_WEIGHT = 0.02`,
+  the `MAX_WAYPOINTS`-based DOF factor, and `VALIDATION_USE_CASE_1`. Only `main.py` is kept at
+  the newer revision (corrupt-checkpoint detection and `--run-suffix`; no hyperparameter
+  changes).
+
+**Launch:** fresh 8 M at 45 s, `lr_max 3e-4 → lr_min 3e-5`, `warmup_frac 0.04`, `vf_coef 0.25`,
+`target_kl 0.05` — identical to Run 13.
+
+!!! warning "Expected to tighten the flag, not relax it"
+    Instrumenting both gates on Run 13's own checkpoints showed the predicted gate was open in
+    **every episode at every checkpoint** (0 relaxations in 95 episode-evaluations). The change
+    is a **semantics correction**, not a loosening: `success` can no longer be reported `True`
+    on an episode that actually busted 3 NM. Reported success rate should fall slightly and
+    become trustworthy. Full measurement in
+    [Loss of separation](separation.md#measured-the-predicted-gate-never-bound).

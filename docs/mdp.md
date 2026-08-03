@@ -126,9 +126,19 @@ tiers (T1–T4) award partial terminal bonus but are **not** counted as success.
 | 4 | ≥ 80% within ±60 s | `max_dev` < 120 s | no |
 | 5 | **all** within ±60 s | all landed | **yes** |
 
-All tiers require the **relaxed near-conflict gate**: `_steps_since_near_conflict >=
-SUCCESS_NEAR_CONFLICT_CLEAR_STEPS (6)` rather than "no near-conflict ever". Near-conflict status is
-evaluated on the **rollout world** (`current_predicted_world`) after each step.
+All tiers additionally require the **conflict gate**, selected by
+`Config.SUCCESS_CONFLICT_REALISED_ONLY`:
+
+- **`True` (current, run `1_25`+)** — no **realised** loss of separation at severity ≥ 0.7
+  (i.e. inside 3 NM) at any point in the episode, read from the **live** world via
+  `_episode_violations()`.
+- **`False` (legacy, runs ≤ `1_24`)** — `_steps_since_near_conflict >=
+  SUCCESS_NEAR_CONFLICT_CLEAR_STEPS (3)`, evaluated on the **rollout world**
+  (`current_predicted_world`) after each step.
+
+The realised gate makes `is_success` consistent with `end_reason`: previously an episode could
+report `success = True` while also being classified `"separation"`, because the flag consulted
+the forecast and the reward consulted reality. See [Loss of separation](separation.md).
 
 ### `_evaluate_success` sub-metrics (logged in episode_metrics)
 
@@ -141,9 +151,10 @@ evaluated on the **rollout world** (`current_predicted_world`) after each step.
 | `success_all_under_tier5` | Every \|dev\| ≤ 60 s |
 | `success_total_abs_dev` | Raw total absolute deviation (s) |
 | `success_max_aircraft_dev` | Worst single-aircraft deviation (s) |
-| `success_no_near_conflicts` | `steps_since_near_conflict >= 6` |
-| `success_ever_near_conflict` | A near-conflict was present at some step |
-| `success_steps_since_near_conflict` | Steps elapsed since last near-conflict |
+| `success_no_near_conflicts` | The gate **in force** (realised by default) |
+| `success_no_near_conflicts_predicted` | The legacy predicted gate, logged for comparison |
+| `success_ever_near_conflict` | A **predicted** near-conflict was present at some step |
+| `success_steps_since_near_conflict` | Steps elapsed since the last predicted near-conflict |
 
 ## Eval-time action shield (`render_policy.py`) { #eval-time-action-shield }
 

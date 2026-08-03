@@ -153,9 +153,10 @@ These let you see **which criterion is blocking success**.
 | `eval_success/all_landed_mean` | All aircraft completed |
 | `eval_success/all_under_threshold_mean` | All `|dev| <= 30 s` |
 | `eval_success/total_dev_ok_mean` | Sum `|dev| <= n*30 s` |
-| `eval_success/no_near_conflicts_mean` | `steps_since_near_conflict >= 3` |
-| `eval_success/ever_near_conflict_mean` | Near-conflict appeared at any step |
-| `eval_success/steps_since_near_conflict_mean` | Steps elapsed since last near-conflict |
+| `eval_success/no_near_conflicts_mean` | **The gate in force.** With `SUCCESS_CONFLICT_REALISED_ONLY=True`: no *realised* LoS at severity ≥ 0.7 all episode. Legacy: `steps_since_near_conflict >= 3` |
+| `eval_success/no_near_conflicts_predicted_mean` | The legacy *predicted* gate, always logged for comparison even when not in force |
+| `eval_success/ever_near_conflict_mean` | A **predicted** near-conflict appeared at any step |
+| `eval_success/steps_since_near_conflict_mean` | Steps elapsed since the last predicted near-conflict |
 | `eval_success/frac_under_threshold_mean` | Fraction of aircraft under threshold |
 | `eval_success/total_abs_dev_mean` | Mean total absolute deviation (s) |
 | `eval_success/max_aircraft_dev_mean` | Worst per-aircraft deviation (s) |
@@ -228,7 +229,19 @@ the normalization range in `Config` is too narrow for the current scenario diffi
 
 When `eval_custom/success_rate` is low, use `eval_success/*` to see which AND-clause
 is blocking:
-- If `ever_near_conflict_mean` is high → conflict avoidance is the bottleneck.
+
+- If `no_near_conflicts_mean` is low → a **real** loss of separation is happening; conflict
+  avoidance is the bottleneck.
 - If `all_under_threshold_mean` is low but `no_near_conflicts_mean` is high →
   deviation is the bottleneck.
 - If `all_landed_mean` is low → aircraft are not completing in time.
+
+!!! tip "In practice it has always been deviation"
+    `no_near_conflicts_mean` has sat at **0.99–1.00 in every run from `1_17` onward**. If you
+    are diagnosing a low success rate, start at `max_aircraft_dev_mean` and
+    `frac_under_tier*_mean`, not the conflict metrics.
+
+    Beware `ever_near_conflict_mean`: it tracks the **predicted** rollout, not reality, and it
+    runs high even on episodes with no real breach. Compare `no_near_conflicts_mean` against
+    `no_near_conflicts_predicted_mean` to see the two regimes side by side — see
+    [Loss of separation](separation.md#realised-vs-predicted-the-distinction-that-matters).

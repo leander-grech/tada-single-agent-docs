@@ -118,21 +118,23 @@ max_steps = clip(ceil(max_arrival_eta / TIME_BETWEEN_ACTIONS) + HORIZON_STEP_MAR
 
 | Constant | Value | Notes |
 |---|---|---|
-| `HORIZON_STEP_MARGIN` | 12 | Extra steps for the last aircraft to land and settle (≈ 264 s) |
-| `MIN_EPISODE_STEPS` | 96 | Floor |
-| `MAX_EPISODE_STEPS` | 260 | Cap; covers the ~242-step worst-case eval scenario |
+| `HORIZON_STEP_MARGIN` | 6 | Extra steps for the last aircraft to land and settle (≈ 270 s) |
+| `MIN_EPISODE_STEPS` | 48 | Floor |
+| `MAX_EPISODE_STEPS` | 130 | Cap; bounds per-step rollout cost |
 
-This prevents structural timeouts (all five eval scenarios have a latest ETA beyond the 128 × 22 s = 2816 s fixed horizon).
+This prevents structural timeouts (several eval scenarios have a latest ETA beyond the
+64 × 45 s = 2880 s fixed horizon).
 
-!!! note "Interval halved — `TIME_BETWEEN_ACTIONS` 45 → 22 s"
-    The simulation interval (sim seconds advanced per env step) was halved so the agent can act
-    ~twice as often within the same scenario — it needs the extra decision points to switch
-    between aircraft on the hardest scenarios, where only one aircraft can be commanded per step.
-    Every step-count constant that encodes an **absolute duration** (`EPISODE_STEPS`, the three
-    horizon caps above, `NEIGHBOR_LOOKAHEAD_MULTIPLIER`, `SCENARIO_INITIAL_CONFLICT_FREE_STEPS`,
-    `SUCCESS_NEAR_CONFLICT_CLEAR_STEPS`) was **doubled in tandem** to preserve its wall-clock
-    meaning. Net effect: episodes now span ~2× the env-steps (so `gamma = 0.995` matters more for
-    credit-assignment reach) and per-episode rollout compute roughly doubles.
+!!! warning "The 22 s interval was tested and rejected — `TIME_BETWEEN_ACTIONS` is back to 45 s"
+    An earlier revision of this page documented `TIME_BETWEEN_ACTIONS = 22 s` (with every
+    duration-encoding step count doubled: `EPISODE_STEPS` 128, `MIN_EPISODE_STEPS` 96,
+    `MAX_EPISODE_STEPS` 260, `HORIZON_STEP_MARGIN` 12) as the current regime.
+
+    It was given a clean from-scratch trial in [Runs 10–11](experiments.md#run-10) —
+    `atc_run_1_17`, `1_18`, `1_19`, three independent runs up to 5.1 M steps — and **lost to
+    45 s on every measure**: worst-aircraft deviation floored at 240–275 s with `success_rate = 0`
+    throughout, against 45 s reaching 99 s and 30–50 % success. It was reverted in
+    [Run 12](experiments.md#run-12) and all constants restored to their 45 s values (shown above).
 
 ---
 
@@ -145,13 +147,37 @@ The legacy flat `Discrete(220)` + `MaskablePPO` path is selected by setting the 
 
 | Parameter | Value | Notes |
 |---|---|---|
-| `learning_rate` | `linear_schedule(3e-4 → 3e-5)` | Decays to tame rising late-training KL |
+| `learning_rate` | `warmup_cosine_schedule(3e-4 → 3e-5)` | Ramp `0 → lr_max` over `--warmup-frac`, then half-period cosine to `--final-lr`. **This schedule is what unlocked [Run 13](experiments.md#run-13)** |
 | `n_epochs` | 5 | Was SB3 default 10 → too much policy drift per rollout |
-| `target_kl` | 0.03 | Early-stop once `approx_kl` exceeds this |
+| `target_kl` | 0.05 | Raised from 0.03: the tight cap throttled progress (mean `approx_kl` ~0.016). Override with `--target-kl` |
+| `vf_coef` | 0.25 | Halved from 0.5 — the encoder trunk is shared and the critic is already strong (`explained_var` ~0.8), so value gradients were starving the policy |
 | `ent_coef` | 0.01 | Was 0.0 → entropy collapsed and policy plateaued |
 | `max_grad_norm` | 1.5 | Was 0.5 → grads saturated the clip (`clip_frac` ≈ 1.0) |
-| `gamma` | 0.995 | Raised from 0.99 for credit-assignment reach over longer per-scenario episodes |
+| `gamma` | 0.998 | Credit-assignment reach over long per-scenario episodes |
+| `n_steps` | 1024 **per env** | With `N_TRAIN_ENVS = 4` the rollout buffer is 4 × 1024 = 4096 |
+| `batch_size` | 256 | 4096 / 256 = 16 minibatches per epoch |
+| `N_TRAIN_ENVS` | 4 | `SubprocVecEnv`, one OS process each |
 | `total_timesteps` | 2 000 000 (default) | Overridden by `--total-timesteps` |
+
+!!! success "The reference recipe"
+    [Run 13](experiments.md#run-13) (`atc_run_1_22`) is the best run to date and is worth copying
+    verbatim as a starting point:
+
+    ```bash
+    /home/leander/miniconda3/envs/tada/bin/python -u main.py \
+      --total-timesteps 8000000 \
+      --warmup-frac 0.04
+    # lr_max 3e-4 -> lr_min 3e-5, vf_coef 0.25, target_kl 0.05 (all defaults)
+    ```
+
+    Launch long runs under `setsid nohup … &` — `atc_run_1_24_pms`'s first attempt died with its
+    parent CLI session at ~1.27 M steps.
+
+!!! danger "Do not resume a long run onto an end-of-schedule LR"
+    `atc_run_1_21` was resumed at a starting LR of **3.02e-5** decaying to 3e-5 — effectively flat
+    and ~10× below peak — and stalled at `tier_mean` 1.0. `atc_run_1_22` is **byte-identical code**
+    launched fresh on the warm-up→cosine schedule and reached `success_rate = 1.0`. If you resume,
+    pass `--initial-lr` to restore real headroom.
 
 ### Resume LR schedule
 

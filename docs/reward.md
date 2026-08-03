@@ -37,7 +37,7 @@ Where:
 ```
 prox    = 1 - min(1, ttl / horizon)     # 0 = far from landing, 1 = imminent
 weight  = REWARD_DEVIATION_LANDING_BASELINE + (1 - REWARD_DEVIATION_LANDING_BASELINE) * prox
-horizon = EPISODE_STEPS * TIME_BETWEEN_ACTIONS = 128 * 22 = 2816 s
+horizon = EPISODE_STEPS * TIME_BETWEEN_ACTIONS = 64 * 45 = 2880 s
 ```
 
 Each aircraft's absolute deviation is weighted **linearly by landing proximity**:
@@ -62,11 +62,34 @@ conflict_penalty = -REWARD_INFRINGEMENT_WEIGHT * sum_pairs( severity * w(ttc) )
 - Conflicts beyond `T_near` pay only the small `floor` cost; within `T_near` the
   penalty ramps steeply as ttc → 0, so imminent conflicts dominate.
 
-### Near-conflict severity threshold (success gate only)
+This term reads the **predicted** world (a NOOP rollout to the end of the episode), which is
+deliberate: it is the only signal that gives the agent a reason to resolve a conflict *before*
+it happens. See [Loss of separation](separation.md#where-prediction-genuinely-drives-behaviour).
+
+### What `severity` actually means
+
+`severity` is **not** produced by the simulator — it is `min` over two normalised axes computed
+in `normalize_separation()`. With the current constants it maps to distance as:
+
+| Horizontal separation | 0 NM | 1 NM | 2 NM | **3 NM** | 5 NM | ≥ 10 NM |
+|---|---|---|---|---|---|---|
+| `severity` (co-altitude) | 1.00 | 0.90 | 0.80 | **0.70** | 0.50 | 0.00 |
+
+!!! danger "`severity == 1.0` means zero separation, not 3 NM"
+    `HORIZONTAL_CONFLICT_RADIUS_NM` is currently `0.0`, so severity 1.0 requires literally
+    zero horizontal separation and is unreachable in practice. **"Within 3 NM" is
+    `severity >= 0.7`** (`NEAR_CONFLICT_THRESHOLD`). This trips people up constantly — the
+    full explanation, including a live piece of dead code it has already caused, is on the
+    [Loss of separation](separation.md) page.
+
+### Near-conflict severity threshold
 
 `has_near_conflict()` (`rewards.py:80`) uses `NEAR_CONFLICT_SEVERITY_THRESHOLD = 0.7`:
-a conflict counts toward the success gate only if severity ≥ 0.7 **and** ttc < T_near.
-This threshold does **not** affect the per-step conflict penalty magnitude.
+a conflict counts only if severity ≥ 0.7 **and** ttc < `T_near`. This threshold does **not**
+affect the per-step conflict penalty magnitude.
+
+Since run `1_25` this function no longer gates success (see the ladder below) — it is used by
+the eval-time shield in `render_policy.py` and for the `no_near_conflicts_predicted` diagnostic.
 
 ---
 
@@ -116,9 +139,23 @@ always sees a gradient toward the next rung:
                                         landed      completion gate
 ```
 
-Every tier *additionally* requires the **relaxed near-conflict gate**: predicted conflicts must
-be clear for the final `SUCCESS_NEAR_CONFLICT_CLEAR_STEPS = 6` steps (≈ 132 s before landing) —
-not the old unsatisfiable "no near-conflict ever".
+Every tier *additionally* requires the **conflict gate**. Which gate depends on
+`Config.SUCCESS_CONFLICT_REALISED_ONLY`:
+
+| | Gate | Reads | Semantics |
+|---|---|---|---|
+| **Current** (`True`, run `1_25`+) | `not _episode_violations()[0]` | the **live** world | no aircraft pair ever got inside 3 NM (severity ≥ 0.7) during the episode |
+| Legacy (`False`, runs ≤ `1_24`) | `_steps_since_near_conflict >= 3` | the **NOOP forecast** | no *predicted* conflict within `NEAR_CONFLICT_TIME_S` for the final 3 steps (≈ 135 s) |
+
+The original gate before Run 3 was "no near-conflict **ever**, predicted or not", which was
+unsatisfiable and kept `success_rate` pinned at 0.
+
+!!! note "The gate has never been the binding constraint"
+    `eval_success/no_near_conflicts_mean` is **0.99–1.00 in every run from `1_17` onward**, and
+    replaying `1_22`'s checkpoints with both gates instrumented found the predicted gate open in
+    **every episode at every checkpoint**. Success has been bound by **deviation**, not
+    conflicts, for the entire campaign. Measurement:
+    [Loss of separation](separation.md#measured-the-predicted-gate-never-bound).
 
 | Tier | Criterion | `bonus` | What it targets |
 |---|---|---|---|
@@ -145,6 +182,26 @@ so `r_parts.total()` is recomputed with it before being passed to SB3.
 !!! note "Replaces `REWARD_SUCCESS_BONUS`"
     The old flat ±5.0 `REWARD_SUCCESS_BONUS` is deprecated and unused. `REWARD_VIOLATION_PENALTY`
     is now independently tunable from the tier bonuses.
+
+### The 6-tier variant (runs `1_23`, `1_24`, `1_24_pms`)
+
+Once Run 13 showed that ±30 s is physically reachable, a **Tier 6** was added — *all landed and
+every aircraft within ±30 s* — and it became the binary `success` flag. The ladder shifted up
+one slot so the top payout still lands on true success:
+
+| | T1 | T2 | T3 | T4 | T5 | T6 |
+|---|---|---|---|---|---|---|
+| 5-tier (≤ `1_22`, and `1_25`) | +1.5 | +3.0 | +6.0 | +9.0 | **+13.0** *(success)* | — |
+| 6-tier (`1_23`–`1_24_pms`) | +0.75 | +1.5 | +3.0 | +6.0 | +9.0 | **+13.0** *(success)* |
+
+`SUCCESS_TIER6_DEV_S = 30.0`, and `REWARD_SUCCESS_BONUS_TIER5_CONFIRM` becomes
+`REWARD_SUCCESS_BONUS_TIER6_CONFIRM`.
+
+!!! warning "`tier_mean` is not comparable across the two ladders"
+    The rungs were re-valued, so a `tier_mean` of 2.2 under the 6-tier ladder measures
+    something different from 2.6 under the 5-tier one. Always check which ladder a run used
+    before comparing. Run `1_25` is back on the **5-tier** ladder to stay comparable with
+    Run 13 (`atc_run_1_22`).
 
 ---
 
