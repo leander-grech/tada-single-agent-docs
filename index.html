@@ -292,6 +292,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#where-the-project-stands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the project stands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#quickstart" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -401,6 +412,33 @@
     
   
     Reward
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="separation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loss of separation
   
 
     
@@ -575,6 +613,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#where-the-project-stands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the project stands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#quickstart" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -638,6 +687,41 @@ hit their AMAN target landing times while keeping them separated.</p>
 <p>It supersedes the older <code>SB3_MIGRATION_AND_INSTRUMENTATION.md</code>. Pages are kept in sync
 with the code on <code>UM-lg</code>.</p>
 </div>
+<h2 id="where-the-project-stands">Where the project stands<a class="headerlink" href="#where-the-project-stands" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Best run</strong></td>
+<td><a href="experiments/#run-13"><code>atc_run_1_22</code></a> — MXP trombone, 8 M steps. First <code>success_rate = 1.0</code> evaluations; worst-aircraft deviation <strong>24 s</strong>, <code>eval/mean_reward</code> <strong>+43.8</strong>.</td>
+</tr>
+<tr>
+<td><strong>Open problem</strong></td>
+<td><strong>Stability, not capability.</strong> <code>success_rate</code> oscillates 0.0–1.0 between eval passes instead of converging, and <code>1_22</code> ended on a trough (sustained ~0.41).</td>
+</tr>
+<tr>
+<td><strong>Second airspace</strong></td>
+<td>BGY <strong>point-merge</strong> (<a href="experiments/#run-15">runs <code>1_24</code> / <code>1_24_pms</code></a>) is learnable but unsolved — best success 0.20, worst dev 158–211 s.</td>
+</tr>
+<tr>
+<td><strong>In flight</strong></td>
+<td><a href="experiments/#run-16"><code>atc_run_1_25_trombone_relaxed</code></a> — <code>1_22</code>'s exact recipe with the <a href="separation/">realised-only conflict gate</a>.</td>
+</tr>
+<tr>
+<td><strong>Settled</strong></td>
+<td>Conflict avoidance. <code>no_near_conflicts_mean</code> = 0.99–1.00 in every run since <code>1_17</code>; <strong>every</strong> failure since has been a schedule-deviation failure.</td>
+</tr>
+<tr>
+<td><strong>Closed</strong></td>
+<td>Finer <em>temporal</em> control (22 s interval) — <a href="experiments/#run-10">runs 10–11</a> tested it cleanly and it lost to 45 s. Action <em>magnitude</em> granularity remains open.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="quickstart">Quickstart<a class="headerlink" href="#quickstart" title="Permanent link">&para;</a></h2>
 <p>Training runs in the conda env <strong><code>tada</code></strong> (Python 3.12):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>reinforcement_learning/single_agent_rllib
@@ -675,6 +759,10 @@ lightweight <em>inference</em> set; add <code>pip install -e .[train]</code> for
 <tr>
 <td><a href="reward/">Reward</a></td>
 <td>imminence-dominant conflict, landing-weighted deviation, terminal bonus</td>
+</tr>
+<tr>
+<td><a href="separation/">Loss of separation</a></td>
+<td>what <code>LOSS_OF_SEPARATION</code> means, severity ↔ distance, realised vs. predicted</td>
 </tr>
 <tr>
 <td><a href="training/">Training</a></td>

@@ -342,6 +342,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../separation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loss of separation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../training/" class="md-nav__link">
         
   
@@ -522,6 +549,62 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#run-13-atc_run_1_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 13 — atc_run_1_22 best model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Run 13 — atc_run_1_22 best model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#renders_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renders
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-15-atc_run_1_24_pms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 15 — atc_run_1_24_pms best model (BGY point-merge)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Run 15 — atc_run_1_24_pms best model (BGY point-merge)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#renders_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renders
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#adding-a-new-run" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -621,6 +704,62 @@
     <span class="md-ellipsis">
       
         Refusal-shield sweep (100 seeds)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-13-atc_run_1_22" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 13 — atc_run_1_22 best model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Run 13 — atc_run_1_22 best model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#renders_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renders
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-15-atc_run_1_24_pms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 15 — atc_run_1_24_pms best model (BGY point-merge)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Run 15 — atc_run_1_24_pms best model (BGY point-merge)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#renders_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renders
       
     </span>
   </a>
@@ -1064,6 +1203,143 @@ Columns: `raw` = trained_raw, `rd`/`cc`/`both` = reward-drop / critical-conflict
 
 </details>
 
+<hr />
+<h2 id="run-13-atc_run_1_22">Run 13 — <code>atc_run_1_22</code> best model<a class="headerlink" href="#run-13-atc_run_1_22" title="Permanent link">&para;</a></h2>
+<p>→ <strong>Experiment log:</strong> <a href="../experiments/#run-13">Run 13 — Fresh 8 M with warm-up→cosine LR</a>.</p>
+<p>The best checkpoint produced by the project so far, and the first to clear the ±30 s bar that
+had been out of reach since Run 1. Model:
+<code>experiments/atc_run_1_22/best/best_model.zip</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Best</th>
+<th>Sustained (last 15 % of evals)</th>
+<th>Final</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>success_rate</code></td>
+<td><strong>1.00</strong></td>
+<td>0.41</td>
+<td>0.00</td>
+</tr>
+<tr>
+<td><code>tier_mean</code></td>
+<td><strong>5.00</strong></td>
+<td>3.60</td>
+<td>2.60</td>
+</tr>
+<tr>
+<td><code>max_aircraft_dev</code></td>
+<td><strong>24.3 s</strong></td>
+<td>172 s</td>
+<td>281 s</td>
+</tr>
+<tr>
+<td><code>total_abs_dev</code></td>
+<td><strong>65.8 s</strong></td>
+<td>—</td>
+<td>761 s</td>
+</tr>
+<tr>
+<td><code>eval/mean_reward</code></td>
+<td><strong>+43.8</strong></td>
+<td>—</td>
+<td>−59.9</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Read the 'sustained' column</p>
+<p>The headline <code>success_rate = 1.00</code> is a <strong>peak over evaluation passes</strong>, not a converged
+level — the run oscillates between 0.0 and 1.0 and ends on a trough. Quoting the peak alone
+materially overstates this checkpoint. Characterising and fixing that oscillation is the
+top item on the <a href="../roadmap/#1-training-stability-past-3-m-the-frontier">roadmap</a>.</p>
+</div>
+<h3 id="renders_1">Renders<a class="headerlink" href="#renders_1" title="Permanent link">&para;</a></h3>
+<p>Short deterministic clip (5 episodes), unshielded:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/atc_run_1_22_best_model_det_noshield_ep5.mp4" type="video/mp4">
+</video>
+
+<p>Longer 20-episode reels — the raw policy and the same policy under a reward-drop → do-nothing
+refusal shield:</p>
+<ul>
+<li><a href="../assets/renders/atc_run_1_22_best_model_det_noshield_ep20.mp4">Raw policy, 20 episodes</a></li>
+<li><a href="../assets/renders/atc_run_1_22_best_model_det_rdrop_do_nothing_ep20.mp4">Reward-drop shield → do_nothing, 20 episodes</a></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Shield sweep not yet run for this checkpoint</p>
+<p>The 100-seed refusal-shield benchmark has only been run for <code>atc_run_1_16</code>. Reproduce it for
+this model with the command in <a href="#adding-a-new-run">Adding a new run</a> and paste the summary
+here. On <code>1_16</code> the raw policy beat every shield variant; worth confirming whether that still
+holds for a tier-5-capable checkpoint.</p>
+</div>
+<hr />
+<h2 id="run-15-atc_run_1_24_pms">Run 15 — <code>atc_run_1_24_pms</code> best model (BGY point-merge)<a class="headerlink" href="#run-15-atc_run_1_24_pms" title="Permanent link">&para;</a></h2>
+<p>→ <strong>Experiment log:</strong> <a href="../experiments/#run-15">Run 15 — Point-merge pivot: BGY</a>.</p>
+<p>The first checkpoints on a <strong>second airspace</strong> — Bergamo with a point-merge system rather than
+MXP's trombone. Included here as the current point-merge reference, not as a success: the run
+tops out at <code>success_rate</code> <strong>0.20</strong> against the trombone's 1.00.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th><code>atc_run_1_24_pms</code></th>
+<th><code>atc_run_1_24</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Steps</td>
+<td>8.0 M / 8 M</td>
+<td>7.12 M / 10 M</td>
+</tr>
+<tr>
+<td><code>eval/mean_reward</code> best</td>
+<td><strong>−10.0</strong></td>
+<td>−21.6</td>
+</tr>
+<tr>
+<td><code>success_rate</code> best</td>
+<td><strong>0.20</strong></td>
+<td>0.00</td>
+</tr>
+<tr>
+<td><code>tier_mean</code> best</td>
+<td><strong>2.20</strong></td>
+<td>2.00</td>
+</tr>
+<tr>
+<td><code>max_aircraft_dev</code> floor</td>
+<td>211 s</td>
+<td><strong>158 s</strong></td>
+</tr>
+<tr>
+<td><code>no_near_conflicts_mean</code></td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition warning">
+<p class="admonition-title">Different tier ladder</p>
+<p>Both point-merge runs use the <strong>6-tier</strong> ladder (T6 = all within ±30 s = success), so their
+<code>tier_mean</code> is <strong>not</strong> comparable with <code>atc_run_1_22</code>'s 5-tier value. See
+<a href="../reward/#the-6-tier-variant-runs-1_23-1_24-1_24_pms">Reward</a>.</p>
+</div>
+<h3 id="renders_2">Renders<a class="headerlink" href="#renders_2" title="Permanent link">&para;</a></h3>
+<p>Best model, 3 episodes, unshielded — the point-merge geometry is visibly different from the
+trombone:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/atc_run_1_24_pms_best_model_det_noshield_ep3.mp4" type="video/mp4">
+</video>
+
+<ul>
+<li><a href="../assets/renders/atc_run_1_24_pms_ppo_tada_7470000_steps_det_noshield_ep10.mp4">Checkpoint @7.47 M, 10 episodes, unshielded</a></li>
+</ul>
 <hr />
 <h2 id="adding-a-new-run">Adding a new run<a class="headerlink" href="#adding-a-new-run" title="Permanent link">&para;</a></h2>
 <p>To add a showcase for run <strong>N</strong> (<code>atc_run_1_X</code>):</p>

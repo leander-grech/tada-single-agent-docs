@@ -14,7 +14,7 @@
         <link rel="prev" href="../observations/">
       
       
-        <link rel="next" href="../training/">
+        <link rel="next" href="../separation/">
       
       
         
@@ -409,10 +409,21 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#near-conflict-severity-threshold-success-gate-only" class="md-nav__link">
+  <a href="#what-severity-actually-means" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Near-conflict severity threshold (success gate only)
+        What severity actually means
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#near-conflict-severity-threshold" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Near-conflict severity threshold
       
     </span>
   </a>
@@ -461,6 +472,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="🎯 Terminal success-tier ladder (set in step())">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-6-tier-variant-runs-1_23-1_24-1_24_pms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 6-tier variant (runs 1_23, 1_24, 1_24_pms)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -489,6 +517,33 @@
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../separation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loss of separation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -689,10 +744,21 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#near-conflict-severity-threshold-success-gate-only" class="md-nav__link">
+  <a href="#what-severity-actually-means" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Near-conflict severity threshold (success gate only)
+        What severity actually means
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#near-conflict-severity-threshold" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Near-conflict severity threshold
       
     </span>
   </a>
@@ -740,6 +806,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="🎯 Terminal success-tier ladder (set in step())">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-6-tier-variant-runs-1_23-1_24-1_24_pms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The 6-tier variant (runs 1_23, 1_24, 1_24_pms)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -807,7 +890,7 @@ deviation is always sourced from the simulator rollout.</p>
 <p>Where:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>prox    = 1 - min(1, ttl / horizon)     # 0 = far from landing, 1 = imminent
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>weight  = REWARD_DEVIATION_LANDING_BASELINE + (1 - REWARD_DEVIATION_LANDING_BASELINE) * prox
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>horizon = EPISODE_STEPS * TIME_BETWEEN_ACTIONS = 128 * 22 = 2816 s
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>horizon = EPISODE_STEPS * TIME_BETWEEN_ACTIONS = 64 * 45 = 2880 s
 </code></pre></div>
 <p>Each aircraft's absolute deviation is weighted <strong>linearly by landing proximity</strong>:
 from <code>REWARD_DEVIATION_LANDING_BASELINE = 0.2</code> (far) up to <code>1.0</code> (landing imminent).</p>
@@ -826,10 +909,50 @@ For each unique pair, only the <strong>earliest</strong> predicted loss-of-separ
 <li>Conflicts beyond <code>T_near</code> pay only the small <code>floor</code> cost; within <code>T_near</code> the
   penalty ramps steeply as ttc → 0, so imminent conflicts dominate.</li>
 </ul>
-<h3 id="near-conflict-severity-threshold-success-gate-only">Near-conflict severity threshold (success gate only)<a class="headerlink" href="#near-conflict-severity-threshold-success-gate-only" title="Permanent link">&para;</a></h3>
+<p>This term reads the <strong>predicted</strong> world (a NOOP rollout to the end of the episode), which is
+deliberate: it is the only signal that gives the agent a reason to resolve a conflict <em>before</em>
+it happens. See <a href="../separation/#where-prediction-genuinely-drives-behaviour">Loss of separation</a>.</p>
+<h3 id="what-severity-actually-means">What <code>severity</code> actually means<a class="headerlink" href="#what-severity-actually-means" title="Permanent link">&para;</a></h3>
+<p><code>severity</code> is <strong>not</strong> produced by the simulator — it is <code>min</code> over two normalised axes computed
+in <code>normalize_separation()</code>. With the current constants it maps to distance as:</p>
+<table>
+<thead>
+<tr>
+<th>Horizontal separation</th>
+<th>0 NM</th>
+<th>1 NM</th>
+<th>2 NM</th>
+<th><strong>3 NM</strong></th>
+<th>5 NM</th>
+<th>≥ 10 NM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>severity</code> (co-altitude)</td>
+<td>1.00</td>
+<td>0.90</td>
+<td>0.80</td>
+<td><strong>0.70</strong></td>
+<td>0.50</td>
+<td>0.00</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title"><code>severity == 1.0</code> means zero separation, not 3 NM</p>
+<p><code>HORIZONTAL_CONFLICT_RADIUS_NM</code> is currently <code>0.0</code>, so severity 1.0 requires literally
+zero horizontal separation and is unreachable in practice. <strong>"Within 3 NM" is
+<code>severity &gt;= 0.7</code></strong> (<code>NEAR_CONFLICT_THRESHOLD</code>). This trips people up constantly — the
+full explanation, including a live piece of dead code it has already caused, is on the
+<a href="../separation/">Loss of separation</a> page.</p>
+</div>
+<h3 id="near-conflict-severity-threshold">Near-conflict severity threshold<a class="headerlink" href="#near-conflict-severity-threshold" title="Permanent link">&para;</a></h3>
 <p><code>has_near_conflict()</code> (<code>rewards.py:80</code>) uses <code>NEAR_CONFLICT_SEVERITY_THRESHOLD = 0.7</code>:
-a conflict counts toward the success gate only if severity ≥ 0.7 <strong>and</strong> ttc &lt; T_near.
-This threshold does <strong>not</strong> affect the per-step conflict penalty magnitude.</p>
+a conflict counts only if severity ≥ 0.7 <strong>and</strong> ttc &lt; <code>T_near</code>. This threshold does <strong>not</strong>
+affect the per-step conflict penalty magnitude.</p>
+<p>Since run <code>1_25</code> this function no longer gates success (see the ladder below) — it is used by
+the eval-time shield in <code>render_policy.py</code> and for the <code>no_near_conflicts_predicted</code> diagnostic.</p>
 <hr />
 <h2 id="component-3-action-penalty-rewardspy">Component 3 — Action penalty (<code>rewards.py</code>)<a class="headerlink" href="#component-3-action-penalty-rewardspy" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">action_reward</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">num_commands</span> <span class="o">**</span> <span class="mf">1.25</span><span class="p">)</span> <span class="o">*</span> <span class="n">REWARD_ACTION_PENALTY_WEIGHT</span> <span class="o">*</span> <span class="n">dof_factor</span>
@@ -878,9 +1001,42 @@ always sees a gradient toward the next rung:</p>
 <a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>   —         —      max&lt;200 s max&lt;120 s  all       extra worst-aircraft /
 <a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>                                        landed      completion gate
 </code></pre></div>
-<p>Every tier <em>additionally</em> requires the <strong>relaxed near-conflict gate</strong>: predicted conflicts must
-be clear for the final <code>SUCCESS_NEAR_CONFLICT_CLEAR_STEPS = 6</code> steps (≈ 132 s before landing) —
-not the old unsatisfiable "no near-conflict ever".</p>
+<p>Every tier <em>additionally</em> requires the <strong>conflict gate</strong>. Which gate depends on
+<code>Config.SUCCESS_CONFLICT_REALISED_ONLY</code>:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Gate</th>
+<th>Reads</th>
+<th>Semantics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Current</strong> (<code>True</code>, run <code>1_25</code>+)</td>
+<td><code>not _episode_violations()[0]</code></td>
+<td>the <strong>live</strong> world</td>
+<td>no aircraft pair ever got inside 3 NM (severity ≥ 0.7) during the episode</td>
+</tr>
+<tr>
+<td>Legacy (<code>False</code>, runs ≤ <code>1_24</code>)</td>
+<td><code>_steps_since_near_conflict &gt;= 3</code></td>
+<td>the <strong>NOOP forecast</strong></td>
+<td>no <em>predicted</em> conflict within <code>NEAR_CONFLICT_TIME_S</code> for the final 3 steps (≈ 135 s)</td>
+</tr>
+</tbody>
+</table>
+<p>The original gate before Run 3 was "no near-conflict <strong>ever</strong>, predicted or not", which was
+unsatisfiable and kept <code>success_rate</code> pinned at 0.</p>
+<div class="admonition note">
+<p class="admonition-title">The gate has never been the binding constraint</p>
+<p><code>eval_success/no_near_conflicts_mean</code> is <strong>0.99–1.00 in every run from <code>1_17</code> onward</strong>, and
+replaying <code>1_22</code>'s checkpoints with both gates instrumented found the predicted gate open in
+<strong>every episode at every checkpoint</strong>. Success has been bound by <strong>deviation</strong>, not
+conflicts, for the entire campaign. Measurement:
+<a href="../separation/#measured-the-predicted-gate-never-bound">Loss of separation</a>.</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -948,6 +1104,52 @@ so <code>r_parts.total()</code> is recomputed with it before being passed to SB3
 <p class="admonition-title">Replaces <code>REWARD_SUCCESS_BONUS</code></p>
 <p>The old flat ±5.0 <code>REWARD_SUCCESS_BONUS</code> is deprecated and unused. <code>REWARD_VIOLATION_PENALTY</code>
 is now independently tunable from the tier bonuses.</p>
+</div>
+<h3 id="the-6-tier-variant-runs-1_23-1_24-1_24_pms">The 6-tier variant (runs <code>1_23</code>, <code>1_24</code>, <code>1_24_pms</code>)<a class="headerlink" href="#the-6-tier-variant-runs-1_23-1_24-1_24_pms" title="Permanent link">&para;</a></h3>
+<p>Once Run 13 showed that ±30 s is physically reachable, a <strong>Tier 6</strong> was added — <em>all landed and
+every aircraft within ±30 s</em> — and it became the binary <code>success</code> flag. The ladder shifted up
+one slot so the top payout still lands on true success:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>T1</th>
+<th>T2</th>
+<th>T3</th>
+<th>T4</th>
+<th>T5</th>
+<th>T6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5-tier (≤ <code>1_22</code>, and <code>1_25</code>)</td>
+<td>+1.5</td>
+<td>+3.0</td>
+<td>+6.0</td>
+<td>+9.0</td>
+<td><strong>+13.0</strong> <em>(success)</em></td>
+<td>—</td>
+</tr>
+<tr>
+<td>6-tier (<code>1_23</code>–<code>1_24_pms</code>)</td>
+<td>+0.75</td>
+<td>+1.5</td>
+<td>+3.0</td>
+<td>+6.0</td>
+<td>+9.0</td>
+<td><strong>+13.0</strong> <em>(success)</em></td>
+</tr>
+</tbody>
+</table>
+<p><code>SUCCESS_TIER6_DEV_S = 30.0</code>, and <code>REWARD_SUCCESS_BONUS_TIER5_CONFIRM</code> becomes
+<code>REWARD_SUCCESS_BONUS_TIER6_CONFIRM</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title"><code>tier_mean</code> is not comparable across the two ladders</p>
+<p>The rungs were re-valued, so a <code>tier_mean</code> of 2.2 under the 6-tier ladder measures
+something different from 2.6 under the 5-tier one. Always check which ladder a run used
+before comparing. Run <code>1_25</code> is back on the <strong>5-tier</strong> ladder to stay comparable with
+Run 13 (<code>atc_run_1_22</code>).</p>
 </div>
 <hr />
 <h2 id="reward-config-reference">Reward config reference<a class="headerlink" href="#reward-config-reference" title="Permanent link">&para;</a></h2>

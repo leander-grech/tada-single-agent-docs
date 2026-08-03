@@ -11,7 +11,7 @@
       
       
       
-        <link rel="prev" href="../reward/">
+        <link rel="prev" href="../separation/">
       
       
         <link rel="next" href="../instrumentation/">
@@ -323,6 +323,33 @@
     
   
     Reward
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../separation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loss of separation
   
 
     
@@ -1045,32 +1072,33 @@
 <tbody>
 <tr>
 <td><code>HORIZON_STEP_MARGIN</code></td>
-<td>12</td>
-<td>Extra steps for the last aircraft to land and settle (≈ 264 s)</td>
+<td>6</td>
+<td>Extra steps for the last aircraft to land and settle (≈ 270 s)</td>
 </tr>
 <tr>
 <td><code>MIN_EPISODE_STEPS</code></td>
-<td>96</td>
+<td>48</td>
 <td>Floor</td>
 </tr>
 <tr>
 <td><code>MAX_EPISODE_STEPS</code></td>
-<td>260</td>
-<td>Cap; covers the ~242-step worst-case eval scenario</td>
+<td>130</td>
+<td>Cap; bounds per-step rollout cost</td>
 </tr>
 </tbody>
 </table>
-<p>This prevents structural timeouts (all five eval scenarios have a latest ETA beyond the 128 × 22 s = 2816 s fixed horizon).</p>
-<div class="admonition note">
-<p class="admonition-title">Interval halved — <code>TIME_BETWEEN_ACTIONS</code> 45 → 22 s</p>
-<p>The simulation interval (sim seconds advanced per env step) was halved so the agent can act
-~twice as often within the same scenario — it needs the extra decision points to switch
-between aircraft on the hardest scenarios, where only one aircraft can be commanded per step.
-Every step-count constant that encodes an <strong>absolute duration</strong> (<code>EPISODE_STEPS</code>, the three
-horizon caps above, <code>NEIGHBOR_LOOKAHEAD_MULTIPLIER</code>, <code>SCENARIO_INITIAL_CONFLICT_FREE_STEPS</code>,
-<code>SUCCESS_NEAR_CONFLICT_CLEAR_STEPS</code>) was <strong>doubled in tandem</strong> to preserve its wall-clock
-meaning. Net effect: episodes now span ~2× the env-steps (so <code>gamma = 0.995</code> matters more for
-credit-assignment reach) and per-episode rollout compute roughly doubles.</p>
+<p>This prevents structural timeouts (several eval scenarios have a latest ETA beyond the
+64 × 45 s = 2880 s fixed horizon).</p>
+<div class="admonition warning">
+<p class="admonition-title">The 22 s interval was tested and rejected — <code>TIME_BETWEEN_ACTIONS</code> is back to 45 s</p>
+<p>An earlier revision of this page documented <code>TIME_BETWEEN_ACTIONS = 22 s</code> (with every
+duration-encoding step count doubled: <code>EPISODE_STEPS</code> 128, <code>MIN_EPISODE_STEPS</code> 96,
+<code>MAX_EPISODE_STEPS</code> 260, <code>HORIZON_STEP_MARGIN</code> 12) as the current regime.</p>
+<p>It was given a clean from-scratch trial in <a href="../experiments/#run-10">Runs 10–11</a> —
+<code>atc_run_1_17</code>, <code>1_18</code>, <code>1_19</code>, three independent runs up to 5.1 M steps — and <strong>lost to
+45 s on every measure</strong>: worst-aircraft deviation floored at 240–275 s with <code>success_rate = 0</code>
+throughout, against 45 s reaching 99 s and 30–50 % success. It was reverted in
+<a href="../experiments/#run-12">Run 12</a> and all constants restored to their 45 s values (shown above).</p>
 </div>
 <hr />
 <h2 id="ppo-hyperparameters">PPO hyperparameters<a class="headerlink" href="#ppo-hyperparameters" title="Permanent link">&para;</a></h2>
@@ -1088,8 +1116,8 @@ The legacy flat <code>Discrete(220)</code> + <code>MaskablePPO</code> path is se
 <tbody>
 <tr>
 <td><code>learning_rate</code></td>
-<td><code>linear_schedule(3e-4 → 3e-5)</code></td>
-<td>Decays to tame rising late-training KL</td>
+<td><code>warmup_cosine_schedule(3e-4 → 3e-5)</code></td>
+<td>Ramp <code>0 → lr_max</code> over <code>--warmup-frac</code>, then half-period cosine to <code>--final-lr</code>. <strong>This schedule is what unlocked <a href="../experiments/#run-13">Run 13</a></strong></td>
 </tr>
 <tr>
 <td><code>n_epochs</code></td>
@@ -1098,8 +1126,13 @@ The legacy flat <code>Discrete(220)</code> + <code>MaskablePPO</code> path is se
 </tr>
 <tr>
 <td><code>target_kl</code></td>
-<td>0.03</td>
-<td>Early-stop once <code>approx_kl</code> exceeds this</td>
+<td>0.05</td>
+<td>Raised from 0.03: the tight cap throttled progress (mean <code>approx_kl</code> ~0.016). Override with <code>--target-kl</code></td>
+</tr>
+<tr>
+<td><code>vf_coef</code></td>
+<td>0.25</td>
+<td>Halved from 0.5 — the encoder trunk is shared and the critic is already strong (<code>explained_var</code> ~0.8), so value gradients were starving the policy</td>
 </tr>
 <tr>
 <td><code>ent_coef</code></td>
@@ -1113,8 +1146,23 @@ The legacy flat <code>Discrete(220)</code> + <code>MaskablePPO</code> path is se
 </tr>
 <tr>
 <td><code>gamma</code></td>
-<td>0.995</td>
-<td>Raised from 0.99 for credit-assignment reach over longer per-scenario episodes</td>
+<td>0.998</td>
+<td>Credit-assignment reach over long per-scenario episodes</td>
+</tr>
+<tr>
+<td><code>n_steps</code></td>
+<td>1024 <strong>per env</strong></td>
+<td>With <code>N_TRAIN_ENVS = 4</code> the rollout buffer is 4 × 1024 = 4096</td>
+</tr>
+<tr>
+<td><code>batch_size</code></td>
+<td>256</td>
+<td>4096 / 256 = 16 minibatches per epoch</td>
+</tr>
+<tr>
+<td><code>N_TRAIN_ENVS</code></td>
+<td>4</td>
+<td><code>SubprocVecEnv</code>, one OS process each</td>
 </tr>
 <tr>
 <td><code>total_timesteps</code></td>
@@ -1123,6 +1171,25 @@ The legacy flat <code>Discrete(220)</code> + <code>MaskablePPO</code> path is se
 </tr>
 </tbody>
 </table>
+<div class="admonition success">
+<p class="admonition-title">The reference recipe</p>
+<p><a href="../experiments/#run-13">Run 13</a> (<code>atc_run_1_22</code>) is the best run to date and is worth copying
+verbatim as a starting point:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>/home/leander/miniconda3/envs/tada/bin/python<span class="w"> </span>-u<span class="w"> </span>main.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span>--total-timesteps<span class="w"> </span><span class="m">8000000</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>--warmup-frac<span class="w"> </span><span class="m">0</span>.04
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="c1"># lr_max 3e-4 -&gt; lr_min 3e-5, vf_coef 0.25, target_kl 0.05 (all defaults)</span>
+</code></pre></div>
+<p>Launch long runs under <code>setsid nohup … &amp;</code> — <code>atc_run_1_24_pms</code>'s first attempt died with its
+parent CLI session at ~1.27 M steps.</p>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Do not resume a long run onto an end-of-schedule LR</p>
+<p><code>atc_run_1_21</code> was resumed at a starting LR of <strong>3.02e-5</strong> decaying to 3e-5 — effectively flat
+and ~10× below peak — and stalled at <code>tier_mean</code> 1.0. <code>atc_run_1_22</code> is <strong>byte-identical code</strong>
+launched fresh on the warm-up→cosine schedule and reached <code>success_rate = 1.0</code>. If you resume,
+pass <code>--initial-lr</code> to restore real headroom.</p>
+</div>
 <h3 id="resume-lr-schedule">Resume LR schedule<a class="headerlink" href="#resume-lr-schedule" title="Permanent link">&para;</a></h3>
 <p>On <code>--resume</code>, the schedule's <strong>starting LR</strong> (<code>start_lr</code>) is either <code>--initial-lr</code> (if given) or
 the LR read from the saved optimizer state (<code>model.policy.optimizer.param_groups[0]["lr"]</code>, frozen
@@ -1192,11 +1259,11 @@ gives a <strong>flat schedule</strong> for the remainder. The chosen <code>start
 <p><strong>Aircraft head</strong> — <code>Linear(128 → N_aircraft)</code> + softmax over valid aircraft (mask from obs).</p>
 <p><strong>Clearance head</strong> — <code>Linear(128 + aircraft_embed → N_clearances)</code> conditioned on the sampled aircraft embedding; masked over valid clearances for that aircraft.</p>
 <h3 id="legacy-path-maskableppo-atcfeatureextractor">Legacy path: <code>MaskablePPO</code> + <code>ATCFeatureExtractor</code><a class="headerlink" href="#legacy-path-maskableppo-atcfeatureextractor" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">policy_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">features_extractor_class</span><span class="o">=</span><span class="n">ATCFeatureExtractor</span><span class="p">,</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">features_extractor_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">features_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">),</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="n">net_arch</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pi</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span> <span class="n">vf</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">]),</span>
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="p">)</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">policy_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">features_extractor_class</span><span class="o">=</span><span class="n">ATCFeatureExtractor</span><span class="p">,</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">features_extractor_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">features_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">),</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">net_arch</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pi</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">],</span> <span class="n">vf</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">64</span><span class="p">]),</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="p">)</span>
 </code></pre></div>
 <p>Same <code>ATCEncoder</code> backbone; the latent vector feeds separate policy (<code>pi</code>) and value (<code>vf</code>) heads with two 64-unit hidden layers each.</p>
 <hr />

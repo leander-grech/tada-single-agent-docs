@@ -342,6 +342,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../separation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loss of separation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../training/" class="md-nav__link">
         
   
@@ -1319,15 +1346,19 @@ This lets you detect gradient explosion and saturation of the clip.</p>
 </tr>
 <tr>
 <td><code>eval_success/no_near_conflicts_mean</code></td>
-<td><code>steps_since_near_conflict &gt;= 3</code></td>
+<td><strong>The gate in force.</strong> With <code>SUCCESS_CONFLICT_REALISED_ONLY=True</code>: no <em>realised</em> LoS at severity ≥ 0.7 all episode. Legacy: <code>steps_since_near_conflict &gt;= 3</code></td>
+</tr>
+<tr>
+<td><code>eval_success/no_near_conflicts_predicted_mean</code></td>
+<td>The legacy <em>predicted</em> gate, always logged for comparison even when not in force</td>
 </tr>
 <tr>
 <td><code>eval_success/ever_near_conflict_mean</code></td>
-<td>Near-conflict appeared at any step</td>
+<td>A <strong>predicted</strong> near-conflict appeared at any step</td>
 </tr>
 <tr>
 <td><code>eval_success/steps_since_near_conflict_mean</code></td>
-<td>Steps elapsed since last near-conflict</td>
+<td>Steps elapsed since the last predicted near-conflict</td>
 </tr>
 <tr>
 <td><code>eval_success/frac_under_threshold_mean</code></td>
@@ -1496,11 +1527,24 @@ hitting the <code>[-1, 1]</code> clip boundary. For the <code>aircraft</code> ke
 the normalization range in <code>Config</code> is too narrow for the current scenario difficulty.</p>
 <h3 id="success-gate-diagnosis">Success gate diagnosis<a class="headerlink" href="#success-gate-diagnosis" title="Permanent link">&para;</a></h3>
 <p>When <code>eval_custom/success_rate</code> is low, use <code>eval_success/*</code> to see which AND-clause
-is blocking:
-- If <code>ever_near_conflict_mean</code> is high → conflict avoidance is the bottleneck.
-- If <code>all_under_threshold_mean</code> is low but <code>no_near_conflicts_mean</code> is high →
-  deviation is the bottleneck.
-- If <code>all_landed_mean</code> is low → aircraft are not completing in time.</p>
+is blocking:</p>
+<ul>
+<li>If <code>no_near_conflicts_mean</code> is low → a <strong>real</strong> loss of separation is happening; conflict
+  avoidance is the bottleneck.</li>
+<li>If <code>all_under_threshold_mean</code> is low but <code>no_near_conflicts_mean</code> is high →
+  deviation is the bottleneck.</li>
+<li>If <code>all_landed_mean</code> is low → aircraft are not completing in time.</li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">In practice it has always been deviation</p>
+<p><code>no_near_conflicts_mean</code> has sat at <strong>0.99–1.00 in every run from <code>1_17</code> onward</strong>. If you
+are diagnosing a low success rate, start at <code>max_aircraft_dev_mean</code> and
+<code>frac_under_tier*_mean</code>, not the conflict metrics.</p>
+<p>Beware <code>ever_near_conflict_mean</code>: it tracks the <strong>predicted</strong> rollout, not reality, and it
+runs high even on episodes with no real breach. Compare <code>no_near_conflicts_mean</code> against
+<code>no_near_conflicts_predicted_mean</code> to see the two regimes side by side — see
+<a href="../separation/#realised-vs-predicted-the-distinction-that-matters">Loss of separation</a>.</p>
+</div>
 
 
 

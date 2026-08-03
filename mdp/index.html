@@ -578,6 +578,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../separation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loss of separation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../training/" class="md-nav__link">
         
   
@@ -1146,9 +1173,19 @@ tiers (T1–T4) award partial terminal bonus but are <strong>not</strong> counte
 </tr>
 </tbody>
 </table>
-<p>All tiers require the <strong>relaxed near-conflict gate</strong>: <code>_steps_since_near_conflict &gt;=
-SUCCESS_NEAR_CONFLICT_CLEAR_STEPS (6)</code> rather than "no near-conflict ever". Near-conflict status is
-evaluated on the <strong>rollout world</strong> (<code>current_predicted_world</code>) after each step.</p>
+<p>All tiers additionally require the <strong>conflict gate</strong>, selected by
+<code>Config.SUCCESS_CONFLICT_REALISED_ONLY</code>:</p>
+<ul>
+<li><strong><code>True</code> (current, run <code>1_25</code>+)</strong> — no <strong>realised</strong> loss of separation at severity ≥ 0.7
+  (i.e. inside 3 NM) at any point in the episode, read from the <strong>live</strong> world via
+  <code>_episode_violations()</code>.</li>
+<li><strong><code>False</code> (legacy, runs ≤ <code>1_24</code>)</strong> — <code>_steps_since_near_conflict &gt;=
+  SUCCESS_NEAR_CONFLICT_CLEAR_STEPS (3)</code>, evaluated on the <strong>rollout world</strong>
+  (<code>current_predicted_world</code>) after each step.</li>
+</ul>
+<p>The realised gate makes <code>is_success</code> consistent with <code>end_reason</code>: previously an episode could
+report <code>success = True</code> while also being classified <code>"separation"</code>, because the flag consulted
+the forecast and the reward consulted reality. See <a href="../separation/">Loss of separation</a>.</p>
 <h3 id="_evaluate_success-sub-metrics-logged-in-episode_metrics"><code>_evaluate_success</code> sub-metrics (logged in episode_metrics)<a class="headerlink" href="#_evaluate_success-sub-metrics-logged-in-episode_metrics" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1188,15 +1225,19 @@ evaluated on the <strong>rollout world</strong> (<code>current_predicted_world</
 </tr>
 <tr>
 <td><code>success_no_near_conflicts</code></td>
-<td><code>steps_since_near_conflict &gt;= 6</code></td>
+<td>The gate <strong>in force</strong> (realised by default)</td>
+</tr>
+<tr>
+<td><code>success_no_near_conflicts_predicted</code></td>
+<td>The legacy predicted gate, logged for comparison</td>
 </tr>
 <tr>
 <td><code>success_ever_near_conflict</code></td>
-<td>A near-conflict was present at some step</td>
+<td>A <strong>predicted</strong> near-conflict was present at some step</td>
 </tr>
 <tr>
 <td><code>success_steps_since_near_conflict</code></td>
-<td>Steps elapsed since last near-conflict</td>
+<td>Steps elapsed since the last predicted near-conflict</td>
 </tr>
 </tbody>
 </table>

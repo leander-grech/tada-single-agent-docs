@@ -340,6 +340,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../separation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loss of separation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../training/" class="md-nav__link">
         
   
@@ -530,22 +557,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-on-hold-agreed" class="md-nav__link">
+  <a href="#next" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next (on hold, agreed)
+        Next
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Next (on hold, agreed)">
+    <nav class="md-nav" aria-label="Next">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-finer-continuous-actions" class="md-nav__link">
+  <a href="#1-training-stability-past-3-m-the-frontier" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Finer / continuous actions
+        1. Training stability past ~3 M — the frontier
       
     </span>
   </a>
@@ -553,10 +580,32 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-reward-peaking-marginal-progress-bonus" class="md-nav__link">
+  <a href="#2-finer-action-granularity-path-b" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Reward peaking / marginal-progress bonus
+        2. Finer action granularity (path B)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-close-the-point-merge-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Close the point-merge gap
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-reward-peaking-calibrate-with-item-2-not-before" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Reward peaking (calibrate with item 2, not before)
       
     </span>
   </a>
@@ -565,6 +614,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#housekeeping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Housekeeping
+      
+    </span>
+  </a>
   
 </li>
       
@@ -647,22 +707,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-on-hold-agreed" class="md-nav__link">
+  <a href="#next" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next (on hold, agreed)
+        Next
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Next (on hold, agreed)">
+    <nav class="md-nav" aria-label="Next">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-finer-continuous-actions" class="md-nav__link">
+  <a href="#1-training-stability-past-3-m-the-frontier" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Finer / continuous actions
+        1. Training stability past ~3 M — the frontier
       
     </span>
   </a>
@@ -670,10 +730,32 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-reward-peaking-marginal-progress-bonus" class="md-nav__link">
+  <a href="#2-finer-action-granularity-path-b" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Reward peaking / marginal-progress bonus
+        2. Finer action granularity (path B)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-close-the-point-merge-gap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Close the point-merge gap
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-reward-peaking-calibrate-with-item-2-not-before" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Reward peaking (calibrate with item 2, not before)
       
     </span>
   </a>
@@ -682,6 +764,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#housekeeping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Housekeeping
+      
+    </span>
+  </a>
   
 </li>
       
@@ -725,46 +818,92 @@
 
 
 <h1 id="roadmap">Roadmap<a class="headerlink" href="#roadmap" title="Permanent link">&para;</a></h1>
-<p>The <a href="../experiments/">experiment log</a> converged on one diagnosis: <strong>conflicts are handled,
-but schedule deviation is stuck</strong> (<code>frac_under_30s ≈ 0.3</code>, worst aircraft ≈ 360–390 s off)
-and exploration/value fixes don't move it. Runs 5–7 since then have <strong>confirmed</strong> this:
-grad-clip, a dense goal bonus, longer training, and KL control each improved reward
-(best −33) but left the deviation ceiling — and <code>success_rate = 0</code> — intact. <strong>Run 8 has since
-broken both</strong> (see <em>Done since</em>): the 5-tier success ladder lifted success to ~30–50% and pulled
-the worst-aircraft deviation from ~360–390 s down to ~99 s. The live frontier is now training
-<strong>stability</strong> (the policy oscillates past ~3 M) and validating finer control.</p>
+<p>The <a href="../experiments/">experiment log</a> has converged, twice. The first diagnosis — <em>conflicts are
+handled, schedule deviation is stuck</em> — held from Run 1 through Run 7 and was broken by <strong>Run 8</strong>'s
+5-tier ladder (worst-aircraft deviation 360–390 s → ~99 s, success 0 → 30–50 %). The second and
+current diagnosis came out of <strong>Run 13</strong> (<code>atc_run_1_22</code>): with the <em>same code</em> that scored
+<code>tier_mean</code> 1.0 when resumed onto a flat 3e-5 LR, a <strong>fresh 8 M run on a warm-up→cosine schedule</strong>
+reached <code>success_rate = 1.0</code>, a <strong>24 s</strong> worst-aircraft deviation and a <strong>positive</strong> eval reward
+(+43.8) — the first of each.</p>
+<p>So capability is no longer the frontier. <strong>Stability is.</strong> <code>success_rate</code> swings between 0.0 and
+1.0 across evaluation passes rather than converging, and Run 13 ended on a trough (sustained
+~0.41, final 0.00). The second frontier is <strong>generalisation</strong>: the BGY point-merge airspace
+(<a href="../experiments/#run-15">Run 15</a>) is learnable but has not come close to the trombone numbers.</p>
 <h2 id="done-since">Done since<a class="headerlink" href="#done-since" title="Permanent link">&para;</a></h2>
 <ul>
-<li>[x] <strong>Larger gradient clip</strong> — <code>max_grad_norm</code> 0.5 → 1.5. Shipped in <strong>Run 5</strong>
-  (<code>atc_run_1_10</code>): <code>clip_frac</code> dropped 1.0 → ~0.2 and reward improved (−51 → −45 best), but
-  the deviation ceiling held.</li>
-<li>[x] <strong>Dense goal "carrot"</strong> (a flat, non-potential version of item 2 below) —
-  <code>MAX·exp(−total_abs_dev/SCALE)</code>. Shipped in <strong>Runs 6–7</strong>: best reward yet (−33) and the best
-  deviation numbers (<code>frac_under_30s</code> 0.35, worst aircraft 367 s), but still no full success.</li>
-<li>[x] <strong>KL control</strong> — LR decay <code>3e-4→3e-5</code>, <code>n_epochs</code> 5, <code>target_kl</code> 0.03 (<strong>Run 7</strong>) fixed
-  Run 6's late-training KL blow-up (<code>approx_kl</code> 0.22 → 0.002) but didn't lift the ceiling.</li>
-<li>[x] <strong>5-tier success + autoregressive policy + per-scenario horizon</strong> — Run 8 (<code>atc_run_1_16</code>):
-  the graduated terminal ladder (replacing the all-or-nothing ±30 s gate) gave the first non-zero
-  success (<strong>0 → ~30%</strong>, peak <strong>50%</strong> by ~7 M) and <strong>broke the deviation ceiling</strong> — worst-aircraft
-  deviation 360–390 s → <strong>~99 s</strong>. Remaining issue: training oscillates past ~3 M rather than
-  converging.</li>
+<li>[x] <strong>Larger gradient clip</strong> — <code>max_grad_norm</code> 0.5 → 1.5 (<strong>Run 5</strong>): <code>clip_frac</code> 1.0 → ~0.2,
+  reward −51 → −45 best; deviation ceiling held.</li>
+<li>[x] <strong>Dense goal "carrot"</strong> — <code>MAX·exp(−total_abs_dev/SCALE)</code> (<strong>Runs 6–7</strong>): best reward −33,
+  <code>frac_under_30s</code> 0.35, worst aircraft 367 s; still no full success.</li>
+<li>[x] <strong>KL control</strong> — LR decay, <code>n_epochs</code> 5, <code>target_kl</code> 0.03 (<strong>Run 7</strong>): fixed the KL blow-up
+  (0.22 → 0.002), didn't lift the ceiling.</li>
+<li>[x] <strong>5-tier success + autoregressive policy + per-scenario horizon</strong> (<strong>Run 8</strong>): first non-zero
+  success (0 → ~30 %, peak 50 %), deviation ceiling broken (→ ~99 s).</li>
+<li>[x] <strong>Finer temporal control — tested and rejected.</strong> <code>TIME_BETWEEN_ACTIONS</code> 45 → 22 s got a
+  clean from-scratch trial in <a href="../experiments/#run-10">Runs 10–11</a> (<code>atc_run_1_17/18/19</code>, three
+  independent runs, up to 5.1 M steps). All floor at <strong>240–275 s</strong> worst-aircraft deviation with
+  <strong>zero</strong> successes, versus 45 s reaching 99 s and 30–50 %. More decision points are not the
+  missing lever. Reverted in <a href="../experiments/#run-12">Run 12</a>.</li>
+<li>[x] <strong>LR schedule — resolved, and it was the big one.</strong> <a href="../experiments/#run-13">Run 13</a>:
+  fresh run + warm-up→cosine <code>3e-4 → 3e-5</code> + a full 8 M steps. Same code as <code>1_21</code>, which had been
+  resumed onto a near-flat 3e-5 and stalled at <code>tier_mean</code> 1.0. <strong>Never resume a long run onto an
+  end-of-schedule LR</strong> — there is no headroom left to learn.</li>
+<li>[x] <strong>±30 s is physically reachable</strong> — answered empirically by Run 13's <strong>24.3 s</strong>
+  worst-aircraft deviation. The success threshold does not need relaxing on capability grounds.
+  This retired the open question below and motivated the T6 (±30 s) ladder.</li>
+<li>[x] <strong>Point-merge MDP is well-posed</strong> — <code>analysis/pms_mdp_sanity.py</code> (2026-07-27): aircraft
+  radius 57 nm vs the ±150 nm extent, 0 % off-map, 0 NaN/Inf, <code>observation_space.contains</code> 100 %
+  over 529 steps, saturation ≤ MXP everywhere. No obs-norm retuning needed.</li>
+<li>[x] <strong>Conflict semantics pinned down</strong> — see <a href="../separation/">Loss of separation</a>. <code>severity == 1.0</code>
+  means <em>zero</em> separation, not 3 NM; "within 3 NM" is <code>severity &gt;= 0.7</code>. The realised-only success
+  gate (<code>SUCCESS_CONFLICT_REALISED_ONLY</code>) ships in <a href="../experiments/#run-16">Run 16</a>.</li>
 </ul>
 <h2 id="in-flight">In flight<a class="headerlink" href="#in-flight" title="Permanent link">&para;</a></h2>
 <ul>
-<li>[ ] <strong>Finer / continuous actions</strong> (item 1) — now the prime suspect: every optimisation and
-  reward lever has been exhausted without breaking the deviation floor.</li>
-<li>[~] <strong>Finer temporal control</strong> — <code>TIME_BETWEEN_ACTIONS</code> 45 → 22 s so the agent acts ~2× as often
-  per scenario (a <em>structural</em> limit distinct from item 1: only one aircraft can be commanded per
-  step). <strong>First data (Run 9):</strong> a 22 s warm-restart of Run 8's 2 M checkpoint (<code>atc_run_1_16_b</code>)
-  transiently hit the best worst-aircraft deviation of any run (~99 s) but regressed harder than the
-  45 s control — transferring an off-regime policy mid-run is destabilising, so the result is
-  <strong>inconclusive</strong>. A clean fresh 22 s run (<code>atc_run_1_17</code>, Run 10) is in early training. See
-  <a href="../experiments/">experiments</a>.</li>
+<li>[ ] <strong>Run 16 (<code>atc_run_1_25_trombone_relaxed</code>)</strong> — Run 13's exact recipe plus the realised-only
+  conflict gate, 8 M steps. Expected to <em>tighten</em> the reported success flag rather than relax it;
+  the point is correctness, and a second 8 M trombone sample to characterise the oscillation.</li>
 </ul>
-<h2 id="next-on-hold-agreed">Next (on hold, agreed)<a class="headerlink" href="#next-on-hold-agreed" title="Permanent link">&para;</a></h2>
-<h3 id="1-finer-continuous-actions">1. Finer / continuous actions<a class="headerlink" href="#1-finer-continuous-actions" title="Permanent link">&para;</a></h3>
-<p>Speed comes in ±10/±30 kt buckets and trombone in whole 1–4 groups — too coarse to trim a
-landing time to ±30 s. Options, increasing effort:</p>
+<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<h3 id="1-training-stability-past-3-m-the-frontier">1. Training stability past ~3 M — <strong>the frontier</strong><a class="headerlink" href="#1-training-stability-past-3-m-the-frontier" title="Permanent link">&para;</a></h3>
+<p><code>success_rate</code> oscillates 0.2–0.5 (Run 8) and 0.0–1.0 (Run 13) rather than converging, and runs
+routinely end well below their own peak. Longer horizons and KL caps were the last attempt and
+did not fix it. Candidates, roughly in order of cost:</p>
+<table>
+<thead>
+<tr>
+<th>Lever</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Checkpoint selection on sustained, not peak, eval</strong></td>
+<td><code>best/</code> currently tracks a single lucky eval pass; a windowed criterion would at least <em>report</em> honestly</td>
+</tr>
+<tr>
+<td><strong>Larger <code>n_eval_episodes</code></strong></td>
+<td>10 episodes over 100 seeds makes each eval pass high-variance — some of the "oscillation" may be measurement noise, and that should be ruled out first</td>
+</tr>
+<tr>
+<td><strong>LR floor / cosine restarts</strong></td>
+<td>Run 13 decays to 3e-5; <code>1_24</code> tried 3e-6. Neither converged</td>
+</tr>
+<tr>
+<td><strong>Entropy schedule</strong></td>
+<td>anneal <code>ent_coef</code> down late so the policy stops exploring off its own peak</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition tip">
+<p class="admonition-title">Rule this out first</p>
+<p>Before treating oscillation as a policy problem, check whether it is an <strong>evaluation</strong> problem.
+<code>n_eval_episodes = 10</code> sampled from 100 seeds, with a binary per-episode success, has a
+standard error of ~0.15 at <code>p = 0.5</code> — enough to produce most of the observed swing on its own.</p>
+</div>
+<h3 id="2-finer-action-granularity-path-b">2. Finer action granularity (path B)<a class="headerlink" href="#2-finer-action-granularity-path-b" title="Permanent link">&para;</a></h3>
+<p>Still never started, and still the prime suspect for the <em>residual</em> deviation floor: ±10/±30 kt
+speed buckets and whole 1–4 trombone groups cannot trim a landing time to ±30 s except by luck.</p>
 <table>
 <thead>
 <tr>
@@ -777,52 +916,64 @@ landing time to ±30 s. Options, increasing effort:</p>
 <tbody>
 <tr>
 <td><strong>B (start here)</strong></td>
-<td>factored <code>MultiDiscrete([aircraft, type, magnitude_bucket])</code> with per-dim masking</td>
+<td>factored <code>MultiDiscrete([aircraft, type, magnitude])</code> with per-dim masking</td>
 <td>low</td>
-<td>fully supported by MaskablePPO; ~16–20 magnitude levels per type; no custom distribution</td>
+<td>already the action-space shape; ~16–20 magnitude levels per type; no custom distribution</td>
 </tr>
 <tr>
 <td><strong>A</strong></td>
 <td>hybrid <code>Discrete(aircraft×type, masked)</code> + <code>Box(magnitude)</code></td>
 <td>high</td>
-<td>true continuous; needs a <strong>custom policy + composite distribution</strong> (MaskableCategorical × DiagGaussian) — stock SB3 has no masked hybrid space</td>
+<td>needs a custom policy + composite distribution; stock SB3 has no masked hybrid space</td>
 </tr>
 <tr>
 <td>C</td>
 <td>more discrete buckets on the flat <code>Discrete</code></td>
 <td>trivial</td>
-<td>clumsy; inflates the 220-space</td>
+<td>clumsy; inflates the space</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Plan:</strong> try <strong>B</strong> first to confirm finer control helps before investing in <strong>A</strong>.</p>
-<h3 id="2-reward-peaking-marginal-progress-bonus">2. Reward peaking / marginal-progress bonus<a class="headerlink" href="#2-reward-peaking-marginal-progress-bonus" title="Permanent link">&para;</a></h3>
-<p>A first, <strong>dense flat</strong> carrot shipped in Runs 6–7 — <code>goal = MAX·exp(−total_abs_dev/SCALE)</code>
-(<code>MAX=2.0</code>, <code>SCALE=400 s</code>). It lifted reward and nudged deviation but did <strong>not</strong> clear the
-ceiling, so the remaining variants are still open:</p>
+<p>Probes exist and are <strong>unrun on point-merge</strong>: <code>analysis/cd4_reachability_probe.py</code>,
+<code>analysis/cd4_granularity_probe.py</code>. Verdict rule: reachability &lt; 53 % ⟹ interface-bound
+(do this first); ≫ 53 % ⟹ policy-bound (do item 1 first).</p>
+<h3 id="3-close-the-point-merge-gap">3. Close the point-merge gap<a class="headerlink" href="#3-close-the-point-merge-gap" title="Permanent link">&para;</a></h3>
+<p><code>1_24_pms</code> and <code>1_24</code> reach best success 0.20 / 0.00 against the trombone's 1.00. Now that Run 13
+has established the recipe that works — <strong>fresh, 8 M, warm-up→cosine, 45 s</strong> — the obvious next
+point-merge run is that recipe applied cleanly, rather than the resumed/aggressive schedules both
+PMS runs actually used.</p>
+<h3 id="4-reward-peaking-calibrate-with-item-2-not-before">4. Reward peaking (calibrate <em>with</em> item 2, not before)<a class="headerlink" href="#4-reward-peaking-calibrate-with-item-2-not-before" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Staircase threshold bonuses</strong> — per-aircraft <code>+b</code> as <code>|dev|</code> crosses 120 s / 60 s / 30 s,
-  and/or a step bonus <code>+k·frac_under_30s</code> (sharper, per-aircraft gradient than the global
-  <code>exp</code> already tried).</li>
-<li><strong>Potential-based shaping</strong> — <code>r += γΦ(s′)−Φ(s)</code> with a <em>peaked</em> <code>Φ = Σ exp(−|dev|/τ)</code>
-  (per-aircraft and provably policy-preserving, unlike the flat bonus shipped so far).</li>
+<li><strong>Staircase threshold bonuses</strong> — per-aircraft <code>+b</code> as <code>|dev|</code> crosses 120 / 60 / 30 s.</li>
+<li><strong>Potential-based shaping</strong> — <code>r += γΦ(s′) − Φ(s)</code> with a peaked per-aircraft
+  <code>Φ = Σ exp(−|dev|/τ)</code>. A tier-fraction PBRS potential (<code>tier_potential</code>) already exists;
+  a per-aircraft one does not.</li>
 </ul>
-<p>Note the dense bonus alone helped little <strong>without finer actions</strong> — likely best calibrated
-<em>together</em> with item 1. Thresholds/coefficients to be tuned jointly.</p>
+<h2 id="housekeeping">Housekeeping<a class="headerlink" href="#housekeeping" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] <strong>Fix the dead scenario filter</strong> — <code>check_not_imminent_infringement()</code> compares against a
+  literal <code>severity &gt;= 1.0</code>, which is unreachable, so it always passes and the
+  initial-conflict-free guarantee is not enforced. Should compare against
+  <code>Config.NEAR_CONFLICT_THRESHOLD</code>. Deferred because it changes the scenario distribution and
+  would confound the <code>1_25</code> vs <code>1_22</code> comparison. See
+  <a href="../separation/#the-scenario-filter-is-dead-code">Loss of separation</a>.</li>
+<li>[ ] <strong>Decide the default scenario</strong> — <code>config.py</code> currently ships <code>VALIDATION_USE_CASE_1</code>
+  (MXP trombone) again for Run 16. The PMS work left it on <code>USE_CASE_2</code>; pick one deliberately.</li>
+<li>[ ] <strong>Launch every long run under <code>setsid nohup</code></strong> — <code>1_24_pms</code>'s first attempt died with its
+  parent CLI session at ~1.27 M steps.</li>
+</ul>
 <h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Is ±30 s physically reachable</strong> for these scenarios? Needs a per-action probe
-  (does a speed/trombone change actually move predicted landing time enough?). If not, the
-  success threshold itself needs revisiting.</li>
-<li><strong>Success-criteria relaxation</strong> beyond the near-conflict gate (e.g. total-only vs
-  per-aircraft) if 30 s proves too strict.</li>
-<li><strong>LR schedule</strong> — <em>tried</em> in Run 7 (linear <code>3e-4→3e-5</code>); it tamed KL but may have capped
-  late improvement (best @425k, then flat). Revisit the decay shape/floor alongside item 1.</li>
+<li><strong>Is the oscillation real or measurement noise?</strong> See the tip under item 1 — this gates
+  everything else.</li>
+<li><strong>Success-criteria shape</strong> — with ±30 s now proven reachable, is <code>all aircraft within ±30 s</code>
+  (T6) the right binary, or should it be a fraction-based criterion that degrades gracefully?</li>
 </ul>
 <h2 id="parked">Parked<a class="headerlink" href="#parked" title="Permanent link">&para;</a></h2>
 <ul>
 <li><strong>SAC</strong> — not applicable under masked discrete actions (SB3 SAC is continuous-only).
   Revisit only if the action space becomes continuous.</li>
+<li><strong>Finer temporal control (22 s)</strong> — tested and rejected; see <em>Done since</em>.</li>
 </ul>
 
 
