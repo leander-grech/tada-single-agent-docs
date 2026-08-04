@@ -265,7 +265,9 @@ lever must be **action granularity** (finer/continuous control) per the [roadmap
 Bundles four simultaneous changes motivated by the Runs 5–7 deviation ceiling, plus the
 switch to finer-grained action control.
 
-† Interrupted at 1.91 M / 2.0 M steps. Resume/spinoff in progress; see [training docs](training.md#resume-lr-schedule).
+† Originally interrupted at 1.91 M / 2.0 M steps, then extended in place to ~7.1 M (the results
+below are from the extended run) and spun off into Runs 9a/9b. See
+[training docs](training.md#resume-lr-schedule).
 
 **Changes vs Run 7:**
 
