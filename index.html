@@ -697,24 +697,24 @@ with the code on <code>UM-lg</code>.</p>
 </thead>
 <tbody>
 <tr>
-<td><strong>Best run</strong></td>
-<td><a href="experiments/#run-13"><code>atc_run_1_22</code></a> — MXP trombone, 8 M steps. First <code>success_rate = 1.0</code> evaluations; worst-aircraft deviation <strong>24 s</strong>, <code>eval/mean_reward</code> <strong>+43.8</strong>.</td>
+<td><strong>Best runs</strong></td>
+<td><a href="experiments/#run-13"><code>atc_run_1_22</code></a> and <a href="experiments/#run-16"><code>atc_run_1_25</code></a> — MXP trombone, 8 M steps each. Scored on the full 100-seed pool their best checkpoints are <strong>0.380</strong> and <strong>0.440</strong> success, statistically indistinguishable.</td>
 </tr>
 <tr>
 <td><strong>Open problem</strong></td>
-<td><strong>Stability, not capability.</strong> <code>success_rate</code> oscillates 0.0–1.0 between eval passes instead of converging, and <code>1_22</code> ended on a trough (sustained ~0.41).</td>
+<td><strong>The evaluation loop.</strong> <code>n_eval_episodes = 5</code> on a <em>rolling</em> seed window, and <code>best/</code> is the argmax over ~1600 such draws — <code>1_22</code>'s <code>best_model</code> was saved at a reported <code>1.00</code> and actually scores <code>0.380</code>. Fix this before trusting any other comparison.</td>
 </tr>
 <tr>
 <td><strong>Second airspace</strong></td>
 <td>BGY <strong>point-merge</strong> (<a href="experiments/#run-15">runs <code>1_24</code> / <code>1_24_pms</code></a>) is learnable but unsolved — best success 0.20, worst dev 158–211 s.</td>
 </tr>
 <tr>
-<td><strong>In flight</strong></td>
-<td><a href="experiments/#run-16"><code>atc_run_1_25_trombone_relaxed</code></a> — <code>1_22</code>'s exact recipe with the <a href="separation/">realised-only conflict gate</a>.</td>
+<td><strong>Latest</strong></td>
+<td><a href="experiments/#run-16"><code>atc_run_1_25_trombone_relaxed</code></a> — <code>1_22</code>'s exact recipe with the <a href="separation/">realised-only conflict gate</a>. Capability matches <code>1_22</code>; the gate change revealed that <strong>~23 % of episodes contain a real loss of separation</strong>.</td>
 </tr>
 <tr>
-<td><strong>Settled</strong></td>
-<td>Conflict avoidance. <code>no_near_conflicts_mean</code> = 0.99–1.00 in every run since <code>1_17</code>; <strong>every</strong> failure since has been a schedule-deviation failure.</td>
+<td><strong>Retired claim</strong></td>
+<td>~~"Conflicts are solved, only deviation remains."~~ The 0.99–1.00 <code>no_near_conflicts_mean</code> behind that claim was a <em>forecast</em>, not behaviour. Deviation is still the harder problem, but conflict avoidance is imperfect at convergence.</td>
 </tr>
 <tr>
 <td><strong>Closed</strong></td>

@@ -1030,12 +1030,15 @@ always sees a gradient toward the next rung:</p>
 <p>The original gate before Run 3 was "no near-conflict <strong>ever</strong>, predicted or not", which was
 unsatisfiable and kept <code>success_rate</code> pinned at 0.</p>
 <div class="admonition note">
-<p class="admonition-title">The gate has never been the binding constraint</p>
-<p><code>eval_success/no_near_conflicts_mean</code> is <strong>0.99–1.00 in every run from <code>1_17</code> onward</strong>, and
-replaying <code>1_22</code>'s checkpoints with both gates instrumented found the predicted gate open in
-<strong>every episode at every checkpoint</strong>. Success has been bound by <strong>deviation</strong>, not
-conflicts, for the entire campaign. Measurement:
-<a href="../separation/#measured-the-predicted-gate-never-bound">Loss of separation</a>.</p>
+<p class="admonition-title">The gate has never been the binding constraint — but that is not the same as 'conflicts are solved'</p>
+<p>Replaying <code>1_22</code>'s checkpoints with both gates instrumented found the predicted gate open in
+<strong>every episode at every checkpoint</strong> (0 relaxations in 95 episode-evaluations), so removing
+it changed nothing. What suppresses separation busts is the <strong>violation penalty</strong>, which has
+always been realised-only.</p>
+<p>Under the realised gate, <code>no_near_conflicts_mean</code> reads <strong>0.774</strong> — ~23 % of episodes contain
+a real loss of separation, where the legacy predicted metric reported 0.99–1.00. Deviation is
+still the harder problem, but do not repeat the claim that conflicts are solved. Measurement:
+<a href="../separation/#but-the-metric-that-said-so-was-measuring-the-wrong-thing">Loss of separation</a>.</p>
 </div>
 <table>
 <thead>

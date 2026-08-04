@@ -662,10 +662,27 @@
   <a href="#run-16" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run 16 — Realised-only conflict gate (atc_run_1_25_trombone_relaxed, 8 M) — in progress
+        Run 16 — Realised-only conflict gate (atc_run_1_25_trombone_relaxed, 8 M)
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Run 16 — Realised-only conflict gate (atc_run_1_25_trombone_relaxed, 8 M)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-finding-conflicts-were-never-as-clean-as-the-logs-said" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The finding: conflicts were never as clean as the logs said
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -937,10 +954,27 @@
   <a href="#run-16" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run 16 — Realised-only conflict gate (atc_run_1_25_trombone_relaxed, 8 M) — in progress
+        Run 16 — Realised-only conflict gate (atc_run_1_25_trombone_relaxed, 8 M)
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Run 16 — Realised-only conflict gate (atc_run_1_25_trombone_relaxed, 8 M)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#the-finding-conflicts-were-never-as-clean-as-the-logs-said" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The finding: conflicts were never as clean as the logs said
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1118,10 +1152,10 @@ line is the takeaway that motivated the next run.</p>
 <tr>
 <td>16</td>
 <td><code>atc_run_1_25_trombone_relaxed</code></td>
-<td>8M <em>(running)</em></td>
+<td>8M</td>
 <td><strong>realised-only conflict gate</strong>, 1_22 recipe restored</td>
-<td>—</td>
-<td>in progress</td>
+<td>+44.2</td>
+<td>capability matches 1_22; <strong>reveals ~23% of episodes contain a real loss of separation</strong></td>
 </tr>
 </tbody>
 </table>
@@ -1621,7 +1655,7 @@ converts it into a tier-6 episode.</p>
 <p>Both runs suffered launch fragility — <code>1_24_pms</code> died with its parent CLI session on the first
 attempt. <strong>All long runs are now launched under <code>setsid nohup</code>.</strong></p>
 <hr />
-<h2 id="run-16">Run 16 — Realised-only conflict gate (<code>atc_run_1_25_trombone_relaxed</code>, 8 M) — <em>in progress</em><a class="headerlink" href="#run-16" title="Permanent link">&para;</a></h2>
+<h2 id="run-16">Run 16 — Realised-only conflict gate (<code>atc_run_1_25_trombone_relaxed</code>, 8 M)<a class="headerlink" href="#run-16" title="Permanent link">&para;</a></h2>
 <p>Returns to the <strong>MXP trombone</strong> to test one change against Run 13's breakthrough, with
 everything else restored to Run 13's exact code state.</p>
 <p><strong>Motivation.</strong> A team review of what <code>LOSS_OF_SEPARATION</code> actually means concluded that a
@@ -1652,6 +1686,161 @@ is a <strong>semantics correction</strong>, not a loosening: <code>success</code
 on an episode that actually busted 3 NM. Reported success rate should fall slightly and
 become trustworthy. Full measurement in
 <a href="../separation/#measured-the-predicted-gate-never-bound">Loss of separation</a>.</p>
+</div>
+<p><strong>Results</strong> (complete: 8,003,584 steps in ~15 h at 147 fps):</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Run 13 (<code>1_22</code>)</th>
+<th>Run 16 (<code>1_25</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>eval <code>success_rate</code> best / sustained</td>
+<td>1.00 / 0.41</td>
+<td>1.00 / 0.39</td>
+</tr>
+<tr>
+<td>eval <code>tier_mean</code> best / sustained</td>
+<td>5.00 / 3.60</td>
+<td>5.00 / 3.17</td>
+</tr>
+<tr>
+<td>min <code>max_aircraft_dev</code></td>
+<td>24.3 s</td>
+<td><strong>20.8 s</strong></td>
+</tr>
+<tr>
+<td>best <code>eval/mean_reward</code></td>
+<td>43.8</td>
+<td><strong>44.2</strong></td>
+</tr>
+<tr>
+<td><strong><code>no_near_conflicts_mean</code></strong></td>
+<td><strong>0.996</strong></td>
+<td><strong>0.774</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Capability is unchanged. To say that with a real confidence interval rather than off the noisy
+in-training statistic, both <code>best_model</code>s were re-scored offline on the <strong>full fixed 100-seed
+pool</strong>, deterministically (<code>analysis/score_checkpoints.py</code>):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Run 13 (<code>1_22</code>)</th>
+<th>Run 16 (<code>1_25</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>success (100 seeds)</td>
+<td>0.380 <em>(95 % CI 0.291–0.478)</em></td>
+<td>0.440 <em>(95 % CI 0.347–0.538)</em></td>
+</tr>
+<tr>
+<td><code>tier_mean</code></td>
+<td>3.25</td>
+<td>3.20</td>
+</tr>
+<tr>
+<td><code>max_aircraft_dev</code></td>
+<td>179.4 s</td>
+<td>192.4 s</td>
+</tr>
+<tr>
+<td><code>total_abs_dev</code></td>
+<td>556.5 s</td>
+<td>621.6 s</td>
+</tr>
+<tr>
+<td><strong>episodes with a real loss of separation</strong></td>
+<td><strong>0.170</strong></td>
+<td><strong>0.180</strong></td>
+</tr>
+<tr>
+<td>end reasons</td>
+<td>45 delayed / 38 success / 17 separation</td>
+<td>44 success / 38 delayed / 18 separation</td>
+</tr>
+</tbody>
+</table>
+<p>Difference in success <strong>+0.060 (SE 0.069) — inside the noise band.</strong> The gate change cost
+nothing, and gained nothing in capability; what it gained is an honest metric.</p>
+<div class="admonition danger">
+<p class="admonition-title"><code>1_22</code>'s <code>best_model</code> was saved at a reported <code>success_rate</code> of 1.00. It actually scores 0.380.</p>
+<p>That gap is the clearest possible demonstration of the evaluation defect described in
+<a href="../roadmap/#1-fix-the-evaluation-loop-do-this-before-anything-else">Roadmap → Fix the evaluation loop</a>:
+<code>best/</code> is selected as the argmax over ~1600 passes of a <strong>5-episode</strong> binomial evaluated on a
+<strong>rolling</strong> seed window. Treat every <code>best</code>-checkpoint headline in this log as an upper bound
+until it has been re-scored offline.</p>
+</div>
+<h3 id="the-finding-conflicts-were-never-as-clean-as-the-logs-said">The finding: conflicts were never as clean as the logs said<a class="headerlink" href="#the-finding-conflicts-were-never-as-clean-as-the-logs-said" title="Permanent link">&para;</a></h3>
+<p>That last row is the result that matters. <strong>~23 % of evaluation episodes contain a real loss of
+separation</strong>, and the old predicted-gate metric reported "no near conflicts" <strong>99.6 %</strong> of the
+time. Every "the conflict side is solved" conclusion from runs <code>1_17</code>–<code>1_24</code> was reading a
+<em>forecast</em> that always cleared before the episode ended — not the aircraft's actual behaviour.</p>
+<p>The realised metric also carries a <strong>learning signal that the predicted one flattened out
+completely</strong>. Across the four quarters of Run 16's training:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Q1</th>
+<th>Q2</th>
+<th>Q3</th>
+<th>Q4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>success_rate</code></td>
+<td>0.00</td>
+<td>0.05</td>
+<td>0.29</td>
+<td>0.39</td>
+</tr>
+<tr>
+<td><code>tier_mean</code></td>
+<td>0.60</td>
+<td>1.45</td>
+<td>2.74</td>
+<td>3.10</td>
+</tr>
+<tr>
+<td><code>max_aircraft_dev</code></td>
+<td>486 s</td>
+<td>366 s</td>
+<td>257 s</td>
+<td>203 s</td>
+</tr>
+<tr>
+<td><strong><code>no_near_conflicts_mean</code></strong></td>
+<td><strong>0.682</strong></td>
+<td><strong>0.769</strong></td>
+<td><strong>0.816</strong></td>
+<td><strong>0.831</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Real separation busts fall from ~32 % of episodes to ~17 % over 8 M steps. Under the predicted
+gate this curve was pinned near 1.00 from the first eval onward and showed nothing at all.</p>
+<p><strong>So conflict avoidance is still being learned, and it is still imperfect at convergence.</strong> That
+does not contradict the finding that <em>the gate</em> never bound — the tier gate and the violation
+penalty are different mechanisms, and the violation penalty (which has always been realised-only)
+is what was doing the work. But it does mean "conflicts are solved, only deviation remains" was
+too strong a claim, and it should be retired.</p>
+<div class="admonition bug">
+<p class="admonition-title">Instrumentation gap during this run</p>
+<p><code>success_no_near_conflicts_predicted</code> was computed by the env for the whole run but <strong>never
+logged</strong> — <code>callbacks/eval_metrics_callback.py</code> carries a hardcoded allowlist of success
+sub-metrics, and restoring it to Run 13's snapshot dropped the new key. Fixed in <code>f4ec70f</code>,
+so the side-by-side gate comparison is available from run <code>1_26</code> onward. The Run 13
+checkpoint replay in <a href="../separation/">Loss of separation</a> is unaffected — it was measured
+directly, not through the callback.</p>
 </div>
 
 

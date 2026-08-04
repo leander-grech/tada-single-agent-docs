@@ -485,6 +485,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#but-the-metric-that-said-so-was-measuring-the-wrong-thing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        …but the metric that said so was measuring the wrong thing
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -770,6 +781,17 @@
     <span class="md-ellipsis">
       
         Measured: the predicted gate never bound
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#but-the-metric-that-said-so-was-measuring-the-wrong-thing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        …but the metric that said so was measuring the wrong thing
       
     </span>
   </a>
@@ -1075,9 +1097,68 @@ so the two regimes can be compared on identical episodes.</p>
 fired <strong>0 times in 95 episode-evaluations</strong>. <code>SUCCESS_NEAR_CONFLICT_CLEAR_STEPS = 3</code> is only a
 ~135 s window at the <em>end</em> of an episode, by which point the aircraft have landed or separated,
 so the rollout is essentially always clear.</p>
-<p>This is corroborated across the whole experiment log: <code>eval_success/no_near_conflicts_mean</code>
-sits at <strong>0.99–1.00 in every run from <code>1_17</code> to <code>1_24_pms</code></strong>. Conflicts have not been the
-blocker for a long time — <strong>schedule deviation is</strong>.</p>
+<h3 id="but-the-metric-that-said-so-was-measuring-the-wrong-thing">…but the metric that said so was measuring the wrong thing<a class="headerlink" href="#but-the-metric-that-said-so-was-measuring-the-wrong-thing" title="Permanent link">&para;</a></h3>
+<p>Across runs <code>1_17</code>–<code>1_24_pms</code>, <code>eval_success/no_near_conflicts_mean</code> sat at <strong>0.99–1.00</strong>, which
+was read as "conflicts are solved, only deviation remains". <a href="../experiments/#run-16">Run 16</a> put
+the realised gate in force on the trombone and the same metric reads <strong>0.774</strong>.</p>
+<p><strong>~23 % of evaluation episodes contain a real loss of separation.</strong> The 0.99–1.00 figure was a
+<em>forecast</em> that always cleared by the end of the episode, not a description of what the aircraft
+did.</p>
+<p>The realised metric also carries a learning curve the predicted one completely flattened —
+across the quarters of Run 16's training:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Q1</th>
+<th>Q2</th>
+<th>Q3</th>
+<th>Q4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>no_near_conflicts_mean</code> (realised)</td>
+<td>0.682</td>
+<td>0.769</td>
+<td>0.816</td>
+<td><strong>0.831</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Real busts fall from ~32 % of episodes to ~17 % over 8 M steps. Under the predicted gate this
+was pinned near 1.00 from the first eval pass and showed nothing.</p>
+<p>Confirmed at the checkpoint level too — scoring the <code>best_model</code> of both of the project's two
+strongest runs on the full fixed 100-seed pool:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>atc_run_1_22</code></th>
+<th><code>atc_run_1_25</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>episodes ending in <code>separation</code></td>
+<td><strong>17/100</strong></td>
+<td><strong>18/100</strong></td>
+</tr>
+</tbody>
+</table>
+<p>So roughly one episode in six ends with a genuine loss of separation, at the best checkpoints
+available.</p>
+<div class="admonition note">
+<p class="admonition-title">Both things are true</p>
+<p>The tier gate never bound (measured above, 0 relaxations in 95 episode-evaluations) <strong>and</strong>
+conflicts were never actually solved. There is no contradiction: the mechanism that has been
+suppressing separation busts is the <strong>violation penalty</strong> (<code>−REWARD_VIOLATION_PENALTY</code>, keyed
+off <code>end_reason="separation"</code>), which has always been realised-only. The tier gate was
+redundant with it in the relaxing direction, which is exactly why removing it changed nothing.</p>
+<p>What should be retired is the claim <em>"conflicts are solved, only deviation remains."</em>
+Deviation is still the harder problem, but conflict avoidance is imperfect at convergence and
+now — finally — measurable.</p>
+</div>
 <hr />
 <h2 id="where-prediction-genuinely-drives-behaviour">Where prediction genuinely drives behaviour<a class="headerlink" href="#where-prediction-genuinely-drives-behaviour" title="Permanent link">&para;</a></h2>
 <p>Not the gate — the <strong>reward</strong>. <code>infringement_reward_from_world()</code> runs on the predicted world

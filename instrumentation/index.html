@@ -1535,14 +1535,19 @@ is blocking:</p>
   deviation is the bottleneck.</li>
 <li>If <code>all_landed_mean</code> is low → aircraft are not completing in time.</li>
 </ul>
-<div class="admonition tip">
-<p class="admonition-title">In practice it has always been deviation</p>
-<p><code>no_near_conflicts_mean</code> has sat at <strong>0.99–1.00 in every run from <code>1_17</code> onward</strong>. If you
-are diagnosing a low success rate, start at <code>max_aircraft_dev_mean</code> and
-<code>frac_under_tier*_mean</code>, not the conflict metrics.</p>
-<p>Beware <code>ever_near_conflict_mean</code>: it tracks the <strong>predicted</strong> rollout, not reality, and it
-runs high even on episodes with no real breach. Compare <code>no_near_conflicts_mean</code> against
-<code>no_near_conflicts_predicted_mean</code> to see the two regimes side by side — see
+<div class="admonition warning">
+<p class="admonition-title">Check which gate produced the number before interpreting it</p>
+<p>Under the <strong>legacy predicted</strong> gate (runs ≤ <code>1_24</code>) <code>no_near_conflicts_mean</code> sat at
+0.99–1.00 in every run from <code>1_17</code> onward, which was read as "conflicts are solved".
+Under the <strong>realised</strong> gate (<code>1_25</code>+) the same metric reads <strong>0.774</strong> — about 23 % of
+episodes contain a real loss of separation. The old number was a forecast that always
+cleared by episode end, not a description of behaviour.</p>
+<p>Deviation is still the harder problem, so <code>max_aircraft_dev_mean</code> and <code>frac_under_tier*_mean</code>
+are still the first place to look — but conflict avoidance is <strong>not</strong> solved and the realised
+metric does carry a real learning curve (0.68 → 0.83 across <code>1_25</code>).</p>
+<p>Beware <code>ever_near_conflict_mean</code>: it tracks the <strong>predicted</strong> rollout, not reality, and runs
+high even on episodes with no real breach. Compare <code>no_near_conflicts_mean</code> against
+<code>no_near_conflicts_predicted_mean</code> to see both regimes side by side — see
 <a href="../separation/#realised-vs-predicted-the-distinction-that-matters">Loss of separation</a>.</p>
 </div>
 

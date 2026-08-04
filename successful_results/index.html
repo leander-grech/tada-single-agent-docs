@@ -577,6 +577,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#run-16-atc_run_1_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 16 — atc_run_1_25_trombone_relaxed best model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#run-15-atc_run_1_24_pms" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -740,6 +751,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-16-atc_run_1_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 16 — atc_run_1_25_trombone_relaxed best model
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1251,12 +1273,36 @@ had been out of reach since Run 1. Model:
 </tr>
 </tbody>
 </table>
-<div class="admonition warning">
-<p class="admonition-title">Read the 'sustained' column</p>
-<p>The headline <code>success_rate = 1.00</code> is a <strong>peak over evaluation passes</strong>, not a converged
-level — the run oscillates between 0.0 and 1.0 and ends on a trough. Quoting the peak alone
-materially overstates this checkpoint. Characterising and fixing that oscillation is the
-top item on the <a href="../roadmap/#1-training-stability-past-3-m-the-frontier">roadmap</a>.</p>
+<div class="admonition danger">
+<p class="admonition-title">The headline 1.00 is not real — this checkpoint scores 0.380</p>
+<p>Re-scored offline on the <strong>full fixed 100-seed pool</strong> (<code>analysis/score_checkpoints.py</code>,
+deterministic), <code>best_model.zip</code> gets:</p>
+<table>
+<thead>
+<tr>
+<th>success</th>
+<th><code>tier_mean</code></th>
+<th><code>max_aircraft_dev</code></th>
+<th><code>total_abs_dev</code></th>
+<th>real loss of separation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>0.380</strong> <em>(95 % CI 0.291–0.478)</em></td>
+<td>3.25</td>
+<td>179.4 s</td>
+<td>556.5 s</td>
+<td><strong>17 % of episodes</strong></td>
+</tr>
+</tbody>
+</table>
+<p>End reasons over the 100 seeds: <strong>45 delayed, 38 success, 17 separation.</strong></p>
+<p>The <code>success_rate = 1.00</code> it was saved at is the argmax over ~1600 passes of a 5-episode
+binomial on a rolling seed window — an extreme-value artifact. See
+<a href="../roadmap/#1-fix-the-evaluation-loop-do-this-before-anything-else">Roadmap → Fix the evaluation loop</a>.
+The 24.3 s worst-aircraft deviation in the table above is likewise a best-pass figure; the
+honest number for this checkpoint is <strong>179 s</strong>.</p>
 </div>
 <h3 id="renders_1">Renders<a class="headerlink" href="#renders_1" title="Permanent link">&para;</a></h3>
 <p>Short deterministic clip (5 episodes), unshielded:</p>
@@ -1276,6 +1322,72 @@ refusal shield:</p>
 this model with the command in <a href="#adding-a-new-run">Adding a new run</a> and paste the summary
 here. On <code>1_16</code> the raw policy beat every shield variant; worth confirming whether that still
 holds for a tier-5-capable checkpoint.</p>
+</div>
+<hr />
+<h2 id="run-16-atc_run_1_25">Run 16 — <code>atc_run_1_25_trombone_relaxed</code> best model<a class="headerlink" href="#run-16-atc_run_1_25" title="Permanent link">&para;</a></h2>
+<p>→ <strong>Experiment log:</strong> <a href="../experiments/#run-16">Run 16 — Realised-only conflict gate</a>.</p>
+<p>Run 13's exact recipe with <code>SUCCESS_CONFLICT_REALISED_ONLY = True</code>. Model:
+<code>experiments/atc_run_1_25_trombone_relaxed/best/best_model.zip</code>.</p>
+<p><strong>Scored the honest way</strong> — full fixed 100-seed pool, deterministic, both checkpoints under
+identical conditions (<code>analysis/score_checkpoints.py</code>):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Run 13 (<code>1_22</code>)</th>
+<th><strong>Run 16 (<code>1_25</code>)</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>success</td>
+<td>0.380 <em>(CI 0.291–0.478)</em></td>
+<td><strong>0.440</strong> <em>(CI 0.347–0.538)</em></td>
+</tr>
+<tr>
+<td><code>tier_mean</code></td>
+<td>3.25</td>
+<td>3.20</td>
+</tr>
+<tr>
+<td><code>max_aircraft_dev</code></td>
+<td>179.4 s</td>
+<td>192.4 s</td>
+</tr>
+<tr>
+<td><code>total_abs_dev</code></td>
+<td>556.5 s</td>
+<td>621.6 s</td>
+</tr>
+<tr>
+<td>real loss of separation</td>
+<td>17 %</td>
+<td>18 %</td>
+</tr>
+<tr>
+<td>end reasons</td>
+<td>45 delayed / 38 success / 17 sep</td>
+<td>44 success / 38 delayed / 18 sep</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Difference in success +0.060, SE 0.069 — inside the noise band.</strong> The two checkpoints are
+statistically indistinguishable, which is the expected and desired outcome: the gate change was a
+semantics correction, not a capability change.</p>
+<p>The number worth carrying forward is <strong>17–18 % of episodes contain a real loss of separation</strong>,
+at the best checkpoint of the two best runs the project has produced. That was invisible under
+the old predicted-gate metric, which reported 99.6 % clean.</p>
+<p>Reproduce with:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>/home/leander/miniconda3/envs/tada/bin/python<span class="w"> </span>analysis/score_checkpoints.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>--models<span class="w"> </span>experiments/atc_run_1_22/best/best_model.zip<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">           </span>experiments/atc_run_1_25_trombone_relaxed/best/best_model.zip<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--csv<span class="w"> </span>analysis/2026-08-04_1_22_vs_1_25.csv
+</code></pre></div></p>
+<div class="admonition note">
+<p class="admonition-title">No renders yet</p>
+<p>Deterministic clips have not been generated for this checkpoint. Produce them with
+<code>render_policy.py --model experiments/atc_run_1_25_trombone_relaxed/best/best_model.zip</code>
+and drop them into <code>docs/assets/renders/</code> per <a href="#adding-a-new-run">Adding a new run</a>.</p>
 </div>
 <hr />
 <h2 id="run-15-atc_run_1_24_pms">Run 15 — <code>atc_run_1_24_pms</code> best model (BGY point-merge)<a class="headerlink" href="#run-15-atc_run_1_24_pms" title="Permanent link">&para;</a></h2>
@@ -1348,10 +1460,10 @@ trombone:</p>
    <code>&lt;video controls preload="metadata" width="100%"&gt;</code> block (src is <code>../assets/renders/&lt;file&gt;.mp4</code>,
    relative to this page). Keep a couple of short single-episode clips inline; link the long reels.</li>
 <li><strong>Sweep.</strong> Run the shield benchmark on that checkpoint's best model over all 100 seeds:
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>/home/leander/miniconda3/envs/tada/bin/python<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>analysis/2026-06-24_shield_benchmark/shield_benchmark.py<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>--model<span class="w"> </span>experiments/atc_run_1_X/best/best_model.zip<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--out-dir<span class="w"> </span>analysis/&lt;date&gt;_shield_benchmark_1_X
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>/home/leander/miniconda3/envs/tada/bin/python<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>analysis/2026-06-24_shield_benchmark/shield_benchmark.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>--model<span class="w"> </span>experiments/atc_run_1_X/best/best_model.zip<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--out-dir<span class="w"> </span>analysis/&lt;date&gt;_shield_benchmark_1_X
 </code></pre></div>
    then render the summary + per-seed pivots from the resulting <code>results.csv</code>.</li>
 <li><strong>Cross-link.</strong> Add a <code>## Run N — \</code>atc_run_1_X` best model<code>heading whose first line is</code>→ <strong>Experiment log:</strong> <a href="../experiments/#run-N">Run N — …</a><code>— the</code>experiments.md<code id="run-N">headings
