@@ -166,9 +166,46 @@ fired **0 times in 95 episode-evaluations**. `SUCCESS_NEAR_CONFLICT_CLEAR_STEPS 
 ~135 s window at the *end* of an episode, by which point the aircraft have landed or separated,
 so the rollout is essentially always clear.
 
-This is corroborated across the whole experiment log: `eval_success/no_near_conflicts_mean`
-sits at **0.99–1.00 in every run from `1_17` to `1_24_pms`**. Conflicts have not been the
-blocker for a long time — **schedule deviation is**.
+### …but the metric that said so was measuring the wrong thing
+
+Across runs `1_17`–`1_24_pms`, `eval_success/no_near_conflicts_mean` sat at **0.99–1.00**, which
+was read as "conflicts are solved, only deviation remains". [Run 16](experiments.md#run-16) put
+the realised gate in force on the trombone and the same metric reads **0.774**.
+
+**~23 % of evaluation episodes contain a real loss of separation.** The 0.99–1.00 figure was a
+*forecast* that always cleared by the end of the episode, not a description of what the aircraft
+did.
+
+The realised metric also carries a learning curve the predicted one completely flattened —
+across the quarters of Run 16's training:
+
+| | Q1 | Q2 | Q3 | Q4 |
+|---|---|---|---|---|
+| `no_near_conflicts_mean` (realised) | 0.682 | 0.769 | 0.816 | **0.831** |
+
+Real busts fall from ~32 % of episodes to ~17 % over 8 M steps. Under the predicted gate this
+was pinned near 1.00 from the first eval pass and showed nothing.
+
+Confirmed at the checkpoint level too — scoring the `best_model` of both of the project's two
+strongest runs on the full fixed 100-seed pool:
+
+| | `atc_run_1_22` | `atc_run_1_25` |
+|---|---|---|
+| episodes ending in `separation` | **17/100** | **18/100** |
+
+So roughly one episode in six ends with a genuine loss of separation, at the best checkpoints
+available.
+
+!!! note "Both things are true"
+    The tier gate never bound (measured above, 0 relaxations in 95 episode-evaluations) **and**
+    conflicts were never actually solved. There is no contradiction: the mechanism that has been
+    suppressing separation busts is the **violation penalty** (`−REWARD_VIOLATION_PENALTY`, keyed
+    off `end_reason="separation"`), which has always been realised-only. The tier gate was
+    redundant with it in the relaxing direction, which is exactly why removing it changed nothing.
+
+    What should be retired is the claim *"conflicts are solved, only deviation remains."*
+    Deviation is still the harder problem, but conflict avoidance is imperfect at convergence and
+    now — finally — measurable.
 
 ---
 

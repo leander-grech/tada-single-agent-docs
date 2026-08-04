@@ -42,33 +42,113 @@ So capability is no longer the frontier. **Stability is.** `success_rate` swings
   means *zero* separation, not 3 NM; "within 3 NM" is `severity >= 0.7`. The realised-only success
   gate (`SUCCESS_CONFLICT_REALISED_ONLY`) ships in [Run 16](experiments.md#run-16).
 
+- [x] **Realised-only conflict gate shipped and measured** — [Run 16](experiments.md#run-16)
+  (`atc_run_1_25_trombone_relaxed`, 8 M). Capability identical to Run 13; the gate change cost
+  nothing and **corrected the instrumentation**: `no_near_conflicts_mean` 0.996 → 0.774, i.e.
+  ~23 % of episodes contain a real loss of separation where the old metric reported 99.6 % clean.
+
 ## In flight
 
-- [ ] **Run 16 (`atc_run_1_25_trombone_relaxed`)** — Run 13's exact recipe plus the realised-only
-  conflict gate, 8 M steps. Expected to *tighten* the reported success flag rather than relax it;
-  the point is correctness, and a second 8 M trombone sample to characterise the oscillation.
+- [ ] *(nothing training)* — next run should be one of the two items below, run **separately**
+  so the effects are attributable.
 
 ## Next
 
-### 1. Training stability past ~3 M — **the frontier**
+### 1. Fix the evaluation loop — **do this before anything else**
 
-`success_rate` oscillates 0.2–0.5 (Run 8) and 0.0–1.0 (Run 13) rather than converging, and runs
-routinely end well below their own peak. Longer horizons and KL caps were the last attempt and
-did not fix it. Candidates, roughly in order of cost:
+The "training oscillates 0.0–1.0 instead of converging" problem is **mostly a measurement
+artifact**, and until it is fixed no other change on this list can be evaluated. Three
+compounding defects:
 
-| Lever | Rationale |
+| # | Defect | Effect |
+|---|---|---|
+| 1 | `n_eval_episodes = 5` (`main.py:580`) | `success_rate` can only be 0, .2, .4, .6, .8, 1.0; SE ≈ **0.22** at p≈0.4 |
+| 2 | `_eval_episode_index` (`single_agent_env.py:185`) is never reset per eval pass | **every pass walks a different 5-seed window** — consecutive eval points measure different scenarios |
+| 3 | `best/best_model.zip` = argmax over ~1600 such draws | an extreme-value artifact, not the best policy |
+
+**Measured directly:** `atc_run_1_22`'s `best_model`, saved at a reported `success_rate` of
+**1.00**, scores **0.380 (95 % CI 0.291–0.478)** when re-run on the full fixed 100-seed pool.
+Corroborated by the last-15 % mean of `success_rate` (0.41) and by the observed 1.6 % frequency
+of 5/5 passes, which is what a binomial at p≈0.44 predicts.
+
+Two numbers fix it, at **identical eval compute**:
+
+```python
+# main.py
+eval_freq=max(100_000 // N_TRAIN_ENVS, 1),   # was 5_000
+n_eval_episodes=100,                          # was 5  (== len(Config.SCENARIO_EVAL_SEEDS))
+```
+
+Setting `n_eval_episodes` equal to the seed-pool size makes the rolling window wrap exactly, so
+**every pass evaluates the identical 100 scenarios**. Cost is unchanged (1600 × 5 = 8000 episodes
+before, 80 × 100 = 8000 after); SE drops 0.22 → 0.05 and passes become comparable.
+
+!!! tip "Success is per-scenario, not uniform"
+    46.6 % of `1_22`'s eval passes scored exactly 0.0, where a constant p=0.44 predicts 5.5 %.
+    That excess means the policy reliably solves some seeds and **never** solves others. A scalar
+    `success_rate` is the wrong instrument — dump per-seed outcomes and study the failing subset.
+
+Completed runs can be re-scored after the fact — eval settings do not affect training. Use
+`analysis/score_checkpoints.py`, which scores any checkpoint on the full fixed seed pool and
+reports a Wilson confidence interval.
+
+### 2. Stop taxing safe spacing in the conflict reward
+
+The conflict term is **~46 % of the per-step reward magnitude**, but decomposing it on Run 13's
+best model shows where that goes:
+
+| Closest approach of the charged pair | Share of the conflict penalty |
 |---|---|
-| **Checkpoint selection on sustained, not peak, eval** | `best/` currently tracks a single lucky eval pass; a windowed criterion would at least *report* honestly |
-| **Larger `n_eval_episodes`** | 10 episodes over 100 seeds makes each eval pass high-variance — some of the "oscillation" may be measurement noise, and that should be ruled out first |
-| **LR floor / cosine restarts** | Run 13 decays to 3e-5; `1_24` tried 3e-6. Neither converged |
-| **Entropy schedule** | anneal `ent_coef` down late so the policy stops exploring off its own peak |
+| > 7 NM | 25.1 % |
+| **5–7 NM** | **73.7 %** |
+| 3–5 NM | 0.6 % |
+| **< 3 NM (an actual conflict)** | **0.6 %** |
 
-!!! tip "Rule this out first"
-    Before treating oscillation as a policy problem, check whether it is an **evaluation** problem.
-    `n_eval_episodes = 10` sampled from 100 seeds, with a binary per-episode success, has a
-    standard error of ~0.15 at `p = 0.5` — enough to produce most of the observed swing on its own.
+Mean severity of charged pairs is 0.167 — about **8.3 NM apart**. So roughly half the agent's
+gradient is a proximity tax on normal arrival spacing, and it is **directly opposed to the
+deviation objective**: hitting AMAN times requires sequencing aircraft tightly, which this term
+punishes. That is the most likely explanation for a deviation ceiling that survived 20 runs of
+reward and optimiser tuning.
 
-### 2. Finer action granularity (path B)
+Cause: `HORIZONTAL_SAFEZONE_RADIUS_NM = 10.0` makes severity non-zero out to 10 NM, and
+`NEAR_CONFLICT_TIME_S = 1200 s` means the imminence *ramp* (not the small `CONFLICT_FAR_FLOOR`)
+applies for most of an episode.
+
+Fix — a severity deadband. **The idiom already exists in the same file** (`rewards.py:367`,
+`compute_weighted_infringement_total`); the newer `infringement_reward_from_world` just dropped it:
+
+```python
+severity = _pair_severity(infr)
+s0 = float(Config.CONFLICT_SEVERITY_DEADBAND)   # 0.5 == 5 NM
+if severity <= s0:
+    continue
+severity = (severity - s0) / (1.0 - s0)
+```
+
+Small diff, **large behavioural change** — it removes ~99 % of the conflict penalty magnitude on
+safe episodes. The safety backstop is untouched (`−REWARD_VIOLATION_PENALTY = −15` on a realised
+bust, plus the realised-only tier gate), but watch `no_near_conflicts_mean`: it is **0.774**, not
+the 0.99 the old metric implied, so there is genuinely less headroom here than it looks. If it
+falls below ~0.70, raise `s0` or restore some weight.
+
+### 3. Make the terminal success signal non-negligible
+
+`_tier_bonus()` (`single_agent_env.py:684`) is **defined and never called** — the +1.5 … +13.0
+ladder this documentation calls the "primary north star" is not applied as a terminal reward. It
+survives only as the coefficients inside the PBRS potential, and PBRS telescopes to a
+policy-independent constant per episode.
+
+So the entire terminal payoff for solving the problem is
+`REWARD_SUCCESS_BONUS_TIER5_CONFIRM = +1.0`, against an episode return range of roughly −200…+44 —
+about **0.4 % of the range**. There is no basin of attraction at the goal: the agent optimises
+dense deviation and success is incidental, which is exactly the "gets there, doesn't stay there"
+behaviour observed.
+
+The large cliff was removed deliberately (high-variance lump for the critic) and Run 13 was the
+best run *with* that design, so do not restore the full ladder. But raise the confirm to **~5**,
+and consider a matching small T4 confirm, so there is a real gradient step at the top.
+
+### 4. Finer action granularity (path B)
 
 Still never started, and still the prime suspect for the *residual* deviation floor: ±10/±30 kt
 speed buckets and whole 1–4 trombone groups cannot trim a landing time to ±30 s except by luck.

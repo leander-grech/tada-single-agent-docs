@@ -236,12 +236,18 @@ is blocking:
   deviation is the bottleneck.
 - If `all_landed_mean` is low → aircraft are not completing in time.
 
-!!! tip "In practice it has always been deviation"
-    `no_near_conflicts_mean` has sat at **0.99–1.00 in every run from `1_17` onward**. If you
-    are diagnosing a low success rate, start at `max_aircraft_dev_mean` and
-    `frac_under_tier*_mean`, not the conflict metrics.
+!!! warning "Check which gate produced the number before interpreting it"
+    Under the **legacy predicted** gate (runs ≤ `1_24`) `no_near_conflicts_mean` sat at
+    0.99–1.00 in every run from `1_17` onward, which was read as "conflicts are solved".
+    Under the **realised** gate (`1_25`+) the same metric reads **0.774** — about 23 % of
+    episodes contain a real loss of separation. The old number was a forecast that always
+    cleared by episode end, not a description of behaviour.
 
-    Beware `ever_near_conflict_mean`: it tracks the **predicted** rollout, not reality, and it
-    runs high even on episodes with no real breach. Compare `no_near_conflicts_mean` against
-    `no_near_conflicts_predicted_mean` to see the two regimes side by side — see
+    Deviation is still the harder problem, so `max_aircraft_dev_mean` and `frac_under_tier*_mean`
+    are still the first place to look — but conflict avoidance is **not** solved and the realised
+    metric does carry a real learning curve (0.68 → 0.83 across `1_25`).
+
+    Beware `ever_near_conflict_mean`: it tracks the **predicted** rollout, not reality, and runs
+    high even on episodes with no real breach. Compare `no_near_conflicts_mean` against
+    `no_near_conflicts_predicted_mean` to see both regimes side by side — see
     [Loss of separation](separation.md#realised-vs-predicted-the-distinction-that-matters).

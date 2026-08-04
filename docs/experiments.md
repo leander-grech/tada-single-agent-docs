@@ -32,7 +32,7 @@ The `atc_run_1_N` suffix increments each launch; the relevant ones are noted per
 | **13** | **`atc_run_1_22`** | **8M** | **fresh 8M at 45 s, warm-up→cosine LR 3e-4→3e-5** | **+43.8** | **success 1.00 peak / 0.41 sustained; worst dev 24 s — best run to date** |
 | 14 | `atc_run_1_23` | 1M (abandoned) | **T6 tier** (±30 s) + action penalty 0.02→0.05 | −24.6 | stopped early; superseded by the point-merge pivot |
 | 15 | `atc_run_1_24_pms`, `atc_run_1_24` | 8M, 7.1M | **BGY point-merge (PMS)** — new airspace | −10.0 / −21.6 | success 0.2 / 0.0; worst dev 211 / 158 s |
-| 16 | `atc_run_1_25_trombone_relaxed` | 8M *(running)* | **realised-only conflict gate**, 1_22 recipe restored | — | in progress |
+| 16 | `atc_run_1_25_trombone_relaxed` | 8M | **realised-only conflict gate**, 1_22 recipe restored | +44.2 | capability matches 1_22; **reveals ~23% of episodes contain a real loss of separation** |
 
 † Run 6 targeted 5M but was stopped at ~3.14M. `atc_run_1_11` (the launch that introduced
 the goal bonus + experiment-dir scaffolding) aborted at ~2k steps and was relaunched as run 6.
@@ -516,7 +516,7 @@ attempt. **All long runs are now launched under `setsid nohup`.**
 
 ---
 
-## Run 16 — Realised-only conflict gate (`atc_run_1_25_trombone_relaxed`, 8 M) — *in progress* { #run-16 }
+## Run 16 — Realised-only conflict gate (`atc_run_1_25_trombone_relaxed`, 8 M) { #run-16 }
 
 Returns to the **MXP trombone** to test one change against Run 13's breakthrough, with
 everything else restored to Run 13's exact code state.
@@ -550,3 +550,70 @@ See [Loss of separation](separation.md) for the full semantics.
     on an episode that actually busted 3 NM. Reported success rate should fall slightly and
     become trustworthy. Full measurement in
     [Loss of separation](separation.md#measured-the-predicted-gate-never-bound).
+
+**Results** (complete: 8,003,584 steps in ~15 h at 147 fps):
+
+| Metric | Run 13 (`1_22`) | Run 16 (`1_25`) |
+|---|---|---|
+| eval `success_rate` best / sustained | 1.00 / 0.41 | 1.00 / 0.39 |
+| eval `tier_mean` best / sustained | 5.00 / 3.60 | 5.00 / 3.17 |
+| min `max_aircraft_dev` | 24.3 s | **20.8 s** |
+| best `eval/mean_reward` | 43.8 | **44.2** |
+| **`no_near_conflicts_mean`** | **0.996** | **0.774** |
+
+Capability is unchanged. To say that with a real confidence interval rather than off the noisy
+in-training statistic, both `best_model`s were re-scored offline on the **full fixed 100-seed
+pool**, deterministically (`analysis/score_checkpoints.py`):
+
+| | Run 13 (`1_22`) | Run 16 (`1_25`) |
+|---|---|---|
+| success (100 seeds) | 0.380 *(95 % CI 0.291–0.478)* | 0.440 *(95 % CI 0.347–0.538)* |
+| `tier_mean` | 3.25 | 3.20 |
+| `max_aircraft_dev` | 179.4 s | 192.4 s |
+| `total_abs_dev` | 556.5 s | 621.6 s |
+| **episodes with a real loss of separation** | **0.170** | **0.180** |
+| end reasons | 45 delayed / 38 success / 17 separation | 44 success / 38 delayed / 18 separation |
+
+Difference in success **+0.060 (SE 0.069) — inside the noise band.** The gate change cost
+nothing, and gained nothing in capability; what it gained is an honest metric.
+
+!!! danger "`1_22`'s `best_model` was saved at a reported `success_rate` of 1.00. It actually scores 0.380."
+    That gap is the clearest possible demonstration of the evaluation defect described in
+    [Roadmap → Fix the evaluation loop](roadmap.md#1-fix-the-evaluation-loop-do-this-before-anything-else):
+    `best/` is selected as the argmax over ~1600 passes of a **5-episode** binomial evaluated on a
+    **rolling** seed window. Treat every `best`-checkpoint headline in this log as an upper bound
+    until it has been re-scored offline.
+
+### The finding: conflicts were never as clean as the logs said
+
+That last row is the result that matters. **~23 % of evaluation episodes contain a real loss of
+separation**, and the old predicted-gate metric reported "no near conflicts" **99.6 %** of the
+time. Every "the conflict side is solved" conclusion from runs `1_17`–`1_24` was reading a
+*forecast* that always cleared before the episode ended — not the aircraft's actual behaviour.
+
+The realised metric also carries a **learning signal that the predicted one flattened out
+completely**. Across the four quarters of Run 16's training:
+
+| | Q1 | Q2 | Q3 | Q4 |
+|---|---|---|---|---|
+| `success_rate` | 0.00 | 0.05 | 0.29 | 0.39 |
+| `tier_mean` | 0.60 | 1.45 | 2.74 | 3.10 |
+| `max_aircraft_dev` | 486 s | 366 s | 257 s | 203 s |
+| **`no_near_conflicts_mean`** | **0.682** | **0.769** | **0.816** | **0.831** |
+
+Real separation busts fall from ~32 % of episodes to ~17 % over 8 M steps. Under the predicted
+gate this curve was pinned near 1.00 from the first eval onward and showed nothing at all.
+
+**So conflict avoidance is still being learned, and it is still imperfect at convergence.** That
+does not contradict the finding that *the gate* never bound — the tier gate and the violation
+penalty are different mechanisms, and the violation penalty (which has always been realised-only)
+is what was doing the work. But it does mean "conflicts are solved, only deviation remains" was
+too strong a claim, and it should be retired.
+
+!!! bug "Instrumentation gap during this run"
+    `success_no_near_conflicts_predicted` was computed by the env for the whole run but **never
+    logged** — `callbacks/eval_metrics_callback.py` carries a hardcoded allowlist of success
+    sub-metrics, and restoring it to Run 13's snapshot dropped the new key. Fixed in `f4ec70f`,
+    so the side-by-side gate comparison is available from run `1_26` onward. The Run 13
+    checkpoint replay in [Loss of separation](separation.md) is unaffected — it was measured
+    directly, not through the callback.

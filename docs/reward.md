@@ -150,12 +150,16 @@ Every tier *additionally* requires the **conflict gate**. Which gate depends on
 The original gate before Run 3 was "no near-conflict **ever**, predicted or not", which was
 unsatisfiable and kept `success_rate` pinned at 0.
 
-!!! note "The gate has never been the binding constraint"
-    `eval_success/no_near_conflicts_mean` is **0.99–1.00 in every run from `1_17` onward**, and
-    replaying `1_22`'s checkpoints with both gates instrumented found the predicted gate open in
-    **every episode at every checkpoint**. Success has been bound by **deviation**, not
-    conflicts, for the entire campaign. Measurement:
-    [Loss of separation](separation.md#measured-the-predicted-gate-never-bound).
+!!! note "The gate has never been the binding constraint — but that is not the same as 'conflicts are solved'"
+    Replaying `1_22`'s checkpoints with both gates instrumented found the predicted gate open in
+    **every episode at every checkpoint** (0 relaxations in 95 episode-evaluations), so removing
+    it changed nothing. What suppresses separation busts is the **violation penalty**, which has
+    always been realised-only.
+
+    Under the realised gate, `no_near_conflicts_mean` reads **0.774** — ~23 % of episodes contain
+    a real loss of separation, where the legacy predicted metric reported 0.99–1.00. Deviation is
+    still the harder problem, but do not repeat the claim that conflicts are solved. Measurement:
+    [Loss of separation](separation.md#but-the-metric-that-said-so-was-measuring-the-wrong-thing).
 
 | Tier | Criterion | `bonus` | What it targets |
 |---|---|---|---|

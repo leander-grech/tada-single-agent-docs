@@ -339,11 +339,21 @@ had been out of reach since Run 1. Model:
 | `total_abs_dev` | **65.8 s** | — | 761 s |
 | `eval/mean_reward` | **+43.8** | — | −59.9 |
 
-!!! warning "Read the 'sustained' column"
-    The headline `success_rate = 1.00` is a **peak over evaluation passes**, not a converged
-    level — the run oscillates between 0.0 and 1.0 and ends on a trough. Quoting the peak alone
-    materially overstates this checkpoint. Characterising and fixing that oscillation is the
-    top item on the [roadmap](roadmap.md#1-training-stability-past-3-m-the-frontier).
+!!! danger "The headline 1.00 is not real — this checkpoint scores 0.380"
+    Re-scored offline on the **full fixed 100-seed pool** (`analysis/score_checkpoints.py`,
+    deterministic), `best_model.zip` gets:
+
+    | success | `tier_mean` | `max_aircraft_dev` | `total_abs_dev` | real loss of separation |
+    |---|---|---|---|---|
+    | **0.380** *(95 % CI 0.291–0.478)* | 3.25 | 179.4 s | 556.5 s | **17 % of episodes** |
+
+    End reasons over the 100 seeds: **45 delayed, 38 success, 17 separation.**
+
+    The `success_rate = 1.00` it was saved at is the argmax over ~1600 passes of a 5-episode
+    binomial on a rolling seed window — an extreme-value artifact. See
+    [Roadmap → Fix the evaluation loop](roadmap.md#1-fix-the-evaluation-loop-do-this-before-anything-else).
+    The 24.3 s worst-aircraft deviation in the table above is likewise a best-pass figure; the
+    honest number for this checkpoint is **179 s**.
 
 ### Renders
 
@@ -364,6 +374,48 @@ refusal shield:
     this model with the command in [Adding a new run](#adding-a-new-run) and paste the summary
     here. On `1_16` the raw policy beat every shield variant; worth confirming whether that still
     holds for a tier-5-capable checkpoint.
+
+---
+
+## Run 16 — `atc_run_1_25_trombone_relaxed` best model { #run-16-atc_run_1_25 }
+
+→ **Experiment log:** [Run 16 — Realised-only conflict gate](experiments.md#run-16).
+
+Run 13's exact recipe with `SUCCESS_CONFLICT_REALISED_ONLY = True`. Model:
+`experiments/atc_run_1_25_trombone_relaxed/best/best_model.zip`.
+
+**Scored the honest way** — full fixed 100-seed pool, deterministic, both checkpoints under
+identical conditions (`analysis/score_checkpoints.py`):
+
+| | Run 13 (`1_22`) | **Run 16 (`1_25`)** |
+|---|---|---|
+| success | 0.380 *(CI 0.291–0.478)* | **0.440** *(CI 0.347–0.538)* |
+| `tier_mean` | 3.25 | 3.20 |
+| `max_aircraft_dev` | 179.4 s | 192.4 s |
+| `total_abs_dev` | 556.5 s | 621.6 s |
+| real loss of separation | 17 % | 18 % |
+| end reasons | 45 delayed / 38 success / 17 sep | 44 success / 38 delayed / 18 sep |
+
+**Difference in success +0.060, SE 0.069 — inside the noise band.** The two checkpoints are
+statistically indistinguishable, which is the expected and desired outcome: the gate change was a
+semantics correction, not a capability change.
+
+The number worth carrying forward is **17–18 % of episodes contain a real loss of separation**,
+at the best checkpoint of the two best runs the project has produced. That was invisible under
+the old predicted-gate metric, which reported 99.6 % clean.
+
+Reproduce with:
+```bash
+/home/leander/miniconda3/envs/tada/bin/python analysis/score_checkpoints.py \
+  --models experiments/atc_run_1_22/best/best_model.zip \
+           experiments/atc_run_1_25_trombone_relaxed/best/best_model.zip \
+  --seeds 100 --csv analysis/2026-08-04_1_22_vs_1_25.csv
+```
+
+!!! note "No renders yet"
+    Deterministic clips have not been generated for this checkpoint. Produce them with
+    `render_policy.py --model experiments/atc_run_1_25_trombone_relaxed/best/best_model.zip`
+    and drop them into `docs/assets/renders/` per [Adding a new run](#adding-a-new-run).
 
 ---
 
