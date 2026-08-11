@@ -1,5 +1,12 @@
 # Successful results
 
+
+!!! abstract "TL;DR"
+    Curated renders and shield sweeps per run. For the comparable cross-run numbers see the
+    [experiment log](experiments.md#recent-runs) instead — everything there is scored on the
+    same fixed 100-seed pool, which the per-run material on this page is not.
+
+
 Curated highlights from the **best checkpoints** of individual runs: deterministic render
 clips, plus the full eval-time **refusal-shield sweep** over all 100 evaluation seeds. Each
 subsection links back to the matching entry in the [experiment log](experiments.md), which
@@ -320,137 +327,6 @@ Columns: `raw` = trained_raw, `rd`/`cc`/`both` = reward-drop / critical-conflict
 | 202363285 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
 
 </details>
-
----
-
-## Run 13 — `atc_run_1_22` best model { #run-13-atc_run_1_22 }
-
-→ **Experiment log:** [Run 13 — Fresh 8 M with warm-up→cosine LR](experiments.md#run-13).
-
-The best checkpoint produced by the project so far, and the first to clear the ±30 s bar that
-had been out of reach since Run 1. Model:
-`experiments/atc_run_1_22/best/best_model.zip`.
-
-| Metric | Best | Sustained (last 15 % of evals) | Final |
-|---|---|---|---|
-| `success_rate` | **1.00** | 0.41 | 0.00 |
-| `tier_mean` | **5.00** | 3.60 | 2.60 |
-| `max_aircraft_dev` | **24.3 s** | 172 s | 281 s |
-| `total_abs_dev` | **65.8 s** | — | 761 s |
-| `eval/mean_reward` | **+43.8** | — | −59.9 |
-
-!!! danger "The headline 1.00 is not real — this checkpoint scores 0.380"
-    Re-scored offline on the **full fixed 100-seed pool** (`analysis/score_checkpoints.py`,
-    deterministic), `best_model.zip` gets:
-
-    | success | `tier_mean` | `max_aircraft_dev` | `total_abs_dev` | real loss of separation |
-    |---|---|---|---|---|
-    | **0.380** *(95 % CI 0.291–0.478)* | 3.25 | 179.4 s | 556.5 s | **17 % of episodes** |
-
-    End reasons over the 100 seeds: **45 delayed, 38 success, 17 separation.**
-
-    The `success_rate = 1.00` it was saved at is the argmax over ~1600 passes of a 5-episode
-    binomial on a rolling seed window — an extreme-value artifact. See
-    [Roadmap → Fix the evaluation loop](roadmap.md#1-fix-the-evaluation-loop-do-this-before-anything-else).
-    The 24.3 s worst-aircraft deviation in the table above is likewise a best-pass figure; the
-    honest number for this checkpoint is **179 s**.
-
-### Renders
-
-Short deterministic clip (5 episodes), unshielded:
-
-<video controls preload="metadata" width="100%">
-  <source src="../assets/renders/atc_run_1_22_best_model_det_noshield_ep5.mp4" type="video/mp4">
-</video>
-
-Longer 20-episode reels — the raw policy and the same policy under a reward-drop → do-nothing
-refusal shield:
-
-- [Raw policy, 20 episodes](assets/renders/atc_run_1_22_best_model_det_noshield_ep20.mp4)
-- [Reward-drop shield → do_nothing, 20 episodes](assets/renders/atc_run_1_22_best_model_det_rdrop_do_nothing_ep20.mp4)
-
-!!! note "Shield sweep not yet run for this checkpoint"
-    The 100-seed refusal-shield benchmark has only been run for `atc_run_1_16`. Reproduce it for
-    this model with the command in [Adding a new run](#adding-a-new-run) and paste the summary
-    here. On `1_16` the raw policy beat every shield variant; worth confirming whether that still
-    holds for a tier-5-capable checkpoint.
-
----
-
-## Run 16 — `atc_run_1_25_trombone_relaxed` best model { #run-16-atc_run_1_25 }
-
-→ **Experiment log:** [Run 16 — Realised-only conflict gate](experiments.md#run-16).
-
-Run 13's exact recipe with `SUCCESS_CONFLICT_REALISED_ONLY = True`. Model:
-`experiments/atc_run_1_25_trombone_relaxed/best/best_model.zip`.
-
-**Scored the honest way** — full fixed 100-seed pool, deterministic, both checkpoints under
-identical conditions (`analysis/score_checkpoints.py`):
-
-| | Run 13 (`1_22`) | **Run 16 (`1_25`)** |
-|---|---|---|
-| success | 0.380 *(CI 0.291–0.478)* | **0.440** *(CI 0.347–0.538)* |
-| `tier_mean` | 3.25 | 3.20 |
-| `max_aircraft_dev` | 179.4 s | 192.4 s |
-| `total_abs_dev` | 556.5 s | 621.6 s |
-| real loss of separation | 17 % | 18 % |
-| end reasons | 45 delayed / 38 success / 17 sep | 44 success / 38 delayed / 18 sep |
-
-**Difference in success +0.060, SE 0.069 — inside the noise band.** The two checkpoints are
-statistically indistinguishable, which is the expected and desired outcome: the gate change was a
-semantics correction, not a capability change.
-
-The number worth carrying forward is **17–18 % of episodes contain a real loss of separation**,
-at the best checkpoint of the two best runs the project has produced. That was invisible under
-the old predicted-gate metric, which reported 99.6 % clean.
-
-Reproduce with:
-```bash
-/home/leander/miniconda3/envs/tada/bin/python analysis/score_checkpoints.py \
-  --models experiments/atc_run_1_22/best/best_model.zip \
-           experiments/atc_run_1_25_trombone_relaxed/best/best_model.zip \
-  --seeds 100 --csv analysis/2026-08-04_1_22_vs_1_25.csv
-```
-
-!!! note "No renders yet"
-    Deterministic clips have not been generated for this checkpoint. Produce them with
-    `render_policy.py --model experiments/atc_run_1_25_trombone_relaxed/best/best_model.zip`
-    and drop them into `docs/assets/renders/` per [Adding a new run](#adding-a-new-run).
-
----
-
-## Run 15 — `atc_run_1_24_pms` best model (BGY point-merge) { #run-15-atc_run_1_24_pms }
-
-→ **Experiment log:** [Run 15 — Point-merge pivot: BGY](experiments.md#run-15).
-
-The first checkpoints on a **second airspace** — Bergamo with a point-merge system rather than
-MXP's trombone. Included here as the current point-merge reference, not as a success: the run
-tops out at `success_rate` **0.20** against the trombone's 1.00.
-
-| Metric | `atc_run_1_24_pms` | `atc_run_1_24` |
-|---|---|---|
-| Steps | 8.0 M / 8 M | 7.12 M / 10 M |
-| `eval/mean_reward` best | **−10.0** | −21.6 |
-| `success_rate` best | **0.20** | 0.00 |
-| `tier_mean` best | **2.20** | 2.00 |
-| `max_aircraft_dev` floor | 211 s | **158 s** |
-| `no_near_conflicts_mean` | 1.00 | 1.00 |
-
-!!! warning "Different tier ladder"
-    Both point-merge runs use the **6-tier** ladder (T6 = all within ±30 s = success), so their
-    `tier_mean` is **not** comparable with `atc_run_1_22`'s 5-tier value. See
-    [Reward](reward.md#the-6-tier-variant-runs-1_23-1_24-1_24_pms).
-
-### Renders
-
-Best model, 3 episodes, unshielded — the point-merge geometry is visibly different from the
-trombone:
-
-<video controls preload="metadata" width="100%">
-  <source src="../assets/renders/atc_run_1_24_pms_best_model_det_noshield_ep3.mp4" type="video/mp4">
-</video>
-
-- [Checkpoint @7.47 M, 10 episodes, unshielded](assets/renders/atc_run_1_24_pms_ppo_tada_7470000_steps_det_noshield_ep10.mp4)
 
 ---
 

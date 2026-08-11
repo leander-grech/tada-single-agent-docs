@@ -1,5 +1,19 @@
 # MDP & Environment
 
+
+!!! abstract "TL;DR"
+    One agent issues **one clearance per 45 s step** to up to 10 arrivals, chosen as a factored
+    `MultiDiscrete([10, 15])` — aircraft, then clearance. Clearance sets are **versioned**:
+    `v2` (15 actions) from run 1_27, `v1` (22) frozen so run 1_26 stays replayable.
+
+    An episode ends when every aircraft lands, or **immediately** on a realised loss of
+    separation — inside 3 NM *and* 500 ft on the live world. Predicted conflicts never
+    terminate and never gate success; they are priced in the [reward](reward.md#conflict-penalty)
+    instead. Success is the top of a 5-tier ladder: **all landed, every aircraft within ±60 s**.
+
+    `timeout` has fired zero times in 800 scored episodes — the horizon does not bind.
+
+
 Source: `atc_env/single_agent_env.py`, `config/config.py`
 
 ---
@@ -21,16 +35,61 @@ Selected by `Config.USE_AUTOREGRESSIVE_ACTIONS` (default `True`):
 
 ```
 # default — autoregressive: aircraft head -> clearance head conditioned on the chosen aircraft
-action_space = MultiDiscrete([N_AIRCRAFT_MAX, N_CLEARANCES]) = MultiDiscrete([10, 22])
+action_space = MultiDiscrete([N_AIRCRAFT_MAX, N_CLEARANCES]) = MultiDiscrete([10, 15])
 
 # legacy flat (USE_AUTOREGRESSIVE_ACTIONS = False)
-action_space = Discrete(N_AIRCRAFT_MAX * N_CLEARANCES)        = Discrete(220)
+action_space = Discrete(N_AIRCRAFT_MAX * N_CLEARANCES)        = Discrete(150)
 ```
 
 | Constant | Value | Source |
 |---|---|---|
 | `N_AIRCRAFT_MAX` | 10 | `config.py` (= `MAX_AIRCRAFT_COUNT_EVAL`) |
-| `N_CLEARANCES` | 22 | `config.py` (= `NUM_ACTIONS`) |
+| `N_CLEARANCES` | 15 | `config.py` (= `NUM_ACTIONS`, from `ACTION_SET`) |
+
+### Clearance sets are versioned (run 1_27 onward) { #action-set-versions }
+
+`Config.ACTION_SET` selects which clearance set the environment exposes, and `NUM_ACTIONS`
+follows from it — which in turn sizes the action space, the clearance head, the mask and the
+action-history one-hot.
+
+| set | clearances | used by |
+|---|---|---|
+| `v1` | 22 | every run up to and including **1_26**. Frozen in `actions/actions_v1.py`; never edited again. |
+| `v2` | 15 | **1_27** onward. The reduced set specified by the domain experts. |
+
+A checkpoint can only be loaded into the action space it was trained on. To replay 1_26:
+
+```bash
+TADA_ACTION_SET=v1 python render_policy.py --model experiments/atc_run_1_26_sep3nm/best/best_model.zip
+```
+
+It is an environment variable rather than a CLI flag because it is consumed at *import* time.
+`actions/action_set.py::check_checkpoint_compatible` reads the clearance count out of a
+checkpoint and fails with that instruction rather than a raw tensor-shape error.
+
+Only the ACTION side is versioned. Replaying runs ≤ 1_25 is *not* supported: their observation
+encoding predates the log-deviation change and the severity/proximity split, so they would be
+fed inputs they never trained on.
+
+#### v2 clearances { #v2-clearances }
+
+```
+ 0 DO_NOTHING          5 SPEED_UP_MEDIUM       10 SKIP_1_WAYPOINT
+ 1 SLOW_DOWN_SMALL     6 TURN_LEFT_…_ROUTE     11 SKIP_2_WAYPOINTS_NOT_NEXT
+ 2 SLOW_DOWN_MEDIUM    7 TURN_RIGHT_…_ROUTE    12 SKIP_3_WAYPOINTS_NOT_NEXT
+ 3 SLOW_DOWN_LARGE     8 LENGTHEN_TROMBONE     13 SKIP_4_WAYPOINTS_NOT_NEXT
+ 4 SPEED_UP_SMALL      9 SHORTEN_TROMBONE      14 VECTOR_TO_ILS
+```
+
+Speed steps are ±10/20/30 kt, and the set is deliberately **asymmetric** — three levels of
+slowing, two of speeding, no `SPEED_UP_LARGE`. Arrivals sit near their speed ceiling: six
+consecutive `SPEED_UP_LARGE` move landing time by only −18 s, against +339 s for six
+`SLOW_DOWN_LARGE`.
+
+`LENGTHEN_TROMBONE` and `SHORTEN_TROMBONE` are exact inverses of one level each and **stack**,
+so three lengthens with no shorten between them give +3. Capacity is 4 levels. Shortening
+cannot go below the baseline route: every aircraft starts with its trombone fully cut out, so
+shorten only undoes the agent's own prior lengthening.
 
 ### Decoding an action (`single_agent_env.py::step`)
 
@@ -87,19 +146,28 @@ clearance heads (see [Training → policy network](training.md#policy-network)).
 
 | Condition | `terminated` | `truncated` | `last_end_reason` |
 |---|---|---|---|
+| **Realised loss of separation** | `True` | `False` | `"separation"` |
+| **Airspace exit** | `True` | `False` | `"airspace_exit"` |
 | All aircraft landed + reaches **Tier 5** | `True` | `False` | `"success"` |
 | All aircraft landed, below Tier 5 | `True` | `False` | `"delayed"` |
 | Step limit (`_steps >= max_steps_per_episode`) | `False` | `True` | `"timeout"` |
 
-A realized hard violation **overrides** the reason above (`_refine_end_reason`): a loss of
-separation → `"separation"`, an airspace exit → `"airspace_exit"`.
+Since run 1_26 a violation **ends the episode immediately** — the check runs first in
+`_check_terminated`. A realised loss of separation means some pair was inside **3 NM and
+500 ft** (severity 1.0) on the live world at the current simulation time. Purely predicted
+conflicts never terminate and never gate success, however imminent.
 
-!!! warning
-    Infringement-*truncation* is present in the code but **commented out** — episodes are never
-    cut short on a violation. Instead, a violation is recorded as the terminal `last_end_reason`,
-    which suppresses any tier bonus and applies the violation penalty (below).
+!!! note
+    `"timeout"` has been observed **zero** times in 800 scored episodes across eight
+    checkpoints — every episode ends by landing or by a bust. The episode horizon does not
+    bind in practice.
 
 ### Terminal reward adjustment
+
+!!! info "Why the violation penalty is horizon-aware"
+    Terminating early is an escape hatch whenever mean step reward is negative. On run 1_25 it
+    was −0.23, so bailing out at step 20 of 66 would have saved ≈10.6 against a flat 15-point
+    penalty. The forfeit term removes the incentive by construction.
 
 A terminal bonus is added to `last_reward.bonus` **before** `r_parts.total()` is returned. The old
 flat ±5.0 `REWARD_SUCCESS_BONUS` is **gone**, replaced by a graduated **5-tier success ladder**
@@ -107,7 +175,7 @@ flat ±5.0 `REWARD_SUCCESS_BONUS` is **gone**, replaced by a graduated **5-tier 
 
 | End reason | Bonus |
 |---|---|
-| `"separation"` / `"airspace_exit"` | `−REWARD_VIOLATION_PENALTY` = −15.0 (suppresses any tier) |
+| `"separation"` / `"airspace_exit"` | `−(REWARD_VIOLATION_PENALTY + REWARD_VIOLATION_PER_REMAINING_STEP × remaining_steps)` = `−(30 + 0.5·r)` (suppresses any tier) |
 | `"success"` / `"delayed"` / `"timeout"` | graduated tier bonus `+1.5 … +13.0` by highest tier reached (0.0 if none) |
 
 See the [reward tier ladder](reward.md) for the full T1–T5 criteria and rationale.
@@ -126,19 +194,9 @@ tiers (T1–T4) award partial terminal bonus but are **not** counted as success.
 | 4 | ≥ 80% within ±60 s | `max_dev` < 120 s | no |
 | 5 | **all** within ±60 s | all landed | **yes** |
 
-All tiers additionally require the **conflict gate**, selected by
-`Config.SUCCESS_CONFLICT_REALISED_ONLY`:
-
-- **`True` (current, run `1_25`+)** — no **realised** loss of separation at severity ≥ 0.7
-  (i.e. inside 3 NM) at any point in the episode, read from the **live** world via
-  `_episode_violations()`.
-- **`False` (legacy, runs ≤ `1_24`)** — `_steps_since_near_conflict >=
-  SUCCESS_NEAR_CONFLICT_CLEAR_STEPS (3)`, evaluated on the **rollout world**
-  (`current_predicted_world`) after each step.
-
-The realised gate makes `is_success` consistent with `end_reason`: previously an episode could
-report `success = True` while also being classified `"separation"`, because the flag consulted
-the forecast and the reward consulted reality. See [Loss of separation](separation.md).
+All tiers require the **relaxed near-conflict gate**: `_steps_since_near_conflict >=
+SUCCESS_NEAR_CONFLICT_CLEAR_STEPS (6)` rather than "no near-conflict ever". Near-conflict status is
+evaluated on the **rollout world** (`current_predicted_world`) after each step.
 
 ### `_evaluate_success` sub-metrics (logged in episode_metrics)
 
@@ -151,10 +209,9 @@ the forecast and the reward consulted reality. See [Loss of separation](separati
 | `success_all_under_tier5` | Every \|dev\| ≤ 60 s |
 | `success_total_abs_dev` | Raw total absolute deviation (s) |
 | `success_max_aircraft_dev` | Worst single-aircraft deviation (s) |
-| `success_no_near_conflicts` | The gate **in force** (realised by default) |
-| `success_no_near_conflicts_predicted` | The legacy predicted gate, logged for comparison |
-| `success_ever_near_conflict` | A **predicted** near-conflict was present at some step |
-| `success_steps_since_near_conflict` | Steps elapsed since the last predicted near-conflict |
+| `success_no_near_conflicts` | `steps_since_near_conflict >= 6` |
+| `success_ever_near_conflict` | A near-conflict was present at some step |
+| `success_steps_since_near_conflict` | Steps elapsed since last near-conflict |
 
 ## Eval-time action shield (`render_policy.py`) { #eval-time-action-shield }
 

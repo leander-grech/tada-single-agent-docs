@@ -1,5 +1,23 @@
 # Reward Function
 
+
+!!! abstract "TL;DR"
+    Five per-step components — deviation, conflict, action cost, a dense goal bonus, and PBRS
+    tier shaping — plus a terminal signal. The two that matter most:
+
+    - **Conflict** is `−10 × severity × 2^(−ttc/240 s)`. Severity is **1.0 inside 3 NM and
+      500 ft, zero beyond 5 NM**, so legal spacing is free. Before run 1_26 the band ran to
+      10 NM and 98.8% of the penalty was charged to pairs that never came within 5 NM.
+    - **Deviation** is landing-weighted: the same error costs more the closer an aircraft is
+      to touchdown.
+
+    A realised bust pays `−(30 + 0.5 × remaining_steps)` and ends the episode. The forfeit term
+    is what stops bailing out early from being profitable.
+
+    See [Observations](observations.md) for what the agent can *see* of all this — deliberately
+    a wider band than what it is charged for.
+
+
 Source: `actions/rewards.py`, `utils/reward_utils.py`, `config/config.py`
 
 ---
@@ -37,7 +55,7 @@ Where:
 ```
 prox    = 1 - min(1, ttl / horizon)     # 0 = far from landing, 1 = imminent
 weight  = REWARD_DEVIATION_LANDING_BASELINE + (1 - REWARD_DEVIATION_LANDING_BASELINE) * prox
-horizon = EPISODE_STEPS * TIME_BETWEEN_ACTIONS = 64 * 45 = 2880 s
+horizon = EPISODE_STEPS * TIME_BETWEEN_ACTIONS = 128 * 22 = 2816 s
 ```
 
 Each aircraft's absolute deviation is weighted **linearly by landing proximity**:
@@ -45,51 +63,54 @@ from `REWARD_DEVIATION_LANDING_BASELINE = 0.2` (far) up to `1.0` (landing immine
 
 ---
 
-## Component 2 — Conflict penalty (`rewards.py:28`)
+## Component 2 — Conflict penalty (`rewards.py:28`) { #conflict-penalty }
 
-**Imminence-dominant ramp** over unique predicted aircraft pairs.
+**Exponentially discounted** over unique predicted aircraft pairs.
 For each unique pair, only the **earliest** predicted loss-of-separation is used.
 
 ```
-w(ttc) = max(floor, ((T_near - ttc) / T_near) ^ p)   for ttc < T_near
-w(ttc) = floor                                        for ttc >= T_near
+w(ttc) = max(CONFLICT_FAR_FLOOR, 2 ^ (-ttc / CONFLICT_HALF_LIFE_S))
 
 conflict_penalty = -REWARD_INFRINGEMENT_WEIGHT * sum_pairs( severity * w(ttc) )
 ```
 
-- `severity` = normalized spatial severity `[0, 1]` (from `normalize_separation`).
+- `severity` — see below. Zero beyond 5 NM, so legal spacing costs nothing.
 - `ttc` = predicted time to conflict (s), relative to current world time.
-- Conflicts beyond `T_near` pay only the small `floor` cost; within `T_near` the
-  penalty ramps steeply as ttc → 0, so imminent conflicts dominate.
+- `CONFLICT_HALF_LIFE_S = 240`. This replaced a cubic ramp whose *effective* half-life was
+  248 s — nobody chose that, it fell out of the exponent — so the two agree to within 0.02
+  everywhere inside 5 minutes, where essentially all the penalty mass sits. What changed is
+  the far field: the cubic collapsed to the floor by 20 min (weight 0.016 at 15 min) while
+  the exponential keeps a real gradient there (0.074).
 
-This term reads the **predicted** world (a NOOP rollout to the end of the episode), which is
-deliberate: it is the only signal that gives the agent a reason to resolve a conflict *before*
-it happens. See [Loss of separation](separation.md#where-prediction-genuinely-drives-behaviour).
+### Severity geometry (run 1_26 onward)
 
-### What `severity` actually means
+![Severity against horizontal separation, before and after run 1_26](assets/severity_ramp.png)
 
-`severity` is **not** produced by the simulator — it is `min` over two normalised axes computed
-in `normalize_separation()`. With the current constants it maps to distance as:
+Two deliberately different radius pairs. Detection is wide so the agent can *see* a conflict
+develop (that side is covered in [Observations](observations.md)); severity is narrow so it is
+only *charged* for closeness that matters.
 
-| Horizontal separation | 0 NM | 1 NM | 2 NM | **3 NM** | 5 NM | ≥ 10 NM |
-|---|---|---|---|---|---|---|
-| `severity` (co-altitude) | 1.00 | 0.90 | 0.80 | **0.70** | 0.50 | 0.00 |
+```
+u        = clamp( min( (5 - h)/(5 - 3), (1000 - v)/(1000 - 500) ), 0, 1 )
+severity = u ^ SEVERITY_SHAPE_P          # p = 2, convex
 
-!!! danger "`severity == 1.0` means zero separation, not 3 NM"
-    `HORIZONTAL_CONFLICT_RADIUS_NM` is currently `0.0`, so severity 1.0 requires literally
-    zero horizontal separation and is unreachable in practice. **"Within 3 NM" is
-    `severity >= 0.7`** (`NEAR_CONFLICT_THRESHOLD`). This trips people up constantly — the
-    full explanation, including a live piece of dead code it has already caused, is on the
-    [Loss of separation](separation.md) page.
+  severity = 1.0  <=>  h <= 3 NM AND v <= 500 ft    (the operational loss of separation)
+  severity = 0.0  <=   h >= 5 NM  or  v >= 1000 ft  (legal spacing — free)
+```
 
-### Near-conflict severity threshold
+Before this, the band was 10/0 NM: severity 1.0 required literally zero separation and was
+unreachable, and **98.8% of the conflict penalty was charged to pairs that never came within
+5 NM** — a continuous tax on the arrival spacing that hitting AMAN times requires.
 
-`has_near_conflict()` (`rewards.py:80`) uses `NEAR_CONFLICT_SEVERITY_THRESHOLD = 0.7`:
-a conflict counts only if severity ≥ 0.7 **and** ttc < `T_near`. This threshold does **not**
-affect the per-step conflict penalty magnitude.
+The convex `p = 2` decay puts the strongest restoring gradient immediately outside 3 NM
+(0.95/NM against 0.50 for a linear ramp) and meets zero at 5 NM with matching slope, so there
+is no kink at legal spacing. The corner sits at 3 NM, which is where a hard edge belongs — the
+episode ends there.
 
-Since run `1_25` this function no longer gates success (see the ladder below) — it is used by
-the eval-time shield in `render_policy.py` and for the `no_near_conflicts_predicted` diagnostic.
+`LOS_SEVERITY_THRESHOLD = 1.0` is the single failure definition: it drives the tier gate,
+`end_reason="separation"` and episode termination. `NEAR_CONFLICT_DISTANCE_NM = 3.5` is a
+diagnostic/eval-shield threshold only, pinned as a **distance** because a severity threshold
+silently changes meaning whenever the band edges or `SEVERITY_SHAPE_P` move.
 
 ---
 
@@ -139,27 +160,9 @@ always sees a gradient toward the next rung:
                                         landed      completion gate
 ```
 
-Every tier *additionally* requires the **conflict gate**. Which gate depends on
-`Config.SUCCESS_CONFLICT_REALISED_ONLY`:
-
-| | Gate | Reads | Semantics |
-|---|---|---|---|
-| **Current** (`True`, run `1_25`+) | `not _episode_violations()[0]` | the **live** world | no aircraft pair ever got inside 3 NM (severity ≥ 0.7) during the episode |
-| Legacy (`False`, runs ≤ `1_24`) | `_steps_since_near_conflict >= 3` | the **NOOP forecast** | no *predicted* conflict within `NEAR_CONFLICT_TIME_S` for the final 3 steps (≈ 135 s) |
-
-The original gate before Run 3 was "no near-conflict **ever**, predicted or not", which was
-unsatisfiable and kept `success_rate` pinned at 0.
-
-!!! note "The gate has never been the binding constraint — but that is not the same as 'conflicts are solved'"
-    Replaying `1_22`'s checkpoints with both gates instrumented found the predicted gate open in
-    **every episode at every checkpoint** (0 relaxations in 95 episode-evaluations), so removing
-    it changed nothing. What suppresses separation busts is the **violation penalty**, which has
-    always been realised-only.
-
-    Under the realised gate, `no_near_conflicts_mean` reads **0.774** — ~23 % of episodes contain
-    a real loss of separation, where the legacy predicted metric reported 0.99–1.00. Deviation is
-    still the harder problem, but do not repeat the claim that conflicts are solved. Measurement:
-    [Loss of separation](separation.md#but-the-metric-that-said-so-was-measuring-the-wrong-thing).
+Every tier *additionally* requires the **relaxed near-conflict gate**: predicted conflicts must
+be clear for the final `SUCCESS_NEAR_CONFLICT_CLEAR_STEPS = 6` steps (≈ 132 s before landing) —
+not the old unsatisfiable "no near-conflict ever".
 
 | Tier | Criterion | `bonus` | What it targets |
 |---|---|---|---|
@@ -186,26 +189,6 @@ so `r_parts.total()` is recomputed with it before being passed to SB3.
 !!! note "Replaces `REWARD_SUCCESS_BONUS`"
     The old flat ±5.0 `REWARD_SUCCESS_BONUS` is deprecated and unused. `REWARD_VIOLATION_PENALTY`
     is now independently tunable from the tier bonuses.
-
-### The 6-tier variant (runs `1_23`, `1_24`, `1_24_pms`)
-
-Once Run 13 showed that ±30 s is physically reachable, a **Tier 6** was added — *all landed and
-every aircraft within ±30 s* — and it became the binary `success` flag. The ladder shifted up
-one slot so the top payout still lands on true success:
-
-| | T1 | T2 | T3 | T4 | T5 | T6 |
-|---|---|---|---|---|---|---|
-| 5-tier (≤ `1_22`, and `1_25`) | +1.5 | +3.0 | +6.0 | +9.0 | **+13.0** *(success)* | — |
-| 6-tier (`1_23`–`1_24_pms`) | +0.75 | +1.5 | +3.0 | +6.0 | +9.0 | **+13.0** *(success)* |
-
-`SUCCESS_TIER6_DEV_S = 30.0`, and `REWARD_SUCCESS_BONUS_TIER5_CONFIRM` becomes
-`REWARD_SUCCESS_BONUS_TIER6_CONFIRM`.
-
-!!! warning "`tier_mean` is not comparable across the two ladders"
-    The rungs were re-valued, so a `tier_mean` of 2.2 under the 6-tier ladder measures
-    something different from 2.6 under the 5-tier one. Always check which ladder a run used
-    before comparing. Run `1_25` is back on the **5-tier** ladder to stay comparable with
-    Run 13 (`atc_run_1_22`).
 
 ---
 

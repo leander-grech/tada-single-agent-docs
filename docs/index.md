@@ -1,27 +1,30 @@
 # TADA Single-Agent RL
 
-Reinforcement-learning controller for **air-traffic arrival sequencing**: a single agent
-issues clearances (speed / vectoring / trombone / skip) to a fleet of inbound aircraft to
-hit their AMAN target landing times while keeping them separated.
+!!! abstract "TL;DR"
+    A single RL agent sequences up to 10 inbound aircraft into Milan Malpensa, issuing one
+    clearance per 45 s to hit AMAN target landing times without losing separation.
 
-- **Algorithm:** vanilla **PPO** with a custom autoregressive policy (`ATCAutoregressivePolicy`) — aircraft head → clearance head conditioned on sampled aircraft; masks read from obs. Legacy flat `Discrete(220)` + `MaskablePPO` retained behind `Config.USE_AUTOREGRESSIVE_ACTIONS = False`. See [Training](training.md).
+    **Current best — run `1_26`, scored on 100 fixed seeds:** success **0.65–0.70**, losses of
+    separation **0.09**, worst-aircraft deviation **45 s**. The clean-subset success rate that
+    had held near 53.7% across twenty runs reached **0.71**. Run `1_27` is training on a
+    reduced 15-clearance set. See the [experiment log](experiments.md#recent-runs).
+
+    **Read numbers only from `analysis/track_run.py`.** The in-training `success_rate` is a
+    5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.
+
+![Run 1_26 scored on 100 fixed eval seeds](assets/1_26_training_curve.png)
+
+- **Algorithm:** PPO with a custom autoregressive policy (`ATCAutoregressivePolicy`) — aircraft
+  head → clearance head conditioned on the sampled aircraft, masks read from the observation.
+  See [Training](training.md).
 - **Simulator:** Rust `flight_simulator` (PyO3 wheel), driven through a deterministic rollout.
+- **Scenario:** MXP trombone (`VALIDATION_USE_CASE_1`). BGY point-merge exists but underperforms.
 - **Branch:** `UM-lg`.
 
 !!! info "This site is the current source of truth"
-    It supersedes the older `SB3_MIGRATION_AND_INSTRUMENTATION.md`. Pages are kept in sync
-    with the code on `UM-lg`.
-
-## Where the project stands
-
-| | |
-|---|---|
-| **Best runs** | [`atc_run_1_22`](experiments.md#run-13) and [`atc_run_1_25`](experiments.md#run-16) — MXP trombone, 8 M steps each. Scored on the full 100-seed pool their best checkpoints are **0.380** and **0.440** success, statistically indistinguishable. |
-| **Open problem** | **The evaluation loop.** `n_eval_episodes = 5` on a *rolling* seed window, and `best/` is the argmax over ~1600 such draws — `1_22`'s `best_model` was saved at a reported `1.00` and actually scores `0.380`. Fix this before trusting any other comparison. |
-| **Second airspace** | BGY **point-merge** ([runs `1_24` / `1_24_pms`](experiments.md#run-15)) is learnable but unsolved — best success 0.20, worst dev 158–211 s. |
-| **Latest** | [`atc_run_1_25_trombone_relaxed`](experiments.md#run-16) — `1_22`'s exact recipe with the [realised-only conflict gate](separation.md). Capability matches `1_22`; the gate change revealed that **~23 % of episodes contain a real loss of separation**. |
-| **Retired claim** | ~~"Conflicts are solved, only deviation remains."~~ The 0.99–1.00 `no_near_conflicts_mean` behind that claim was a *forecast*, not behaviour. Deviation is still the harder problem, but conflict avoidance is imperfect at convergence. |
-| **Closed** | Finer *temporal* control (22 s interval) — [runs 10–11](experiments.md#run-10) tested it cleanly and it lost to 45 s. Action *magnitude* granularity remains open. |
+    Pages are kept in sync with the code on `UM-lg`. Each page opens with a TL;DR; the detail
+    below it is not repeated across pages, so follow the links rather than expecting each page
+    to stand alone.
 
 ## Quickstart
 
@@ -30,12 +33,15 @@ Training runs in the conda env **`tada`** (Python 3.12):
 ```bash
 cd reinforcement_learning/single_agent_rllib
 
-# fresh run (2 M steps)
-/home/leander/miniconda3/envs/tada/bin/python -u main.py
+# fresh run
+python -u main.py --total-timesteps 10000000 --run-suffix my_experiment
 
-# resume from latest checkpoint of a previous run
-/home/leander/miniconda3/envs/tada/bin/python -u main.py \
-  --resume experiments/atc_run_1_16 --total-timesteps 3000000
+# score its checkpoints on the fixed 100-seed pool while it trains
+python analysis/track_run.py --run experiments/atc_run_1_28_my_experiment
+
+# replay an OLD run whose action set differs (see MDP -> action-set versions)
+TADA_ACTION_SET=v1 python render_policy.py \
+  --model experiments/atc_run_1_26_sep3nm/best/best_model.zip --seeds 1595180635
 ```
 
 Watch it live — TensorBoard is now under each run's `tb/` sub-directory:
@@ -54,13 +60,12 @@ lightweight *inference* set; add `pip install -e .[train]` for the full training
 |------|--------------|
 | [MDP & Environment](mdp.md) | action space, episode, termination & success criteria |
 | [Observations](observations.md) | the Dict obs, per-aircraft features, normalization |
-| [Reward](reward.md) | imminence-dominant conflict, landing-weighted deviation, terminal bonus |
-| [Loss of separation](separation.md) | what `LOSS_OF_SEPARATION` means, severity ↔ distance, realised vs. predicted |
-| [Training](training.md) | MaskablePPO + VecNormalize config, callbacks, network |
+| [Reward](reward.md) | severity geometry, exponential conflict decay, landing-weighted deviation, tier ladder |
+| [Training](training.md) | PPO + VecNormalize config, callbacks, network, snapshots |
 | [Instrumentation](instrumentation.md) | every TensorBoard metric and what to watch |
 | [Experiment log](experiments.md) | what changed in each run and what we learned |
 | [Successful results](successful_results.md) | curated renders + refusal-shield sweeps for the best checkpoints, per run |
-| [Roadmap](roadmap.md) | what's next (finer actions, reward-peaking bonus) |
+| [Roadmap](roadmap.md) | what's next, and what is designed but unbuilt |
 
 ## Build the docs
 

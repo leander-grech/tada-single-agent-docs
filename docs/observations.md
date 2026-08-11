@@ -1,5 +1,20 @@
 # Observations
 
+
+!!! abstract "TL;DR"
+    A `Dict` observation: per-aircraft scalars, a global vector, relative flight plans, a
+    per-aircraft action history, and the two masks. Everything is normalised to `[-1, 1]`.
+
+    Two deliberate choices to know about:
+
+    - **Time features are log-scaled.** Linear encoding put every tier boundary the agent is
+      graded on into the bottom 13% of the range and rendered a 10 s error as `0.011`.
+    - **The agent sees further than it is charged.** `predicted_infringement` reads a wide
+      3–10 NM detection band, while the [conflict penalty](reward.md#conflict-penalty)
+      only bites inside 5 NM — so a conflict can be watched developing long before it costs
+      anything.
+
+
 Source: `models/observations.py`, `config/config.py`, `atc_env/single_agent_env.py`
 
 ---
@@ -38,8 +53,32 @@ Horizon for time normalization: `64 × 45 = 2880 s`.
 
 ## `aircraft` — 12 per-aircraft scalar features (`models/observations.py:18`)
 
-`AIRCRAFT_SCALAR_LEN = 12` (`config.py:60`). Feature 11 (`time_to_conflict`) was
-added in the current codebase. All values are in `[-1, 1]`.
+`AIRCRAFT_SCALAR_LEN = 12` (`config.py:60`). All values are in `[-1, 1]`.
+
+!!! info "Time features are log-scaled (run 1_26 onward)"
+    `time_deviation` and `time_to_target` use a **sign-preserving log** encoding:
+
+    ```
+    obs = sign(d) * ln(1 + |d| / FLOOR) / ln(1 + MAX / FLOOR)
+    ```
+
+    with `TIME_DEVIATION_LOG_FLOOR_S = 10`, `TIME_DEVIATION_MAX = 1800`. The previous linear
+    `clip(d / 900)` crushed every tier boundary the agent is graded on (±60, 70, 100, 120 s)
+    into the bottom 13% of the range and encoded a 10 s error as **0.011** — indistinguishable
+    from zero after LayerNorm. Measured effect on saturation (fraction of samples pinned at
+    ±1): `time_to_target` **65.6% → 18.1%** on MXP and **71.4% → 15.1%** on PMS;
+    `time_deviation` clipping 3.2% → 0%. Set `USE_LOG_DEVIATION_OBS = False` for the linear
+    encoding as a free ablation.
+
+    Two time features are **not** log-scaled and are known-imperfect: `time_to_conflict` is a
+    linear ramp over 20 min while the reward decays exponentially with a 4-minute half-life,
+    and `global.time_s` normalises against a 2880 s fallback horizon while real episodes run
+    3105–5715 s, so it is pinned at +1 for the last ~23% of every episode.
+
+!!! info "`predicted_infringement` reads the DETECTION band, not severity"
+    The observation deliberately sees further than the reward charges: it uses `proximity`
+    over the wide 3–10 NM detection band, so a conflict can be watched developing from 10 NM
+    even though closing to 6 NM costs nothing.
 
 | Index | Field | Raw unit | Normalization | Notes |
 |---|---|---|---|---|
@@ -67,6 +106,12 @@ Schedule deviation (`time_deviation`, field 8) comes exclusively from
 `compute_dynamic_deviation` was removed — see `observations.py:412`.
 
 ---
+
+![Linear versus signed-log encoding of schedule deviation](assets/deviation_encoding.png)
+
+The crossover near 750 s is deliberate: resolution is bought where the decision boundaries are
+(±60–120 s) and paid for in the tail, where the exact number does not change what the agent
+should do.
 
 ## `mask_aircraft` and `mask_action_per_ac`
 

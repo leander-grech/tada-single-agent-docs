@@ -1,5 +1,18 @@
 # Instrumentation & TensorBoard Metrics
 
+
+!!! abstract "TL;DR"
+    Every TensorBoard series and what it is for. Two warnings before you read anything off a
+    chart:
+
+    - **`rollout/success_rate` is a 5-episode rolling window.** It reported 1.00 for a run
+      whose true rate was 0.38. Use `analysis/track_run.py` instead — it scores checkpoints on
+      a fixed 100-seed pool.
+    - **`custom_metrics/end_reason/*` was presence-only before run 1_27.** Every series
+      averaged to exactly 1.0 regardless of frequency, so separation rates cannot be read from
+      any earlier run's TensorBoard.
+
+
 Source: `callbacks/instrumentation_callback.py`, `callbacks/eval_metrics_callback.py`,
 `callbacks/metrics_callback.py`, `utils/instrumentation.py`
 
@@ -153,10 +166,9 @@ These let you see **which criterion is blocking success**.
 | `eval_success/all_landed_mean` | All aircraft completed |
 | `eval_success/all_under_threshold_mean` | All `|dev| <= 30 s` |
 | `eval_success/total_dev_ok_mean` | Sum `|dev| <= n*30 s` |
-| `eval_success/no_near_conflicts_mean` | **The gate in force.** With `SUCCESS_CONFLICT_REALISED_ONLY=True`: no *realised* LoS at severity ≥ 0.7 all episode. Legacy: `steps_since_near_conflict >= 3` |
-| `eval_success/no_near_conflicts_predicted_mean` | The legacy *predicted* gate, always logged for comparison even when not in force |
-| `eval_success/ever_near_conflict_mean` | A **predicted** near-conflict appeared at any step |
-| `eval_success/steps_since_near_conflict_mean` | Steps elapsed since the last predicted near-conflict |
+| `eval_success/no_near_conflicts_mean` | `steps_since_near_conflict >= 3` |
+| `eval_success/ever_near_conflict_mean` | Near-conflict appeared at any step |
+| `eval_success/steps_since_near_conflict_mean` | Steps elapsed since last near-conflict |
 | `eval_success/frac_under_threshold_mean` | Fraction of aircraft under threshold |
 | `eval_success/total_abs_dev_mean` | Mean total absolute deviation (s) |
 | `eval_success/max_aircraft_dev_mean` | Worst per-aircraft deviation (s) |
@@ -229,25 +241,7 @@ the normalization range in `Config` is too narrow for the current scenario diffi
 
 When `eval_custom/success_rate` is low, use `eval_success/*` to see which AND-clause
 is blocking:
-
-- If `no_near_conflicts_mean` is low → a **real** loss of separation is happening; conflict
-  avoidance is the bottleneck.
+- If `ever_near_conflict_mean` is high → conflict avoidance is the bottleneck.
 - If `all_under_threshold_mean` is low but `no_near_conflicts_mean` is high →
   deviation is the bottleneck.
 - If `all_landed_mean` is low → aircraft are not completing in time.
-
-!!! warning "Check which gate produced the number before interpreting it"
-    Under the **legacy predicted** gate (runs ≤ `1_24`) `no_near_conflicts_mean` sat at
-    0.99–1.00 in every run from `1_17` onward, which was read as "conflicts are solved".
-    Under the **realised** gate (`1_25`+) the same metric reads **0.774** — about 23 % of
-    episodes contain a real loss of separation. The old number was a forecast that always
-    cleared by episode end, not a description of behaviour.
-
-    Deviation is still the harder problem, so `max_aircraft_dev_mean` and `frac_under_tier*_mean`
-    are still the first place to look — but conflict avoidance is **not** solved and the realised
-    metric does carry a real learning curve (0.68 → 0.83 across `1_25`).
-
-    Beware `ever_near_conflict_mean`: it tracks the **predicted** rollout, not reality, and runs
-    high even on episodes with no real breach. Compare `no_near_conflicts_mean` against
-    `no_near_conflicts_predicted_mean` to see both regimes side by side — see
-    [Loss of separation](separation.md#realised-vs-predicted-the-distinction-that-matters).
