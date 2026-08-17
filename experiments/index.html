@@ -829,7 +829,7 @@
   <a href="#run-10" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run 10 — Fresh 22 s run (atc_run_1_17, 5 M target) — in progress
+        Run 10 — Fresh 22 s run (atc_run_1_17, 5.14 M)
       
     </span>
   </a>
@@ -871,10 +871,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#run-1_27-reduced-clearance-set-training" class="md-nav__link">
+  <a href="#run-1_27" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run 1_27 — reduced clearance set (training)
+        Run 1_27 — reduced clearance set
       
     </span>
   </a>
@@ -1290,7 +1290,7 @@
   <a href="#run-10" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run 10 — Fresh 22 s run (atc_run_1_17, 5 M target) — in progress
+        Run 10 — Fresh 22 s run (atc_run_1_17, 5.14 M)
       
     </span>
   </a>
@@ -1332,10 +1332,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#run-1_27-reduced-clearance-set-training" class="md-nav__link">
+  <a href="#run-1_27" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run 1_27 — reduced clearance set (training)
+        Run 1_27 — reduced clearance set
       
     </span>
   </a>
@@ -1538,10 +1538,10 @@ line is the takeaway that motivated the next run.</p>
 <tr>
 <td>10</td>
 <td><code>atc_run_1_17</code></td>
-<td>5M (running)</td>
+<td>5.14M</td>
 <td><strong>fresh</strong> 22 s run (clean interval test)</td>
-<td>— <em>(early training)</em></td>
-<td>results pending</td>
+<td><strong>−37.2</strong></td>
+<td>22 s <strong>lost</strong>; every run from <code>1_18</code> is back on 45 s</td>
 </tr>
 </tbody>
 </table>
@@ -1551,7 +1551,7 @@ the goal bonus + experiment-dir scaffolding) aborted at ~2k steps and was relaun
 Run 8 replaces that gate with a 5-tier system; extended in-place to ~7.1M it reaches a <strong>50% success
 peak</strong> (~30% plateau) with the worst-aircraft deviation down to ~99 s. Runs 9a/9b spin off its 2M
 checkpoint to test the halved 22 s interval against a 45 s control; Run 10 (<code>atc_run_1_17</code>) is a
-fresh 22 s run still in early training.</p>
+fresh 22 s run, which settled it — the halved interval lost and was reverted.</p>
 <hr />
 <h2 id="run-1">Run 1 — Baseline (<code>atc_run_1_4</code>, 50k)<a class="headerlink" href="#run-1" title="Permanent link">&para;</a></h2>
 <p>First real run after the RLlib → sb3-contrib <strong>MaskablePPO</strong> migration, with the
@@ -1825,14 +1825,17 @@ policy into 22 s mid-run conflates a regime change with the interval benefit and
 training. The per-aircraft deviation gain is real but did not hold. The interval change needs a
 <strong>clean from-scratch test</strong> before any verdict — see Run 10.</p>
 <hr />
-<h2 id="run-10">Run 10 — Fresh 22 s run (<code>atc_run_1_17</code>, 5 M target) — <em>in progress</em><a class="headerlink" href="#run-10" title="Permanent link">&para;</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Early training — no results yet</p>
-<p>A fresh, from-scratch run on the 22 s regime (no warm restart), launched with a 5 M-step target
-to give a clean read on finer temporal control. At the time of writing it is only ~12 k steps
-in, so there are <strong>no eval results to report</strong> — this entry is a placeholder to fill once it has
-trained. The doubled per-episode env-steps make this the most compute-heavy run so far.</p>
-</div>
+<h2 id="run-10">Run 10 — Fresh 22 s run (<code>atc_run_1_17</code>, 5.14 M)<a class="headerlink" href="#run-10" title="Permanent link">&para;</a></h2>
+<p>A fresh, from-scratch run on the 22 s regime (no warm restart), to give a clean read on finer
+temporal control after Run 9's warm-restart result was confounded by the mid-run regime change.
+Every step-count constant encoding an absolute duration was doubled in tandem.</p>
+<p><strong>Results.</strong> Ran to 5.14 M steps. Final <code>eval/mean_reward</code> <strong>−37.2</strong>, against Run 8's <strong>+3.5</strong> on
+the same 45 s-trained lineage. The doubled per-episode env-steps also made it the most
+compute-heavy run to that date, for no return.</p>
+<p><strong>Finding — the 22 s interval was tested cleanly and lost.</strong> It was reverted; every run from
+<code>1_18</code> onward is back on <strong>45 s</strong>, and <code>TIME_BETWEEN_ACTIONS</code> has not moved since. Acting twice as
+often did not buy finer control, it just doubled the credit-assignment horizon. The reference
+values on <a href="../mdp/#episode-length">MDP</a> and <a href="../training/">Training</a> are the 45 s ones.</p>
 <hr />
 <h2 id="recent-runs">Runs 1_18 – 1_27 (summary)<a class="headerlink" href="#recent-runs" title="Permanent link">&para;</a></h2>
 <p>The per-run narrative above stops at 1_17. This section covers what happened since, scored
@@ -1948,12 +1951,26 @@ cap 20) separates <em>capability</em> from <em>reliability</em>:</p>
 authority is roughly 19× weaker upward than downward, so this motivated <code>SHORTEN_TROMBONE</code> in
 the <a href="../mdp/#action-set-versions">v2 clearance set</a> — on those same
 seeds the agent lengthens the trombone in 12/12 episodes and could never take it back.</p>
-<h3 id="run-1_27-reduced-clearance-set-training">Run 1_27 — reduced clearance set (training)<a class="headerlink" href="#run-1_27-reduced-clearance-set-training" title="Permanent link">&para;</a></h3>
-<p>Changes only the action side on top of 1_26: 22 clearances → 15, eight turn variants collapsed
-to two, four trombone levels to a reversible ±1 pair, <code>SPEED_UP_LARGE</code> dropped, MEDIUM speed
-steps and <code>SHORTEN_TROMBONE</code> added. Full set in <a href="../mdp/#v2-clearances">MDP</a>.</p>
-<p>Riding along, none of them MDP: eval every 25k instead of 5k, checkpoints every 25k instead of
-10k, and a 1.93× faster observation build (bit-identical output).</p>
+<h3 id="run-1_27">Run 1_27 — reduced clearance set<a class="headerlink" href="#run-1_27" title="Permanent link">&para;</a></h3>
+<p><strong>Changes.</strong> Only the action side, on top of 1_26: 22 clearances → 15, eight turn variants
+collapsed to two, four trombone levels to a reversible ±1 pair, <code>SPEED_UP_LARGE</code> dropped, MEDIUM
+speed steps and <code>SHORTEN_TROMBONE</code> added. Full set in <a href="../mdp/#v2-clearances">MDP</a>. Riding along,
+none of them MDP: eval every 25k instead of 5k, checkpoints every 25k instead of 10k, and a
+1.93× faster observation build (bit-identical output). Completed at 10M on 12 Aug.</p>
+<p><strong>Results.</strong> Success <strong>0.64</strong> against 1_26's 0.70 — a tie at this sample size — and
+worst-aircraft deviation <strong>87.3 s</strong> against <strong>43.4 s</strong>, which is not. It leads 1_26 on success at
+every checkpoint through 7M (0.25 at 2M where 1_26 is at 0.00), draws level at 8M, then flattens.
+<code>SHORTEN_TROMBONE</code> is issued <strong>5 times in 5 162 clearances</strong>, and 1_27 solves <strong>0 of 1_26's 12
+precision-bound seeds</strong>. Safety-bound failures halved, 6 → 3.</p>
+<p><img alt="Runs 1_26 and 1_27 on the same 100 fixed eval seeds" src="../assets/1_26_vs_1_27_training_curve.png" /></p>
+<p><strong>Finding.</strong> A smaller action space is much easier to explore and, here, less able to finish the
+job — but the run <strong>crashed at 4.98M and resumed onto a linear LR decay</strong> instead of continuing
+the cosine, so it trained its whole second half at a higher rate. That would leave the same
+fingerprint on convergence, so the precision claim cannot be promoted past "consistent with"
+until a clean run exists. The finding that does not depend on the confound: <strong>giving the agent a
+corrective action is not the same as giving it a reason to learn one.</strong></p>
+<p>Full analysis: <a href="../analysis_v1_v2/">22 clearances vs 15</a>. Raw tests:
+<a href="../analysis_log/#t-1_27-bands">test log, 17 Aug</a>.</p>
 <hr />
 <h2 id="non-mdp-changes">Changes outside the MDP<a class="headerlink" href="#non-mdp-changes" title="Permanent link">&para;</a></h2>
 <p>Work that does not change what the agent optimises but does change what you can see or trust.</p>
