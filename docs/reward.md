@@ -55,7 +55,7 @@ Where:
 ```
 prox    = 1 - min(1, ttl / horizon)     # 0 = far from landing, 1 = imminent
 weight  = REWARD_DEVIATION_LANDING_BASELINE + (1 - REWARD_DEVIATION_LANDING_BASELINE) * prox
-horizon = EPISODE_STEPS * TIME_BETWEEN_ACTIONS = 128 * 22 = 2816 s
+horizon = EPISODE_STEPS * TIME_BETWEEN_ACTIONS = 64 * 45 = 2880 s
 ```
 
 Each aircraft's absolute deviation is weighted **linearly by landing proximity**:
@@ -237,7 +237,7 @@ so `r_parts.total()` is recomputed with it before being passed to SB3.
 
 ```
 step(action)
-  -> apply_action_and_advance()                    # advance 22 s (TIME_BETWEEN_ACTIONS)
+  -> apply_action_and_advance()                    # advance 45 s (TIME_BETWEEN_ACTIONS)
   -> advance_multiple_steps(max_steps_per_episode) # NOOP rollout -> current_predicted_world
   -> calculate_reward(...)
        deviation  = _deviation_reward_rollout(predicted_world, t)

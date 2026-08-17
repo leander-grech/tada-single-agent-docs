@@ -4,15 +4,19 @@
     A single RL agent sequences up to 10 inbound aircraft into Milan Malpensa, issuing one
     clearance per 45 s to hit AMAN target landing times without losing separation.
 
-    **Current best — run `1_26`, scored on 100 fixed seeds:** success **0.65–0.70**, losses of
-    separation **0.09**, worst-aircraft deviation **45 s**. The clean-subset success rate that
-    had held near 53.7% across twenty runs reached **0.71**. Run `1_27` is training on a
-    reduced 15-clearance set. See the [experiment log](experiments.md#recent-runs).
+    **Current best — run `1_26`, 22 clearances, scored on 100 fixed seeds:** success **0.70**,
+    losses of separation **0.07**, worst-aircraft deviation **43 s**. The clean-subset success
+    rate that had held near 53.7% across twenty runs reached **0.753**.
+
+    **Run `1_27` tested a reduced 15-clearance set on top and did not beat it** — success
+    **0.64**, a statistical tie, but worst-aircraft deviation **doubled to 87 s**. It learns much
+    faster and converges worse, and a mid-run crash changed its learning-rate schedule, so the
+    comparison is not decisive. See [22 clearances vs 15](analysis_v1_v2.md).
 
     **Read numbers only from `analysis/track_run.py`.** The in-training `success_rate` is a
     5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.
 
-![Run 1_26 scored on 100 fixed eval seeds](assets/1_26_training_curve.png)
+![Runs 1_26 and 1_27 scored on 100 fixed eval seeds](assets/1_26_vs_1_27_training_curve.png)
 
 - **Algorithm:** PPO with a custom autoregressive policy (`ATCAutoregressivePolicy`) — aircraft
   head → clearance head conditioned on the sampled aircraft, masks read from the observation.
@@ -65,6 +69,9 @@ lightweight *inference* set; add `pip install -e .[train]` for the full training
 | [Instrumentation](instrumentation.md) | every TensorBoard metric and what to watch |
 | [Experiment log](experiments.md) | what changed in each run and what we learned |
 | [Successful results](successful_results.md) | curated renders + refusal-shield sweeps for the best checkpoints, per run |
+| [How an agent is tested](analysis_methods.md) | every metric defined from the code — success, the clean set, pass@k, what not to quote |
+| [Test log](analysis_log.md) | every test run against an agent, in order, with the question it settled |
+| [22 clearances vs 15](analysis_v1_v2.md) | the `1_26` vs `1_27` head-to-head |
 | [Roadmap](roadmap.md) | what's next, and what is designed but unbuilt |
 
 ## Build the docs

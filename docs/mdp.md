@@ -21,7 +21,7 @@ Source: `atc_env/single_agent_env.py`, `config/config.py`
 ## Gym environment class
 
 `ATCSingleAgentEnv(gym.Env)` — single-agent env. The **default** action space is a **factored,
-autoregressive** `(aircraft, clearance)` pair; a legacy flat `Discrete(220)` is retained behind
+autoregressive** `(aircraft, clearance)` pair; a legacy flat `Discrete(150)` is retained behind
 `Config.USE_AUTOREGRESSIVE_ACTIONS = False`.
 
 ```python
@@ -112,20 +112,30 @@ values below are the fallback / cap reference.
 
 | Parameter | Value | Meaning |
 |---|---|---|
-| `EPISODE_STEPS` | 128 | Fixed-horizon fallback / cap reference |
-| `TIME_BETWEEN_ACTIONS` | 22 s | Sim seconds advanced per env step (**was 45**; halved for finer temporal control) |
-| Fallback wall-clock horizon | **≈ 2 816 s (47 min)** | 128 × 22 |
+| `EPISODE_STEPS` | 64 | Fixed-horizon fallback / cap reference |
+| `TIME_BETWEEN_ACTIONS` | **45 s** | Sim seconds advanced per env step |
+| `MIN_EPISODE_STEPS` / `MAX_EPISODE_STEPS` | 48 / 130 | floor and cap on the per-scenario horizon |
+| `HORIZON_STEP_MARGIN` | 6 | extra steps so the last aircraft can land and settle (~270 s) |
+| Fallback wall-clock horizon | **2 880 s (48 min)** | 64 × 45 |
 
 Truncation fires when `_steps >= max_steps_per_episode`.
 
 !!! note
-    `SECONDARY_TIME_BETWEEN_ACTIONS = 22 s` (same as primary; used when a repeat
+    `SECONDARY_TIME_BETWEEN_ACTIONS = 45 s` (same as primary; used when a repeat
     clearance is pending). `EPISODE_TIMEOUT = 30 s` is a wall-clock guard for
     env-runner processes only — it does not change the MDP horizon.
 
+!!! warning "The 22 s interval was tested and lost"
+    Runs 9 and 10 halved `TIME_BETWEEN_ACTIONS` to 22 s (doubling every step-count
+    constant in tandem). It destabilised training and was reverted; every run from `1_18`
+    onward is back on **45 s**. The experiment is written up in the
+    [experiment log](experiments.md#run-9) — the constants above are the live ones.
+
 ## Action mask
 
-`action_masks()` (`single_agent_env.py:601`) returns a flat `bool[220]` vector.
+`action_masks()` (`single_agent_env.py:601`) returns a flat
+`bool[N_AIRCRAFT_MAX × N_CLEARANCES]` vector — **150** under the current v2 clearance set,
+220 under v1.
 The mask is built from two observation sub-keys written every step:
 
 - `mask_aircraft[ac]` — 1 if aircraft slot `ac` holds a live, active aircraft.

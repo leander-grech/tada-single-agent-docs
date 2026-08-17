@@ -169,7 +169,7 @@ so the rollout is essentially always clear.
 ### …but the metric that said so was measuring the wrong thing
 
 Across runs `1_17`–`1_24_pms`, `eval_success/no_near_conflicts_mean` sat at **0.99–1.00**, which
-was read as "conflicts are solved, only deviation remains". [Run 16](experiments.md#run-16) put
+was read as "conflicts are solved, only deviation remains". [Run `1_25`](experiments.md#recent-runs) put
 the realised gate in force on the trombone and the same metric reads **0.774**.
 
 **~23 % of evaluation episodes contain a real loss of separation.** The 0.99–1.00 figure was a

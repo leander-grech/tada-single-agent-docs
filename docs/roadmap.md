@@ -2,19 +2,28 @@
 
 !!! abstract "TL;DR"
     The deviation ceiling **broke** in run 1_26 — see the [experiment log](experiments.md#recent-runs).
-    What remains splits cleanly: about two-thirds of residual failures are a *precision*
-    problem, one-third *reliability*, and there is a queue of designed-but-unbuilt observation
-    fixes.
+    Run 1_27's reduced clearance set **did not build on it**, and the run that would settle why
+    has not been done. What remains splits cleanly: about two-thirds of residual failures are a
+    *precision* problem, one-third *reliability*, and there is a queue of designed-but-unbuilt
+    observation fixes.
+
+    **Top of the list:** re-run clearance set v2 uninterrupted on run 1_26's exact schedule.
+    Run 1_27 crashed mid-run and resumed on a different learning-rate decay, so "15 actions
+    converge worse" and "a linear late-LR converges worse" are currently the same measurement.
+    See [22 clearances vs 15](analysis_v1_v2.md#confound).
 
 ## Where the frontier actually is
 
 Measured, not inferred — from `analysis/attempts_to_solve.py` over all 100 eval seeds:
 
-- Deterministic **0.63**, pass@1 **0.56**, pass@20 **0.82**. The ~19-point gap is
-  **reliability**, recoverable at inference by best-of-n, a shield, or a lower sampling
-  temperature, with no retraining at all. This is the cheapest win available.
+- Deterministic **0.63**, pass@1 **0.56**, pass@20 **0.82**. The gap from the single-shot rate
+  to the asymptote — **0.26** — is **reliability**, recoverable at inference by best-of-n, a
+  shield, or a lower sampling temperature, with no retraining at all. This is the cheapest win
+  available.
 - Of the 18 never solved in 20 attempts: **12 precision-bound** (under 20% of attempts bust,
-  tier 4 on 73% of attempts, tier 5 never) and **5 safety-bound** (bust on ~100%).
+  tier 4 on 73% of attempts, tier 5 never) and **6 safety-bound** (four bust on 100% of
+  attempts, the others on 95% and 70%). Classification rule and seed lists on the
+  [test log](analysis_log.md#t-attempts-1_26).
 
 Those need opposite fixes, which is why a plain success rate was never going to tell us what
 to build next.
@@ -29,7 +38,7 @@ Each has a worked-out design and measurements behind it.
 | **Δt-stamped action history** | History rows carry no time and per-aircraft buffers are mutually unaligned | the `step` field already exists in `_action_history` and is discarded at the observation boundary |
 | **`time_to_conflict` should match the reward** | Observable ramps linearly over 20 min; the [conflict penalty](reward.md#conflict-penalty) decays exponentially with a 4-min half-life | at 240 s out the reward has halved while the observable still reads 0.80 |
 | **Action cost waived under urgency** | Scale the cost by `(1 − urgency)` rather than switching on a conflict flag | a binary switch is exploitable — hovering a pair at 4.9 NM costs ~0.025/step and would waive up to 0.30; the continuous form is self-policing at ~33:1 |
-| **Finer clearance magnitudes (CD2)** | The 12 precision-bound seeds reach tier 4 and cannot cross it | partly addressed by v2's MEDIUM steps and `SHORTEN_TROMBONE`; run 1_27 tests it |
+| **Finer clearance magnitudes (CD2)** | The 12 precision-bound seeds reach tier 4 and cannot cross it | **tested and did not deliver.** v2's MEDIUM steps and `SHORTEN_TROMBONE` left worst-aircraft deviation at 87 s against 1_26's 43 s — [the head-to-head](analysis_v1_v2.md#head-to-head) |
 
 ## Tried and abandoned
 
@@ -44,8 +53,11 @@ Each has a worked-out design and measurements behind it.
 
 - **The `USE_LOG_DEVIATION_OBS = False` ablation.** Run 1_26 shipped three changes together,
   so its result attributes to the bundle and not to a part. The flag exists to make this cheap.
+- **A clean v2 re-run** — the single highest-value experiment available. `--warmup-frac 0.08`,
+  10M steps, no resume. Until it exists the v1-vs-v2 comparison has two variables.
 - **`cd4_reachability_probe.py` / `cd4_granularity_probe.py`** — would answer the reachability
-  question directly rather than by inference.
+  question directly rather than by inference. Still hardcode v1 action names, so they need a
+  small fix before they run under v2.
 - **PMS transfer.** More attractive than it was: point-merge's known blocker was the
   observation norms, which is exactly what the log-scaling fixed
   (`time_to_target` saturation 71.4% → 15.1% on PMS).
@@ -72,8 +84,12 @@ Each has a worked-out design and measurements behind it.
 
 ## In flight
 
-- [ ] **Finer / continuous actions** (item 1) — now the prime suspect: every optimisation and
-  reward lever has been exhausted without breaking the deviation floor.
+- [x] **Reduced clearance set (v2, 15 actions)** — Run 1_27, complete at 10M on 12 Aug. Success
+  0.64 against 1_26's 0.70 (a tie), worst-aircraft deviation **87 s against 43 s** (not a tie).
+  Markedly more sample-efficient early — 0.25 success at 2M where 1_26 is at 0.00 — then
+  plateaus. **Confounded by a mid-run crash and resume**; a clean re-run is item 1 above.
+- [ ] **Finer / continuous actions** (item 1) — still open. Note that 1_27 moved *coarser* on
+  turns and the trombone while adding MEDIUM speed steps, so it is not a test of this.
 - [~] **Finer temporal control** — `TIME_BETWEEN_ACTIONS` 45 → 22 s so the agent acts ~2× as often
   per scenario (a *structural* limit distinct from item 1: only one aircraft can be commanded per
   step). **First data (Run 9):** a 22 s warm-restart of Run 8's 2 M checkpoint (`atc_run_1_16_b`)

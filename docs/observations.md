@@ -120,7 +120,7 @@ should do.
 - `mask_action_per_ac[i, j]` = 1 if clearance `j` is geometrically/structurally
   valid for the aircraft in slot `i` (computed by `action_mask.compute_action_mask`).
 
-These two masks are combined in `action_masks()` to produce the flat `bool[220]`
+These two masks are combined in `action_masks()` to produce the flat `bool[150]`
 mask consumed by `MaskablePPO`.
 
 ---

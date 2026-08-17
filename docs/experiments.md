@@ -8,7 +8,10 @@
 
     The headline: run **1_26** broke a deviation ceiling that twenty runs of reward and
     optimiser tuning had left intact, taking clean-subset success from **0.537 to 0.75** while
-    *halving* losses of separation. Run **1_27** is testing a reduced clearance set on top.
+    *halving* losses of separation. Run **1_27** then tested the reduced 15-clearance set on top
+    and **did not improve on it** — it learns markedly faster and converges slightly worse, with
+    a confound that stops the comparison being decisive. Full analysis:
+    [22 clearances vs 15](analysis_v1_v2.md).
 
     Also here: [changes outside the MDP](#non-mdp-changes) — rendering, tooling, and seven
     infrastructure bugs, several of which had been silently wrong for many runs.
@@ -373,8 +376,20 @@ window and is not comparable — it read 1.00 for `1_22` whose true rate was 0.3
 | `1_22` | 0.38 | 0.17 | 0.458 | 3.25 | 179 s | best of the pre-1_26 era |
 | `1_24_pms` | — | — | — | — | — | BGY point-merge; near the do-nothing floor, 0/100 success |
 | `1_25` | 0.44 | 0.18 | 0.537 | 3.20 | 192 s | realised-only conflict gate; a semantics fix, not a capability change |
-| **`1_26`** | **0.65** | **0.09** | **0.714** | **4.25** | **45.5 s** | severity redesign + exponential decay + log deviation observable |
-| `1_27` | *training* | | | | | clearance set v2 |
+| **`1_26`** | **0.70** | **0.07** | **0.753** | **4.38** | **43.4 s** | severity redesign + exponential decay + log deviation observable |
+| `1_27` | 0.64 | 0.10 | 0.711 | 4.01 | 87.3 s | clearance set v2 — 15 actions |
+
+`1_26` and `1_27` are quoted at their **10M step checkpoints**; the earlier rows are best
+checkpoints. `1_26`'s `final_model` scores 0.65 and its `best_model` 0.66, so its 10M checkpoint
+is not a lucky pick; `1_27`'s `best_model` scores 0.62 and its `final_model` 0.58.
+
+!!! note "Both checkpoints were scored twice, and the spread is the error bar"
+    An independent same-day re-score of the same two checkpoints on the same pool returned
+    **0.69 / 41.3 s** for `1_26` and **0.60 / 92.3 s** for `1_27`
+    (`analysis/2026-08-17_1_2{6,7}_at10M_perseed.csv`). The observation frame is drawn from a
+    global RNG that `reset()` never reseeds, so repeated scoring of one checkpoint moves by a few
+    seeds. **Both draws agree on the conclusion:** the success gap (0.06 and 0.09) is inside the
+    ≈0.13 significance threshold, and the deviation gap (44 s and 51 s) is not.
 
 ![Run 1_26 scored on 100 fixed eval seeds](assets/1_26_training_curve.png)
 
@@ -408,7 +423,8 @@ cap 20) separates *capability* from *reliability*:
 - deterministic **0.63**, pass@1 **0.56**, pass@20 **0.82** — so ~19 points is reliability,
   recoverable at inference by best-of-n or a shield with no retraining.
 - Of the 18 never solved: **12 are precision-bound** (under 20% of attempts bust, tier 4 on
-  73% of attempts, tier 5 never) and **5 are safety-bound** (bust on ~100% of attempts).
+  73% of attempts, tier 5 never) and **6 are safety-bound** (bust on 70–100% of attempts).
+  Rule and seed lists: [test log](analysis_log.md#t-attempts-1_26).
 
 ![Attempts to solve, pass@k, and the per-attempt outcome spread](assets/1_26_attempts_to_solve.png)
 

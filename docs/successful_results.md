@@ -345,6 +345,93 @@ To add a showcase for run **N** (`atc_run_1_X`):
      --seeds 100 --out-dir analysis/<date>_shield_benchmark_1_X
    ```
    then render the summary + per-seed pivots from the resulting `results.csv`.
-3. **Cross-link.** Add a `## Run N — \`atc_run_1_X\` best model` heading whose first line is
-   `→ **Experiment log:** [Run N — …](experiments.md#run-N)` — the `experiments.md` headings
-   carry stable `{ #run-N }` anchors for exactly this.
+3. **Cross-link.** Add a heading whose first line points back at the experiment log — those
+   headings carry stable anchors for exactly this purpose:
+
+   ```markdown
+   ## Run N — `atc_run_1_X` best model { #run-N-atc_run_1_X }
+
+   → **Experiment log:** [Run N — what changed](experiments.md#run-N).
+   ```
+
+---
+
+## Runs 1_26 / 1_27 — 22 clearances vs 15, side by side { #run-1_26-1_27 }
+
+→ **Experiment log:** [Runs 1_18–1_27](experiments.md#recent-runs) ·
+**Analysis:** [22 clearances vs 15](analysis_v1_v2.md)
+
+Both checkpoints are at exactly **10M steps**, both deterministic, both replaying the *same*
+scenario with the *same* pinned observation frame. Run `1_26` uses the 22-clearance set
+(`TADA_ACTION_SET=v1`), run `1_27` the 15-clearance set. The action markers on the map decode
+against the legend in the left column, which is generated from whichever set is active — **the
+ids do not mean the same thing in the two clips**. Marker `8` is a right turn under v1 and
+`LENGTHEN_TROMBONE` under v2.
+
+!!! warning "Both sides pin `--rng-seed`, and that is not optional"
+    The observation frame is drawn from a global RNG that `reset()` never reseeds, so the *same*
+    deterministic checkpoint on the *same* scenario can reach a different outcome in a different
+    process. Measured: run `1_27` at 10M solves eval seed `41` at tier 5 in one invocation and
+    stalls at tier 4 in another, with nothing changed but the frame. Any single-episode A/B
+    without `--rng-seed` is partly comparing noise. See
+    [How an agent is tested](analysis_methods.md#repro).
+
+### Seed 1194819984 — the reduced set wins
+
+| | end reason | tier | total \|deviation\| | clearances issued |
+|---|---|---|---|---|
+| `1_26` — 22 clearances | `delayed` | 4 | 137.1 s | 40 |
+| **`1_27` — 15 clearances** | **`success`** | **5** | **14.8 s** | 36 |
+
+<p><strong>22 clearances</strong> — lands everyone, misses the ±60 s bar:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/ab_seed1194819984_v1_22clr.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>15 clearances</strong> — same scenario, solved, with fewer clearances:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/ab_seed1194819984_v2_15clr.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+### Seed 1699226064 — the reduced set fails badly
+
+The largest margin the other way, and not a near miss: `1_27` empties the airspace in **28
+steps** against `1_26`'s 70, landing the fleet 4 748 s off schedule in aggregate. It is also
+censored under [attempts-to-solution](analysis_log.md#t-attempts-1_27) — unsolved in 20
+stochastic tries, best tier 2 — so this is a capability failure, not an unlucky rollout.
+
+| | steps | end reason | tier | total \|deviation\| | clearances issued |
+|---|---|---|---|---|---|
+| **`1_26` — 22 clearances** | 70 | **`success`** | **5** | **113.3 s** | 54 |
+| `1_27` — 15 clearances | 28 | `delayed` | 0 | 4 747.9 s | 20 |
+
+<p><strong>22 clearances</strong> — works the fleet for 70 steps and solves it:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/ab_seed1699226064_v1_22clr.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>15 clearances</strong> — same scenario, collapses:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/ab_seed1699226064_v2_15clr.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+!!! note "Neither clip is the result"
+    The result is the [100-seed table](analysis_v1_v2.md#head-to-head). Across the pool the two
+    policies disagree in **both** directions — 49 scenarios both solve, 20 only `1_26`, 11 only
+    `1_27`, 20 neither. These two clips are the largest margin from each of the middle columns,
+    shown together precisely so the pair is not an argument for either side.
+
+### The 15-clearance agent over eight consecutive eval scenarios
+
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_27_v2_15clr_det_ep8_reel.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+The first eight seeds of the evaluation pool, in pool order, deterministic, no shield. Useful for
+watching *how* the reduced set flies rather than whether it wins — in particular the trombone
+being lengthened and shortened within a single episode, which was impossible under v1.

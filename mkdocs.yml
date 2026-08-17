@@ -5,6 +5,8 @@ docs_dir: docs
 theme:
   name: material
   features:
+    - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
     - navigation.top
     - navigation.tracking
@@ -32,6 +34,8 @@ markdown_extensions:
   - tables
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.highlight:
       anchor_linenums: true
   - toc:
@@ -39,12 +43,18 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - MDP & Environment: mdp.md
-  - Observations: observations.md
-  - Reward: reward.md
-  - Loss of separation: separation.md
-  - Training: training.md
-  - Instrumentation: instrumentation.md
-  - Experiment log: experiments.md
-  - Successful results: successful_results.md
+  - Reference:
+      - MDP & Environment: mdp.md
+      - Observations: observations.md
+      - Reward: reward.md
+      - Loss of separation: separation.md
+      - Training: training.md
+      - Instrumentation: instrumentation.md
+  - Experiments:
+      - Experiment log: experiments.md
+      - Successful results: successful_results.md
+  - Analysis:
+      - How an agent is tested: analysis_methods.md
+      - Test log: analysis_log.md
+      - 22 clearances vs 15: analysis_v1_v2.md
   - Roadmap: roadmap.md

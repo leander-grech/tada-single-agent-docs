@@ -136,7 +136,7 @@ On resume, `train_env` is restored via `VecNormalize.load()` from the checkpoint
 
 ### Per-scenario episode horizon
 
-Instead of a fixed 128-step cap, the episode length is sized to each scenario's latest arrival ETA (`Config.USE_PER_SCENARIO_HORIZON = True`):
+Instead of a fixed 64-step cap, the episode length is sized to each scenario's latest arrival ETA (`Config.USE_PER_SCENARIO_HORIZON = True`):
 
 ```
 max_steps = clip(ceil(max_arrival_eta / TIME_BETWEEN_ACTIONS) + HORIZON_STEP_MARGIN,
@@ -145,28 +145,28 @@ max_steps = clip(ceil(max_arrival_eta / TIME_BETWEEN_ACTIONS) + HORIZON_STEP_MAR
 
 | Constant | Value | Notes |
 |---|---|---|
-| `HORIZON_STEP_MARGIN` | 12 | Extra steps for the last aircraft to land and settle (≈ 264 s) |
-| `MIN_EPISODE_STEPS` | 96 | Floor |
-| `MAX_EPISODE_STEPS` | 260 | Cap; covers the ~242-step worst-case eval scenario |
+| `HORIZON_STEP_MARGIN` | 6 | Extra steps for the last aircraft to land and settle (≈ 270 s) |
+| `MIN_EPISODE_STEPS` | 48 | Floor |
+| `MAX_EPISODE_STEPS` | 130 | Cap (bounds per-step rollout cost) |
 
-This prevents structural timeouts (all five eval scenarios have a latest ETA beyond the 128 × 22 s = 2816 s fixed horizon).
+This prevents structural timeouts: the eval scenarios' latest arrival ETAs run well beyond the
+64 × 45 s = 2880 s fixed horizon. Measured episode lengths on the 100-seed pool are 3105–5715 s.
 
-!!! note "Interval halved — `TIME_BETWEEN_ACTIONS` 45 → 22 s"
-    The simulation interval (sim seconds advanced per env step) was halved so the agent can act
-    ~twice as often within the same scenario — it needs the extra decision points to switch
-    between aircraft on the hardest scenarios, where only one aircraft can be commanded per step.
-    Every step-count constant that encodes an **absolute duration** (`EPISODE_STEPS`, the three
-    horizon caps above, `NEIGHBOR_LOOKAHEAD_MULTIPLIER`, `SCENARIO_INITIAL_CONFLICT_FREE_STEPS`,
-    `SUCCESS_NEAR_CONFLICT_CLEAR_STEPS`) was **doubled in tandem** to preserve its wall-clock
-    meaning. Net effect: episodes now span ~2× the env-steps (so `gamma = 0.995` matters more for
-    credit-assignment reach) and per-episode rollout compute roughly doubles.
+!!! warning "The halved 22 s interval was reverted"
+    Runs 9 and 10 halved `TIME_BETWEEN_ACTIONS` 45 → 22 s (doubling `EPISODE_STEPS`, the three
+    horizon caps, `NEIGHBOR_LOOKAHEAD_MULTIPLIER`, `SCENARIO_INITIAL_CONFLICT_FREE_STEPS` and
+    `SUCCESS_NEAR_CONFLICT_CLEAR_STEPS` in tandem to preserve their wall-clock meaning) so the
+    agent could act twice as often. It **destabilised training and lost** — see the
+    [experiment log](experiments.md#run-9). Every run from `1_18` onward is back on 45 s, and
+    the constants in the table above are the live ones.
 
 ---
 
 ## PPO hyperparameters
 
 `Config.USE_AUTOREGRESSIVE_ACTIONS = True` (default) uses vanilla `PPO` with `ATCAutoregressivePolicy`.
-The legacy flat `Discrete(220)` + `MaskablePPO` path is selected by setting the flag to `False`.
+The legacy flat `Discrete(150)` + `MaskablePPO` path is selected by setting the flag to `False`
+(`Discrete(N_AIRCRAFT_MAX × N_CLEARANCES)`, so 220 under the v1 clearance set).
 
 ### Shared hyperparameters (both paths)
 
