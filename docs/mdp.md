@@ -104,7 +104,7 @@ a_clr = flat  % n_clearances
 The callsign for slot `a_air` is looked up from `_prev_aircraft_order` (the permuted,
 stable slot-to-callsign mapping built each step by `build_global_observation`).
 
-## Episode length
+## Episode length { #episode-length }
 
 The horizon is **sized per scenario** to the latest arrival ETA (see
 [Training → per-scenario episode horizon](training.md#per-scenario-episode-horizon)); the fixed

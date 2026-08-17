@@ -43,7 +43,7 @@ The `atc_run_1_N` suffix increments each launch; the relevant ones are noted per
 | 8 | `atc_run_1_16` | →7.1M† | **5-tier success** + autoregressive policy + per-scenario horizon + DOF action cost | **50% success peak** (@5.7M), ~30% plateau | worst-aircraft dev → **99 s** (ceiling broken); oscillates, not monotone |
 | 9a | `atc_run_1_16_a` | 2→4M | 45 s **control** (Run 8 ckpt @2M continued) | ~40% peak, then drifts | reproduces Run 8 plateau/oscillation |
 | 9b | `atc_run_1_16_b` | 2→4M | **½ interval 45→22 s** + warm-restart LR (`--initial-lr 1e-4`) | best per-AC dev (worst 99 s, tier1 0.98) but **regresses to ~0–10%** | 22 s transfer mid-run destabilising; inconclusive |
-| 10 | `atc_run_1_17` | 5M (running) | **fresh** 22 s run (clean interval test) | — *(early training)* | results pending |
+| 10 | `atc_run_1_17` | 5.14M | **fresh** 22 s run (clean interval test) | **−37.2** | 22 s **lost**; every run from `1_18` is back on 45 s |
 
 † Run 6 targeted 5M but was stopped at ~3.14M. `atc_run_1_11` (the launch that introduced
 the goal bonus + experiment-dir scaffolding) aborted at ~2k steps and was relaunched as run 6.
@@ -51,7 +51,7 @@ the goal bonus + experiment-dir scaffolding) aborted at ~2k steps and was relaun
 Run 8 replaces that gate with a 5-tier system; extended in-place to ~7.1M it reaches a **50% success
 peak** (~30% plateau) with the worst-aircraft deviation down to ~99 s. Runs 9a/9b spin off its 2M
 checkpoint to test the halved 22 s interval against a 45 s control; Run 10 (`atc_run_1_17`) is a
-fresh 22 s run still in early training.
+fresh 22 s run, which settled it — the halved interval lost and was reverted.
 
 ---
 
@@ -354,13 +354,20 @@ training. The per-aircraft deviation gain is real but did not hold. The interval
 
 ---
 
-## Run 10 — Fresh 22 s run (`atc_run_1_17`, 5 M target) — *in progress* { #run-10 }
+## Run 10 — Fresh 22 s run (`atc_run_1_17`, 5.14 M) { #run-10 }
 
-!!! warning "Early training — no results yet"
-    A fresh, from-scratch run on the 22 s regime (no warm restart), launched with a 5 M-step target
-    to give a clean read on finer temporal control. At the time of writing it is only ~12 k steps
-    in, so there are **no eval results to report** — this entry is a placeholder to fill once it has
-    trained. The doubled per-episode env-steps make this the most compute-heavy run so far.
+A fresh, from-scratch run on the 22 s regime (no warm restart), to give a clean read on finer
+temporal control after Run 9's warm-restart result was confounded by the mid-run regime change.
+Every step-count constant encoding an absolute duration was doubled in tandem.
+
+**Results.** Ran to 5.14 M steps. Final `eval/mean_reward` **−37.2**, against Run 8's **+3.5** on
+the same 45 s-trained lineage. The doubled per-episode env-steps also made it the most
+compute-heavy run to that date, for no return.
+
+**Finding — the 22 s interval was tested cleanly and lost.** It was reverted; every run from
+`1_18` onward is back on **45 s**, and `TIME_BETWEEN_ACTIONS` has not moved since. Acting twice as
+often did not buy finer control, it just doubled the credit-assignment horizon. The reference
+values on [MDP](mdp.md#episode-length) and [Training](training.md) are the 45 s ones.
 
 ---
 
@@ -433,14 +440,31 @@ authority is roughly 19× weaker upward than downward, so this motivated `SHORTE
 the [v2 clearance set](mdp.md#action-set-versions) — on those same
 seeds the agent lengthens the trombone in 12/12 episodes and could never take it back.
 
-### Run 1_27 — reduced clearance set (training)
+### Run 1_27 — reduced clearance set { #run-1_27 }
 
-Changes only the action side on top of 1_26: 22 clearances → 15, eight turn variants collapsed
-to two, four trombone levels to a reversible ±1 pair, `SPEED_UP_LARGE` dropped, MEDIUM speed
-steps and `SHORTEN_TROMBONE` added. Full set in [MDP](mdp.md#v2-clearances).
+**Changes.** Only the action side, on top of 1_26: 22 clearances → 15, eight turn variants
+collapsed to two, four trombone levels to a reversible ±1 pair, `SPEED_UP_LARGE` dropped, MEDIUM
+speed steps and `SHORTEN_TROMBONE` added. Full set in [MDP](mdp.md#v2-clearances). Riding along,
+none of them MDP: eval every 25k instead of 5k, checkpoints every 25k instead of 10k, and a
+1.93× faster observation build (bit-identical output). Completed at 10M on 12 Aug.
 
-Riding along, none of them MDP: eval every 25k instead of 5k, checkpoints every 25k instead of
-10k, and a 1.93× faster observation build (bit-identical output).
+**Results.** Success **0.64** against 1_26's 0.70 — a tie at this sample size — and
+worst-aircraft deviation **87.3 s** against **43.4 s**, which is not. It leads 1_26 on success at
+every checkpoint through 7M (0.25 at 2M where 1_26 is at 0.00), draws level at 8M, then flattens.
+`SHORTEN_TROMBONE` is issued **5 times in 5 162 clearances**, and 1_27 solves **0 of 1_26's 12
+precision-bound seeds**. Safety-bound failures halved, 6 → 3.
+
+![Runs 1_26 and 1_27 on the same 100 fixed eval seeds](assets/1_26_vs_1_27_training_curve.png)
+
+**Finding.** A smaller action space is much easier to explore and, here, less able to finish the
+job — but the run **crashed at 4.98M and resumed onto a linear LR decay** instead of continuing
+the cosine, so it trained its whole second half at a higher rate. That would leave the same
+fingerprint on convergence, so the precision claim cannot be promoted past "consistent with"
+until a clean run exists. The finding that does not depend on the confound: **giving the agent a
+corrective action is not the same as giving it a reason to learn one.**
+
+Full analysis: [22 clearances vs 15](analysis_v1_v2.md). Raw tests:
+[test log, 17 Aug](analysis_log.md#t-1_27-bands).
 
 ---
 
