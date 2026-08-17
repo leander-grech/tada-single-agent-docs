@@ -90,7 +90,7 @@
 
   
 
-<header class="md-header md-header--shadow" data-md-component="header">
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="TADA Single-Agent RL" class="md-header__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
       
@@ -193,13 +193,122 @@
     
   </nav>
   
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../experiments/" class="md-tabs__link">
+          
+  
+  
+  Experiments
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../analysis_methods/" class="md-tabs__link">
+          
+  
+  
+  Analysis
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../roadmap/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
 </header>
     
     <div class="md-container" data-md-component="container">
       
       
-        
-          
         
       
       <main class="md-main" data-md-component="main">
@@ -213,8 +322,10 @@
                     
 
 
+  
 
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="TADA Single-Agent RL" class="md-nav__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
       
@@ -256,6 +367,63 @@
     
       
       
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
     
@@ -342,6 +510,34 @@
   
     <nav class="md-nav" aria-label="Action space">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#action-set-versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clearance sets are versioned (run 1_27 onward)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Clearance sets are versioned (run 1_27 onward)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v2-clearances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v2 clearances
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#decoding-an-action-single_agent_envpystep" class="md-nav__link">
@@ -516,9 +712,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -543,9 +740,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -570,9 +768,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -597,9 +796,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -624,9 +824,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -651,9 +852,69 @@
     </li>
   
 
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiments
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Experiments
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -678,9 +939,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -702,6 +964,157 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis_methods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How an agent is tested
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis_log/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis_v1_v2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    22 clearances vs 15
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -781,6 +1194,34 @@
   
     <nav class="md-nav" aria-label="Action space">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#action-set-versions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Clearance sets are versioned (run 1_27 onward)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Clearance sets are versioned (run 1_27 onward)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#v2-clearances" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        v2 clearances
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#decoding-an-action-single_agent_envpystep" class="md-nav__link">
@@ -966,11 +1407,22 @@
 
 
 <h1 id="mdp-environment">MDP &amp; Environment<a class="headerlink" href="#mdp-environment" title="Permanent link">&para;</a></h1>
+<div class="admonition abstract">
+<p class="admonition-title">TL;DR</p>
+<p>One agent issues <strong>one clearance per 45 s step</strong> to up to 10 arrivals, chosen as a factored
+<code>MultiDiscrete([10, 15])</code> — aircraft, then clearance. Clearance sets are <strong>versioned</strong>:
+<code>v2</code> (15 actions) from run 1_27, <code>v1</code> (22) frozen so run 1_26 stays replayable.</p>
+<p>An episode ends when every aircraft lands, or <strong>immediately</strong> on a realised loss of
+separation — inside 3 NM <em>and</em> 500 ft on the live world. Predicted conflicts never
+terminate and never gate success; they are priced in the <a href="../reward/#conflict-penalty">reward</a>
+instead. Success is the top of a 5-tier ladder: <strong>all landed, every aircraft within ±60 s</strong>.</p>
+<p><code>timeout</code> has fired zero times in 800 scored episodes — the horizon does not bind.</p>
+</div>
 <p>Source: <code>atc_env/single_agent_env.py</code>, <code>config/config.py</code></p>
 <hr />
 <h2 id="gym-environment-class">Gym environment class<a class="headerlink" href="#gym-environment-class" title="Permanent link">&para;</a></h2>
 <p><code>ATCSingleAgentEnv(gym.Env)</code> — single-agent env. The <strong>default</strong> action space is a <strong>factored,
-autoregressive</strong> <code>(aircraft, clearance)</code> pair; a legacy flat <code>Discrete(220)</code> is retained behind
+autoregressive</strong> <code>(aircraft, clearance)</code> pair; a legacy flat <code>Discrete(150)</code> is retained behind
 <code>Config.USE_AUTOREGRESSIVE_ACTIONS = False</code>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">atc_env.single_agent_env</span><span class="w"> </span><span class="kn">import</span> <span class="n">ATCSingleAgentEnv</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">env</span> <span class="o">=</span> <span class="n">ATCSingleAgentEnv</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;evaluation_mode&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})</span>
@@ -978,10 +1430,10 @@ autoregressive</strong> <code>(aircraft, clearance)</code> pair; a legacy flat <
 <h2 id="action-space">Action space<a class="headerlink" href="#action-space" title="Permanent link">&para;</a></h2>
 <p>Selected by <code>Config.USE_AUTOREGRESSIVE_ACTIONS</code> (default <code>True</code>):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a># default — autoregressive: aircraft head -&gt; clearance head conditioned on the chosen aircraft
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>action_space = MultiDiscrete([N_AIRCRAFT_MAX, N_CLEARANCES]) = MultiDiscrete([10, 22])
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>action_space = MultiDiscrete([N_AIRCRAFT_MAX, N_CLEARANCES]) = MultiDiscrete([10, 15])
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a># legacy flat (USE_AUTOREGRESSIVE_ACTIONS = False)
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>action_space = Discrete(N_AIRCRAFT_MAX * N_CLEARANCES)        = Discrete(220)
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>action_space = Discrete(N_AIRCRAFT_MAX * N_CLEARANCES)        = Discrete(150)
 </code></pre></div>
 <table>
 <thead>
@@ -999,17 +1451,66 @@ autoregressive</strong> <code>(aircraft, clearance)</code> pair; a legacy flat <
 </tr>
 <tr>
 <td><code>N_CLEARANCES</code></td>
-<td>22</td>
-<td><code>config.py</code> (= <code>NUM_ACTIONS</code>)</td>
+<td>15</td>
+<td><code>config.py</code> (= <code>NUM_ACTIONS</code>, from <code>ACTION_SET</code>)</td>
 </tr>
 </tbody>
 </table>
+<h3 id="action-set-versions">Clearance sets are versioned (run 1_27 onward)<a class="headerlink" href="#action-set-versions" title="Permanent link">&para;</a></h3>
+<p><code>Config.ACTION_SET</code> selects which clearance set the environment exposes, and <code>NUM_ACTIONS</code>
+follows from it — which in turn sizes the action space, the clearance head, the mask and the
+action-history one-hot.</p>
+<table>
+<thead>
+<tr>
+<th>set</th>
+<th>clearances</th>
+<th>used by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>v1</code></td>
+<td>22</td>
+<td>every run up to and including <strong>1_26</strong>. Frozen in <code>actions/actions_v1.py</code>; never edited again.</td>
+</tr>
+<tr>
+<td><code>v2</code></td>
+<td>15</td>
+<td><strong>1_27</strong> onward. The reduced set specified by the domain experts.</td>
+</tr>
+</tbody>
+</table>
+<p>A checkpoint can only be loaded into the action space it was trained on. To replay 1_26:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nv">TADA_ACTION_SET</span><span class="o">=</span>v1<span class="w"> </span>python<span class="w"> </span>render_policy.py<span class="w"> </span>--model<span class="w"> </span>experiments/atc_run_1_26_sep3nm/best/best_model.zip
+</code></pre></div>
+<p>It is an environment variable rather than a CLI flag because it is consumed at <em>import</em> time.
+<code>actions/action_set.py::check_checkpoint_compatible</code> reads the clearance count out of a
+checkpoint and fails with that instruction rather than a raw tensor-shape error.</p>
+<p>Only the ACTION side is versioned. Replaying runs ≤ 1_25 is <em>not</em> supported: their observation
+encoding predates the log-deviation change and the severity/proximity split, so they would be
+fed inputs they never trained on.</p>
+<h4 id="v2-clearances">v2 clearances<a class="headerlink" href="#v2-clearances" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a> 0 DO_NOTHING          5 SPEED_UP_MEDIUM       10 SKIP_1_WAYPOINT
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a> 1 SLOW_DOWN_SMALL     6 TURN_LEFT_…_ROUTE     11 SKIP_2_WAYPOINTS_NOT_NEXT
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a> 2 SLOW_DOWN_MEDIUM    7 TURN_RIGHT_…_ROUTE    12 SKIP_3_WAYPOINTS_NOT_NEXT
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a> 3 SLOW_DOWN_LARGE     8 LENGTHEN_TROMBONE     13 SKIP_4_WAYPOINTS_NOT_NEXT
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a> 4 SPEED_UP_SMALL      9 SHORTEN_TROMBONE      14 VECTOR_TO_ILS
+</code></pre></div>
+<p>Speed steps are ±10/20/30 kt, and the set is deliberately <strong>asymmetric</strong> — three levels of
+slowing, two of speeding, no <code>SPEED_UP_LARGE</code>. Arrivals sit near their speed ceiling: six
+consecutive <code>SPEED_UP_LARGE</code> move landing time by only −18 s, against +339 s for six
+<code>SLOW_DOWN_LARGE</code>.</p>
+<p><code>LENGTHEN_TROMBONE</code> and <code>SHORTEN_TROMBONE</code> are exact inverses of one level each and <strong>stack</strong>,
+so three lengthens with no shorten between them give +3. Capacity is 4 levels. Shortening
+cannot go below the baseline route: every aircraft starts with its trombone fully cut out, so
+shorten only undoes the agent's own prior lengthening.</p>
 <h3 id="decoding-an-action-single_agent_envpystep">Decoding an action (<code>single_agent_env.py::step</code>)<a class="headerlink" href="#decoding-an-action-single_agent_envpystep" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># autoregressive: action already is the pair</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">a_air</span><span class="p">,</span> <span class="n">a_clr</span> <span class="o">=</span> <span class="n">action</span>            <span class="c1"># aircraft slot [0, 9], clearance [0, 21]</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1"># legacy flat:</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">a_air</span> <span class="o">=</span> <span class="n">flat</span> <span class="o">//</span> <span class="n">n_clearances</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="n">a_clr</span> <span class="o">=</span> <span class="n">flat</span>  <span class="o">%</span> <span class="n">n_clearances</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># autoregressive: action already is the pair</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">a_air</span><span class="p">,</span> <span class="n">a_clr</span> <span class="o">=</span> <span class="n">action</span>            <span class="c1"># aircraft slot [0, 9], clearance [0, 21]</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># legacy flat:</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">a_air</span> <span class="o">=</span> <span class="n">flat</span> <span class="o">//</span> <span class="n">n_clearances</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="n">a_clr</span> <span class="o">=</span> <span class="n">flat</span>  <span class="o">%</span> <span class="n">n_clearances</span>
 </code></pre></div>
 <p>The callsign for slot <code>a_air</code> is looked up from <code>_prev_aircraft_order</code> (the permuted,
 stable slot-to-callsign mapping built each step by <code>build_global_observation</code>).</p>
@@ -1028,38 +1529,57 @@ values below are the fallback / cap reference.</p>
 <tbody>
 <tr>
 <td><code>EPISODE_STEPS</code></td>
-<td>128</td>
+<td>64</td>
 <td>Fixed-horizon fallback / cap reference</td>
 </tr>
 <tr>
 <td><code>TIME_BETWEEN_ACTIONS</code></td>
-<td>22 s</td>
-<td>Sim seconds advanced per env step (<strong>was 45</strong>; halved for finer temporal control)</td>
+<td><strong>45 s</strong></td>
+<td>Sim seconds advanced per env step</td>
+</tr>
+<tr>
+<td><code>MIN_EPISODE_STEPS</code> / <code>MAX_EPISODE_STEPS</code></td>
+<td>48 / 130</td>
+<td>floor and cap on the per-scenario horizon</td>
+</tr>
+<tr>
+<td><code>HORIZON_STEP_MARGIN</code></td>
+<td>6</td>
+<td>extra steps so the last aircraft can land and settle (~270 s)</td>
 </tr>
 <tr>
 <td>Fallback wall-clock horizon</td>
-<td><strong>≈ 2 816 s (47 min)</strong></td>
-<td>128 × 22</td>
+<td><strong>2 880 s (48 min)</strong></td>
+<td>64 × 45</td>
 </tr>
 </tbody>
 </table>
 <p>Truncation fires when <code>_steps &gt;= max_steps_per_episode</code>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><code>SECONDARY_TIME_BETWEEN_ACTIONS = 22 s</code> (same as primary; used when a repeat
+<p><code>SECONDARY_TIME_BETWEEN_ACTIONS = 45 s</code> (same as primary; used when a repeat
 clearance is pending). <code>EPISODE_TIMEOUT = 30 s</code> is a wall-clock guard for
 env-runner processes only — it does not change the MDP horizon.</p>
 </div>
+<div class="admonition warning">
+<p class="admonition-title">The 22 s interval was tested and lost</p>
+<p>Runs 9 and 10 halved <code>TIME_BETWEEN_ACTIONS</code> to 22 s (doubling every step-count
+constant in tandem). It destabilised training and was reverted; every run from <code>1_18</code>
+onward is back on <strong>45 s</strong>. The experiment is written up in the
+<a href="../experiments/#run-9">experiment log</a> — the constants above are the live ones.</p>
+</div>
 <h2 id="action-mask">Action mask<a class="headerlink" href="#action-mask" title="Permanent link">&para;</a></h2>
-<p><code>action_masks()</code> (<code>single_agent_env.py:601</code>) returns a flat <code>bool[220]</code> vector.
+<p><code>action_masks()</code> (<code>single_agent_env.py:601</code>) returns a flat
+<code>bool[N_AIRCRAFT_MAX × N_CLEARANCES]</code> vector — <strong>150</strong> under the current v2 clearance set,
+220 under v1.
 The mask is built from two observation sub-keys written every step:</p>
 <ul>
 <li><code>mask_aircraft[ac]</code> — 1 if aircraft slot <code>ac</code> holds a live, active aircraft.</li>
 <li><code>mask_action_per_ac[ac, clr]</code> — 1 if clearance <code>clr</code> is currently valid for
   aircraft <code>ac</code> (geometry, route constraints, design limits).</li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">flat_action</span> <span class="o">=</span> <span class="n">ac</span> <span class="o">*</span> <span class="n">n_clearances</span> <span class="o">+</span> <span class="n">clr</span>
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">mask</span><span class="p">[</span><span class="n">flat_action</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>   <span class="c1"># iff both masks are 1</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">flat_action</span> <span class="o">=</span> <span class="n">ac</span> <span class="o">*</span> <span class="n">n_clearances</span> <span class="o">+</span> <span class="n">clr</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">mask</span><span class="p">[</span><span class="n">flat_action</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>   <span class="c1"># iff both masks are 1</span>
 </code></pre></div>
 <p>In the <strong>legacy</strong> flat path, <code>MaskablePPO</code> reads this flat mask and zeros invalid logits before
 sampling or computing the policy gradient. In the <strong>default autoregressive</strong> path the same
@@ -1076,6 +1596,18 @@ clearance heads (see <a href="../training/#policy-network">Training → policy n
 </tr>
 </thead>
 <tbody>
+<tr>
+<td><strong>Realised loss of separation</strong></td>
+<td><code>True</code></td>
+<td><code>False</code></td>
+<td><code>"separation"</code></td>
+</tr>
+<tr>
+<td><strong>Airspace exit</strong></td>
+<td><code>True</code></td>
+<td><code>False</code></td>
+<td><code>"airspace_exit"</code></td>
+</tr>
 <tr>
 <td>All aircraft landed + reaches <strong>Tier 5</strong></td>
 <td><code>True</code></td>
@@ -1096,15 +1628,23 @@ clearance heads (see <a href="../training/#policy-network">Training → policy n
 </tr>
 </tbody>
 </table>
-<p>A realized hard violation <strong>overrides</strong> the reason above (<code>_refine_end_reason</code>): a loss of
-separation → <code>"separation"</code>, an airspace exit → <code>"airspace_exit"</code>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Infringement-<em>truncation</em> is present in the code but <strong>commented out</strong> — episodes are never
-cut short on a violation. Instead, a violation is recorded as the terminal <code>last_end_reason</code>,
-which suppresses any tier bonus and applies the violation penalty (below).</p>
+<p>Since run 1_26 a violation <strong>ends the episode immediately</strong> — the check runs first in
+<code>_check_terminated</code>. A realised loss of separation means some pair was inside <strong>3 NM and
+500 ft</strong> (severity 1.0) on the live world at the current simulation time. Purely predicted
+conflicts never terminate and never gate success, however imminent.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code>"timeout"</code> has been observed <strong>zero</strong> times in 800 scored episodes across eight
+checkpoints — every episode ends by landing or by a bust. The episode horizon does not
+bind in practice.</p>
 </div>
 <h3 id="terminal-reward-adjustment">Terminal reward adjustment<a class="headerlink" href="#terminal-reward-adjustment" title="Permanent link">&para;</a></h3>
+<div class="admonition info">
+<p class="admonition-title">Why the violation penalty is horizon-aware</p>
+<p>Terminating early is an escape hatch whenever mean step reward is negative. On run 1_25 it
+was −0.23, so bailing out at step 20 of 66 would have saved ≈10.6 against a flat 15-point
+penalty. The forfeit term removes the incentive by construction.</p>
+</div>
 <p>A terminal bonus is added to <code>last_reward.bonus</code> <strong>before</strong> <code>r_parts.total()</code> is returned. The old
 flat ±5.0 <code>REWARD_SUCCESS_BONUS</code> is <strong>gone</strong>, replaced by a graduated <strong>5-tier success ladder</strong>
 (highest tier reached wins) plus a hard-violation penalty:</p>
@@ -1118,7 +1658,7 @@ flat ±5.0 <code>REWARD_SUCCESS_BONUS</code> is <strong>gone</strong>, replaced 
 <tbody>
 <tr>
 <td><code>"separation"</code> / <code>"airspace_exit"</code></td>
-<td><code>−REWARD_VIOLATION_PENALTY</code> = −15.0 (suppresses any tier)</td>
+<td><code>−(REWARD_VIOLATION_PENALTY + REWARD_VIOLATION_PER_REMAINING_STEP × remaining_steps)</code> = <code>−(30 + 0.5·r)</code> (suppresses any tier)</td>
 </tr>
 <tr>
 <td><code>"success"</code> / <code>"delayed"</code> / <code>"timeout"</code></td>
@@ -1173,19 +1713,9 @@ tiers (T1–T4) award partial terminal bonus but are <strong>not</strong> counte
 </tr>
 </tbody>
 </table>
-<p>All tiers additionally require the <strong>conflict gate</strong>, selected by
-<code>Config.SUCCESS_CONFLICT_REALISED_ONLY</code>:</p>
-<ul>
-<li><strong><code>True</code> (current, run <code>1_25</code>+)</strong> — no <strong>realised</strong> loss of separation at severity ≥ 0.7
-  (i.e. inside 3 NM) at any point in the episode, read from the <strong>live</strong> world via
-  <code>_episode_violations()</code>.</li>
-<li><strong><code>False</code> (legacy, runs ≤ <code>1_24</code>)</strong> — <code>_steps_since_near_conflict &gt;=
-  SUCCESS_NEAR_CONFLICT_CLEAR_STEPS (3)</code>, evaluated on the <strong>rollout world</strong>
-  (<code>current_predicted_world</code>) after each step.</li>
-</ul>
-<p>The realised gate makes <code>is_success</code> consistent with <code>end_reason</code>: previously an episode could
-report <code>success = True</code> while also being classified <code>"separation"</code>, because the flag consulted
-the forecast and the reward consulted reality. See <a href="../separation/">Loss of separation</a>.</p>
+<p>All tiers require the <strong>relaxed near-conflict gate</strong>: <code>_steps_since_near_conflict &gt;=
+SUCCESS_NEAR_CONFLICT_CLEAR_STEPS (6)</code> rather than "no near-conflict ever". Near-conflict status is
+evaluated on the <strong>rollout world</strong> (<code>current_predicted_world</code>) after each step.</p>
 <h3 id="_evaluate_success-sub-metrics-logged-in-episode_metrics"><code>_evaluate_success</code> sub-metrics (logged in episode_metrics)<a class="headerlink" href="#_evaluate_success-sub-metrics-logged-in-episode_metrics" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1225,19 +1755,15 @@ the forecast and the reward consulted reality. See <a href="../separation/">Loss
 </tr>
 <tr>
 <td><code>success_no_near_conflicts</code></td>
-<td>The gate <strong>in force</strong> (realised by default)</td>
-</tr>
-<tr>
-<td><code>success_no_near_conflicts_predicted</code></td>
-<td>The legacy predicted gate, logged for comparison</td>
+<td><code>steps_since_near_conflict &gt;= 6</code></td>
 </tr>
 <tr>
 <td><code>success_ever_near_conflict</code></td>
-<td>A <strong>predicted</strong> near-conflict was present at some step</td>
+<td>A near-conflict was present at some step</td>
 </tr>
 <tr>
 <td><code>success_steps_since_near_conflict</code></td>
-<td>Steps elapsed since the last predicted near-conflict</td>
+<td>Steps elapsed since last near-conflict</td>
 </tr>
 </tbody>
 </table>
@@ -1339,13 +1865,13 @@ trained policy avoids) is refused with reason <code>interpret_error</code> rathe
 <p><code>next_best</code> is what recovers tier/punctuality; <code>do_nothing</code> mostly only buys safety — see the
 <a href="../successful_results/#run-8-atc_run_1_16">sweep takeaways</a>.</p>
 <h3 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># render with the critical-conflict shield, next-best fallback, stochastic sampling</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>python<span class="w"> </span>render_policy.py<span class="w"> </span>--model<span class="w"> </span>experiments/atc_run_1_16/best/best_model.zip<span class="w"> </span>--out<span class="w"> </span>shielded.mp4<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span>--refuse-on-critical-conflict<span class="w"> </span>--refuse-fallback<span class="w"> </span>next_best<span class="w"> </span>--stochastic
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="c1"># both checks, next-best fallback, benchmark across all eval seeds (no video)</span>
-<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>python<span class="w"> </span>render_policy.py<span class="w"> </span>--model<span class="w"> </span>experiments/atc_run_1_16/best/best_model.zip<span class="w"> </span>--all-eval-seeds<span class="w"> </span>--no-video<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span>--refuse-on-reward-drop<span class="w"> </span>--refuse-on-critical-conflict<span class="w"> </span>--refuse-fallback<span class="w"> </span>next_best
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="c1"># render with the critical-conflict shield, next-best fallback, stochastic sampling</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>python<span class="w"> </span>render_policy.py<span class="w"> </span>--model<span class="w"> </span>experiments/atc_run_1_16/best/best_model.zip<span class="w"> </span>--out<span class="w"> </span>shielded.mp4<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span>--refuse-on-critical-conflict<span class="w"> </span>--refuse-fallback<span class="w"> </span>next_best<span class="w"> </span>--stochastic
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="c1"># both checks, next-best fallback, benchmark across all eval seeds (no video)</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>python<span class="w"> </span>render_policy.py<span class="w"> </span>--model<span class="w"> </span>experiments/atc_run_1_16/best/best_model.zip<span class="w"> </span>--all-eval-seeds<span class="w"> </span>--no-video<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">    </span>--refuse-on-reward-drop<span class="w"> </span>--refuse-on-critical-conflict<span class="w"> </span>--refuse-fallback<span class="w"> </span>next_best
 </code></pre></div>
 <p><code>--stochastic</code> (sample vs. greedy) is orthogonal to shielding; <code>--legacy-interval</code> restores the 45 s
 interval + un-doubled horizon caps so a pre-22 s checkpoint is rendered under its training-time timing.
@@ -1353,15 +1879,15 @@ The shield's effectiveness across the full eval set is reported in
 <a href="../successful_results/#run-8-atc_run_1_16">Successful results → refusal-shield sweep</a>.</p>
 <h2 id="observation-space-summary">Observation space (summary)<a class="headerlink" href="#observation-space-summary" title="Permanent link">&para;</a></h2>
 <p>See <a href="../observations/">observations.md</a> for full spec.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Dict(
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  global:             Box(-1, 1, shape=(4,)),
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  aircraft:           Box(-1, 1, shape=(10, 12)),
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  mask_aircraft:      MultiBinary(10),
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  mask_action_per_ac: MultiBinary((10, 22)),
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  flight_plans_rel:   Box(-1, 1, shape=(10, 20, 11)),
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>  flight_plan_mask:   MultiBinary((10, 20)),
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>  action_histories:   Box( 0, 1, shape=(10,  8, 23)),
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>Dict(
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  global:             Box(-1, 1, shape=(4,)),
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  aircraft:           Box(-1, 1, shape=(10, 12)),
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  mask_aircraft:      MultiBinary(10),
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>  mask_action_per_ac: MultiBinary((10, 22)),
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>  flight_plans_rel:   Box(-1, 1, shape=(10, 20, 11)),
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>  flight_plan_mask:   MultiBinary((10, 20)),
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>  action_histories:   Box( 0, 1, shape=(10,  8, 23)),
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>)
 </code></pre></div>
 
 
@@ -1418,7 +1944,7 @@ The shield's effectiveness across the full eval set is reported in
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>

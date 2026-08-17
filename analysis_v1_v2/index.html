@@ -1,0 +1,1756 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Single-agent ATC arrival sequencing with sb3-contrib MaskablePPO">
+      
+      
+      
+      
+        <link rel="prev" href="../analysis_log/">
+      
+      
+        <link rel="next" href="../roadmap/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>22 clearances vs 15 - TADA Single-Agent RL</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#22-clearances-vs-15" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="TADA Single-Agent RL" class="md-header__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TADA Single-Agent RL
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              22 clearances vs 15
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../mdp/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../experiments/" class="md-tabs__link">
+          
+  
+  
+  Experiments
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../analysis_methods/" class="md-tabs__link">
+          
+  
+  
+  Analysis
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../roadmap/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="TADA Single-Agent RL" class="md-nav__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    TADA Single-Agent RL
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mdp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MDP & Environment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../observations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reward/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reward
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../separation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loss of separation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../training/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Training
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../instrumentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instrumentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiments
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Experiments
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../experiments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiment log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../successful_results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Successful results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis_methods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How an agent is tested
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis_log/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    22 clearances vs 15
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    22 clearances vs 15
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the set was reduced at all
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two sets, side by side
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The two sets, side by side">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What changed, and the evidence for each change
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How a set is selected
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the training run showed
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What the training run showed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#confound" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The confound, stated first
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#head-to-head" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Head to head
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-seed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two policies disagree in both directions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shorten-verdict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Did SHORTEN_TROMBONE earn its place?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verdict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The verdict, and what it does and does not license
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why the set was reduced at all
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two sets, side by side
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The two sets, side by side">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What changed, and the evidence for each change
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How a set is selected
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the training run showed
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What the training run showed">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#confound" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The confound, stated first
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#head-to-head" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Head to head
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-seed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The two policies disagree in both directions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#shorten-verdict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Did SHORTEN_TROMBONE earn its place?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verdict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The verdict, and what it does and does not license
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="22-clearances-vs-15">22 clearances vs 15<a class="headerlink" href="#22-clearances-vs-15" title="Permanent link">&para;</a></h1>
+<div class="admonition abstract">
+<p class="admonition-title">TL;DR</p>
+<p>Run <code>1_27</code> changes exactly one thing on top of <code>1_26</code>: the clearance set, from <strong>22 actions
+to 15</strong>. The set was specified by the domain experts, every cut is backed by measured usage,
+and it adds one genuinely new capability — <strong><code>SHORTEN_TROMBONE</code></strong>, the ability to undo a
+delay the agent had previously added.</p>
+<p><strong>It did not beat the full set.</strong> At 10M steps on the same 100 seeds: success <strong>0.70 → 0.64</strong>
+(a statistical tie) and worst-aircraft deviation <strong>43 s → 87 s</strong> (not a tie). The reduced set
+is markedly <em>more sample-efficient</em> — at 2M steps it is at 0.25 success where the full set is
+at 0.00 — and then it plateaus where the full set keeps sharpening.</p>
+<p><strong>The comparison is not decisive</strong>, because run <code>1_27</code> crashed at 4.98M steps and resumed on a
+<em>different learning-rate schedule</em>, which would leave the same fingerprint. A clean re-run is
+the recommendation.</p>
+</div>
+<p>Source: <code>actions/actions_v1.py</code>, <code>actions/actions_v2.py</code>, <code>actions/action_set.py</code>,
+<code>experiments/*/progress_scored.csv</code>, <code>analysis/2026-08-17_1_27_*</code>.</p>
+<hr />
+<h2 id="why">Why the set was reduced at all<a class="headerlink" href="#why" title="Permanent link">&para;</a></h2>
+<p>Not for its own sake. It came out of a specific measurement — see
+<a href="../analysis_log/#t-attempts-1_26">test log, 11 Aug</a>.</p>
+<p>Of run <code>1_26</code>'s 18 unsolvable seeds, <strong>12 were precision-bound</strong>: they never lose separation,
+they land everything, and they top out at tier 4 because one aircraft misses the ±60 s bar. All
+twelve end <strong>late</strong>, and on all twelve the agent <strong>lengthens the trombone in 12 of 12 episodes at
+roughly 5× the pool-average rate</strong>.</p>
+<p>That is a trap, and it was structural. Under v1 the trombone was a <strong>one-way door</strong>: four
+<code>LENGTHEN_TROMBONE_n</code> clearances existed and no shortening clearance existed at all. Speed
+authority could not compensate — six consecutive <code>SPEED_UP_LARGE</code> move landing time by only
+<strong>−18 s</strong>, against <strong>+339 s</strong> for six <code>SLOW_DOWN_LARGE</code>, because arrivals already sit near their
+speed ceiling. So an agent that over-delayed early had no action available to recover.</p>
+<p>The second observation was that most of v1 was never used. From the 100-seed clearance log
+(<a href="../analysis_log/#t-try25-1_26">11 Aug</a>), everything v2 drops accounts for <strong>7.16%</strong> of all
+clearances issued.</p>
+<hr />
+<h2 id="sets">The two sets, side by side<a class="headerlink" href="#sets" title="Permanent link">&para;</a></h2>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">v1 — 22 clearances (runs ≤ <code>1_26</code>)</label><label for="__tabbed_1_2">v2 — 15 clearances (runs ≥ <code>1_27</code>)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a> 0  DO_NOTHING                                12  TURN_RIGHT_SKIP_1_AND_RETURN_TO_ROUTE_10
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a> 1  SPEED_UP_SMALL                            13  LENGTHEN_TROMBONE_1
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a> 2  SPEED_UP_LARGE                            14  LENGTHEN_TROMBONE_2
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a> 3  SLOW_DOWN_SMALL                           15  LENGTHEN_TROMBONE_3
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a> 4  SLOW_DOWN_LARGE                           16  LENGTHEN_TROMBONE_4
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a> 5  TURN_LEFT_AND_RETURN_TO_ROUTE_5           17  SKIP_1_WAYPOINT
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a> 6  TURN_RIGHT_AND_RETURN_TO_ROUTE_5          18  SKIP_2_WAYPOINTS_NOT_NEXT
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a> 7  TURN_LEFT_AND_RETURN_TO_ROUTE_10          19  SKIP_3_WAYPOINTS_NOT_NEXT
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a> 8  TURN_RIGHT_AND_RETURN_TO_ROUTE_10         20  SKIP_4_WAYPOINTS_NOT_NEXT
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a> 9  TURN_LEFT_SKIP_1_AND_RETURN_TO_ROUTE_5    21  VECTOR_TO_ILS
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>10  TURN_RIGHT_SKIP_1_AND_RETURN_TO_ROUTE_5
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>11  TURN_LEFT_SKIP_1_AND_RETURN_TO_ROUTE_10
+</code></pre></div>
+<p>Eight of these twenty-two are turn variants, and four more are trombone levels that only
+go one way.</p>
+<p>Frozen in <code>actions/actions_v1.py</code> and never edited again, so run <code>1_26</code> stays replayable.</p>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a> 0 DO_NOTHING              5 SPEED_UP_MEDIUM      10 SKIP_1_WAYPOINT
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a> 1 SLOW_DOWN_SMALL         6 TURN_LEFT_..._ROUTE  11 SKIP_2_WAYPOINTS_NOT_NEXT
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a> 2 SLOW_DOWN_MEDIUM        7 TURN_RIGHT_.._ROUTE  12 SKIP_3_WAYPOINTS_NOT_NEXT
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a> 3 SLOW_DOWN_LARGE         8 LENGTHEN_TROMBONE    13 SKIP_4_WAYPOINTS_NOT_NEXT
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a> 4 SPEED_UP_SMALL          9 SHORTEN_TROMBONE     14 VECTOR_TO_ILS
+</code></pre></div>
+<p>Ids are contiguous 0–14 and <strong>do not correspond to v1's ids</strong>. Marker <code>8</code> means a right turn
+under v1 and <code>LENGTHEN_TROMBONE</code> under v2 — which is why the render's action legend is now
+generated from the active enum rather than a fixed table.</p>
+</div>
+</div>
+</div>
+<h3 id="changes">What changed, and the evidence for each change<a class="headerlink" href="#changes" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>change</th>
+<th>v1</th>
+<th>v2</th>
+<th>evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Turn variants collapsed</strong></td>
+<td>8</td>
+<td>2</td>
+<td>Only the plain 10 NM rejoin saw real use (1.54% left / 1.17% right on run <code>1_25</code>). The 5 NM and skip-1 variants were 0.02–0.6% each</td>
+</tr>
+<tr>
+<td><strong>Trombone made reversible</strong></td>
+<td>4 absolute levels, one-way</td>
+<td>1 reversible pair, stacking</td>
+<td>The 12 precision-bound seeds, above. This is the substantive addition</td>
+</tr>
+<tr>
+<td><strong><code>SPEED_UP_LARGE</code> dropped</strong></td>
+<td>present</td>
+<td>removed</td>
+<td>6× <code>SPEED_UP_LARGE</code> = −18 s of landing time vs +339 s for 6× <code>SLOW_DOWN_LARGE</code>. It was 1.4% of clearances</td>
+</tr>
+<tr>
+<td><strong>MEDIUM speed steps added</strong></td>
+<td>±10 / ±30 kt</td>
+<td>±10 / ±20 / ±30 kt</td>
+<td>Fills the gap between a step too small to matter and one that overshoots</td>
+</tr>
+<tr>
+<td><strong>Set made asymmetric</strong></td>
+<td>2 up, 2 down</td>
+<td><strong>2 up, 3 down</strong></td>
+<td>Deliberate: arrivals sit near their speed ceiling, so slowing has far more authority than speeding up</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title"><code>LENGTHEN</code>/<code>SHORTEN</code> are exact inverses, and they stack</p>
+<p>Three lengthens with no shorten between them give +3; capacity is 4 levels. Shortening
+cannot go below the baseline route — every aircraft starts with its trombone fully cut out,
+so shorten only ever undoes the agent's own prior lengthening. The unwind is stack-based
+because insertions nest (<code>A, f1..fn, bn..b1, B</code>), and only levels not yet flown past are
+removable. Verified directly: 3 lengthens + 3 shortens restore the exact original route on
+4/4 aircraft, and 30 randomly interleaved operations leave route length and store capacity
+identical to the start.</p>
+</div>
+<h3 id="selection">How a set is selected<a class="headerlink" href="#selection" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">ACTION_SET</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;TADA_ACTION_SET&quot;</span><span class="p">,</span> <span class="s2">&quot;v2&quot;</span><span class="p">)</span>     <span class="c1"># config/config.py:217</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">_ACTION_SET_SIZES</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;v1&quot;</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span> <span class="s2">&quot;v2&quot;</span><span class="p">:</span> <span class="mi">15</span><span class="p">}</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">NUM_ACTIONS</span> <span class="o">=</span> <span class="n">_ACTION_SET_SIZES</span><span class="p">[</span><span class="n">ACTION_SET</span><span class="p">]</span>
+</code></pre></div>
+<p>An <strong>environment variable</strong>, not a CLI flag, because <code>actions/action_set.py</code> reads it at <em>import</em>
+time — it sizes the action space, the clearance head, the mask and the action-history one-hot, so
+a flag parsed inside <code>main()</code> would arrive far too late.</p>
+<p><code>check_checkpoint_compatible()</code> reads the clearance-head width straight out of a checkpoint zip
+and exits with the remedy rather than a raw tensor-shape error:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Checkpoint/action-set mismatch.
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  experiments/atc_run_1_26_sep3nm/checkpoints/ppo_tada_9950000_steps.zip
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>  was trained with 22 clearances, but ACTION_SET=&#39;v2&#39; has 15.
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>Re-run with:
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>  TADA_ACTION_SET=v1 python &lt;your command&gt;
+</code></pre></div>
+<hr />
+<h2 id="results">What the training run showed<a class="headerlink" href="#results" title="Permanent link">&para;</a></h2>
+<p>Run <code>1_27</code> launched 11 Aug at commit <code>4a170c6</code>, 10M steps, MXP trombone, on top of run <code>1_26</code>'s
+MDP with only the clearance set changed. It completed 12 Aug.</p>
+<h3 id="confound">The confound, stated first<a class="headerlink" href="#confound" title="Permanent link">&para;</a></h3>
+<p><code>1_27</code> <strong>is not a clean single-variable experiment</strong>, and the reason matters.</p>
+<p>It died at <strong>4 975 000</strong> steps and was resumed the next morning. <code>main.py::_resume_lr_schedule</code>
+does not continue the original cosine — it builds a <strong>linear</strong> decay from the learning rate the
+checkpoint was at (1.846e-4) down to the same floor (3e-5) over the remaining steps. Both runs
+start at 3e-4 and end at 3e-5; <code>1_27</code> spends its whole second half above <code>1_26</code>.</p>
+<p><img alt="Learning-rate schedules for 1_26 and 1_27" src="../assets/lr_schedule_1_26_vs_1_27.png" /></p>
+<div class="admonition danger">
+<p class="admonition-title">The confound points the same way as the effect</p>
+<p>A higher late learning rate is exactly what prevents the fine convergence that
+<strong>worst-aircraft deviation</strong> needs — and worst-aircraft deviation is precisely where <code>1_27</code>
+underperforms. It therefore <strong>cannot be ruled out</strong> as the cause.</p>
+<p>This project has been caught by this before: <code>1_21</code> and <code>1_22</code> are <em>byte-identical code</em>, and
+a fresh warm-up-plus-cosine versus a resume onto a flat rate was the entire difference
+between them.</p>
+</div>
+<p>Two smaller differences rode along, both believed harmless: eval and checkpoint cadence moved
+from 5k/10k to 25k steps — which makes <code>1_27</code>'s <code>best_model</code> a <em>less</em> extreme argmax than
+<code>1_26</code>'s, so if anything it flatters <code>1_27</code> on that one metric — and the bit-identical
+observation-build speed-up.</p>
+<h3 id="head-to-head">Head to head<a class="headerlink" href="#head-to-head" title="Permanent link">&para;</a></h3>
+<p><img alt="1_26 and 1_27 scored on the same 100 fixed eval seeds" src="../assets/1_26_vs_1_27_training_curve.png" /></p>
+<table>
+<thead>
+<tr>
+<th>at 10M steps</th>
+<th>success</th>
+<th>95% CI</th>
+<th>separation</th>
+<th>clean-subset</th>
+<th>tier</th>
+<th>worst-ac dev</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>1_26</code> — 22 clearances</strong></td>
+<td><strong>0.70</strong></td>
+<td>0.60–0.78</td>
+<td>0.07</td>
+<td><strong>0.753</strong></td>
+<td>4.38</td>
+<td><strong>43.4 s</strong></td>
+</tr>
+<tr>
+<td><strong><code>1_27</code> — 15 clearances</strong></td>
+<td><strong>0.64</strong></td>
+<td>0.54–0.73</td>
+<td>0.10</td>
+<td><strong>0.711</strong></td>
+<td>4.01</td>
+<td><strong>87.3 s</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Scored twice, and the spread is the error bar</p>
+<p>An independent same-day re-score of the same two checkpoints on the same pool returned
+<strong>0.69 / 41.3 s</strong> and <strong>0.60 / 92.3 s</strong>
+(<code>analysis/2026-08-17_1_2{6,7}_at10M_perseed.csv</code>). The observation frame comes from a global
+RNG <code>reset()</code> never reseeds, so repeat scoring of one checkpoint moves by a few seeds — here,
+1 seed for <code>1_26</code> and 4 for <code>1_27</code>. <strong>Both draws support the same two conclusions.</strong></p>
+</div>
+<p><strong>Success is a tie.</strong> The gap is 0.06 on the tracked series and 0.09 on the re-score, against a
+95% threshold of ≈0.13 at this sample size (see
+<a href="../analysis_methods/#wilson">Wilson intervals</a>). Claiming that 22 clearances beat 15 on success
+is reading noise.</p>
+<p><strong>Worst-aircraft deviation is not a tie</strong>, and the curve shape is the real evidence:</p>
+<table>
+<thead>
+<tr>
+<th>steps</th>
+<th>1_26 max dev</th>
+<th>1_27 max dev</th>
+<th></th>
+<th>1_26 success</th>
+<th>1_27 success</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1M</td>
+<td>390.0 s</td>
+<td>318.8 s</td>
+<td></td>
+<td>0.00</td>
+<td><strong>0.10</strong></td>
+</tr>
+<tr>
+<td>2M</td>
+<td>330.8 s</td>
+<td>188.0 s</td>
+<td></td>
+<td>0.00</td>
+<td><strong>0.25</strong></td>
+</tr>
+<tr>
+<td>3M</td>
+<td>186.5 s</td>
+<td>145.3 s</td>
+<td></td>
+<td>0.11</td>
+<td><strong>0.38</strong></td>
+</tr>
+<tr>
+<td>4M</td>
+<td><strong>72.2 s</strong></td>
+<td>111.3 s</td>
+<td></td>
+<td>0.41</td>
+<td><strong>0.48</strong></td>
+</tr>
+<tr>
+<td>5M</td>
+<td><strong>61.4 s</strong></td>
+<td>119.5 s</td>
+<td></td>
+<td>0.47</td>
+<td><strong>0.53</strong></td>
+</tr>
+<tr>
+<td>6M</td>
+<td><strong>65.5 s</strong></td>
+<td>111.5 s</td>
+<td></td>
+<td>0.50</td>
+<td><strong>0.57</strong></td>
+</tr>
+<tr>
+<td>7M</td>
+<td><strong>61.0 s</strong></td>
+<td>110.9 s</td>
+<td></td>
+<td>0.56</td>
+<td><strong>0.60</strong></td>
+</tr>
+<tr>
+<td>8M</td>
+<td><strong>58.5 s</strong></td>
+<td>130.7 s</td>
+<td></td>
+<td>0.59</td>
+<td>0.59</td>
+</tr>
+<tr>
+<td>9M</td>
+<td><strong>44.8 s</strong></td>
+<td>103.8 s</td>
+<td></td>
+<td><strong>0.61</strong></td>
+<td>0.60</td>
+</tr>
+<tr>
+<td>10M</td>
+<td><strong>43.4 s</strong></td>
+<td>87.3 s</td>
+<td></td>
+<td><strong>0.70</strong></td>
+<td>0.64</td>
+</tr>
+</tbody>
+</table>
+<p>Two clean readings come out of this table:</p>
+<ol>
+<li><strong>The reduced set is much more sample-efficient.</strong> <code>1_27</code> leads on success at <em>every</em>
+   checkpoint through 7M. At 2M it is at 0.25 where <code>1_26</code> is at exactly 0.00. A smaller action
+   space is easier to explore, and it shows immediately.</li>
+<li><strong>It then stops improving where <code>1_26</code> doesn't.</strong> From 4M on, <code>1_26</code>'s worst-aircraft
+   deviation walks down 72 → 43 s and crosses the ±60 s bar that T5 requires. <code>1_27</code> never gets
+   below 87 s — still 1.45× the bar. They cross over on success at 8M.</li>
+</ol>
+<h3 id="per-seed">The two policies disagree in both directions<a class="headerlink" href="#per-seed" title="Permanent link">&para;</a></h3>
+<p>Averages hide this. Seed by seed at 10M, deterministic:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>scenarios</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>both solve</td>
+<td><strong>49</strong></td>
+</tr>
+<tr>
+<td>only <code>1_26</code> (22 clearances) solves</td>
+<td><strong>20</strong></td>
+</tr>
+<tr>
+<td>only <code>1_27</code> (15 clearances) solves</td>
+<td><strong>11</strong></td>
+</tr>
+<tr>
+<td>neither solves</td>
+<td><strong>20</strong></td>
+</tr>
+</tbody>
+</table>
+<p>So v2 is <strong>not a strictly worse policy</strong> — it wins 11 scenarios v1 cannot solve greedily. It is a
+differently-shaped one that loses more trades than it wins. Mean worst-aircraft deviation
+restricted to <strong>clean</strong> episodes is 44.4 s (v1, n=92) against 89.8 s (v2, n=93), so the precision
+gap is not an artefact of busts either.</p>
+<h3 id="shorten-verdict">Did <code>SHORTEN_TROMBONE</code> earn its place?<a class="headerlink" href="#shorten-verdict" title="Permanent link">&para;</a></h3>
+<p>This is the question the whole change was built around — and it has a clean answer.</p>
+<p><strong>No. The agent issues it 5 times in 5 162 clearances.</strong></p>
+<p><img alt="Clearance usage by manoeuvre family, both runs" src="../assets/clearance_mix_v1_vs_v2.png" /></p>
+<table>
+<thead>
+<tr>
+<th>manoeuvre family</th>
+<th><code>1_26</code> (v1)</th>
+<th><code>1_27</code> (v2)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>slow down</td>
+<td>3 077 · 58.7%</td>
+<td>2 971 · 57.6%</td>
+</tr>
+<tr>
+<td>speed up</td>
+<td>994 · 19.0%</td>
+<td>1 145 · 22.2%</td>
+</tr>
+<tr>
+<td><strong>lengthen trombone</strong></td>
+<td>628 · 12.0%</td>
+<td><strong>713 · 13.8%</strong></td>
+</tr>
+<tr>
+<td><strong>shorten trombone</strong></td>
+<td>— (does not exist)</td>
+<td><strong>5 · 0.10%</strong></td>
+</tr>
+<tr>
+<td>skip waypoints</td>
+<td>458 · 8.7%</td>
+<td>316 · 6.1%</td>
+</tr>
+<tr>
+<td>turn off / rejoin</td>
+<td>88 · 1.7%</td>
+<td>12 · 0.2%</td>
+</tr>
+<tr>
+<td><strong>total issued</strong></td>
+<td><strong>5 245</strong></td>
+<td><strong>5 162</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The agent <strong>lengthens 143× more often than it shortens</strong>. So the mechanism intended to rescue
+the precision-bound scenarios never engaged — and, correspondingly, they were not rescued:</p>
+<p><img alt="pass@k and the residual-failure split, both runs" src="../assets/1_26_vs_1_27_attempts.png" /></p>
+<table>
+<thead>
+<tr>
+<th>attempts-to-solution, 100 seeds, cap 20</th>
+<th><code>1_26</code></th>
+<th><code>1_27</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>deterministic</td>
+<td>0.63</td>
+<td>0.62</td>
+</tr>
+<tr>
+<td>pass@1</td>
+<td>0.56</td>
+<td><strong>0.58</strong></td>
+</tr>
+<tr>
+<td>pass@20</td>
+<td><strong>0.82</strong></td>
+<td>0.74</td>
+</tr>
+<tr>
+<td>never solved in 20</td>
+<td><strong>18</strong></td>
+<td>26</td>
+</tr>
+<tr>
+<td>— precision-bound</td>
+<td>12</td>
+<td><strong>18</strong></td>
+</tr>
+<tr>
+<td>— safety-bound</td>
+<td>6</td>
+<td><strong>3</strong></td>
+</tr>
+<tr>
+<td>— mixed</td>
+<td>0</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition danger">
+<p class="admonition-title">Zero of twelve</p>
+<p><code>1_27</code> solves <strong>none</strong> of <code>1_26</code>'s 12 precision-bound seeds within 20 attempts. All twelve
+remain censored and six more join them. The reduced set was designed for exactly these
+scenarios.</p>
+</div>
+<p><strong>What did move:</strong> safety-bound failures halved, 6 → 3 — <code>1_27</code> solves three seeds
+(<code>41</code>, <code>1242911821</code>, <code>1632629719</code>) that <code>1_27</code>'s predecessor could not fly safely at all. And
+pass@1 is marginally <em>better</em> while pass@20 is clearly worse, which is the signature of a
+tighter action distribution: a better first guess, less left for sampling to find.</p>
+<p>Full detail and the raw tables: <a href="../analysis_log/#t-shorten-usage">test log, 17 Aug</a>.</p>
+<h3 id="verdict">The verdict, and what it does and does not license<a class="headerlink" href="#verdict" title="Permanent link">&para;</a></h3>
+<div class="admonition abstract">
+<p class="admonition-title">Three statements, in decreasing confidence</p>
+<ol>
+<li><strong><code>SHORTEN_TROMBONE</code> is not being used, and the precision-bound scenarios are not fixed.</strong>
+   5 clearances in 5 162, and 0 of 12 seeds. This is a direct observation and does not depend
+   on the confound at all.</li>
+<li><strong>The reduced set is markedly more sample-efficient.</strong> 0.25 success at 2M steps against
+   0.00, leading at every checkpoint through 7M. Also confound-independent — the runs are
+   identical up to 4.98M.</li>
+<li><strong>The reduced set converges to worse schedule precision.</strong> 87 s against 43 s. This is the
+   one claim the <a href="#confound">resume confound</a> touches, and it touches it in the same
+   direction, so it cannot be promoted past "consistent with" until a clean run exists.</li>
+</ol>
+</div>
+<p><strong>Recommendation.</strong> Re-run v2 uninterrupted on <code>1_26</code>'s exact schedule
+(<code>--total-timesteps 10000000 --warmup-frac 0.08</code>). That separates statement 3 from the learning
+rate for ~19 h of compute. Independently of which set wins, the finding that matters is
+statement 1: <strong>giving the agent a corrective action is not the same as giving it a reason to
+learn one</strong> — which is a reward-shaping and exploration problem, and the next design question
+worth spending a run on.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

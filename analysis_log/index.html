@@ -1,0 +1,1905 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Single-agent ATC arrival sequencing with sb3-contrib MaskablePPO">
+      
+      
+      
+      
+        <link rel="prev" href="../analysis_methods/">
+      
+      
+        <link rel="next" href="../analysis_v1_v2/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Test log - TADA Single-Agent RL</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#test-log" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="TADA Single-Agent RL" class="md-header__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TADA Single-Agent RL
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Test log
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../mdp/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../experiments/" class="md-tabs__link">
+          
+  
+  
+  Experiments
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../analysis_methods/" class="md-tabs__link">
+          
+  
+  
+  Analysis
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../roadmap/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="TADA Single-Agent RL" class="md-nav__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    TADA Single-Agent RL
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mdp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MDP & Environment
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../observations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reward/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reward
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../separation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loss of separation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../training/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Training
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../instrumentation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Instrumentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiments
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Experiments
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../experiments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiment log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../successful_results/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Successful results
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis_methods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How an agent is tested
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test log
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#t-eval-noise" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 Aug — Is the reported success rate measuring anything?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-gate-replay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 Aug — Was the success gate hiding real conflicts?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-1_22-vs-1_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4 Aug — Did the gate change cost any capability? (1_22 vs 1_25)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-obs-norms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10 Aug — Are the observation features saturated?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-scenario-filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10 Aug — Is the initial-conflict scenario filter doing anything?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-cross-mdp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10 Aug — Does 1_25's policy survive the new severity geometry?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-ordering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11 Aug — Does aircraft slot ordering change the decision?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-attempts-1_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11 Aug — Capability or reliability? (1_26, 100 seeds)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-try25-1_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11 Aug — What does 1_26 do when allowed to retry?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-selftest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11 Aug — Does the stack work under both clearance sets?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-1_27-bands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17 Aug — Does the reduced clearance set beat the full one? (1_27 vs 1_26)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-1_27-perseed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17 Aug — Do the two action sets fail on the same scenarios?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-attempts-1_27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17 Aug — Does the reduced set need fewer attempts? (1_27, 100 seeds)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-shorten-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17 Aug — Is SHORTEN_TROMBONE used at all?
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis_v1_v2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    22 clearances vs 15
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#t-eval-noise" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 Aug — Is the reported success rate measuring anything?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-gate-replay" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3 Aug — Was the success gate hiding real conflicts?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-1_22-vs-1_25" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4 Aug — Did the gate change cost any capability? (1_22 vs 1_25)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-obs-norms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10 Aug — Are the observation features saturated?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-scenario-filter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10 Aug — Is the initial-conflict scenario filter doing anything?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-cross-mdp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10 Aug — Does 1_25's policy survive the new severity geometry?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-ordering" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11 Aug — Does aircraft slot ordering change the decision?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-attempts-1_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11 Aug — Capability or reliability? (1_26, 100 seeds)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-try25-1_26" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11 Aug — What does 1_26 do when allowed to retry?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-selftest" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11 Aug — Does the stack work under both clearance sets?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-1_27-bands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17 Aug — Does the reduced clearance set beat the full one? (1_27 vs 1_26)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-1_27-perseed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17 Aug — Do the two action sets fail on the same scenarios?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-attempts-1_27" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17 Aug — Does the reduced set need fewer attempts? (1_27, 100 seeds)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-shorten-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17 Aug — Is SHORTEN_TROMBONE used at all?
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="test-log">Test log<a class="headerlink" href="#test-log" title="Permanent link">&para;</a></h1>
+<div class="admonition abstract">
+<p class="admonition-title">TL;DR</p>
+<p>Every test run against a trained agent, in the order it happened, with the question it was
+asked to settle. Terms are defined once on <a href="../analysis_methods/">How an agent is tested</a> —
+this page assumes them.</p>
+<p>Read it as the audit trail behind the <a href="../experiments/">experiment log</a>. The experiment log
+says <em>what we changed</em>; this says <em>what we checked, and what it turned out to be</em>. Several
+entries overturned something the team believed.</p>
+</div>
+<p>Source: <code>analysis/</code> (scripts and dated output directories), <code>experiments/&lt;run&gt;/progress_scored.csv</code>.</p>
+<hr />
+<h2 id="t-eval-noise">3 Aug — Is the reported success rate measuring anything?<a class="headerlink" href="#t-eval-noise" title="Permanent link">&para;</a></h2>
+<p><strong>Agent under test:</strong> <code>atc_run_1_22</code>, the best run of its era. · <strong>Instrument:</strong> re-scoring +
+audit of the eval loop.</p>
+<p><strong>Question.</strong> <code>atc_run_1_22</code> reported a peak <code>eval_custom/success_rate</code> of <strong>1.00</strong>. Training
+appeared to oscillate wildly between 0.0 and 1.0 rather than converge. Was that policy
+instability?</p>
+<p><strong>Method.</strong> Read the eval loop, then re-score the saved checkpoint offline on a fixed pool.</p>
+<p><strong>Result — the meter was broken, not the policy.</strong> Three compounding defects: <code>n_eval_episodes</code>
+was <strong>5</strong> (so <code>success_rate</code> can only take six values, SE ≈ 0.22 at p ≈ 0.4);
+<code>_eval_episode_index</code> is never reset per pass, so <strong>consecutive eval points measure completely
+different scenarios</strong>; and <code>best_model.zip</code> is the argmax over ~1600 such draws. Three
+independent estimates put <code>1_22</code>'s true rate near <strong>0.42</strong> — the last-15% mean of eval passes
+(0.41), a fresh 20-seed deterministic eval (0.50), and the frequency of 5/5 passes (implies
+p ≈ 0.44). Deterministic scoring on the full 100-seed pool later returned <strong>0.38</strong>.</p>
+<p><strong>Consequence.</strong> Every cross-run claim resting on in-training <code>success_rate</code> was withdrawn.
+<code>analysis/score_checkpoints.py</code> was written the same week, and is now the only sanctioned
+instrument. A second finding fell out: <strong>46.6%</strong> of <code>1_22</code>'s eval passes scored exactly 0.0,
+where a constant p = 0.44 predicts 5.5% — the policy reliably solves some seeds and never
+solves others, so a scalar success rate was the wrong instrument regardless of its variance.</p>
+<hr />
+<h2 id="t-gate-replay">3 Aug — Was the success gate hiding real conflicts?<a class="headerlink" href="#t-gate-replay" title="Permanent link">&para;</a></h2>
+<p><strong>Agent under test:</strong> <code>atc_run_1_22</code> checkpoints, replayed. · <strong>Instrument:</strong> both success gates
+instrumented simultaneously.</p>
+<p><strong>Question.</strong> Tiers were gated on <em>no near-conflict predicted by the NOOP rollout for the final
+3 steps</em>. The team's hypothesis was that this forecast-based gate was too strict and was
+suppressing success. Switching it to a realised-only test would therefore be a relaxation.</p>
+<p><strong>Method.</strong> Replay <code>1_22</code>'s own checkpoints with both the predicted gate and the realised gate
+logged on every episode.</p>
+<p><strong>Result — the hypothesis was wrong, in an informative way.</strong> The predicted gate was <strong>open in
+every episode at every checkpoint: 0 relaxations in 95 episode-evaluations.</strong> It had never once
+bound. <code>SUCCESS_NEAR_CONFLICT_CLEAR_STEPS = 3</code> is only a ~135 s window at the very end of an
+episode, and by then everything has landed.</p>
+<p><strong>But the realised gate then showed that <code>no_near_conflicts_mean</code> is 0.774, not 0.996</strong> — about
+<strong>23% of episodes contain a real loss of separation</strong>, where the old metric had reported
+"no near conflicts" 99.6% of the time. The conflict side of the problem was never as clean as
+every run log since <code>1_17</code> had claimed. See <a href="../separation/">Loss of separation</a>.</p>
+<hr />
+<h2 id="t-1_22-vs-1_25">4 Aug — Did the gate change cost any capability? (<code>1_22</code> vs <code>1_25</code>)<a class="headerlink" href="#t-1_22-vs-1_25" title="Permanent link">&para;</a></h2>
+<p><strong>Agents:</strong> <code>atc_run_1_22</code> and <code>atc_run_1_25_trombone_relaxed</code> — byte-identical code except the
+realised-only gate. · <strong>Instrument:</strong> deterministic scoring, 100 seeds.
+· <strong>Data:</strong> <code>analysis/2026-08-04_1_22_vs_1_25.csv</code>.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>success</th>
+<th>separation</th>
+<th>clean-subset</th>
+<th>tier</th>
+<th>max dev</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1_22</code></td>
+<td>0.38</td>
+<td>0.17</td>
+<td>0.458</td>
+<td>3.25</td>
+<td>179.4 s</td>
+</tr>
+<tr>
+<td><code>1_25</code></td>
+<td>0.44</td>
+<td>0.18</td>
+<td>0.537</td>
+<td>3.20</td>
+<td>192.4 s</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Result.</strong> The differences are inside the noise band (SE ≈ 0.05 each, so ≈ 0.14 is the
+threshold for a claim). The gate change was a <strong>semantics fix, not a capability change</strong> —
+exactly as predicted — and reported success became honest rather than smaller.</p>
+<p><strong>Consequence.</strong> This pair established the <strong>clean-subset ceiling near 0.5</strong> that the next three
+runs were aimed at.</p>
+<hr />
+<h2 id="t-obs-norms">10 Aug — Are the observation features saturated?<a class="headerlink" href="#t-obs-norms" title="Permanent link">&para;</a></h2>
+<p><strong>Agent under test:</strong> the observation encoder, both scenarios. · <strong>Instrument:</strong>
+<code>analysis/obs_norm_audit.py</code> — fraction of samples pinned at ±1, per feature. A pinned feature
+carries no gradient, which is the same as not having the feature.</p>
+<table>
+<thead>
+<tr>
+<th>feature</th>
+<th>MXP before</th>
+<th>MXP after</th>
+<th>PMS before</th>
+<th>PMS after</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>time_to_target</code></td>
+<td>65.6%</td>
+<td><strong>18.1%</strong></td>
+<td>71.4%</td>
+<td><strong>15.1%</strong></td>
+</tr>
+<tr>
+<td><code>time_deviation</code></td>
+<td>3.2%</td>
+<td><strong>0.0%</strong></td>
+<td>0.8%</td>
+<td><strong>0.0%</strong></td>
+</tr>
+<tr>
+<td><code>time_deviation</code> span (of 2.0)</td>
+<td>1.13</td>
+<td><strong>1.32</strong></td>
+<td>1.12</td>
+<td><strong>1.38</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Result.</strong> Two-thirds of aircraft had <code>time_to_target</code> pinned at its ceiling — constant for
+most of the fleet for most of every episode. The linear <code>clip(d / 900)</code> deviation encoding put
+<strong>every tier boundary the agent is graded on (±60, 70, 100, 120 s) inside the bottom 13% of the
+feature's range</strong>, and encoded a 10 s error as <strong>0.011</strong> — indistinguishable from zero after
+LayerNorm. The policy was being asked to hit ±60 s through a feature that barely moved there.</p>
+<p><strong>Consequence.</strong> The signed-log encoding shipped in run <code>1_26</code>, and is the change most likely
+responsible for that run's collapse in worst-aircraft deviation.</p>
+<hr />
+<h2 id="t-scenario-filter">10 Aug — Is the initial-conflict scenario filter doing anything?<a class="headerlink" href="#t-scenario-filter" title="Permanent link">&para;</a></h2>
+<p><strong>Instrument:</strong> <code>analysis/scenario_filter_probe.py</code>.</p>
+<p><strong>Result — dead code.</strong> <code>Simulator.check_not_imminent_infringement()</code> rejects candidate
+scenarios on <code>severity &gt;= 1.0</code>. Under the pre-<code>1_26</code> ramp, <code>severity == 1.0</code> required <em>literally
+zero</em> separation, so the test never fired and the function <strong>always returned <code>True</code></strong>. The
+"initial-conflict-free scenario" filter had been inert since the conflict radius changed to 0.0.</p>
+<p><strong>Consequence.</strong> Not fixed at the time — repairing it would have shifted the training scenario
+distribution mid-comparison. The <code>1_26</code> severity redesign makes <code>severity == 1.0</code> mean an actual
+loss of separation, so the filter is live again by side effect.</p>
+<hr />
+<h2 id="t-cross-mdp">10 Aug — Does <code>1_25</code>'s policy survive the new severity geometry?<a class="headerlink" href="#t-cross-mdp" title="Permanent link">&para;</a></h2>
+<p><strong>Agent under test:</strong> <code>atc_run_1_25</code>'s best checkpoint, scored <strong>under <code>1_26</code>'s MDP</strong>.
+· <strong>Data:</strong> <code>analysis/2026-08-10_1_25_under_1_26_mdp.csv</code>.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>success</th>
+<th>separation</th>
+<th>clean-subset</th>
+<th>tier</th>
+<th>max dev</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1_25</code> under its own MDP</td>
+<td>0.44</td>
+<td>0.18</td>
+<td>0.537</td>
+<td>3.20</td>
+<td>192 s</td>
+</tr>
+<tr>
+<td><code>1_25</code> under <code>1_26</code>'s MDP</td>
+<td><strong>0.11</strong></td>
+<td><strong>0.22</strong></td>
+<td><strong>0.141</strong></td>
+<td>1.63</td>
+<td>314 s</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Result.</strong> The old policy collapses under the new rules. <strong>This is the control that makes
+<code>1_26</code>'s numbers meaningful</strong> — it rules out the possibility that <code>1_26</code> merely looked better
+because the new MDP is easier to score well on. It is not: the same policy scores far worse
+under it.</p>
+<hr />
+<h2 id="t-ordering">11 Aug — Does aircraft slot ordering change the decision?<a class="headerlink" href="#t-ordering" title="Permanent link">&para;</a></h2>
+<p><strong>Agent under test:</strong> <code>atc_run_1_26</code>. · <strong>Instrument:</strong> <code>analysis/ordering_sensitivity.py</code>,
+25 scenarios × 8 orderings, scenario and observation frame held fixed, only <code>env.acft_perm</code>
+re-rolled. · <strong>Data:</strong> <code>analysis/2026-08-11_1_26_ordering/</code>.</p>
+<p><strong>Question.</strong> Aircraft are assigned to observation slots in arrival order; the random
+permutation in <code>reset()</code> is commented out and has never been used. Is arrival-order slotting
+biasing results, and would shuffling be free data augmentation?</p>
+<p><strong>Result — provably inert.</strong> First-action agreement <strong>100%</strong> (the policy picks the same
+<em>callsign</em> first regardless of which slot it occupies), <strong>0 of 25</strong> scenarios changed outcome,
+deviation spread <strong>0.0 s on every seed</strong>, and every outcome field byte-identical across all
+eight orderings.</p>
+<p><strong>Why.</strong> The policy's context is <code>concat(masked-mean over aircraft, global embedding)</code> — which
+is permutation <em>invariant</em> — and the heads are applied slotwise with shared weights, so their
+outputs are permutation <em>equivariant</em>. The test confirms the architecture end to end.</p>
+<p><strong>Consequence.</strong> Arrival-order slotting has never biased a result, and enabling the shuffle as
+augmentation would buy nothing. One less hypothesis in the pool.</p>
+<hr />
+<h2 id="t-attempts-1_26">11 Aug — Capability or reliability? (<code>1_26</code>, 100 seeds)<a class="headerlink" href="#t-attempts-1_26" title="Permanent link">&para;</a></h2>
+<p><strong>Agent under test:</strong> <code>atc_run_1_26</code> <code>best_model</code>. · <strong>Instrument:</strong>
+<a href="../analysis_methods/#attempts">attempts-to-solution</a>, 100 seeds, cap 20.
+· <strong>Data:</strong> <code>analysis/2026-08-11_1_26_attempts_100seeds/</code>.</p>
+<p>Two smaller probes preceded it and are worth flagging as a lesson in sample size: a 25-seed run
+at cap 10 gave deterministic 0.56 / pass@10 0.80, and a second 25-seed run at cap 100 gave
+deterministic <strong>0.80</strong> / pass@100 0.92. That 25-seed subset is <strong>markedly easier than the full
+pool</strong> — the 100-seed run below returns 0.63 deterministic. The small probes are not comparable
+to it and should not be quoted.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>deterministic</td>
+<td><strong>0.63</strong></td>
+</tr>
+<tr>
+<td>pass@1 (single-shot, stochastic)</td>
+<td><strong>0.56</strong></td>
+</tr>
+<tr>
+<td>pass@5</td>
+<td>0.75</td>
+</tr>
+<tr>
+<td>pass@10</td>
+<td>0.79</td>
+</tr>
+<tr>
+<td>pass@20</td>
+<td><strong>0.82</strong></td>
+</tr>
+<tr>
+<td>never solved in 20</td>
+<td><strong>18</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Attempts-to-first-success among the 82 solved: <code>1×56, 2×13, 3×4, 4×2, 6×1, 7×1, 8×1, 10×1,
+11×1, 13×1, 19×1</code>.</p>
+<p><strong>Result.</strong> The pass@1 → pass@20 gap is <strong>0.26 of pure reliability</strong> — solving rollouts that are
+already inside the policy's distribution, just not on the greedy path. That is recoverable at
+inference by best-of-n or a shield, with no retraining at all.</p>
+<p><strong>The 18 residual failures split cleanly</strong> (rule in
+<a href="../analysis_methods/#residual-split">methods</a>):</p>
+<table>
+<thead>
+<tr>
+<th>class</th>
+<th>n</th>
+<th>seeds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>precision-bound</strong></td>
+<td><strong>12</strong></td>
+<td><code>1566942273</code>, <code>202363285</code>, <code>786551703</code>, <code>27911967</code>, <code>1477278577</code>, <code>1973214822</code>, <code>825873196</code>, <code>1392783743</code>, <code>240251661</code>, <code>284277889</code>, <code>2144181937</code>, <code>594130308</code></td>
+</tr>
+<tr>
+<td><strong>safety-bound</strong></td>
+<td><strong>6</strong></td>
+<td><code>946785248</code>, <code>398340369</code>, <code>1259191105</code>, <code>1632629719</code> (bust 100% of attempts), <code>1242911821</code> (95%), <code>41</code> (70%)</td>
+</tr>
+</tbody>
+</table>
+<p>Every precision-bound seed tops out at <strong>tier 4</strong> with a best clean worst-aircraft deviation of
+60–114 s — they need to shave one aircraft under the ±60 s bar and cannot. All of them end
+<strong>late</strong>.</p>
+<p><strong>Consequence — this is the test that designed clearance set v2.</strong> Speed authority is roughly
+19× weaker upward than downward (six consecutive <code>SPEED_UP_LARGE</code> move landing time −18 s
+against +339 s for six <code>SLOW_DOWN_LARGE</code>), and on these twelve seeds the agent <strong>lengthens the
+trombone in 12 of 12 episodes at ~5× the pool-average rate</strong> — adding delay it had no action to
+take back. <code>SHORTEN_TROMBONE</code> exists because of this table. It also <strong>de-prioritised the
+multi-select action head</strong>: 12 of 18 residual failures never lose separation, so coordination is
+not their problem.</p>
+<hr />
+<h2 id="t-try25-1_26">11 Aug — What does <code>1_26</code> do when allowed to retry?<a class="headerlink" href="#t-try25-1_26" title="Permanent link">&para;</a></h2>
+<p><strong>Agent under test:</strong> <code>atc_run_1_26</code> @ 9.95M. · <strong>Instrument:</strong>
+<a href="../analysis_methods/#solutions">stochastic benchmark with a clearance log</a>, 100 seeds, cap 25.
+· <strong>Data:</strong> <code>atc_run_1_26_sep3nm_ppo_tada_9950000_steps_stoch_noshield_ep100_try25_results.md</code>.</p>
+<p><strong>Result.</strong> 83/100 solved within 25 attempts. Tier histogram <code>t0=4, t4=13, t5=83</code>, mean tier
+4.67. Worst-aircraft deviation mean 41 s, median 34 s. Minimum separation mean 5.84 NM, median
+5.42 NM, <strong>min 0.14 NM</strong>. Clearances per episode mean 52.5.</p>
+<p><strong>The clearance mix is the load-bearing result</strong> — it is what justified each cut in v2:</p>
+<ul>
+<li><code>SLOW_DOWN_SMALL</code> 1995, <code>SLOW_DOWN_LARGE</code> 1082, <code>SPEED_UP_SMALL</code> 770 — speed control is the
+  overwhelming majority of what the agent issues.</li>
+<li><code>SPEED_UP_LARGE</code> 224, against <code>SLOW_DOWN_LARGE</code>'s 1082 — and it barely moves landing time.</li>
+<li>Every one of the <strong>eight</strong> v1 turn variants beyond the plain 10 NM rejoin appears in single or
+  low double digits (<code>TURN_RIGHT_SKIP_1_..._5</code> = 39 is the largest; <code>TURN_LEFT_SKIP_1_..._10</code>
+  = 1 the smallest).</li>
+<li>Everything v2 drops totals <strong>7.16%</strong> of all clearances issued.</li>
+</ul>
+<hr />
+<h2 id="t-selftest">11 Aug — Does the stack work under both clearance sets?<a class="headerlink" href="#t-selftest" title="Permanent link">&para;</a></h2>
+<p><strong>Instrument:</strong> <code>analysis/action_set_selftest.py</code>, run under <code>v1</code> and <code>v2</code>.</p>
+<p>Checks enum size against <code>Config.NUM_ACTIONS</code>, contiguous ids from 0, a reward multiplier for
+every clearance, <code>STORE_MUTATING_CLEARANCES</code> non-empty and in range, action-space shape,
+action-history one-hot width, a read-only peek over every legal clearance asserting route length
+is unchanged, and a 25-step masked random rollout. <strong>All nine checks pass under both sets.</strong></p>
+<p>This is the guard that catches a mis-set <code>TADA_ACTION_SET</code> before it silently poisons a
+comparison, and it is re-run before every cross-set claim on this site.</p>
+<p><strong>Related, found while building it:</strong> the trombone inverse was verified directly — three
+lengthens followed by three shortens restore the exact original route on 4/4 aircraft, and 30
+randomly interleaved operations leave route length and store capacity identical to the start.</p>
+<hr />
+<h2 id="t-1_27-bands">17 Aug — Does the reduced clearance set beat the full one? (<code>1_27</code> vs <code>1_26</code>)<a class="headerlink" href="#t-1_27-bands" title="Permanent link">&para;</a></h2>
+<p><strong>Agents under test:</strong> <code>atc_run_1_26_sep3nm</code> (22 clearances) and <code>atc_run_1_27_actionset_v2</code>
+(15 clearances), both complete at 10M steps. · <strong>Instrument:</strong> deterministic scoring, every
+million-step band plus a matched pair at 10M.
+· <strong>Data:</strong> both runs' <code>progress_scored.csv</code>, <code>analysis/2026-08-17_1_2{6,7}_at10M_perseed.csv</code>.</p>
+<p><strong>Question.</strong> <code>1_27</code> finished on 12 Aug and had never been scored past 4M steps. Its only
+post-4M signal was the in-training eval loop — the instrument <a href="#t-eval-noise">this log's first
+entry</a> disqualified. Does the reduced set actually help?</p>
+<p><strong>Method.</strong> Backfill the 5M–10M bands with <code>track_run.py</code>, then independently re-score both
+runs' 10M checkpoints back-to-back on the same 100 seeds, as a replication.</p>
+<table>
+<thead>
+<tr>
+<th>at 10M steps</th>
+<th>success</th>
+<th>95% CI</th>
+<th>separation</th>
+<th>clean-subset</th>
+<th>tier</th>
+<th>worst-ac dev</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1_26</code> — 22 clearances</td>
+<td><strong>0.70</strong></td>
+<td>0.60–0.78</td>
+<td>0.07</td>
+<td><strong>0.753</strong></td>
+<td>4.38</td>
+<td><strong>43.4 s</strong></td>
+</tr>
+<tr>
+<td><code>1_27</code> — 15 clearances</td>
+<td><strong>0.64</strong></td>
+<td>0.54–0.73</td>
+<td>0.10</td>
+<td><strong>0.711</strong></td>
+<td>4.01</td>
+<td><strong>87.3 s</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Result — it learns faster and converges worse.</strong> <code>1_27</code> leads on success at <em>every</em> checkpoint
+through 7M (at 2M it is at 0.25 where <code>1_26</code> is at exactly 0.00), they draw level at 8M, and then
+<code>1_26</code> pulls away. Worst-aircraft deviation tells the sharper story: <code>1_26</code> walks down 72 → 43 s
+over its last 6M steps and crosses the ±60 s bar T5 requires; <code>1_27</code> never gets below 87 s.</p>
+<p>On <strong>success</strong> the two are a statistical tie — 0.06 apart against a ≈0.13 threshold. On
+<strong>precision</strong> they are not.</p>
+<div class="admonition danger">
+<p class="admonition-title">This is not a clean single-variable experiment</p>
+<p><code>1_27</code> crashed at 4 975 000 steps and was resumed, and <code>_resume_lr_schedule</code> gives the
+remainder a <strong>linear</strong> decay instead of continuing the cosine — so <code>1_27</code> trains its whole
+second half at a higher learning rate than <code>1_26</code> did. A higher late learning rate is exactly
+what prevents fine convergence, which is exactly where <code>1_27</code> underperforms. <strong>The confound
+points the same way as the effect and cannot be ruled out.</strong> Full write-up:
+<a href="../analysis_v1_v2/#confound">22 clearances vs 15</a>.</p>
+</div>
+<p><strong>Also measured, and worth keeping:</strong> the replication returned <strong>0.69 / 41.3 s</strong> and
+<strong>0.60 / 92.3 s</strong> — 1 seed from the tracked value for <code>1_26</code>, 4 seeds for <code>1_27</code>, on identical
+checkpoints and an identical pool. The observation frame is drawn from a global RNG <code>reset()</code>
+never reseeds, so <strong>a few seeds of movement is the practical floor on this instrument</strong>, and any
+comparison should clear it before it is called a result. Both draws clear it on deviation and
+neither clears it on success.</p>
+<hr />
+<h2 id="t-1_27-perseed">17 Aug — Do the two action sets fail on the same scenarios?<a class="headerlink" href="#t-1_27-perseed" title="Permanent link">&para;</a></h2>
+<p><strong>Instrument:</strong> the same matched 10M pair, compared seed by seed rather than in aggregate.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>scenarios</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>both solve</td>
+<td><strong>49</strong></td>
+</tr>
+<tr>
+<td>only <code>1_26</code> (22 clearances) solves</td>
+<td><strong>20</strong></td>
+</tr>
+<tr>
+<td>only <code>1_27</code> (15 clearances) solves</td>
+<td><strong>11</strong></td>
+</tr>
+<tr>
+<td>neither solves</td>
+<td><strong>20</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Result.</strong> They disagree in <strong>both</strong> directions. The reduced set is not a uniformly worse
+policy — it greedily solves 11 scenarios the full set cannot — it simply loses more trades than
+it wins. Mean worst-aircraft deviation restricted to <strong>clean</strong> episodes is 44.4 s (<code>1_26</code>, n=92)
+against 89.8 s (<code>1_27</code>, n=93), so the precision gap is not an artefact of busts.</p>
+<p><strong>Consequence.</strong> An aggregate success rate was hiding a real capability difference in each
+direction. The largest margin each way became the A/B renders on
+<a href="../successful_results/#run-1_26-1_27">Successful results</a>: seed <code>1194819984</code> (v1 tier 4 at 137 s,
+v2 tier 5 at 15 s) and seed <code>1699226064</code> (v1 tier 5 at 27 s, v2 tier 0 at 976 s).</p>
+<hr />
+<h2 id="t-attempts-1_27">17 Aug — Does the reduced set need fewer attempts? (<code>1_27</code>, 100 seeds)<a class="headerlink" href="#t-attempts-1_27" title="Permanent link">&para;</a></h2>
+<p><strong>Agent under test:</strong> <code>atc_run_1_27_actionset_v2</code> @ 10M — the frozen step-checkpoint, not
+<code>best_model</code>. · <strong>Instrument:</strong> <a href="../analysis_methods/#attempts">attempts-to-solution</a>, 100 seeds,
+cap 20 — matched exactly to <a href="#t-attempts-1_26"><code>1_26</code>'s probe</a> so the two are comparable.
+· <strong>Data:</strong> <code>analysis/2026-08-17_1_27_attempts_100seeds/</code>.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>1_26</code> — 22 clearances</th>
+<th><code>1_27</code> — 15 clearances</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>deterministic</td>
+<td>0.63</td>
+<td>0.62</td>
+</tr>
+<tr>
+<td>pass@1</td>
+<td>0.56</td>
+<td><strong>0.58</strong></td>
+</tr>
+<tr>
+<td>pass@5</td>
+<td><strong>0.75</strong></td>
+<td>0.71</td>
+</tr>
+<tr>
+<td>pass@20</td>
+<td><strong>0.82</strong></td>
+<td>0.74</td>
+</tr>
+<tr>
+<td>never solved in 20</td>
+<td><strong>18</strong></td>
+<td>26</td>
+</tr>
+<tr>
+<td>— precision-bound</td>
+<td>12</td>
+<td><strong>18</strong></td>
+</tr>
+<tr>
+<td>— safety-bound</td>
+<td>6</td>
+<td><strong>3</strong></td>
+</tr>
+<tr>
+<td>— mixed</td>
+<td>0</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<p><img alt="pass@k and the residual-failure split, both runs" src="../assets/1_26_vs_1_27_attempts.png" /></p>
+<p><strong>Result — the reduced set is slightly better single-shot and distinctly worse given retries.</strong>
+<code>1_27</code> edges <code>1_26</code> at pass@1 (0.58 vs 0.56) and then flattens: its pass@20 is 0.74 against 0.82,
+and its censored set grows from 18 seeds to 26. A tighter action distribution buys a better first
+guess and leaves less for sampling to find.</p>
+<p>The composition of the failures moved as well, and in opposite directions: <strong>safety-bound
+failures halve (6 → 3)</strong> while <strong>precision-bound failures grow by half (12 → 18)</strong>. Of <code>1_26</code>'s
+six safety-bound seeds, <code>1_27</code> solves three (<code>41</code>, <code>1242911821</code>, <code>1632629719</code>).</p>
+<div class="admonition danger">
+<p class="admonition-title">It solved none of the seeds it was built for</p>
+<p>The reduced set was designed around <code>1_26</code>'s <strong>12 precision-bound seeds</strong> — the ones that fly
+safely and land late. <strong><code>1_27</code> solves 0 of those 12 within 20 attempts.</strong> All twelve remain
+censored, and six more join them.</p>
+</div>
+<hr />
+<h2 id="t-shorten-usage">17 Aug — Is <code>SHORTEN_TROMBONE</code> used at all?<a class="headerlink" href="#t-shorten-usage" title="Permanent link">&para;</a></h2>
+<p><strong>Agent under test:</strong> <code>1_27</code> @ 10M. · <strong>Instrument:</strong>
+<a href="../analysis_methods/#solutions">stochastic benchmark with a clearance log</a>, 100 seeds, cap 25 —
+matched to <a href="#t-try25-1_26"><code>1_26</code>'s run</a>. · <strong>Data:</strong>
+<code>analysis/2026-08-17_1_27_ep100_try25_solutions.json</code>.</p>
+<p><strong>Question.</strong> <code>SHORTEN_TROMBONE</code> is the only capability v2 adds that v1 did not have, and the
+entire case for the reduced set rests on it. Does the trained agent actually issue it?</p>
+<p><strong>Result — five times in 5 162 clearances. 0.10%.</strong></p>
+<table>
+<thead>
+<tr>
+<th>manoeuvre family</th>
+<th><code>1_26</code> (v1)</th>
+<th><code>1_27</code> (v2)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>slow down</td>
+<td>3 077 · 58.7%</td>
+<td>2 971 · 57.6%</td>
+</tr>
+<tr>
+<td>speed up</td>
+<td>994 · 19.0%</td>
+<td>1 145 · 22.2%</td>
+</tr>
+<tr>
+<td><strong>lengthen trombone</strong></td>
+<td>628 · 12.0%</td>
+<td><strong>713 · 13.8%</strong></td>
+</tr>
+<tr>
+<td><strong>shorten trombone</strong></td>
+<td>— (does not exist)</td>
+<td><strong>5 · 0.10%</strong></td>
+</tr>
+<tr>
+<td>skip waypoints</td>
+<td>458 · 8.7%</td>
+<td>316 · 6.1%</td>
+</tr>
+<tr>
+<td>turn off / rejoin</td>
+<td>88 · 1.7%</td>
+<td><strong>12 · 0.2%</strong></td>
+</tr>
+<tr>
+<td><strong>total issued</strong></td>
+<td><strong>5 245</strong></td>
+<td><strong>5 162</strong></td>
+</tr>
+</tbody>
+</table>
+<p><img alt="Clearance usage by manoeuvre family, both runs" src="../assets/clearance_mix_v1_vs_v2.png" /></p>
+<p>The agent <strong>lengthens the trombone 143× more often than it shortens it</strong>. The mechanism that was
+supposed to rescue the precision-bound scenarios never engaged — which is consistent with the
+<a href="#t-attempts-1_27">attempts result</a> that none of them were rescued.</p>
+<p>Nothing is wrong with the implementation: <code>SHORTEN_TROMBONE</code> is an exact inverse, it stacks, it
+restores routes byte-for-byte under test, and it is mask-legal whenever a level exists to remove.
+The agent simply never learned to reach for it.</p>
+<div class="admonition note">
+<p class="admonition-title">A plausible mechanism, offered as a hypothesis</p>
+<p>Lengthening pays immediately and visibly — it moves a conflict away and the dense conflict
+penalty falls on the very next step. Shortening pays only at landing, through the deviation
+term, and costs an action penalty now. To discover it the agent must first over-delay and
+then recover, and every intermediate step of that sequence scores worse than not trying.
+That is an exploration and credit-assignment problem, not an action-space one.</p>
+</div>
+<p><strong>Also visible in this table:</strong> the two turn variants v2 kept, chosen because they were the only
+ones v1 used, are now issued <strong>12 times in 100 episodes</strong> (0.2%, down from 1.7%). The reduced-set
+agent has collapsed almost entirely onto speed control plus trombone lengthening — 93.6% of
+everything it issues.</p>
+<p><strong>Aggregate, cap 25:</strong> <code>1_27</code> solves <strong>76/100</strong> against <code>1_26</code>'s <strong>83/100</strong>; mean tier 4.58 vs
+4.67; worst-aircraft deviation mean 55 s vs 41 s.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

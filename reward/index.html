@@ -90,7 +90,7 @@
 
   
 
-<header class="md-header md-header--shadow" data-md-component="header">
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href=".." title="TADA Single-Agent RL" class="md-header__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
       
@@ -193,13 +193,122 @@
     
   </nav>
   
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../mdp/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../experiments/" class="md-tabs__link">
+          
+  
+  
+  Experiments
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../analysis_methods/" class="md-tabs__link">
+          
+  
+  
+  Analysis
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../roadmap/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Roadmap
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
 </header>
     
     <div class="md-container" data-md-component="container">
       
       
-        
-          
         
       
       <main class="md-main" data-md-component="main">
@@ -213,8 +322,10 @@
                     
 
 
+  
 
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="TADA Single-Agent RL" class="md-nav__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
       
@@ -258,6 +369,63 @@
       
   
   
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
   
   
     <li class="md-nav__item">
@@ -280,9 +448,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -307,9 +476,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
     
@@ -397,7 +567,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#component-2-conflict-penalty-rewardspy28" class="md-nav__link">
+  <a href="#conflict-penalty" class="md-nav__link">
     <span class="md-ellipsis">
       
         Component 2 — Conflict penalty (rewards.py:28)
@@ -409,21 +579,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#what-severity-actually-means" class="md-nav__link">
+  <a href="#severity-geometry-run-1_26-onward" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What severity actually means
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#near-conflict-severity-threshold" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Near-conflict severity threshold
+        Severity geometry (run 1_26 onward)
       
     </span>
   </a>
@@ -472,23 +631,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="🎯 Terminal success-tier ladder (set in step())">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#the-6-tier-variant-runs-1_23-1_24-1_24_pms" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The 6-tier variant (runs 1_23, 1_24, 1_24_pms)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -520,9 +662,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -547,9 +690,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -574,9 +718,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -601,9 +746,69 @@
     </li>
   
 
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Experiments
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Experiments
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -628,9 +833,10 @@
     </li>
   
 
-    
-      
-      
+              
+            
+              
+                
   
   
   
@@ -652,6 +858,157 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Analysis
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Analysis
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis_methods/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How an agent is tested
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis_log/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Test log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../analysis_v1_v2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    22 clearances vs 15
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -732,7 +1089,7 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#component-2-conflict-penalty-rewardspy28" class="md-nav__link">
+  <a href="#conflict-penalty" class="md-nav__link">
     <span class="md-ellipsis">
       
         Component 2 — Conflict penalty (rewards.py:28)
@@ -744,21 +1101,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#what-severity-actually-means" class="md-nav__link">
+  <a href="#severity-geometry-run-1_26-onward" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What severity actually means
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#near-conflict-severity-threshold" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Near-conflict severity threshold
+        Severity geometry (run 1_26 onward)
       
     </span>
   </a>
@@ -807,23 +1153,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="🎯 Terminal success-tier ladder (set in step())">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#the-6-tier-variant-runs-1_23-1_24-1_24_pms" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The 6-tier variant (runs 1_23, 1_24, 1_24_pms)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
 </li>
       
         <li class="md-nav__item">
@@ -866,6 +1195,22 @@
 
 
 <h1 id="reward-function">Reward Function<a class="headerlink" href="#reward-function" title="Permanent link">&para;</a></h1>
+<div class="admonition abstract">
+<p class="admonition-title">TL;DR</p>
+<p>Five per-step components — deviation, conflict, action cost, a dense goal bonus, and PBRS
+tier shaping — plus a terminal signal. The two that matter most:</p>
+<ul>
+<li><strong>Conflict</strong> is <code>−10 × severity × 2^(−ttc/240 s)</code>. Severity is <strong>1.0 inside 3 NM and
+  500 ft, zero beyond 5 NM</strong>, so legal spacing is free. Before run 1_26 the band ran to
+  10 NM and 98.8% of the penalty was charged to pairs that never came within 5 NM.</li>
+<li><strong>Deviation</strong> is landing-weighted: the same error costs more the closer an aircraft is
+  to touchdown.</li>
+</ul>
+<p>A realised bust pays <code>−(30 + 0.5 × remaining_steps)</code> and ends the episode. The forfeit term
+is what stops bailing out early from being profitable.</p>
+<p>See <a href="../observations/">Observations</a> for what the agent can <em>see</em> of all this — deliberately
+a wider band than what it is charged for.</p>
+</div>
 <p>Source: <code>actions/rewards.py</code>, <code>utils/reward_utils.py</code>, <code>config/config.py</code></p>
 <hr />
 <h2 id="rewardparts-dataclass-utilsreward_utilspy8"><code>RewardParts</code> dataclass (<code>utils/reward_utils.py:8</code>)<a class="headerlink" href="#rewardparts-dataclass-utilsreward_utilspy8" title="Permanent link">&para;</a></h2>
@@ -895,74 +1240,54 @@ deviation is always sourced from the simulator rollout.</p>
 <p>Each aircraft's absolute deviation is weighted <strong>linearly by landing proximity</strong>:
 from <code>REWARD_DEVIATION_LANDING_BASELINE = 0.2</code> (far) up to <code>1.0</code> (landing imminent).</p>
 <hr />
-<h2 id="component-2-conflict-penalty-rewardspy28">Component 2 — Conflict penalty (<code>rewards.py:28</code>)<a class="headerlink" href="#component-2-conflict-penalty-rewardspy28" title="Permanent link">&para;</a></h2>
-<p><strong>Imminence-dominant ramp</strong> over unique predicted aircraft pairs.
+<h2 id="conflict-penalty">Component 2 — Conflict penalty (<code>rewards.py:28</code>)<a class="headerlink" href="#conflict-penalty" title="Permanent link">&para;</a></h2>
+<p><strong>Exponentially discounted</strong> over unique predicted aircraft pairs.
 For each unique pair, only the <strong>earliest</strong> predicted loss-of-separation is used.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>w(ttc) = max(floor, ((T_near - ttc) / T_near) ^ p)   for ttc &lt; T_near
-<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>w(ttc) = floor                                        for ttc &gt;= T_near
-<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>conflict_penalty = -REWARD_INFRINGEMENT_WEIGHT * sum_pairs( severity * w(ttc) )
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>w(ttc) = max(CONFLICT_FAR_FLOOR, 2 ^ (-ttc / CONFLICT_HALF_LIFE_S))
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>conflict_penalty = -REWARD_INFRINGEMENT_WEIGHT * sum_pairs( severity * w(ttc) )
 </code></pre></div>
 <ul>
-<li><code>severity</code> = normalized spatial severity <code>[0, 1]</code> (from <code>normalize_separation</code>).</li>
+<li><code>severity</code> — see below. Zero beyond 5 NM, so legal spacing costs nothing.</li>
 <li><code>ttc</code> = predicted time to conflict (s), relative to current world time.</li>
-<li>Conflicts beyond <code>T_near</code> pay only the small <code>floor</code> cost; within <code>T_near</code> the
-  penalty ramps steeply as ttc → 0, so imminent conflicts dominate.</li>
+<li><code>CONFLICT_HALF_LIFE_S = 240</code>. This replaced a cubic ramp whose <em>effective</em> half-life was
+  248 s — nobody chose that, it fell out of the exponent — so the two agree to within 0.02
+  everywhere inside 5 minutes, where essentially all the penalty mass sits. What changed is
+  the far field: the cubic collapsed to the floor by 20 min (weight 0.016 at 15 min) while
+  the exponential keeps a real gradient there (0.074).</li>
 </ul>
-<p>This term reads the <strong>predicted</strong> world (a NOOP rollout to the end of the episode), which is
-deliberate: it is the only signal that gives the agent a reason to resolve a conflict <em>before</em>
-it happens. See <a href="../separation/#where-prediction-genuinely-drives-behaviour">Loss of separation</a>.</p>
-<h3 id="what-severity-actually-means">What <code>severity</code> actually means<a class="headerlink" href="#what-severity-actually-means" title="Permanent link">&para;</a></h3>
-<p><code>severity</code> is <strong>not</strong> produced by the simulator — it is <code>min</code> over two normalised axes computed
-in <code>normalize_separation()</code>. With the current constants it maps to distance as:</p>
-<table>
-<thead>
-<tr>
-<th>Horizontal separation</th>
-<th>0 NM</th>
-<th>1 NM</th>
-<th>2 NM</th>
-<th><strong>3 NM</strong></th>
-<th>5 NM</th>
-<th>≥ 10 NM</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>severity</code> (co-altitude)</td>
-<td>1.00</td>
-<td>0.90</td>
-<td>0.80</td>
-<td><strong>0.70</strong></td>
-<td>0.50</td>
-<td>0.00</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition danger">
-<p class="admonition-title"><code>severity == 1.0</code> means zero separation, not 3 NM</p>
-<p><code>HORIZONTAL_CONFLICT_RADIUS_NM</code> is currently <code>0.0</code>, so severity 1.0 requires literally
-zero horizontal separation and is unreachable in practice. <strong>"Within 3 NM" is
-<code>severity &gt;= 0.7</code></strong> (<code>NEAR_CONFLICT_THRESHOLD</code>). This trips people up constantly — the
-full explanation, including a live piece of dead code it has already caused, is on the
-<a href="../separation/">Loss of separation</a> page.</p>
-</div>
-<h3 id="near-conflict-severity-threshold">Near-conflict severity threshold<a class="headerlink" href="#near-conflict-severity-threshold" title="Permanent link">&para;</a></h3>
-<p><code>has_near_conflict()</code> (<code>rewards.py:80</code>) uses <code>NEAR_CONFLICT_SEVERITY_THRESHOLD = 0.7</code>:
-a conflict counts only if severity ≥ 0.7 <strong>and</strong> ttc &lt; <code>T_near</code>. This threshold does <strong>not</strong>
-affect the per-step conflict penalty magnitude.</p>
-<p>Since run <code>1_25</code> this function no longer gates success (see the ladder below) — it is used by
-the eval-time shield in <code>render_policy.py</code> and for the <code>no_near_conflicts_predicted</code> diagnostic.</p>
+<h3 id="severity-geometry-run-1_26-onward">Severity geometry (run 1_26 onward)<a class="headerlink" href="#severity-geometry-run-1_26-onward" title="Permanent link">&para;</a></h3>
+<p><img alt="Severity against horizontal separation, before and after run 1_26" src="../assets/severity_ramp.png" /></p>
+<p>Two deliberately different radius pairs. Detection is wide so the agent can <em>see</em> a conflict
+develop (that side is covered in <a href="../observations/">Observations</a>); severity is narrow so it is
+only <em>charged</em> for closeness that matters.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>u        = clamp( min( (5 - h)/(5 - 3), (1000 - v)/(1000 - 500) ), 0, 1 )
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>severity = u ^ SEVERITY_SHAPE_P          # p = 2, convex
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>  severity = 1.0  &lt;=&gt;  h &lt;= 3 NM AND v &lt;= 500 ft    (the operational loss of separation)
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>  severity = 0.0  &lt;=   h &gt;= 5 NM  or  v &gt;= 1000 ft  (legal spacing — free)
+</code></pre></div>
+<p>Before this, the band was 10/0 NM: severity 1.0 required literally zero separation and was
+unreachable, and <strong>98.8% of the conflict penalty was charged to pairs that never came within
+5 NM</strong> — a continuous tax on the arrival spacing that hitting AMAN times requires.</p>
+<p>The convex <code>p = 2</code> decay puts the strongest restoring gradient immediately outside 3 NM
+(0.95/NM against 0.50 for a linear ramp) and meets zero at 5 NM with matching slope, so there
+is no kink at legal spacing. The corner sits at 3 NM, which is where a hard edge belongs — the
+episode ends there.</p>
+<p><code>LOS_SEVERITY_THRESHOLD = 1.0</code> is the single failure definition: it drives the tier gate,
+<code>end_reason="separation"</code> and episode termination. <code>NEAR_CONFLICT_DISTANCE_NM = 3.5</code> is a
+diagnostic/eval-shield threshold only, pinned as a <strong>distance</strong> because a severity threshold
+silently changes meaning whenever the band edges or <code>SEVERITY_SHAPE_P</code> move.</p>
 <hr />
 <h2 id="component-3-action-penalty-rewardspy">Component 3 — Action penalty (<code>rewards.py</code>)<a class="headerlink" href="#component-3-action-penalty-rewardspy" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">action_reward</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">num_commands</span> <span class="o">**</span> <span class="mf">1.25</span><span class="p">)</span> <span class="o">*</span> <span class="n">REWARD_ACTION_PENALTY_WEIGHT</span> <span class="o">*</span> <span class="n">dof_factor</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">action_reward</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">num_commands</span> <span class="o">**</span> <span class="mf">1.25</span><span class="p">)</span> <span class="o">*</span> <span class="n">REWARD_ACTION_PENALTY_WEIGHT</span> <span class="o">*</span> <span class="n">dof_factor</span>
 </code></pre></div>
 <p><code>num_commands = len(interpreted_actions.commands)</code>. The 1.25 exponent applies a
 slightly super-linear cost to issuing many commands in one step.</p>
 <h3 id="degrees-of-freedom-dof-scaling">Degrees-of-freedom (DOF) scaling<a class="headerlink" href="#degrees-of-freedom-dof-scaling" title="Permanent link">&para;</a></h3>
 <p>Acting late — when the commanded aircraft has few remaining waypoints — is penalised more
 than acting early. The factor scales the base action cost:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>factor = max(1.0,  1 + K × (W − r) / W)
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>factor = max(1.0,  1 + K × (W − r) / W)
 </code></pre></div>
 <p>where <code>r</code> = remaining waypoints at decision time, <code>W = MAX_WAYPOINTS</code>, <code>K = REWARD_ACTION_DOF_K</code>.</p>
 <table>
@@ -992,54 +1317,18 @@ than acting early. The factor scales the base action cost:</p>
 escalating tiers</strong> rather than an all-or-nothing "solved" flag. The highest tier reached wins —
 <strong>tiers do not stack</strong> — and each higher tier strictly implies all lower ones, so the agent
 always sees a gradient toward the next rung:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>            tighter schedule  +  worst aircraft pulled in  ───────────────►
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>   T1   ──►   T2   ──►   T3   ──►   T4   ──►   T5
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  +1.5      +3.0      +6.0      +9.0     +13.0     bonus
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  ≥50%      ≥80%      ≥80%      ≥80%      ALL      fraction of aircraft
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a> ±120 s    ±100 s     ±70 s     ±60 s    ±60 s     within deviation
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>   —         —      max&lt;200 s max&lt;120 s  all       extra worst-aircraft /
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>                                        landed      completion gate
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>            tighter schedule  +  worst aircraft pulled in  ───────────────►
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>   T1   ──►   T2   ──►   T3   ──►   T4   ──►   T5
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  +1.5      +3.0      +6.0      +9.0     +13.0     bonus
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>  ≥50%      ≥80%      ≥80%      ≥80%      ALL      fraction of aircraft
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a> ±120 s    ±100 s     ±70 s     ±60 s    ±60 s     within deviation
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>   —         —      max&lt;200 s max&lt;120 s  all       extra worst-aircraft /
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>                                        landed      completion gate
 </code></pre></div>
-<p>Every tier <em>additionally</em> requires the <strong>conflict gate</strong>. Which gate depends on
-<code>Config.SUCCESS_CONFLICT_REALISED_ONLY</code>:</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>Gate</th>
-<th>Reads</th>
-<th>Semantics</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Current</strong> (<code>True</code>, run <code>1_25</code>+)</td>
-<td><code>not _episode_violations()[0]</code></td>
-<td>the <strong>live</strong> world</td>
-<td>no aircraft pair ever got inside 3 NM (severity ≥ 0.7) during the episode</td>
-</tr>
-<tr>
-<td>Legacy (<code>False</code>, runs ≤ <code>1_24</code>)</td>
-<td><code>_steps_since_near_conflict &gt;= 3</code></td>
-<td>the <strong>NOOP forecast</strong></td>
-<td>no <em>predicted</em> conflict within <code>NEAR_CONFLICT_TIME_S</code> for the final 3 steps (≈ 135 s)</td>
-</tr>
-</tbody>
-</table>
-<p>The original gate before Run 3 was "no near-conflict <strong>ever</strong>, predicted or not", which was
-unsatisfiable and kept <code>success_rate</code> pinned at 0.</p>
-<div class="admonition note">
-<p class="admonition-title">The gate has never been the binding constraint — but that is not the same as 'conflicts are solved'</p>
-<p>Replaying <code>1_22</code>'s checkpoints with both gates instrumented found the predicted gate open in
-<strong>every episode at every checkpoint</strong> (0 relaxations in 95 episode-evaluations), so removing
-it changed nothing. What suppresses separation busts is the <strong>violation penalty</strong>, which has
-always been realised-only.</p>
-<p>Under the realised gate, <code>no_near_conflicts_mean</code> reads <strong>0.774</strong> — ~23 % of episodes contain
-a real loss of separation, where the legacy predicted metric reported 0.99–1.00. Deviation is
-still the harder problem, but do not repeat the claim that conflicts are solved. Measurement:
-<a href="../separation/#but-the-metric-that-said-so-was-measuring-the-wrong-thing">Loss of separation</a>.</p>
-</div>
+<p>Every tier <em>additionally</em> requires the <strong>relaxed near-conflict gate</strong>: predicted conflicts must
+be clear for the final <code>SUCCESS_NEAR_CONFLICT_CLEAR_STEPS = 6</code> steps (≈ 132 s before landing) —
+not the old unsatisfiable "no near-conflict ever".</p>
 <table>
 <thead>
 <tr>
@@ -1107,52 +1396,6 @@ so <code>r_parts.total()</code> is recomputed with it before being passed to SB3
 <p class="admonition-title">Replaces <code>REWARD_SUCCESS_BONUS</code></p>
 <p>The old flat ±5.0 <code>REWARD_SUCCESS_BONUS</code> is deprecated and unused. <code>REWARD_VIOLATION_PENALTY</code>
 is now independently tunable from the tier bonuses.</p>
-</div>
-<h3 id="the-6-tier-variant-runs-1_23-1_24-1_24_pms">The 6-tier variant (runs <code>1_23</code>, <code>1_24</code>, <code>1_24_pms</code>)<a class="headerlink" href="#the-6-tier-variant-runs-1_23-1_24-1_24_pms" title="Permanent link">&para;</a></h3>
-<p>Once Run 13 showed that ±30 s is physically reachable, a <strong>Tier 6</strong> was added — <em>all landed and
-every aircraft within ±30 s</em> — and it became the binary <code>success</code> flag. The ladder shifted up
-one slot so the top payout still lands on true success:</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>T1</th>
-<th>T2</th>
-<th>T3</th>
-<th>T4</th>
-<th>T5</th>
-<th>T6</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>5-tier (≤ <code>1_22</code>, and <code>1_25</code>)</td>
-<td>+1.5</td>
-<td>+3.0</td>
-<td>+6.0</td>
-<td>+9.0</td>
-<td><strong>+13.0</strong> <em>(success)</em></td>
-<td>—</td>
-</tr>
-<tr>
-<td>6-tier (<code>1_23</code>–<code>1_24_pms</code>)</td>
-<td>+0.75</td>
-<td>+1.5</td>
-<td>+3.0</td>
-<td>+6.0</td>
-<td>+9.0</td>
-<td><strong>+13.0</strong> <em>(success)</em></td>
-</tr>
-</tbody>
-</table>
-<p><code>SUCCESS_TIER6_DEV_S = 30.0</code>, and <code>REWARD_SUCCESS_BONUS_TIER5_CONFIRM</code> becomes
-<code>REWARD_SUCCESS_BONUS_TIER6_CONFIRM</code>.</p>
-<div class="admonition warning">
-<p class="admonition-title"><code>tier_mean</code> is not comparable across the two ladders</p>
-<p>The rungs were re-valued, so a <code>tier_mean</code> of 2.2 under the 6-tier ladder measures
-something different from 2.6 under the 5-tier one. Always check which ladder a run used
-before comparing. Run <code>1_25</code> is back on the <strong>5-tier</strong> ladder to stay comparable with
-Run 13 (<code>atc_run_1_22</code>).</p>
 </div>
 <hr />
 <h2 id="reward-config-reference">Reward config reference<a class="headerlink" href="#reward-config-reference" title="Permanent link">&para;</a></h2>
@@ -1320,18 +1563,18 @@ parameter is accepted for signature compatibility but ignored.</p>
 </div>
 <hr />
 <h2 id="full-reward-flow">Full reward flow<a class="headerlink" href="#full-reward-flow" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>step(action)
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  -&gt; apply_action_and_advance()                    # advance 22 s (TIME_BETWEEN_ACTIONS)
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  -&gt; advance_multiple_steps(max_steps_per_episode) # NOOP rollout -&gt; current_predicted_world
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  -&gt; calculate_reward(...)
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>       deviation  = _deviation_reward_rollout(predicted_world, t)
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>       conflict   = infringement_reward_from_world(predicted_world, t)
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>       action     = -_action_penalty(interpreted_actions)   # DOF-scaled
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>       goal       = _goal_bonus(predicted_world)            # exp(-total_dev/S_T) * exp(-max_dev/S_M)
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>       -&gt; RewardParts(deviation, conflict, action, goal)
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>  -&gt; _check_terminated / _check_truncated
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>  -&gt; adjust bonus on terminal step
-<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>  -&gt; reward = r_parts.total()
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>step(action)
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  -&gt; apply_action_and_advance()                    # advance 45 s (TIME_BETWEEN_ACTIONS)
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>  -&gt; advance_multiple_steps(max_steps_per_episode) # NOOP rollout -&gt; current_predicted_world
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>  -&gt; calculate_reward(...)
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>       deviation  = _deviation_reward_rollout(predicted_world, t)
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>       conflict   = infringement_reward_from_world(predicted_world, t)
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>       action     = -_action_penalty(interpreted_actions)   # DOF-scaled
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>       goal       = _goal_bonus(predicted_world)            # exp(-total_dev/S_T) * exp(-max_dev/S_M)
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>       -&gt; RewardParts(deviation, conflict, action, goal)
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>  -&gt; _check_terminated / _check_truncated
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>  -&gt; adjust bonus on terminal step
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>  -&gt; reward = r_parts.total()
 </code></pre></div>
 
 
@@ -1388,7 +1631,7 @@ parameter is accepted for signature compatibility but ignored.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
