@@ -9,14 +9,17 @@
     rate that had held near 53.7% across twenty runs reached **0.753**.
 
     **Run `1_27` tested a reduced 15-clearance set on top and did not beat it** — success
-    **0.64**, a statistical tie, but worst-aircraft deviation **doubled to 87 s**. It learns much
-    faster and converges worse, and a mid-run crash changed its learning-rate schedule, so the
-    comparison is not decisive. See [22 clearances vs 15](analysis_v1_v2.md).
+    **0.64**, a statistical tie, but worst-aircraft deviation nearly doubled, to **87 s**. It
+    learns much faster and converges worse. A mid-run crash had changed its learning-rate
+    schedule; **`1_27a` re-ran the second half on the correct one and the result held** — same
+    0.64 success, deviation 76 s, and no gain at all among clean episodes. The reduced set issues
+    `SHORTEN_TROMBONE`, its one new capability, about **once per thousand clearances** in both
+    runs. See [22 clearances vs 15](analysis_v1_v2.md).
 
     **Read numbers only from `analysis/track_run.py`.** The in-training `success_rate` is a
     5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.
 
-![Runs 1_26 and 1_27 scored on 100 fixed eval seeds](assets/1_26_vs_1_27_training_curve.png)
+![All three arms scored on 100 fixed eval seeds](assets/1_26_vs_1_27_vs_1_27a.png)
 
 - **Algorithm:** PPO with a custom autoregressive policy (`ATCAutoregressivePolicy`) — aircraft
   head → clearance head conditioned on the sampled aircraft, masks read from the observation.

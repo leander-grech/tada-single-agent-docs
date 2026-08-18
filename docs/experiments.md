@@ -384,7 +384,8 @@ window and is not comparable — it read 1.00 for `1_22` whose true rate was 0.3
 | `1_24_pms` | — | — | — | — | — | BGY point-merge; near the do-nothing floor, 0/100 success |
 | `1_25` | 0.44 | 0.18 | 0.537 | 3.20 | 192 s | realised-only conflict gate; a semantics fix, not a capability change |
 | **`1_26`** | **0.70** | **0.07** | **0.753** | **4.38** | **43.4 s** | severity redesign + exponential decay + log deviation observable |
-| `1_27` | 0.64 | 0.10 | 0.711 | 4.01 | 87.3 s | clearance set v2 — 15 actions |
+| `1_27` | 0.64 | 0.10 | 0.711 | 4.01 | 87.3 s | clearance set v2 — 15 actions; LR schedule confounded |
+| `1_27a` | 0.64 | 0.10 | 0.711 | 4.04 | 76.5 s | same, resumed on the **correct** cosine — the confound removed |
 
 `1_26` and `1_27` are quoted at their **10M step checkpoints**; the earlier rows are best
 checkpoints. `1_26`'s `final_model` scores 0.65 and its `best_model` 0.66, so its 10M checkpoint
@@ -457,14 +458,34 @@ precision-bound seeds**. Safety-bound failures halved, 6 → 3.
 ![Runs 1_26 and 1_27 on the same 100 fixed eval seeds](assets/1_26_vs_1_27_training_curve.png)
 
 **Finding.** A smaller action space is much easier to explore and, here, less able to finish the
-job — but the run **crashed at 4.98M and resumed onto a linear LR decay** instead of continuing
-the cosine, so it trained its whole second half at a higher rate. That would leave the same
-fingerprint on convergence, so the precision claim cannot be promoted past "consistent with"
-until a clean run exists. The finding that does not depend on the confound: **giving the agent a
-corrective action is not the same as giving it a reason to learn one.**
+job. The run **crashed at 4.98M and resumed onto a linear LR decay** instead of continuing the
+cosine, training its whole second half up to 1.6× hotter — which would leave the same fingerprint
+on convergence. That confound was removed by `1_27a` (below) and did **not** account for the
+result. The finding that never depended on it: **giving the agent a corrective action is not the
+same as giving it a reason to learn one.**
 
 Full analysis: [22 clearances vs 15](analysis_v1_v2.md). Raw tests:
 [test log, 17 Aug](analysis_log.md#t-1_27-bands).
+
+### Run 1_27a — the same run with the learning rate fixed { #run-1_27a }
+
+**Changes.** Nothing in the MDP. Resumes `1_27` from its own 4 975 000-step checkpoint and runs
+the remaining 5.025M steps on `1_26`'s cosine rather than the linear resume decay
+(`main.py --resume-schedule cosine`). The cosine at that point reconstructs the checkpoint's own
+learning rate to within 0.06%, so it continues the curve instead of starting a new one.
+
+**Results.** Success **0.64** — identical to `1_27`, so the schedule moved it not at all.
+Worst-aircraft deviation **76.5 s** against `1_27`'s 87.3 s and `1_26`'s 43.4 s: 10.8 s of a
+43.9 s gap. Restricted to clean episodes the corrected run is 92.8 s against 89.8 s, i.e. no
+better. Attempts, censored counts, precision-bound split, cap-25 solve rate and
+`SHORTEN_TROMBONE` usage all reproduce `1_27` almost exactly.
+
+![All three arms on the same 100 fixed eval seeds](assets/1_26_vs_1_27_vs_1_27a.png)
+
+**Finding.** **The learning-rate schedule was not the explanation.** The 22-clearance set's
+advantage in schedule precision is a property of the action set, and the `SHORTEN_TROMBONE`
+result now rests on two independent runs with different optimiser schedules. Details:
+[test log, 18 Aug](analysis_log.md#t-1_27a-confound).
 
 ---
 

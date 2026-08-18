@@ -382,6 +382,7 @@ ids do not mean the same thing in the two clips**. Marker `8` is a right turn un
 |---|---|---|---|---|
 | `1_26` — 22 clearances | `delayed` | 4 | 137.1 s | 40 |
 | **`1_27` — 15 clearances** | **`success`** | **5** | **14.8 s** | 36 |
+| **`1_27a` — 15 clearances, corrected LR** | **`success`** | **5** | **27.5 s** | 36 |
 
 <p><strong>22 clearances</strong> — lands everyone, misses the ±60 s bar:</p>
 <video controls preload="metadata" width="100%">
@@ -392,6 +393,12 @@ ids do not mean the same thing in the two clips**. Marker `8` is a right turn un
 <p><strong>15 clearances</strong> — same scenario, solved, with fewer clearances:</p>
 <video controls preload="metadata" width="100%">
   <source src="../assets/renders/ab_seed1194819984_v2_15clr.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>15 clearances, corrected learning rate</strong> — still solved:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/ab_seed1194819984_v2cos_15clr.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 
@@ -406,6 +413,11 @@ stochastic tries, best tier 2 — so this is a capability failure, not an unluck
 |---|---|---|---|---|---|
 | **`1_26` — 22 clearances** | 70 | **`success`** | **5** | **113.3 s** | 54 |
 | `1_27` — 15 clearances | 28 | `delayed` | 0 | 4 747.9 s | 20 |
+| `1_27a` — 15 clearances, corrected LR | 52 | `delayed` | 0 | 3 027.8 s | 37 |
+
+The third row is the point: **fixing the learning rate does not fix this scenario.** The
+corrected run works it for longer and still throws it away, issuing `LENGTHEN_TROMBONE` eight
+times and `SHORTEN_TROMBONE` not once.
 
 <p><strong>22 clearances</strong> — works the fleet for 70 steps and solves it:</p>
 <video controls preload="metadata" width="100%">
@@ -416,6 +428,12 @@ stochastic tries, best tier 2 — so this is a capability failure, not an unluck
 <p><strong>15 clearances</strong> — same scenario, collapses:</p>
 <video controls preload="metadata" width="100%">
   <source src="../assets/renders/ab_seed1699226064_v2_15clr.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>15 clearances, corrected learning rate</strong> — collapses the same way:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/ab_seed1699226064_v2cos_15clr.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 

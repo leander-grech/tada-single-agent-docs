@@ -7,10 +7,14 @@
     *precision* problem, one-third *reliability*, and there is a queue of designed-but-unbuilt
     observation fixes.
 
-    **Top of the list:** re-run clearance set v2 uninterrupted on run 1_26's exact schedule.
-    Run 1_27 crashed mid-run and resumed on a different learning-rate decay, so "15 actions
-    converge worse" and "a linear late-LR converges worse" are currently the same measurement.
-    See [22 clearances vs 15](analysis_v1_v2.md#confound).
+    **Done since:** the learning-rate confound on run 1_27 was removed by re-running its second
+    half on the correct cosine (`1_27a`). It changed nothing — same 0.64 success, and no
+    deviation gain at all among clean episodes. The reduced clearance set's disadvantage is a
+    property of the action set. See [the corrected run](analysis_v1_v2.md#corrected-run).
+
+    **Top of the list now:** make `SHORTEN_TROMBONE` worth learning. Two runs on two schedules
+    both issue it about once per thousand clearances, so the capability exists and the incentive
+    does not.
 
 ## Where the frontier actually is
 
@@ -53,8 +57,9 @@ Each has a worked-out design and measurements behind it.
 
 - **The `USE_LOG_DEVIATION_OBS = False` ablation.** Run 1_26 shipped three changes together,
   so its result attributes to the bundle and not to a part. The flag exists to make this cheap.
-- **A clean v2 re-run** — the single highest-value experiment available. `--warmup-frac 0.08`,
-  10M steps, no resume. Until it exists the v1-vs-v2 comparison has two variables.
+- [x] ~~**A clean v2 re-run**~~ — **done** as `1_27a` (18 Aug): resumed from `1_27`'s own
+  4.98M checkpoint on the correct cosine. The confound accounted for a quarter of the deviation
+  gap on paper and none of it among clean episodes.
 - **`cd4_reachability_probe.py` / `cd4_granularity_probe.py`** — would answer the reachability
   question directly rather than by inference. Still hardcode v1 action names, so they need a
   small fix before they run under v2.
