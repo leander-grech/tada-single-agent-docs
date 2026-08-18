@@ -881,6 +881,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#run-1_27a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 1_27a — the same run with the learning rate fixed
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1336,6 +1347,17 @@
     <span class="md-ellipsis">
       
         Run 1_27 — reduced clearance set
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-1_27a" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 1_27a — the same run with the learning rate fixed
       
     </span>
   </a>
@@ -1898,7 +1920,16 @@ window and is not comparable — it read 1.00 for <code>1_22</code> whose true r
 <td>0.711</td>
 <td>4.01</td>
 <td>87.3 s</td>
-<td>clearance set v2 — 15 actions</td>
+<td>clearance set v2 — 15 actions; LR schedule confounded</td>
+</tr>
+<tr>
+<td><code>1_27a</code></td>
+<td>0.64</td>
+<td>0.10</td>
+<td>0.711</td>
+<td>4.04</td>
+<td>76.5 s</td>
+<td>same, resumed on the <strong>correct</strong> cosine — the confound removed</td>
 </tr>
 </tbody>
 </table>
@@ -1964,13 +1995,28 @@ every checkpoint through 7M (0.25 at 2M where 1_26 is at 0.00), draws level at 8
 precision-bound seeds</strong>. Safety-bound failures halved, 6 → 3.</p>
 <p><img alt="Runs 1_26 and 1_27 on the same 100 fixed eval seeds" src="../assets/1_26_vs_1_27_training_curve.png" /></p>
 <p><strong>Finding.</strong> A smaller action space is much easier to explore and, here, less able to finish the
-job — but the run <strong>crashed at 4.98M and resumed onto a linear LR decay</strong> instead of continuing
-the cosine, so it trained its whole second half at a higher rate. That would leave the same
-fingerprint on convergence, so the precision claim cannot be promoted past "consistent with"
-until a clean run exists. The finding that does not depend on the confound: <strong>giving the agent a
-corrective action is not the same as giving it a reason to learn one.</strong></p>
+job. The run <strong>crashed at 4.98M and resumed onto a linear LR decay</strong> instead of continuing the
+cosine, training its whole second half up to 1.6× hotter — which would leave the same fingerprint
+on convergence. That confound was removed by <code>1_27a</code> (below) and did <strong>not</strong> account for the
+result. The finding that never depended on it: <strong>giving the agent a corrective action is not the
+same as giving it a reason to learn one.</strong></p>
 <p>Full analysis: <a href="../analysis_v1_v2/">22 clearances vs 15</a>. Raw tests:
 <a href="../analysis_log/#t-1_27-bands">test log, 17 Aug</a>.</p>
+<h3 id="run-1_27a">Run 1_27a — the same run with the learning rate fixed<a class="headerlink" href="#run-1_27a" title="Permanent link">&para;</a></h3>
+<p><strong>Changes.</strong> Nothing in the MDP. Resumes <code>1_27</code> from its own 4 975 000-step checkpoint and runs
+the remaining 5.025M steps on <code>1_26</code>'s cosine rather than the linear resume decay
+(<code>main.py --resume-schedule cosine</code>). The cosine at that point reconstructs the checkpoint's own
+learning rate to within 0.06%, so it continues the curve instead of starting a new one.</p>
+<p><strong>Results.</strong> Success <strong>0.64</strong> — identical to <code>1_27</code>, so the schedule moved it not at all.
+Worst-aircraft deviation <strong>76.5 s</strong> against <code>1_27</code>'s 87.3 s and <code>1_26</code>'s 43.4 s: 10.8 s of a
+43.9 s gap. Restricted to clean episodes the corrected run is 92.8 s against 89.8 s, i.e. no
+better. Attempts, censored counts, precision-bound split, cap-25 solve rate and
+<code>SHORTEN_TROMBONE</code> usage all reproduce <code>1_27</code> almost exactly.</p>
+<p><img alt="All three arms on the same 100 fixed eval seeds" src="../assets/1_26_vs_1_27_vs_1_27a.png" /></p>
+<p><strong>Finding.</strong> <strong>The learning-rate schedule was not the explanation.</strong> The 22-clearance set's
+advantage in schedule precision is a property of the action set, and the <code>SHORTEN_TROMBONE</code>
+result now rests on two independent runs with different optimiser schedules. Details:
+<a href="../analysis_log/#t-1_27a-confound">test log, 18 Aug</a>.</p>
 <hr />
 <h2 id="non-mdp-changes">Changes outside the MDP<a class="headerlink" href="#non-mdp-changes" title="Permanent link">&para;</a></h2>
 <p>Work that does not change what the agent optimises but does change what you can see or trust.</p>

@@ -1012,6 +1012,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#t-1_27a-confound" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18 Aug — Was it the action set or the learning rate? (1_27a)
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1257,6 +1268,17 @@
     <span class="md-ellipsis">
       
         17 Aug — Is SHORTEN_TROMBONE used at all?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#t-1_27a-confound" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18 Aug — Was it the action set or the learning rate? (1_27a)
       
     </span>
   </a>
@@ -1840,6 +1862,84 @@ agent has collapsed almost entirely onto speed control plus trombone lengthening
 everything it issues.</p>
 <p><strong>Aggregate, cap 25:</strong> <code>1_27</code> solves <strong>76/100</strong> against <code>1_26</code>'s <strong>83/100</strong>; mean tier 4.58 vs
 4.67; worst-aircraft deviation mean 55 s vs 41 s.</p>
+<hr />
+<h2 id="t-1_27a-confound">18 Aug — Was it the action set or the learning rate? (<code>1_27a</code>)<a class="headerlink" href="#t-1_27a-confound" title="Permanent link">&para;</a></h2>
+<p><strong>Agent under test:</strong> <code>atc_run_1_27_actionset_v2_a</code> — <code>1_27</code> resumed from its own 4 975 000-step
+checkpoint onto <code>1_26</code>'s cosine instead of the linear decay. · <strong>Instrument:</strong> the full battery,
+matched to both earlier runs. · <strong>Data:</strong> <code>experiments/atc_run_1_27_actionset_v2_a/</code>,
+<code>analysis/2026-08-18_1_27a_*</code>.</p>
+<p><strong>Question.</strong> <a href="#t-1_27-bands">17 Aug</a> found the reduced clearance set converging to worse schedule
+precision, but <code>1_27</code> had crashed at 4.98M and resumed onto a <strong>linear</strong> LR decay rather than
+continuing the cosine — running its whole second half up to <strong>1.6× hotter</strong> than <code>1_26</code>. A higher
+late learning rate prevents exactly the fine convergence that worst-aircraft deviation needs, so
+the confound pointed the same way as the effect and could not be argued away.</p>
+<p><strong>Method.</strong> Branch from the identical checkpoint and re-run the remaining 5.025M steps with the
+original cosine re-installed (<code>main.py --resume-schedule cosine</code>, added for this). The cosine
+evaluated at the resume point gives <strong>1.8452e-4</strong> against the checkpoint's <strong>1.8464e-4</strong> — 0.06%
+apart — so it continues the curve rather than starting a new one. The original <code>1_27</code> is left
+untouched as the comparison arm.</p>
+<table>
+<thead>
+<tr>
+<th>at 10M</th>
+<th>success</th>
+<th>separation</th>
+<th>clean-subset</th>
+<th>tier</th>
+<th>worst-ac dev</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1_26</code> — 22 clr, cosine</td>
+<td><strong>0.70</strong></td>
+<td>0.07</td>
+<td><strong>0.753</strong></td>
+<td>4.38</td>
+<td><strong>43.4 s</strong></td>
+</tr>
+<tr>
+<td><code>1_27</code> — 15 clr, linear</td>
+<td>0.64</td>
+<td>0.10</td>
+<td>0.711</td>
+<td>4.01</td>
+<td>87.3 s</td>
+</tr>
+<tr>
+<td><code>1_27a</code> — 15 clr, cosine</td>
+<td><strong>0.64</strong></td>
+<td>0.10</td>
+<td>0.711</td>
+<td>4.04</td>
+<td><strong>76.5 s</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Result — the schedule was not the explanation.</strong> Success did not move (0.64 either way).
+Deviation closed <strong>10.8 s of a 43.9 s gap</strong>, and even that does not survive scrutiny: restricted
+to <em>clean</em> episodes the corrected run is <strong>92.8 s</strong> against the linear run's <strong>89.8 s</strong> — no
+better. The apparent gain came from bust episodes, not from flying more precisely.</p>
+<p>Every other instrument reproduces across the two schedules: deterministic 0.62, pass@20 0.74,
+26 censored, 18 precision-bound, 0 of <code>1_26</code>'s 12 precision-bound seeds solved, 76/100 solved at
+cap 25, and <code>SHORTEN_TROMBONE</code> issued <strong>6 times in 5 425 clearances</strong> (0.11%) against the linear
+run's 5 in 5 162 (0.10%).</p>
+<p><strong>Consequence.</strong> The hedge on <a href="../analysis_v1_v2/">22 clearances vs 15</a> is retired: the
+comparison now rests on a removed confound rather than an argued one, and the conclusion is
+unchanged. The <code>SHORTEN_TROMBONE</code> finding is the one that hardened most — two independent runs
+with different optimiser schedules both issue it about once per thousand clearances.</p>
+<div class="admonition warning">
+<p class="admonition-title">A single band nearly produced a false reversal</p>
+<p>At 9M <code>1_27a</code> scored <strong>0.65</strong>, ahead of <code>1_26</code>'s 0.61, with deviation down to 74 s. One band
+later it settled to 0.64 and 76.5 s. Publishing a revision off that point would have
+announced a reversal that did not exist. At n=100 the few-seed floor is real; <strong>the endpoint
+is the number</strong>, and intermediate bands are for watching shape, not for drawing conclusions.</p>
+</div>
+<p><strong>Tooling note.</strong> <code>--resume-schedule {linear,cosine}</code> now exists on <code>main.py</code>, defaulting to
+<code>linear</code> so nothing else changes. A cosine only lines up if <code>--total-timesteps</code> matches the
+horizon the original run was scheduled over, so the flag checks the reconstructed LR against the
+checkpoint's own and warns when they disagree by more than 5% — a mismatch was caught this way
+during testing.</p>
 
 
 

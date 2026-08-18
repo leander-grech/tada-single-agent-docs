@@ -993,6 +993,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#corrected-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The corrected run — removing the confound
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#verdict" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1184,6 +1195,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#corrected-run" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The corrected run — removing the confound
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#verdict" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1227,9 +1249,11 @@ delay the agent had previously added.</p>
 (a statistical tie) and worst-aircraft deviation <strong>43 s → 87 s</strong> (not a tie). The reduced set
 is markedly <em>more sample-efficient</em> — at 2M steps it is at 0.25 success where the full set is
 at 0.00 — and then it plateaus where the full set keeps sharpening.</p>
-<p><strong>The comparison is not decisive</strong>, because run <code>1_27</code> crashed at 4.98M steps and resumed on a
-<em>different learning-rate schedule</em>, which would leave the same fingerprint. A clean re-run is
-the recommendation.</p>
+<p><strong>The confound has since been removed by experiment.</strong> Run <code>1_27</code> crashed at 4.98M and resumed
+onto a different learning-rate schedule, which would have left the same fingerprint — so
+<code>1_27a</code> re-ran the second half from the same checkpoint on the <em>correct</em> cosine. It landed at
+the same <strong>0.64</strong> success and closed only 11 s of the 44 s deviation gap, none of which
+survives restricting to clean episodes. <strong>The result stands, and now stands cleanly.</strong></p>
 </div>
 <p>Source: <code>actions/actions_v1.py</code>, <code>actions/actions_v2.py</code>, <code>actions/action_set.py</code>,
 <code>experiments/*/progress_scored.csv</code>, <code>analysis/2026-08-17_1_27_*</code>.</p>
@@ -1365,13 +1389,15 @@ checkpoint was at (1.846e-4) down to the same floor (3e-5) over the remaining st
 start at 3e-4 and end at 3e-5; <code>1_27</code> spends its whole second half above <code>1_26</code>.</p>
 <p><img alt="Learning-rate schedules for 1_26 and 1_27" src="../assets/lr_schedule_1_26_vs_1_27.png" /></p>
 <div class="admonition danger">
-<p class="admonition-title">The confound points the same way as the effect</p>
+<p class="admonition-title">The confound pointed the same way as the effect</p>
 <p>A higher late learning rate is exactly what prevents the fine convergence that
 <strong>worst-aircraft deviation</strong> needs — and worst-aircraft deviation is precisely where <code>1_27</code>
-underperforms. It therefore <strong>cannot be ruled out</strong> as the cause.</p>
+underperforms. So it could not be ruled out by argument.</p>
 <p>This project has been caught by this before: <code>1_21</code> and <code>1_22</code> are <em>byte-identical code</em>, and
 a fresh warm-up-plus-cosine versus a resume onto a flat rate was the entire difference
 between them.</p>
+<p><strong>It was therefore tested rather than argued about</strong> — see
+<a href="#corrected-run">the corrected run</a> below.</p>
 </div>
 <p>Two smaller differences rode along, both believed harmless: eval and checkpoint cadence moved
 from 5k/10k to 25k steps — which makes <code>1_27</code>'s <code>best_model</code> a <em>less</em> extreme argmax than
@@ -1670,27 +1696,148 @@ scenarios.</p>
 pass@1 is marginally <em>better</em> while pass@20 is clearly worse, which is the signature of a
 tighter action distribution: a better first guess, less left for sampling to find.</p>
 <p>Full detail and the raw tables: <a href="../analysis_log/#t-shorten-usage">test log, 17 Aug</a>.</p>
+<h3 id="corrected-run">The corrected run — removing the confound<a class="headerlink" href="#corrected-run" title="Permanent link">&para;</a></h3>
+<p>Rather than argue about the learning rate, we re-ran it. <code>atc_run_1_27_actionset_v2_a</code> resumes
+from <code>1_27</code>'s <strong>exact</strong> 4 975 000-step checkpoint and runs the remaining 5.025M steps on
+<code>1_26</code>'s cosine instead of the linear decay
+(<code>main.py --resume-schedule cosine</code>, added for this). The cosine evaluated at that resume point
+returns <strong>1.8452e-4</strong> against the checkpoint's actual <strong>1.8464e-4</strong> — 0.06% apart — so it is a
+seamless continuation rather than a third schedule.</p>
+<p><img alt="All three arms scored on the same 100 fixed eval seeds" src="../assets/1_26_vs_1_27_vs_1_27a.png" /></p>
+<table>
+<thead>
+<tr>
+<th>at 10M steps</th>
+<th>success</th>
+<th>separation</th>
+<th>clean-subset</th>
+<th>tier</th>
+<th>worst-ac dev</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1_26</code> — 22 clearances, cosine</td>
+<td><strong>0.70</strong></td>
+<td>0.07</td>
+<td><strong>0.753</strong></td>
+<td>4.38</td>
+<td><strong>43.4 s</strong></td>
+</tr>
+<tr>
+<td><code>1_27</code> — 15 clearances, linear</td>
+<td>0.64</td>
+<td>0.10</td>
+<td>0.711</td>
+<td>4.01</td>
+<td>87.3 s</td>
+</tr>
+<tr>
+<td><strong><code>1_27a</code> — 15 clearances, cosine</strong></td>
+<td><strong>0.64</strong></td>
+<td>0.10</td>
+<td>0.711</td>
+<td>4.04</td>
+<td><strong>76.5 s</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>The schedule was not the explanation.</strong></p>
+<ul>
+<li><strong>Success did not move at all</strong> — 0.64 either way, still 0.06 below <code>1_26</code> and inside the
+  ≈0.13 significance threshold.</li>
+<li><strong>Deviation closed 10.8 s of a 43.9 s gap</strong> — about a quarter — leaving 33 s unexplained.</li>
+<li><strong>And that quarter does not survive scrutiny.</strong> Restricted to <em>clean</em> episodes, mean
+  worst-aircraft deviation is <strong>89.8 s</strong> for the linear run and <strong>92.8 s</strong> for the corrected one.
+  The apparent gain came from the bust episodes, not from flying more precisely.</li>
+</ul>
+<p>Everything else reproduces almost exactly across the two schedules, which is the strongest
+evidence that the action set — not the optimiser — is what is being measured:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>1_26</code></th>
+<th><code>1_27</code> linear</th>
+<th><code>1_27a</code> cosine</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>attempts: deterministic</td>
+<td>0.63</td>
+<td>0.62</td>
+<td>0.62</td>
+</tr>
+<tr>
+<td>pass@1</td>
+<td>0.56</td>
+<td>0.58</td>
+<td>0.61</td>
+</tr>
+<tr>
+<td>pass@20</td>
+<td><strong>0.82</strong></td>
+<td>0.74</td>
+<td><strong>0.74</strong></td>
+</tr>
+<tr>
+<td>censored / precision-bound</td>
+<td>18 / 12</td>
+<td>26 / 18</td>
+<td><strong>26 / 18</strong></td>
+</tr>
+<tr>
+<td>of <code>1_26</code>'s 12 precision-bound, solved</td>
+<td>—</td>
+<td>0</td>
+<td><strong>0</strong></td>
+</tr>
+<tr>
+<td>solved of 100, cap 25</td>
+<td><strong>83</strong></td>
+<td>76</td>
+<td><strong>76</strong></td>
+</tr>
+<tr>
+<td><code>SHORTEN_TROMBONE</code> issued</td>
+<td>n/a</td>
+<td>5 / 5 162</td>
+<td><strong>6 / 5 425</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">One band nearly told the wrong story</p>
+<p>At 9M the corrected run scored <strong>0.65</strong>, briefly ahead of <code>1_26</code>'s 0.61, and its deviation
+had fallen to 74 s. One band later it settled back to 0.64. A revision published off that
+single point would have been a reversal that was not real — which is exactly what the
+<a href="../analysis_methods/#wilson">few-seed noise floor</a> predicts, and why the endpoint is the
+number.</p>
+</div>
 <h3 id="verdict">The verdict, and what it does and does not license<a class="headerlink" href="#verdict" title="Permanent link">&para;</a></h3>
 <div class="admonition abstract">
-<p class="admonition-title">Three statements, in decreasing confidence</p>
+<p class="admonition-title">Three statements, all now confound-free</p>
 <ol>
 <li><strong><code>SHORTEN_TROMBONE</code> is not being used, and the precision-bound scenarios are not fixed.</strong>
-   5 clearances in 5 162, and 0 of 12 seeds. This is a direct observation and does not depend
-   on the confound at all.</li>
+   5 clearances in 5 162 on the linear run and 6 in 5 425 on the corrected one — about one in
+   a thousand either way — and 0 of 12 seeds in both. Two runs, two schedules, same answer.</li>
 <li><strong>The reduced set is markedly more sample-efficient.</strong> 0.25 success at 2M steps against
-   0.00, leading at every checkpoint through 7M. Also confound-independent — the runs are
-   identical up to 4.98M.</li>
-<li><strong>The reduced set converges to worse schedule precision.</strong> 87 s against 43 s. This is the
-   one claim the <a href="#confound">resume confound</a> touches, and it touches it in the same
-   direction, so it cannot be promoted past "consistent with" until a clean run exists.</li>
+   0.00, leading at every checkpoint through 7M. The runs are identical up to 4.98M, so this
+   never depended on the schedule.</li>
+<li><strong>The reduced set converges to worse schedule precision.</strong> 76 s against 43 s after the
+   correction. The schedule accounted for a quarter of the original gap on paper and none of
+   it among clean episodes.</li>
 </ol>
 </div>
-<p><strong>Recommendation.</strong> Re-run v2 uninterrupted on <code>1_26</code>'s exact schedule
-(<code>--total-timesteps 10000000 --warmup-frac 0.08</code>). That separates statement 3 from the learning
-rate for ~19 h of compute. Independently of which set wins, the finding that matters is
-statement 1: <strong>giving the agent a corrective action is not the same as giving it a reason to
-learn one</strong> — which is a reward-shaping and exploration problem, and the next design question
-worth spending a run on.</p>
+<p><strong>Where this leaves the action set.</strong> The 15-clearance set is genuinely better at <em>finding</em> a
+decent policy and genuinely worse at <em>finishing</em> one. It also wins scenarios the full set cannot
+— 9 of 100, greedily — so it is not uniformly worse, just differently shaped.</p>
+<p><strong>The design question it actually raises.</strong> Statement 1 is the one worth a run:
+<strong>giving the agent a corrective action is not the same as giving it a reason to learn one.</strong>
+Lengthening pays immediately through the conflict term; shortening pays only at landing, through
+deviation, and costs an action penalty now. That is a reward-shaping and exploration problem, and
+it is where the next experiment belongs — not in the action space.</p>
 
 
 

@@ -1249,10 +1249,13 @@ Run 1_27's reduced clearance set <strong>did not build on it</strong>, and the r
 has not been done. What remains splits cleanly: about two-thirds of residual failures are a
 <em>precision</em> problem, one-third <em>reliability</em>, and there is a queue of designed-but-unbuilt
 observation fixes.</p>
-<p><strong>Top of the list:</strong> re-run clearance set v2 uninterrupted on run 1_26's exact schedule.
-Run 1_27 crashed mid-run and resumed on a different learning-rate decay, so "15 actions
-converge worse" and "a linear late-LR converges worse" are currently the same measurement.
-See <a href="../analysis_v1_v2/#confound">22 clearances vs 15</a>.</p>
+<p><strong>Done since:</strong> the learning-rate confound on run 1_27 was removed by re-running its second
+half on the correct cosine (<code>1_27a</code>). It changed nothing — same 0.64 success, and no
+deviation gain at all among clean episodes. The reduced clearance set's disadvantage is a
+property of the action set. See <a href="../analysis_v1_v2/#corrected-run">the corrected run</a>.</p>
+<p><strong>Top of the list now:</strong> make <code>SHORTEN_TROMBONE</code> worth learning. Two runs on two schedules
+both issue it about once per thousand clearances, so the capability exists and the incentive
+does not.</p>
 </div>
 <h2 id="where-the-frontier-actually-is">Where the frontier actually is<a class="headerlink" href="#where-the-frontier-actually-is" title="Permanent link">&para;</a></h2>
 <p>Measured, not inferred — from <code>analysis/attempts_to_solve.py</code> over all 100 eval seeds:</p>
@@ -1319,8 +1322,9 @@ to build next.</p>
 <ul>
 <li><strong>The <code>USE_LOG_DEVIATION_OBS = False</code> ablation.</strong> Run 1_26 shipped three changes together,
   so its result attributes to the bundle and not to a part. The flag exists to make this cheap.</li>
-<li><strong>A clean v2 re-run</strong> — the single highest-value experiment available. <code>--warmup-frac 0.08</code>,
-  10M steps, no resume. Until it exists the v1-vs-v2 comparison has two variables.</li>
+<li>[x] ~~<strong>A clean v2 re-run</strong>~~ — <strong>done</strong> as <code>1_27a</code> (18 Aug): resumed from <code>1_27</code>'s own
+  4.98M checkpoint on the correct cosine. The confound accounted for a quarter of the deviation
+  gap on paper and none of it among clean episodes.</li>
 <li><strong><code>cd4_reachability_probe.py</code> / <code>cd4_granularity_probe.py</code></strong> — would answer the reachability
   question directly rather than by inference. Still hardcode v1 action names, so they need a
   small fix before they run under v2.</li>

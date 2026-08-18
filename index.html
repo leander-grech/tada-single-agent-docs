@@ -1040,13 +1040,16 @@ clearance per 45 s to hit AMAN target landing times without losing separation.</
 losses of separation <strong>0.07</strong>, worst-aircraft deviation <strong>43 s</strong>. The clean-subset success
 rate that had held near 53.7% across twenty runs reached <strong>0.753</strong>.</p>
 <p><strong>Run <code>1_27</code> tested a reduced 15-clearance set on top and did not beat it</strong> — success
-<strong>0.64</strong>, a statistical tie, but worst-aircraft deviation <strong>doubled to 87 s</strong>. It learns much
-faster and converges worse, and a mid-run crash changed its learning-rate schedule, so the
-comparison is not decisive. See <a href="analysis_v1_v2/">22 clearances vs 15</a>.</p>
+<strong>0.64</strong>, a statistical tie, but worst-aircraft deviation nearly doubled, to <strong>87 s</strong>. It
+learns much faster and converges worse. A mid-run crash had changed its learning-rate
+schedule; <strong><code>1_27a</code> re-ran the second half on the correct one and the result held</strong> — same
+0.64 success, deviation 76 s, and no gain at all among clean episodes. The reduced set issues
+<code>SHORTEN_TROMBONE</code>, its one new capability, about <strong>once per thousand clearances</strong> in both
+runs. See <a href="analysis_v1_v2/">22 clearances vs 15</a>.</p>
 <p><strong>Read numbers only from <code>analysis/track_run.py</code>.</strong> The in-training <code>success_rate</code> is a
 5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.</p>
 </div>
-<p><img alt="Runs 1_26 and 1_27 scored on 100 fixed eval seeds" src="assets/1_26_vs_1_27_training_curve.png" /></p>
+<p><img alt="All three arms scored on 100 fixed eval seeds" src="assets/1_26_vs_1_27_vs_1_27a.png" /></p>
 <ul>
 <li><strong>Algorithm:</strong> PPO with a custom autoregressive policy (<code>ATCAutoregressivePolicy</code>) — aircraft
   head → clearance head conditioned on the sampled aircraft, masks read from the observation.
