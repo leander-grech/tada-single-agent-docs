@@ -14,7 +14,12 @@
 
     **Top of the list now:** make `SHORTEN_TROMBONE` worth learning. Two runs on two schedules
     both issue it about once per thousand clearances, so the capability exists and the incentive
-    does not.
+    does not. [Potential-based advice](pbrs.md#fix-advice) is the principled mechanism for that,
+    and it also removes a policy-distorting action cost on the way.
+
+    **Ruled out:** a bigger network. Measured, the encoder uses ~14% of its width and the context
+    ~4% — [see the test log](analysis_log.md#t-embedding-capacity). The productive change is
+    shape, not size.
 
 ## Where the frontier actually is
 
@@ -39,7 +44,10 @@ Each has a worked-out design and measurements behind it.
 | item | why | evidence |
 |---|---|---|
 | **Drop or replace `global.time_s`** | It normalises against a 2880 s fallback horizon while episodes run 3105–5715 s, so it is pinned at +1 for the last ~23% of every episode | `timeout` fires in **zero** of 800 scored episodes, so the deadline it encodes never arrives |
-| **Δt-stamped action history** | History rows carry no time and per-aircraft buffers are mutually unaligned | the `step` field already exists in `_action_history` and is discarded at the observation boundary |
+| **Δt-stamped action history** | History rows carry no time and per-aircraft buffers are mutually unaligned | the `step` field already exists in `_action_history` and is discarded at the observation boundary. **Now also measured:** the history GRU spans 4.5 of 64 effective directions — [test log](analysis_log.md#t-embedding-capacity) |
+| **Pairwise aircraft interaction** | The context is a masked *mean* over aircraft, which cannot represent "*i* and *j* are converging" — the core relation in a separation problem | context effective rank 3–4% of 256; mean cosine between aircraft embeddings 0.70. One self-attention block over the ten slots, same parameter budget |
+| **Continuous tier potential** | Φ moves only when an aircraft crosses a band edge, because it depends on *counts* of aircraft; between crossings the shaping is ~zero | [PBRS](pbrs.md#diagnosis) |
+| **Action cost as potential-based advice** | The action cost is not potential-based, so it changes which policy is optimal | [PBRS](pbrs.md#fix-advice); Harutyunyan et al. (2015) |
 | **`time_to_conflict` should match the reward** | Observable ramps linearly over 20 min; the [conflict penalty](reward.md#conflict-penalty) decays exponentially with a 4-min half-life | at 240 s out the reward has halved while the observable still reads 0.80 |
 | **Action cost waived under urgency** | Scale the cost by `(1 − urgency)` rather than switching on a conflict flag | a binary switch is exploitable — hovering a pair at 4.9 NM costs ~0.025/step and would waive up to 0.30; the continuous form is self-policing at ~33:1 |
 | **Finer clearance magnitudes (CD2)** | The 12 precision-bound seeds reach tier 4 and cannot cross it | **tested and did not deliver.** v2's MEDIUM steps and `SHORTEN_TROMBONE` left worst-aircraft deviation at 87 s against 1_26's 43 s — [the head-to-head](analysis_v1_v2.md#head-to-head) |

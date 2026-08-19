@@ -456,3 +456,77 @@ with different optimiser schedules both issue it about once per thousand clearan
 horizon the original run was scheduled over, so the flag checks the reconstructed LR against the
 checkpoint's own and warns when they disagree by more than 5% — a mismatch was caught this way
 during testing.
+
+---
+
+## 19 Aug — Is the aircraft embedding too small? { #t-embedding-capacity }
+
+**Agents under test:** `atc_run_1_26_sep3nm` and `atc_run_1_27_actionset_v2_a`, both at 10M.
+· **Instrument:** `analysis/embedding_capacity.py` — hooks the encoder and both policy heads on
+real evaluation states and measures how much of each layer's width carries variance.
+· **Data:** `analysis/2026-08-19_embed_1_26/`, `analysis/2026-08-19_embed_1_27a/`
+(~2 100 states each, 30 scenarios).
+
+**Question.** Every run plateaus on worst-aircraft deviation. One hypothesis is representational:
+the policy squeezes each aircraft into a 128-d vector, pools ten of them into a context by
+masked **mean**, and pushes `[per-aircraft 128 ‖ context 256] = 384` dims through a **64**-unit
+head. Is it running out of room? Should the network be bigger, or have another head?
+
+**Method.** For each layer, the **effective rank** — `exp(entropy)` of the normalised eigenvalue
+spectrum of the activation covariance, i.e. how many directions are actually in use — reported
+against the layer's width. Plus dead units, variance concentration, head weight attribution, and
+the pairwise cosine between aircraft embeddings within a state.
+
+![Effective rank as a fraction of layer width, both runs](assets/embedding_capacity.png)
+
+| layer | width | eff. rank `1_26` | eff. rank `1_27a` | % of width used |
+|---|---|---|---|---|
+| aircraft embedding (post-fuse) | 128 | 17.9 | 19.8 | **14–15%** |
+| ├ aircraft scalars (`ac_mlp`) | 128 | 15.0 | 16.3 | 12–13% |
+| ├ flight plan (conv) | 64 | 7.1 | 5.7 | 9–11% (11–14% units **dead**) |
+| └ action history (GRU) | 64 | 4.4 | 4.6 | **7%** |
+| context (pooled ‖ global) | 256 | 8.5 | 9.8 | **3–4%** |
+| └ global branch | 128 | 2.6 | 2.8 | **2%** |
+| aircraft-head hidden | 64 | 5.3 | 9.0 | 8–14% |
+| clearance-head hidden | 64 | 3.7 | 5.7 | 6–9% |
+
+**Result — the network is not short of width. It is using roughly an eighth of what it has.**
+The 128-d aircraft embedding spans ~18 effective directions, and **78–79% of its variance sits
+in the top 10 principal components**. The 256-d context spans ~9. The global branch spans under
+3 of its 128. Both runs agree closely, so this is a property of the training, not the action set.
+
+!!! danger "Making the network bigger would not help"
+    A larger `AR_HIDDEN`, or a wider head, adds directions to layers that are already leaving
+    seven eighths of their directions unused. The binding constraint is elsewhere.
+
+**Three things this does point at:**
+
+1. **The action-history GRU is nearly degenerate** — effective rank **4.4–4.6 of 64**, with 98–99%
+   of variance in its top 10 components. It is the input that a state-action potential would have
+   to read (see [PBRS](pbrs.md#fix-advice)), and right now it is barely representing anything. A
+   history of 8 one-hot clearances with no timestamps does not carry much, which matches the
+   Δt-stamped-history item on the [roadmap](roadmap.md).
+2. **The context is the narrowest point in the network**, at 3–4% of 256. It is built by masked
+   **mean** over aircraft — a permutation-invariant summary that cannot represent *pairwise*
+   structure. For a separation problem, "aircraft *i* and *j* are converging" has to be
+   reconstructed from an average of ten vectors. Mean cosine between aircraft embeddings within
+   a state is **0.70–0.73** (p90 ≈ 0.90), so the per-aircraft vectors are already highly aligned
+   before pooling averages them.
+3. **The heads read the aircraft and the context about equally** — RMS weight per input dim gives
+   a context/aircraft ratio of **0.79–0.88** for both heads in both runs. So the aircraft being
+   scored is not being drowned out by the global summary; the heads are behaving sensibly given
+   what they are fed.
+
+**Consequence.** The answer to "should we use a larger network or another head" is **no on both
+counts, on this evidence**. The productive change is *shape*, not size: replace masked-mean
+pooling with something that can express pairwise structure — a single multi-head
+self-attention block over the ten aircraft slots would keep permutation equivariance (which is
+[verified to hold](#t-ordering) and worth preserving) while letting aircraft *i* attend to
+aircraft *j*. That is a change in the same parameter budget, not an increase.
+
+!!! note "Caveat on the instrument"
+    Effective rank measures how many directions carry *variance*, not how many carry *useful*
+    information — a low-rank representation can still be sufficient if the task is genuinely
+    low-dimensional. The claim here is narrow: **width is not the binding constraint**, so
+    widening is not the fix. It does not by itself prove that attention would help; that needs
+    a run.

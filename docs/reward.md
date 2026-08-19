@@ -22,6 +22,12 @@ Source: `actions/rewards.py`, `utils/reward_utils.py`, `config/config.py`
 
 ---
 
+!!! info "The tier ladder is delivered as potential-based shaping"
+    The five-tier bonus is not paid as a terminal lump — it is delivered densely as
+    `F = γΦ(s′) − Φ(s)`, which cannot change the optimal policy. The potential, the literature
+    it rests on, and two measured defects in it have their own page:
+    **[Reward shaping (PBRS)](pbrs.md)**.
+
 ## `RewardParts` dataclass (`utils/reward_utils.py:8`)
 
 ```python

@@ -47,6 +47,7 @@ nav:
       - MDP & Environment: mdp.md
       - Observations: observations.md
       - Reward: reward.md
+      - Reward shaping (PBRS): pbrs.md
       - Loss of separation: separation.md
       - Training: training.md
       - Instrumentation: instrumentation.md
