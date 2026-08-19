@@ -11,8 +11,10 @@
       
       
       
-        <link rel="prev" href="../analysis_v1_v2/">
+        <link rel="prev" href="../reward/">
       
+      
+        <link rel="next" href="../separation/">
       
       
         
@@ -23,7 +25,7 @@
     
     
       
-        <title>Roadmap - TADA Single-Agent RL</title>
+        <title>Reward shaping (PBRS) - TADA Single-Agent RL</title>
       
     
     
@@ -74,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#roadmap" class="md-skip">
+        <a href="#reward-shaping-pbrs" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Roadmap
+              Reward shaping (PBRS)
             
           </span>
         </div>
@@ -220,10 +222,12 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../mdp/" class="md-tabs__link">
           
   
@@ -280,11 +284,9 @@
   
   
   
-    
   
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="./" class="md-tabs__link">
+    <li class="md-tabs__item">
+      <a href="../roadmap/" class="md-tabs__link">
         
   
   
@@ -367,26 +369,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
             
   
   
@@ -404,7 +411,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -503,10 +510,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../pbrs/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reward shaping (PBRS)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -522,6 +556,92 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#theory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The guarantee we are relying on
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#current" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What we actually ship
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#diagnosis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the figure shows, and why it is a problem
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fix-continuous" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fix 1 — make Φ continuous in the deviations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fix-advice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fix 2 — the action cost as dynamic potential-based advice
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#refs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -880,37 +1000,10 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Roadmap
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
         
   
   
@@ -926,164 +1019,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#where-the-frontier-actually-is" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Where the frontier actually is
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#designed-not-built" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Designed, not built
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#tried-and-abandoned" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Tried and abandoned
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#never-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Never run
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#historical-pre-1_26" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Historical (pre-1_26)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#done-since" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Done since
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#in-flight" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        In flight
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-on-hold-agreed" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next (on hold, agreed)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Next (on hold, agreed)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-finer-continuous-actions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. Finer / continuous actions
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-reward-peaking-marginal-progress-bonus" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Reward peaking / marginal-progress bonus
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#open-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Open questions
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parked" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Parked
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1115,10 +1050,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#where-the-frontier-actually-is" class="md-nav__link">
+  <a href="#theory" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Where the frontier actually is
+        The guarantee we are relying on
       
     </span>
   </a>
@@ -1126,10 +1061,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#designed-not-built" class="md-nav__link">
+  <a href="#current" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Designed, not built
+        What we actually ship
       
     </span>
   </a>
@@ -1137,10 +1072,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#tried-and-abandoned" class="md-nav__link">
+  <a href="#diagnosis" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Tried and abandoned
+        What the figure shows, and why it is a problem
       
     </span>
   </a>
@@ -1148,10 +1083,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#never-run" class="md-nav__link">
+  <a href="#fix-continuous" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Never run
+        Fix 1 — make Φ continuous in the deviations
       
     </span>
   </a>
@@ -1159,10 +1094,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#historical-pre-1_26" class="md-nav__link">
+  <a href="#fix-advice" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Historical (pre-1_26)
+        Fix 2 — the action cost as dynamic potential-based advice
       
     </span>
   </a>
@@ -1170,82 +1105,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#done-since" class="md-nav__link">
+  <a href="#refs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Done since
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#in-flight" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        In flight
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-on-hold-agreed" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next (on hold, agreed)
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Next (on hold, agreed)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-finer-continuous-actions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        1. Finer / continuous actions
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-reward-peaking-marginal-progress-bonus" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        2. Reward peaking / marginal-progress bonus
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#open-questions" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Open questions
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parked" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Parked
+        References
       
     </span>
   </a>
@@ -1269,213 +1132,223 @@
 
 
 
-<h1 id="roadmap">Roadmap<a class="headerlink" href="#roadmap" title="Permanent link">&para;</a></h1>
+<h1 id="reward-shaping-pbrs">Reward shaping (PBRS)<a class="headerlink" href="#reward-shaping-pbrs" title="Permanent link">&para;</a></h1>
 <div class="admonition abstract">
 <p class="admonition-title">TL;DR</p>
-<p>The deviation ceiling <strong>broke</strong> in run 1_26 — see the <a href="../experiments/#recent-runs">experiment log</a>.
-Run 1_27's reduced clearance set <strong>did not build on it</strong>, and the run that would settle why
-has not been done. What remains splits cleanly: about two-thirds of residual failures are a
-<em>precision</em> problem, one-third <em>reliability</em>, and there is a queue of designed-but-unbuilt
-observation fixes.</p>
-<p><strong>Done since:</strong> the learning-rate confound on run 1_27 was removed by re-running its second
-half on the correct cosine (<code>1_27a</code>). It changed nothing — same 0.64 success, and no
-deviation gain at all among clean episodes. The reduced clearance set's disadvantage is a
-property of the action set. See <a href="../analysis_v1_v2/#corrected-run">the corrected run</a>.</p>
-<p><strong>Top of the list now:</strong> make <code>SHORTEN_TROMBONE</code> worth learning. Two runs on two schedules
-both issue it about once per thousand clearances, so the capability exists and the incentive
-does not. <a href="../pbrs/#fix-advice">Potential-based advice</a> is the principled mechanism for that,
-and it also removes a policy-distorting action cost on the way.</p>
-<p><strong>Ruled out:</strong> a bigger network. Measured, the encoder uses ~14% of its width and the context
-~4% — <a href="../analysis_log/#t-embedding-capacity">see the test log</a>. The productive change is
-shape, not size.</p>
+<p>The tier ladder is delivered as <strong>potential-based reward shaping</strong> — <code>F = γΦ(s′) − Φ(s)</code>
+with <code>Φ ≡ 0</code> at terminal — so it cannot change which policy is optimal
+(<a href="#refs">Ng, Harada &amp; Russell 1999</a>).</p>
+<p><strong>The potential we ship is a staircase.</strong> Φ depends on the fleet almost entirely through
+<em>counts</em> — the fraction of aircraft inside each tier band — and with 10 aircraft a fraction
+moves in steps of 0.1. So the agent is paid <strong>nothing</strong> until one aircraft crosses a band
+edge, then a lump. On a sweep from a 320 s worst aircraft down to 20 s, <strong>most steps carry
+essentially no shaping at all</strong>, and the T5 term is an unsmoothed <strong>13-point cliff</strong>.</p>
+<p>Two fixes are proposed below: make Φ continuous in the deviations themselves, and express
+the <strong>action cost</strong> as <em>dynamic potential-based advice</em> over state-action pairs
+(<a href="#refs">Wiewiora et al. 2003</a>; <a href="#refs">Devlin &amp; Kudenko 2012</a>;
+<a href="#refs">Harutyunyan et al. 2015</a>) so that it stops changing the optimal policy.</p>
 </div>
-<h2 id="where-the-frontier-actually-is">Where the frontier actually is<a class="headerlink" href="#where-the-frontier-actually-is" title="Permanent link">&para;</a></h2>
-<p>Measured, not inferred — from <code>analysis/attempts_to_solve.py</code> over all 100 eval seeds:</p>
+<p>Source: <code>actions/rewards.py::tier_potential</code>, <code>atc_env/single_agent_env.py:411-419</code>,
+<code>config/config.py:452-457</code>.</p>
+<hr />
+<h2 id="theory">The guarantee we are relying on<a class="headerlink" href="#theory" title="Permanent link">&para;</a></h2>
+<p>Ng, Harada &amp; Russell (1999) proved that a shaping reward of the form</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>F(s, a, s′) = γ Φ(s′) − Φ(s)
+</code></pre></div>
+<p>leaves the optimal policy of the underlying MDP unchanged — and, crucially, that this form is
+<strong>necessary</strong> as well as sufficient: any shaping that is <em>not</em> a potential difference can, for
+some MDP consistent with the same transition structure, make a suboptimal policy optimal. That
+is why the tier ladder is delivered this way and the deviation, conflict and action terms are
+not: the ladder is <em>guidance</em>, and guidance must not move the goalposts.</p>
+<p>Two consequences we depend on:</p>
 <ul>
-<li>Deterministic <strong>0.63</strong>, pass@1 <strong>0.56</strong>, pass@20 <strong>0.82</strong>. The gap from the single-shot rate
-  to the asymptote — <strong>0.26</strong> — is <strong>reliability</strong>, recoverable at inference by best-of-n, a
-  shield, or a lower sampling temperature, with no retraining at all. This is the cheapest win
-  available.</li>
-<li>Of the 18 never solved in 20 attempts: <strong>12 precision-bound</strong> (under 20% of attempts bust,
-  tier 4 on 73% of attempts, tier 5 never) and <strong>6 safety-bound</strong> (four bust on 100% of
-  attempts, the others on 95% and 70%). Classification rule and seed lists on the
-  <a href="../analysis_log/#t-attempts-1_26">test log</a>.</li>
-</ul>
-<p>Those need opposite fixes, which is why a plain success rate was never going to tell us what
-to build next.</p>
-<h2 id="designed-not-built">Designed, not built<a class="headerlink" href="#designed-not-built" title="Permanent link">&para;</a></h2>
-<p>Each has a worked-out design and measurements behind it.</p>
-<table>
-<thead>
-<tr>
-<th>item</th>
-<th>why</th>
-<th>evidence</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Drop or replace <code>global.time_s</code></strong></td>
-<td>It normalises against a 2880 s fallback horizon while episodes run 3105–5715 s, so it is pinned at +1 for the last ~23% of every episode</td>
-<td><code>timeout</code> fires in <strong>zero</strong> of 800 scored episodes, so the deadline it encodes never arrives</td>
-</tr>
-<tr>
-<td><strong>Δt-stamped action history</strong></td>
-<td>History rows carry no time and per-aircraft buffers are mutually unaligned</td>
-<td>the <code>step</code> field already exists in <code>_action_history</code> and is discarded at the observation boundary. <strong>Now also measured:</strong> the history GRU spans 4.5 of 64 effective directions — <a href="../analysis_log/#t-embedding-capacity">test log</a></td>
-</tr>
-<tr>
-<td><strong>Pairwise aircraft interaction</strong></td>
-<td>The context is a masked <em>mean</em> over aircraft, which cannot represent "<em>i</em> and <em>j</em> are converging" — the core relation in a separation problem</td>
-<td>context effective rank 3–4% of 256; mean cosine between aircraft embeddings 0.70. One self-attention block over the ten slots, same parameter budget</td>
-</tr>
-<tr>
-<td><strong>Continuous tier potential</strong></td>
-<td>Φ moves only when an aircraft crosses a band edge, because it depends on <em>counts</em> of aircraft; between crossings the shaping is ~zero</td>
-<td><a href="../pbrs/#diagnosis">PBRS</a></td>
-</tr>
-<tr>
-<td><strong>Action cost as potential-based advice</strong></td>
-<td>The action cost is not potential-based, so it changes which policy is optimal</td>
-<td><a href="../pbrs/#fix-advice">PBRS</a>; Harutyunyan et al. (2015)</td>
-</tr>
-<tr>
-<td><strong><code>time_to_conflict</code> should match the reward</strong></td>
-<td>Observable ramps linearly over 20 min; the <a href="../reward/#conflict-penalty">conflict penalty</a> decays exponentially with a 4-min half-life</td>
-<td>at 240 s out the reward has halved while the observable still reads 0.80</td>
-</tr>
-<tr>
-<td><strong>Action cost waived under urgency</strong></td>
-<td>Scale the cost by <code>(1 − urgency)</code> rather than switching on a conflict flag</td>
-<td>a binary switch is exploitable — hovering a pair at 4.9 NM costs ~0.025/step and would waive up to 0.30; the continuous form is self-policing at ~33:1</td>
-</tr>
-<tr>
-<td><strong>Finer clearance magnitudes (CD2)</strong></td>
-<td>The 12 precision-bound seeds reach tier 4 and cannot cross it</td>
-<td><strong>tested and did not deliver.</strong> v2's MEDIUM steps and <code>SHORTEN_TROMBONE</code> left worst-aircraft deviation at 87 s against 1_26's 43 s — <a href="../analysis_v1_v2/#head-to-head">the head-to-head</a></td>
-</tr>
-</tbody>
-</table>
-<h2 id="tried-and-abandoned">Tried and abandoned<a class="headerlink" href="#tried-and-abandoned" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>NOOP rollout horizon cut</strong> — built, measured <strong>0.96×</strong>, reverted. The rollout stops once
-  every aircraft lands, so the requested step count is a cap that never binds; cost tracks
-  airborne aircraft. It remains <strong>71% of an env step</strong> and is unaddressed. Cutting it means
-  computing deviation less often, which is a behavioural change needing its own experiment.</li>
-<li><strong>Multi-select CHOOSE/STEP head</strong> — deprioritised: the precision-bound seeds never lose
-  separation, so intra-step coordination is not their problem.</li>
-</ul>
-<h2 id="never-run">Never run<a class="headerlink" href="#never-run" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>The <code>USE_LOG_DEVIATION_OBS = False</code> ablation.</strong> Run 1_26 shipped three changes together,
-  so its result attributes to the bundle and not to a part. The flag exists to make this cheap.</li>
-<li>[x] ~~<strong>A clean v2 re-run</strong>~~ — <strong>done</strong> as <code>1_27a</code> (18 Aug): resumed from <code>1_27</code>'s own
-  4.98M checkpoint on the correct cosine. The confound accounted for a quarter of the deviation
-  gap on paper and none of it among clean episodes.</li>
-<li><strong><code>cd4_reachability_probe.py</code> / <code>cd4_granularity_probe.py</code></strong> — would answer the reachability
-  question directly rather than by inference. Still hardcode v1 action names, so they need a
-  small fix before they run under v2.</li>
-<li><strong>PMS transfer.</strong> More attractive than it was: point-merge's known blocker was the
-  observation norms, which is exactly what the log-scaling fixed
-  (<code>time_to_target</code> saturation 71.4% → 15.1% on PMS).</li>
+<li><strong>The shaping telescopes.</strong> Over an episode, <code>Σ_t γ^t F_t = γ^T Φ(s_T) − Φ(s_0)</code>. With
+  <code>Φ(s_T) = 0</code> this is just <code>−Φ(s_0)</code>, a constant offset per episode that depends only on the
+  starting state. The agent cannot farm shaping by cycling.</li>
+<li><strong>Terminal states must be handled explicitly.</strong> <code>_check_terminated</code> sets
+  <code>Φ = 0</code> on the terminal step (<code>single_agent_env.py:417</code>), so the last real transition pays
+  <code>γ·0 − Φ(s_T)</code>. Grześ (2017) shows this is not a formality: in episodic problems the
+  potential <em>of</em> the terminal state is used when computing the shaping of its predecessors, and
+  Ng's "zero shaping reward at goal states" condition can be satisfied by non-zero potentials
+  that still break things. Zero is the safe choice and it is what we do.</li>
 </ul>
 <hr />
-<h2 id="historical-pre-1_26">Historical (pre-1_26)<a class="headerlink" href="#historical-pre-1_26" title="Permanent link">&para;</a></h2>
-<h2 id="done-since">Done since<a class="headerlink" href="#done-since" title="Permanent link">&para;</a></h2>
-<ul>
-<li>[x] <strong>Larger gradient clip</strong> — <code>max_grad_norm</code> 0.5 → 1.5. Shipped in <strong>Run 5</strong>
-  (<code>atc_run_1_10</code>): <code>clip_frac</code> dropped 1.0 → ~0.2 and reward improved (−51 → −45 best), but
-  the deviation ceiling held.</li>
-<li>[x] <strong>Dense goal "carrot"</strong> (a flat, non-potential version of item 2 below) —
-  <code>MAX·exp(−total_abs_dev/SCALE)</code>. Shipped in <strong>Runs 6–7</strong>: best reward yet (−33) and the best
-  deviation numbers (<code>frac_under_30s</code> 0.35, worst aircraft 367 s), but still no full success.</li>
-<li>[x] <strong>KL control</strong> — LR decay <code>3e-4→3e-5</code>, <code>n_epochs</code> 5, <code>target_kl</code> 0.03 (<strong>Run 7</strong>) fixed
-  Run 6's late-training KL blow-up (<code>approx_kl</code> 0.22 → 0.002) but didn't lift the ceiling.</li>
-<li>[x] <strong>5-tier success + autoregressive policy + per-scenario horizon</strong> — Run 8 (<code>atc_run_1_16</code>):
-  the graduated terminal ladder (replacing the all-or-nothing ±30 s gate) gave the first non-zero
-  success (<strong>0 → ~30%</strong>, peak <strong>50%</strong> by ~7 M) and <strong>broke the deviation ceiling</strong> — worst-aircraft
-  deviation 360–390 s → <strong>~99 s</strong>. Remaining issue: training oscillates past ~3 M rather than
-  converging.</li>
-</ul>
-<h2 id="in-flight">In flight<a class="headerlink" href="#in-flight" title="Permanent link">&para;</a></h2>
-<ul>
-<li>[x] <strong>Reduced clearance set (v2, 15 actions)</strong> — Run 1_27, complete at 10M on 12 Aug. Success
-  0.64 against 1_26's 0.70 (a tie), worst-aircraft deviation <strong>87 s against 43 s</strong> (not a tie).
-  Markedly more sample-efficient early — 0.25 success at 2M where 1_26 is at 0.00 — then
-  plateaus. <strong>Confounded by a mid-run crash and resume</strong>; a clean re-run is item 1 above.</li>
-<li>[ ] <strong>Finer / continuous actions</strong> (item 1) — still open. Note that 1_27 moved <em>coarser</em> on
-  turns and the trombone while adding MEDIUM speed steps, so it is not a test of this.</li>
-<li>[~] <strong>Finer temporal control</strong> — <code>TIME_BETWEEN_ACTIONS</code> 45 → 22 s so the agent acts ~2× as often
-  per scenario (a <em>structural</em> limit distinct from item 1: only one aircraft can be commanded per
-  step). <strong>First data (Run 9):</strong> a 22 s warm-restart of Run 8's 2 M checkpoint (<code>atc_run_1_16_b</code>)
-  transiently hit the best worst-aircraft deviation of any run (~99 s) but regressed harder than the
-  45 s control — transferring an off-regime policy mid-run is destabilising, so the result is
-  <strong>inconclusive</strong>. A clean fresh 22 s run (<code>atc_run_1_17</code>, Run 10) is in early training. See
-  <a href="../experiments/">experiments</a>.</li>
-</ul>
-<h2 id="next-on-hold-agreed">Next (on hold, agreed)<a class="headerlink" href="#next-on-hold-agreed" title="Permanent link">&para;</a></h2>
-<h3 id="1-finer-continuous-actions">1. Finer / continuous actions<a class="headerlink" href="#1-finer-continuous-actions" title="Permanent link">&para;</a></h3>
-<p>Speed comes in ±10/±30 kt buckets and trombone in whole 1–4 groups — too coarse to trim a
-landing time to ±30 s. Options, increasing effort:</p>
+<h2 id="current">What we actually ship<a class="headerlink" href="#current" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Φ(s) = Σ_{j=1..4}  b_j · σ( (cover_j(s) − τ_j) / κ )        ← T3, T4 additionally × σ((cap_j − max_dev)/κ_max)
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>     +             b_5 · 1[ every aircraft within ±60 s ]    ← unsmoothed
+</code></pre></div>
 <table>
 <thead>
 <tr>
-<th>Path</th>
-<th>Mechanism</th>
-<th>Effort</th>
-<th>Notes</th>
+<th>symbol</th>
+<th>meaning</th>
+<th>value</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>B (start here)</strong></td>
-<td>factored <code>MultiDiscrete([aircraft, type, magnitude_bucket])</code> with per-dim masking</td>
-<td>low</td>
-<td>fully supported by MaskablePPO; ~16–20 magnitude levels per type; no custom distribution</td>
+<td><code>b_1..b_5</code></td>
+<td>tier weights, reused from the terminal bonus ladder</td>
+<td>1.5, 3, 6, 9, 13</td>
 </tr>
 <tr>
-<td><strong>A</strong></td>
-<td>hybrid <code>Discrete(aircraft×type, masked)</code> + <code>Box(magnitude)</code></td>
-<td>high</td>
-<td>true continuous; needs a <strong>custom policy + composite distribution</strong> (MaskableCategorical × DiagGaussian) — stock SB3 has no masked hybrid space</td>
+<td><code>cover_j</code></td>
+<td><strong>fraction of aircraft</strong> inside tier <em>j</em>'s deviation band</td>
+<td>multiples of 1/10</td>
 </tr>
 <tr>
-<td>C</td>
-<td>more discrete buckets on the flat <code>Discrete</code></td>
-<td>trivial</td>
-<td>clumsy; inflates the 220-space</td>
+<td><code>τ_j</code></td>
+<td>required fraction</td>
+<td>0.5 (T1), 0.8 (T2–T4)</td>
+</tr>
+<tr>
+<td><code>κ</code></td>
+<td>sigmoid width on the <em>fraction</em> axis</td>
+<td><code>PBRS_KAPPA</code> = 0.1</td>
+</tr>
+<tr>
+<td><code>κ_max</code></td>
+<td>sigmoid width on the worst-aircraft-deviation axis</td>
+<td><code>PBRS_KAPPA_MAX_DEV</code> = 30 s</td>
+</tr>
+<tr>
+<td><code>γ</code></td>
+<td>must equal the PPO discount</td>
+<td><code>PBRS_GAMMA</code> = 0.998</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Plan:</strong> try <strong>B</strong> first to confirm finer control helps before investing in <strong>A</strong>.</p>
-<h3 id="2-reward-peaking-marginal-progress-bonus">2. Reward peaking / marginal-progress bonus<a class="headerlink" href="#2-reward-peaking-marginal-progress-bonus" title="Permanent link">&para;</a></h3>
-<p>A first, <strong>dense flat</strong> carrot shipped in Runs 6–7 — <code>goal = MAX·exp(−total_abs_dev/SCALE)</code>
-(<code>MAX=2.0</code>, <code>SCALE=400 s</code>). It lifted reward and nudged deviation but did <strong>not</strong> clear the
-ceiling, so the remaining variants are still open:</p>
+<p><img alt="The PBRS tier potential, its components, and the per-step shaping it produces" src="../assets/pbrs_potential.png" /></p>
+<hr />
+<h2 id="diagnosis">What the figure shows, and why it is a problem<a class="headerlink" href="#diagnosis" title="Permanent link">&para;</a></h2>
+<p><strong>Left — the components.</strong> Each tier contributes a sigmoid in <em>coverage</em>. With κ = 0.1 the
+transition is genuinely soft, spanning roughly ±0.2 of coverage. That looks healthy.</p>
+<p><strong>Middle — Φ along a fleet that is steadily tightening.</strong> It is a <strong>staircase</strong>. The reason is
+in the table above: <code>cover_j</code> is a <em>fraction of ten aircraft</em>, so it only ever takes the values
+0, 0.1, … 1.0. Smoothing a variable that lives on an 11-point lattice does not make the
+potential smooth — the sigmoid is only ever evaluated at those eleven points. Φ therefore
+changes when, and only when, an aircraft crosses a band edge.</p>
+<p><strong>Right — what the agent is actually paid per step.</strong> Almost all of Φ arrives in a handful of
+spikes. Between them the shaping is ~zero, which is the opposite of what dense shaping is for.</p>
+<p>Three specific defects follow:</p>
+<ol>
+<li><strong>Quantisation.</strong> The gradient the ladder was supposed to provide does not exist between
+   crossings. An action that moves an aircraft from 130 s to 65 s of deviation — enormous
+   progress — earns <strong>nothing</strong> unless it happens to cross 120 s or 60 s.</li>
+<li><strong>The T5 term is a discontinuity.</strong> <code>all_under_tier5</code> is a hard 0/1 indicator multiplied by</li>
+<li>Every other rung is smoothed; the most important one is a cliff. A single aircraft
+   sitting at 60.1 s holds back the entire 13-point term.</li>
+<li><strong>Only <code>max_dev</code> is continuous.</strong> The T3/T4 gates are the sole part of Φ that responds
+   smoothly to the deviations themselves, and they saturate over κ_max = 30 s. That is a thin
+   channel for the one quantity that actually gates success.</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">This is consistent with what the runs do</p>
+<p>Worst-aircraft deviation is exactly where every run plateaus — <code>1_26</code> at 43 s, <code>1_27a</code> at
+76 s, against a T5 bar of 60 s. A potential that is flat between band crossings is a
+plausible contributor: the agent gets no signal for the last few seconds of tightening,
+which is precisely the regime that decides T5.</p>
+</div>
+<hr />
+<h2 id="fix-continuous">Fix 1 — make Φ continuous in the deviations<a class="headerlink" href="#fix-continuous" title="Permanent link">&para;</a></h2>
+<p>Replace the count with a <strong>soft membership</strong>. Instead of</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>cover_j = (1/N) · Σ_i  1[ |dev_i| ≤ d_j ]
+</code></pre></div>
+<p>use</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>cover_j = (1/N) · Σ_i  σ( (d_j − |dev_i|) / κ_dev )
+</code></pre></div>
+<p>Now every aircraft contributes a value that moves continuously as its own deviation changes, so
+Φ responds to <em>any</em> improvement rather than only to boundary crossings. The same substitution
+smooths T5, removing the 13-point cliff.</p>
+<p>This is still a function of state alone, so <strong>policy invariance is untouched</strong> — it is a
+different Φ, not a different shaping form. <code>κ_dev</code> becomes the one new constant; it should be
+set from the deviation scale (order 10–20 s), not from the fraction scale.</p>
+<div class="admonition warning">
+<p class="admonition-title">Check the telescoping before and after</p>
+<p>Φ(s₀) changes, so the per-episode constant offset <code>−Φ(s₀)</code> changes with it. That is
+harmless for the optimal policy but it shifts episode returns, which the violation penalty
+is calibrated against — see <a href="../reward/">reward</a>. Re-read <code>return_clean_min/max</code> after any
+change to Φ.</p>
+</div>
+<hr />
+<h2 id="fix-advice">Fix 2 — the action cost as dynamic potential-based advice<a class="headerlink" href="#fix-advice" title="Permanent link">&para;</a></h2>
+<p><strong>The problem.</strong> The action cost is a plain reward term:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>r_action = −(n_commands)^1.25 · 0.02 · dof,     dof = 1 + 3·(20 − remaining_wp)/20
+</code></pre></div>
+<p>It is <em>not</em> potential-based, so by Ng's necessity result it <strong>can and does change which policy
+is optimal</strong>. We are not merely discouraging chatter; we are optimising a different problem from
+the one we mean to. That is a real cost, and it is why the "action cost waived under urgency"
+idea on the <a href="../roadmap/">roadmap</a> is delicate — any reshaping of a non-potential term is
+another change to the objective.</p>
+<p><strong>The fix has a name.</strong> Three results compose:</p>
 <ul>
-<li><strong>Staircase threshold bonuses</strong> — per-aircraft <code>+b</code> as <code>|dev|</code> crosses 120 s / 60 s / 30 s,
-  and/or a step bonus <code>+k·frac_under_30s</code> (sharper, per-aircraft gradient than the global
-  <code>exp</code> already tried).</li>
-<li><strong>Potential-based shaping</strong> — <code>r += γΦ(s′)−Φ(s)</code> with a <em>peaked</em> <code>Φ = Σ exp(−|dev|/τ)</code>
-  (per-aircraft and provably policy-preserving, unlike the flat bonus shipped so far).</li>
+<li><strong>Wiewiora, Cottrell &amp; Elkan (2003)</strong> extend potentials to <em>state-action</em> pairs — <em>advice</em>.
+  Look-ahead advice is <code>F(s,a,s′,a′) = γΦ(s′,a′) − Φ(s,a)</code>. Because Φ now depends on the
+  action, the guarantee comes with a condition: the greedy policy must be taken with respect to
+  <code>Q(s,a) + Φ₀(s,a)</code>, not <code>Q</code> alone.</li>
+<li><strong>Devlin &amp; Kudenko (2012)</strong> show the guarantee survives making Φ <strong>time-varying</strong>, <code>Φ(s,t)</code>,
+  which is what lets the potential be <em>learned</em> rather than hand-specified.</li>
+<li><strong>Harutyunyan, Devlin, Vrancx &amp; Nowé (2015)</strong> put the two together: to deliver an arbitrary
+  reward <code>R†</code> as advice, learn a <strong>secondary state-action value function</strong> on the <em>negation</em> of
+  <code>R†</code>,</li>
 </ul>
-<p>Note the dense bonus alone helped little <strong>without finer actions</strong> — likely best calibrated
-<em>together</em> with item 1. Thresholds/coefficients to be tuned jointly.</p>
-<h2 id="open-questions">Open questions<a class="headerlink" href="#open-questions" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Is ±30 s physically reachable</strong> for these scenarios? Needs a per-action probe
-  (does a speed/trombone change actually move predicted landing time enough?). If not, the
-  success threshold itself needs revisiting.</li>
-<li><strong>Success-criteria relaxation</strong> beyond the near-conflict gate (e.g. total-only vs
-  per-aircraft) if 30 s proves too strict.</li>
-<li><strong>LR schedule</strong> — <em>tried</em> in Run 7 (linear <code>3e-4→3e-5</code>); it tamed KL but may have capped
-  late improvement (best @425k, then flat). Revisit the decay shape/floor alongside item 1.</li>
-</ul>
-<h2 id="parked">Parked<a class="headerlink" href="#parked" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>SAC</strong> — not applicable under masked discrete actions (SB3 SAC is continuous-only).
-  Revisit only if the action space becomes continuous.</li>
-</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Φ(s,a) ← −R†(s,a) + γ Φ(s′,a′)
+</code></pre></div>
+<p>and use its running estimates as the dynamic advice potential. The resulting shaping then
+  satisfies <code>F = γΦ(s′,a′) − Φ(s,a) ≈ R†(s,a)</code> <strong>in expectation</strong>, while remaining grounded in
+  potentials — so the behavioural pressure of <code>R†</code> is applied without changing what is optimal.</p>
+<p><strong>Applied here</strong>, <code>R†</code> is the action cost. We would:</p>
+<ol>
+<li>Add a small <code>Φ</code>-head on the <strong>existing encoder</strong> — the observation already carries
+   <code>action_histories</code> (last 8 clearances per aircraft, one-hot), so a state-action potential is
+   well-posed with no new inputs. The encoder already produces per-aircraft embeddings and the
+   clearance head already emits a value per (aircraft, clearance) pair, which is exactly the
+   shape <code>Φ(s,a)</code> needs.</li>
+<li>Train it on <code>−r_action</code> with the same γ, as an auxiliary head with its own loss.</li>
+<li>Apply <code>F = γΦ(s′,a′) − Φ(s,a)</code> and <strong>remove <code>r_action</code> from the reward total</strong>.</li>
+<li>Act greedily on <code>Q + Φ₀</code>. Initialising the head's output layer to zero makes <code>Φ₀ ≡ 0</code>, and
+   the biased-greedy rule then collapses to ordinary greedy action selection — which is what we
+   already do. Harutyunyan et al. note this explicitly.</li>
+</ol>
+<div class="admonition danger">
+<p class="admonition-title">What to watch</p>
+<p>This is the most invasive of the proposals and it has a genuine failure mode: the advice
+potential is only <em>approximately</em> <code>R†</code> in expectation, and it is being learned concurrently
+with the policy, so early in training it delivers noise. It should be tested against the
+plain-cost baseline on the same 100-seed pool before adoption, and the
+<a href="../analysis_methods/#attempts">attempts-to-solution</a> probe is the right instrument — the
+hypothesis is that removing a policy-distorting cost should raise the pass@k asymptote, not
+just the mean.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">It also gives <code>SHORTEN_TROMBONE</code> a mechanism</p>
+<p>The <a href="../analysis_v1_v2/#shorten-verdict">measured problem</a> with the reduced clearance set is
+that lengthening pays immediately through the conflict term while shortening pays only at
+landing, so the corrective action is never discovered. Advice is defined over
+<em>(state, action)</em>, so it can express "this action is worth taking here" in a way a
+state-only potential structurally cannot. That makes it the natural place to encode a
+preference for reversibility — still without changing the optimum.</p>
+</div>
+<hr />
+<h2 id="refs">References<a class="headerlink" href="#refs" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Ng, A. Y., Harada, D. &amp; Russell, S. (1999).</strong> <em>Policy invariance under reward
+   transformations: theory and application to reward shaping.</em> ICML.
+   — establishes <code>F = γΦ(s′) − Φ(s)</code> as necessary and sufficient for policy invariance.</li>
+<li><strong>Wiewiora, E., Cottrell, G. &amp; Elkan, C. (2003).</strong> <em>Principled methods for advising
+   reinforcement learning agents.</em> ICML.
+   — extends potentials to state-action <em>advice</em>; introduces look-ahead and look-back advice
+   and the biased greedy action-selection requirement.</li>
+<li><strong>Devlin, S. &amp; Kudenko, D. (2012).</strong> <em>Dynamic potential-based reward shaping.</em> AAMAS,
+   pp. 433–440. — the invariance guarantee survives a time-varying potential.</li>
+<li><strong>Harutyunyan, A., Devlin, S., Vrancx, P. &amp; Nowé, A. (2015).</strong> <em>Expressing arbitrary reward
+   functions as potential-based advice.</em> AAAI-29.
+   — learn a secondary value function on <code>−R†</code> and use its estimates as a dynamic advice
+   potential; the shaping then reflects <code>R†</code> in expectation.</li>
+<li><strong>Grześ, M. (2017).</strong> <em>Reward shaping in episodic reinforcement learning.</em> AAMAS,
+   pp. 565–573. — the potential of terminal states matters in episodic problems; zero is the
+   safe choice.</li>
+</ol>
 
 
 

@@ -14,7 +14,7 @@
         <link rel="prev" href="../observations/">
       
       
-        <link rel="next" href="../separation/">
+        <link rel="next" href="../pbrs/">
       
       
         
@@ -671,6 +671,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../pbrs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reward shaping (PBRS)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../separation/" class="md-nav__link">
         
   
@@ -1213,6 +1241,13 @@ a wider band than what it is charged for.</p>
 </div>
 <p>Source: <code>actions/rewards.py</code>, <code>utils/reward_utils.py</code>, <code>config/config.py</code></p>
 <hr />
+<div class="admonition info">
+<p class="admonition-title">The tier ladder is delivered as potential-based shaping</p>
+<p>The five-tier bonus is not paid as a terminal lump — it is delivered densely as
+<code>F = γΦ(s′) − Φ(s)</code>, which cannot change the optimal policy. The potential, the literature
+it rests on, and two measured defects in it have their own page:
+<strong><a href="../pbrs/">Reward shaping (PBRS)</a></strong>.</p>
+</div>
 <h2 id="rewardparts-dataclass-utilsreward_utilspy8"><code>RewardParts</code> dataclass (<code>utils/reward_utils.py:8</code>)<a class="headerlink" href="#rewardparts-dataclass-utilsreward_utilspy8" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nd">@dataclass</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">RewardParts</span><span class="p">:</span>
