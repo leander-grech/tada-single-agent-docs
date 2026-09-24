@@ -74,6 +74,9 @@ same seed generates a different scenario.
 | `--initial-lr F` | *(checkpoint LR)* | Override the LR the resumed schedule **starts** from. If unset, it starts from the LR reached at the checkpoint (read from the optimizer state). Ignored for fresh runs. |
 | `--env {default,windowed}` | `default` | `windowed` trains the [20-flight windowed env](windowed.md). Recorded as `env` in `run_meta.json`. |
 | `--n-envs N` | `4` | Parallel training workers. Rollout buffer held at 4096 transitions and eval/checkpoint cadence in timesteps, so it only changes wall-clock time. Worth it for the windowed env, which is compute-bound: 4 → 21, 8 → 37, 12 → 36.5 env-steps/s measured. A `--resume` must pass the same value, because the checkpoint stores the per-worker step count. |
+| `--critic-warmup-steps N` | `0` | Fresh runs only: train **only the value head** for N timesteps (encoder and policy heads frozen), then run the `--lr-max` warm-up/cosine over the remaining steps. Use with `--init-weights` onto a new reward, so the critic learns the new return scale before its advantages move the policy. See [run 1_31](experiments.md#run-1_31) for what happens without it. |
+| `--critic-warmup-lr F` | `3e-4` | Constant LR during the critic warm-up. |
+| `--ent-coef F` | `0.01` | Entropy bonus. Fresh runs only. |
 | `--init-weights ZIP` | *(none)* | Fresh runs only: initialise the policy from a checkpoint's weights, with a **fresh** VecNormalize, LR schedule and step counter. Use it for a new MDP whose reward scale differs from the source's; `--resume` would carry over the source's reward-normalisation statistics. Loads with `strict=True`, so a different `ACTION_SET` fails loudly. |
 
 ---

@@ -140,8 +140,14 @@ headline for a stream. **Quote `window_on_time_rate`**: on-time landings over *a
 the scenario, so a bust or a timeout counts every unlanded flight as a miss. It is comparable
 across stream lengths.
 
-**Training:** `atc_run_1_31_windowed`, warm-started from `1_29`'s policy weights with a fresh
-VecNormalize and LR schedule, 5M steps on 8 workers. See the [experiment log](experiments.md#run-1_31).
+**Training.** Warm-started from `1_29`'s policy weights with a fresh VecNormalize, 5M steps on
+8 workers.
+
+- `1_31` used the fresh-run LR schedule and **got worse**: on-time 0.79 → 0.49.
+- `1_32` retunes it as a fine-tune: 300k steps of critic-only warm-up, then peak LR 3e-5 and
+  entropy coefficient 0.003.
+
+See the [experiment log](experiments.md#run-1_31).
 
 **Cost.** A windowed step takes ~131 ms against ~36 ms in the 10-aircraft env. The rollout
 takes 78 ms of it (20 ms in the base env): twice the aircraft, and mid-stream the airspace
@@ -169,7 +175,8 @@ lost separation in every 40-flight episode.
 # train (warm start from an existing checkpoint with the same ACTION_SET)
 python -u main.py --env windowed \
   --init-weights experiments/atc_run_1_29_pbrs_attn_d/best/best_model.zip \
-  --n-envs 8 --total-timesteps 5000000 --run-suffix windowed
+  --n-envs 8 --critic-warmup-steps 300000 --lr-max 3e-5 --final-lr 3e-6 --ent-coef 0.003 \
+  --total-timesteps 5000000 --run-suffix windowed_ft
 ```
 
 A longer stream at evaluation: construct the env with

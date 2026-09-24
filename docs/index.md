@@ -18,8 +18,9 @@
 
     **New: a [windowed env](windowed.md)** runs a 20-flight trombone stream through a window of
     the next 10 flights to land, with a per-flight reward and no observable that depends on the
-    scenario's flight count. Zero-shot from `1_29`: 79% of flights on time. Run `1_31_windowed`
-    is training on it. This work also moved to **`flight_simulator` 0.2.80**, under which the
+    scenario's flight count. Zero-shot from `1_29`: 79% of flights on time. A first fine-tune
+    (`1_31`) made that worse at a fresh-run learning rate; `1_32` retrains it with a critic
+    warm-up and a 10× lower LR. This work also moved to **`flight_simulator` 0.2.80**, under which the
     same seed generates a different scenario.
 
     **Read numbers only from `analysis/track_run.py`.** The in-training `success_rate` is a
@@ -53,7 +54,8 @@ python -u main.py --total-timesteps 10000000 --run-suffix my_experiment
 # windowed env: 20-flight stream, warm-started from an existing checkpoint
 python -u main.py --env windowed \
   --init-weights experiments/atc_run_1_29_pbrs_attn_d/best/best_model.zip \
-  --n-envs 8 --total-timesteps 5000000 --run-suffix windowed
+  --n-envs 8 --critic-warmup-steps 300000 --lr-max 3e-5 --final-lr 3e-6 --ent-coef 0.003 \
+  --total-timesteps 5000000 --run-suffix windowed_ft
 
 # score its checkpoints on the fixed 100-seed pool while it trains
 python analysis/track_run.py --run experiments/atc_run_1_28_my_experiment

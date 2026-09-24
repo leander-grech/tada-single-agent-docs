@@ -13,8 +13,10 @@
     a confound that stops the comparison being decisive. Full analysis:
     [22 clearances vs 15](analysis_v1_v2.md).
 
-    **Run [1_31](#run-1_31)** is the first on the [windowed 20-flight env](windowed.md), a
-    different MDP, so its numbers are not comparable with the table below.
+    **Runs [1_31](#run-1_31) and [1_32](#run-1_32)** are on the [windowed 20-flight
+    env](windowed.md), a different MDP, so their numbers are not comparable with the table
+    below. `1_31` made its warm start worse (on-time 0.79 → 0.49) at a fresh-run learning rate;
+    `1_32` re-runs it as a proper fine-tune.
 
     Also here: [changes outside the MDP](#non-mdp-changes) — rendering, tooling, and seven
     infrastructure bugs, several of which had been silently wrong for many runs.
@@ -492,7 +494,7 @@ result now rests on two independent runs with different optimiser schedules. Det
 
 ---
 
-## Run 1_31 — windowed 20-flight stream (`atc_run_1_31_windowed`, in progress) { #run-1_31 }
+## Run 1_31 — windowed 20-flight stream (`atc_run_1_31_windowed`, stopped at 2M) { #run-1_31 }
 
 **Changes.** A new MDP, not a change to the old one: `main.py --env windowed` trains the
 [windowed env](windowed.md) in place of the 10-aircraft one:
@@ -518,7 +520,49 @@ tracks machine load.
 **10%** separation lost, **10%** all 20 on time. Two independent 10-flight halves would score
 roughly 0.55² ≈ 0.30 all-on-time.
 
-**Results.** Pending.
+**Results.** **Stopped at 1.98M: the fine-tune made the policy worse than its starting point.**
+
+| steps | eval flights on time | separation lost in training |
+|---|---|---|
+| zero-shot (start) | 0.79 | 10% (deterministic) |
+| 0–0.5M | 0.70 | ~36% |
+| 0.5–1.0M | 0.49 | ~42–50% |
+| 1.0–2.0M | 0.48–0.49 | ~45–55% |
+
+Each row pools ~20 evals of 5 episodes. The training column samples actions from the policy
+rather than taking the best one, so it isn't directly comparable to the zero-shot figure; its
+rise is the signal.
+
+**Finding.** The learning rate warmed to the fresh-run peak of 3e-4 within 0.4M steps. The
+critic started at explained variance **0.2**: its value head was trained on `1_29`'s return
+scale, not the per-flight one. So the actor took full-size steps on bad advantages:
+
+- KL per update at the 0.05 cap, and a quarter of samples clipped;
+- entropy **1.09 → 1.65**, the policy becoming more random instead of sharpening.
+
+**A warm start onto a new reward needs a fine-tuning schedule, not a fresh-run one.** Retuned
+as [`1_32`](#run-1_32).
+
+## Run 1_32 — windowed, retuned fine-tune (`atc_run_1_32_windowed_ft`, in progress) { #run-1_32 }
+
+**Changes.** Same MDP and warm start as `1_31`. Only the optimisation changes:
+
+| knob | `1_31` | `1_32` |
+|---|---|---|
+| critic warm-up | none | **300k steps**, value head only, LR 3e-4 |
+| peak LR / final LR | 3e-4 / 3e-5 | **3e-5 / 3e-6** |
+| entropy coefficient | 0.01 | **0.003** |
+
+During the critic warm-up (`main.py --critic-warmup-steps`), the encoder is frozen along with
+both policy heads. The trunk is shared, so the value loss would otherwise still move the
+policy. Verified frozen: KL ≈ −1e-9 and clip fraction 0 on those updates. The warm-up →
+cosine schedule then runs over the remaining 4.7M steps, starting from LR 0.
+
+Smoke-testing this caught a boundary bug. SB3's float progress put the switch at 8191.9999 steps
+instead of 8192, so the first unfrozen update ran at the critic's LR, and that single update moved
+the policy by KL **0.055**. The switch now has a half-step tolerance.
+
+**Results.** Pending. Explained variance was **0.63** after the first frozen update.
 
 ---
 
