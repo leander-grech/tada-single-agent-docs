@@ -1122,8 +1122,9 @@ schedule; <strong><code>1_27a</code> re-ran the second half on the correct one a
 runs. See <a href="analysis_v1_v2/">22 clearances vs 15</a>.</p>
 <p><strong>New: a <a href="windowed/">windowed env</a></strong> runs a 20-flight trombone stream through a window of
 the next 10 flights to land, with a per-flight reward and no observable that depends on the
-scenario's flight count. Zero-shot from <code>1_29</code>: 79% of flights on time. Run <code>1_31_windowed</code>
-is training on it. This work also moved to <strong><code>flight_simulator</code> 0.2.80</strong>, under which the
+scenario's flight count. Zero-shot from <code>1_29</code>: 79% of flights on time. A first fine-tune
+(<code>1_31</code>) made that worse at a fresh-run learning rate; <code>1_32</code> retrains it with a critic
+warm-up and a 10× lower LR. This work also moved to <strong><code>flight_simulator</code> 0.2.80</strong>, under which the
 same seed generates a different scenario.</p>
 <p><strong>Read numbers only from <code>analysis/track_run.py</code>.</strong> The in-training <code>success_rate</code> is a
 5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.</p>
@@ -1154,14 +1155,15 @@ to stand alone.</p>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># windowed env: 20-flight stream, warm-started from an existing checkpoint</span>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>python<span class="w"> </span>-u<span class="w"> </span>main.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span>--init-weights<span class="w"> </span>experiments/atc_run_1_29_pbrs_attn_d/best/best_model.zip<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span>--n-envs<span class="w"> </span><span class="m">8</span><span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>windowed
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># score its checkpoints on the fixed 100-seed pool while it trains</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>python<span class="w"> </span>analysis/track_run.py<span class="w"> </span>--run<span class="w"> </span>experiments/atc_run_1_28_my_experiment
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c1"># replay an OLD run whose action set differs (see MDP -&gt; action-set versions)</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="nv">TADA_ACTION_SET</span><span class="o">=</span>v1<span class="w"> </span>python<span class="w"> </span>render_policy.py<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">  </span>--model<span class="w"> </span>experiments/atc_run_1_26_sep3nm/best/best_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">1595180635</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span>--n-envs<span class="w"> </span><span class="m">8</span><span class="w"> </span>--critic-warmup-steps<span class="w"> </span><span class="m">300000</span><span class="w"> </span>--lr-max<span class="w"> </span>3e-5<span class="w"> </span>--final-lr<span class="w"> </span>3e-6<span class="w"> </span>--ent-coef<span class="w"> </span><span class="m">0</span>.003<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>windowed_ft
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c1"># score its checkpoints on the fixed 100-seed pool while it trains</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>python<span class="w"> </span>analysis/track_run.py<span class="w"> </span>--run<span class="w"> </span>experiments/atc_run_1_28_my_experiment
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="c1"># replay an OLD run whose action set differs (see MDP -&gt; action-set versions)</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="nv">TADA_ACTION_SET</span><span class="o">=</span>v1<span class="w"> </span>python<span class="w"> </span>render_policy.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">  </span>--model<span class="w"> </span>experiments/atc_run_1_26_sep3nm/best/best_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">1595180635</span>
 </code></pre></div>
 <p>Watch it live — TensorBoard is now under each run's <code>tb/</code> sub-directory:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>/home/leander/miniconda3/envs/tada/bin/tensorboard<span class="w"> </span><span class="se">\</span>

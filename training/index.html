@@ -1485,6 +1485,21 @@ same seed generates a different scenario.</p>
 <td>Parallel training workers. Rollout buffer held at 4096 transitions and eval/checkpoint cadence in timesteps, so it only changes wall-clock time. Worth it for the windowed env, which is compute-bound: 4 → 21, 8 → 37, 12 → 36.5 env-steps/s measured. A <code>--resume</code> must pass the same value, because the checkpoint stores the per-worker step count.</td>
 </tr>
 <tr>
+<td><code>--critic-warmup-steps N</code></td>
+<td><code>0</code></td>
+<td>Fresh runs only: train <strong>only the value head</strong> for N timesteps (encoder and policy heads frozen), then run the <code>--lr-max</code> warm-up/cosine over the remaining steps. Use with <code>--init-weights</code> onto a new reward, so the critic learns the new return scale before its advantages move the policy. See <a href="../experiments/#run-1_31">run 1_31</a> for what happens without it.</td>
+</tr>
+<tr>
+<td><code>--critic-warmup-lr F</code></td>
+<td><code>3e-4</code></td>
+<td>Constant LR during the critic warm-up.</td>
+</tr>
+<tr>
+<td><code>--ent-coef F</code></td>
+<td><code>0.01</code></td>
+<td>Entropy bonus. Fresh runs only.</td>
+</tr>
+<tr>
 <td><code>--init-weights ZIP</code></td>
 <td><em>(none)</em></td>
 <td>Fresh runs only: initialise the policy from a checkpoint's weights, with a <strong>fresh</strong> VecNormalize, LR schedule and step counter. Use it for a new MDP whose reward scale differs from the source's; <code>--resume</code> would carry over the source's reward-normalisation statistics. Loads with <code>strict=True</code>, so a different <code>ACTION_SET</code> fails loudly.</td>

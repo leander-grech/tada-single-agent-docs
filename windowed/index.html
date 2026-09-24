@@ -1467,8 +1467,14 @@ episodes move this much. ² The earlier window rule, where only spawned flights 
 headline for a stream. <strong>Quote <code>window_on_time_rate</code></strong>: on-time landings over <em>all</em> flights of
 the scenario, so a bust or a timeout counts every unlanded flight as a miss. It is comparable
 across stream lengths.</p>
-<p><strong>Training:</strong> <code>atc_run_1_31_windowed</code>, warm-started from <code>1_29</code>'s policy weights with a fresh
-VecNormalize and LR schedule, 5M steps on 8 workers. See the <a href="../experiments/#run-1_31">experiment log</a>.</p>
+<p><strong>Training.</strong> Warm-started from <code>1_29</code>'s policy weights with a fresh VecNormalize, 5M steps on
+8 workers.</p>
+<ul>
+<li><code>1_31</code> used the fresh-run LR schedule and <strong>got worse</strong>: on-time 0.79 → 0.49.</li>
+<li><code>1_32</code> retunes it as a fine-tune: 300k steps of critic-only warm-up, then peak LR 3e-5 and
+  entropy coefficient 0.003.</li>
+</ul>
+<p>See the <a href="../experiments/#run-1_31">experiment log</a>.</p>
 <p><strong>Cost.</strong> A windowed step takes ~131 ms against ~36 ms in the 10-aircraft env. The rollout
 takes 78 ms of it (20 ms in the base env): twice the aircraft, and mid-stream the airspace
 never empties. The observation build takes 40 ms (11 ms), because the window always holds 10
@@ -1514,7 +1520,8 @@ lost separation in every 40-flight episode.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># train (warm start from an existing checkpoint with the same ACTION_SET)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python<span class="w"> </span>-u<span class="w"> </span>main.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>--init-weights<span class="w"> </span>experiments/atc_run_1_29_pbrs_attn_d/best/best_model.zip<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span>--n-envs<span class="w"> </span><span class="m">8</span><span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>windowed
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span>--n-envs<span class="w"> </span><span class="m">8</span><span class="w"> </span>--critic-warmup-steps<span class="w"> </span><span class="m">300000</span><span class="w"> </span>--lr-max<span class="w"> </span>3e-5<span class="w"> </span>--final-lr<span class="w"> </span>3e-6<span class="w"> </span>--ent-coef<span class="w"> </span><span class="m">0</span>.003<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>windowed_ft
 </code></pre></div>
 <p>A longer stream at evaluation: construct the env with
 <code>WindowedATCEnv({"evaluation_mode": True, "scenario_aircraft_count": 40})</code>.</p>
