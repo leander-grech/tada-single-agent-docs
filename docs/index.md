@@ -16,6 +16,12 @@
     `SHORTEN_TROMBONE`, its one new capability, about **once per thousand clearances** in both
     runs. See [22 clearances vs 15](analysis_v1_v2.md).
 
+    **New: a [windowed env](windowed.md)** runs a 20-flight trombone stream through a window of
+    the next 10 flights to land, with a per-flight reward and no observable that depends on the
+    scenario's flight count. Zero-shot from `1_29`: 79% of flights on time. Run `1_31_windowed`
+    is training on it. This work also moved to **`flight_simulator` 0.2.80**, under which the
+    same seed generates a different scenario.
+
     **Read numbers only from `analysis/track_run.py`.** The in-training `success_rate` is a
     5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.
 
@@ -26,6 +32,7 @@
   See [Training](training.md).
 - **Simulator:** Rust `flight_simulator` (PyO3 wheel), driven through a deterministic rollout.
 - **Scenario:** MXP trombone (`VALIDATION_USE_CASE_1`). BGY point-merge exists but underperforms.
+- **Windowed variant:** a 20-flight stream through a 10-slot window — [Windowed env](windowed.md).
 - **Branch:** `UM-lg`.
 
 !!! info "This site is the current source of truth"
@@ -42,6 +49,11 @@ cd reinforcement_learning/single_agent_rllib
 
 # fresh run
 python -u main.py --total-timesteps 10000000 --run-suffix my_experiment
+
+# windowed env: 20-flight stream, warm-started from an existing checkpoint
+python -u main.py --env windowed \
+  --init-weights experiments/atc_run_1_29_pbrs_attn_d/best/best_model.zip \
+  --n-envs 8 --total-timesteps 5000000 --run-suffix windowed
 
 # score its checkpoints on the fixed 100-seed pool while it trains
 python analysis/track_run.py --run experiments/atc_run_1_28_my_experiment
@@ -68,6 +80,7 @@ lightweight *inference* set; add `pip install -e .[train]` for the full training
 | [MDP & Environment](mdp.md) | action space, episode, termination & success criteria |
 | [Observations](observations.md) | the Dict obs, per-aircraft features, normalization |
 | [Reward](reward.md) | severity geometry, exponential conflict decay, landing-weighted deviation, tier ladder |
+| [Windowed env](windowed.md) | the 20-flight stream: queue window, stream-stationary observables, per-flight reward |
 | [Training](training.md) | PPO + VecNormalize config, callbacks, network, snapshots |
 | [Instrumentation](instrumentation.md) | every TensorBoard metric and what to watch |
 | [Experiment log](experiments.md) | what changed in each run and what we learned |

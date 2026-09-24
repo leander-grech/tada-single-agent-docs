@@ -17,6 +17,12 @@
     does not. [Potential-based advice](pbrs.md#fix-advice) is the principled mechanism for that,
     and it also removes a policy-distorting action cost on the way.
 
+    **Now running:** run `1_31` on the [windowed 20-flight env](windowed.md), warm-started from
+    `1_29`. Longer streams at evaluation are the next step, as stability tests of whether the
+    agent can be used continuously. They will also test [backlog
+    handling](windowed.md#generator-not-stationary): generated scenarios get harder further
+    down the queue.
+
     **Ruled out:** a bigger network. Measured, the encoder uses ~14% of its width and the context
     ~4% — [see the test log](analysis_log.md#t-embedding-capacity). The productive change is
     shape, not size.
@@ -43,7 +49,8 @@ Each has a worked-out design and measurements behind it.
 
 | item | why | evidence |
 |---|---|---|
-| **Drop or replace `global.time_s`** | It normalises against a 2880 s fallback horizon while episodes run 3105–5715 s, so it is pinned at +1 for the last ~23% of every episode | `timeout` fires in **zero** of 800 scored episodes, so the deadline it encodes never arrives |
+| **Drop or replace `global.time_s`** | It normalises against a 2880 s fallback horizon while episodes run 3105–5715 s, so it is pinned at +1 for the last ~23% of every episode | `timeout` fires in **zero** of 800 scored episodes, so the deadline it encodes never arrives. **Done in the [windowed env](windowed.md#observables)** (replaced by the window span); the 10-aircraft env still has it |
+| **Fix `time_to_target`** | It is read from the rollout's *end* world, so it encodes rollout length and sits pinned near +1 — a dead feature in every run so far | [measured](windowed.md#time-to-target-bug); fixed in the windowed env only, since fixing it in the base env changes every checkpoint's inputs |
 | **Δt-stamped action history** | History rows carry no time and per-aircraft buffers are mutually unaligned | the `step` field already exists in `_action_history` and is discarded at the observation boundary. **Now also measured:** the history GRU spans 4.5 of 64 effective directions — [test log](analysis_log.md#t-embedding-capacity) |
 | **Pairwise aircraft interaction** | The context is a masked *mean* over aircraft, which cannot represent "*i* and *j* are converging" — the core relation in a separation problem | context effective rank 3–4% of 256; mean cosine between aircraft embeddings 0.70. One self-attention block over the ten slots, same parameter budget |
 | **Continuous tier potential** | Φ moves only when an aircraft crosses a band edge, because it depends on *counts* of aircraft; between crossings the shaping is ~zero | [PBRS](pbrs.md#diagnosis) |

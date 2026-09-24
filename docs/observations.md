@@ -75,6 +75,15 @@ Horizon for time normalization: `64 × 45 = 2880 s`.
     and `global.time_s` normalises against a 2880 s fallback horizon while real episodes run
     3105–5715 s, so it is pinned at +1 for the last ~23% of every episode.
 
+!!! warning "`time_to_target` encodes the rollout length, not the time to go"
+    It is computed as `curr_world.calculate_time_to_target_arrival(cs)` on the **end state of
+    the NOOP rollout**, which is thousands of seconds in the future. The value is
+    `rollout length − time to go`: 5381 for a flight 587 s from its target, measured. That is
+    past the 2880 s scale, so the feature sits pinned near +1 and has been **effectively dead
+    in every run so far**. The [windowed env](windowed.md#time-to-target-bug) replaces it with
+    the scheduled `eta − now`; the base env is unchanged so existing checkpoints keep their
+    inputs.
+
 !!! info "`predicted_infringement` reads the DETECTION band, not severity"
     The observation deliberately sees further than the reward charges: it uses `proximity`
     over the wide 3–10 NM detection band, so a conflict can be watched developing from 10 NM
@@ -89,7 +98,7 @@ Horizon for time normalization: `64 × 45 = 2880 s`.
 | 4 | `vz` | fpm | `map_sym(v, 3000.0)` | Vertical speed |
 | 5 | `heading_sin` | — | raw (from vel vector) | |
 | 6 | `heading_cos` | — | raw (from vel vector) | |
-| 7 | `time_to_target` | s | `map_to_sym_unit(v, 0, 900)` | Time to arrival target |
+| 7 | `time_to_target` | s | signed-log, max 2880 s | **Read from the rollout's end world — see warning below** |
 | 8 | `time_deviation` | s | `map_sym(v, 900)` | Schedule deviation from rollout |
 | 9 | `predicted_infringement` | [0,1] | `map_to_sym_unit(v, 0, 1)` | Max conflict severity in look-ahead |
 | 10 | `time_to_conflict` | [0,1] | `_map01_to_sym(v)` | 1=imminent, 0=none/far |

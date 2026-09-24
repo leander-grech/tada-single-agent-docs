@@ -13,6 +13,9 @@
     a confound that stops the comparison being decisive. Full analysis:
     [22 clearances vs 15](analysis_v1_v2.md).
 
+    **Run [1_31](#run-1_31)** is the first on the [windowed 20-flight env](windowed.md), a
+    different MDP, so its numbers are not comparable with the table below.
+
     Also here: [changes outside the MDP](#non-mdp-changes) — rendering, tooling, and seven
     infrastructure bugs, several of which had been silently wrong for many runs.
 
@@ -486,6 +489,36 @@ better. Attempts, censored counts, precision-bound split, cap-25 solve rate and
 advantage in schedule precision is a property of the action set, and the `SHORTEN_TROMBONE`
 result now rests on two independent runs with different optimiser schedules. Details:
 [test log, 18 Aug](analysis_log.md#t-1_27a-confound).
+
+---
+
+## Run 1_31 — windowed 20-flight stream (`atc_run_1_31_windowed`, in progress) { #run-1_31 }
+
+**Changes.** A new MDP, not a change to the old one: `main.py --env windowed` trains the
+[windowed env](windowed.md) in place of the 10-aircraft one:
+
+- 20-flight trombone scenarios, seen through the next 10 flights in the landing queue.
+- Per-flight landing reward instead of the tier ladder + PBRS.
+- Stream-stationary observables and a receding prediction rollout.
+- Continuing-task semantics.
+
+Warm-started from `atc_run_1_29_pbrs_attn_d/best` with `--init-weights`: policy weights only,
+with a fresh VecNormalize and a fresh warm-up → cosine LR schedule. **5M steps, 8 workers.**
+First run on `flight_simulator` 0.2.80.
+
+**Why 5M.** The windowed step costs ~131 ms against ~36 ms for the 10-aircraft env: twice the
+aircraft in every rollout, and an always-full window to encode. Four workers gave ~27
+steps/s, so 10M would have taken four days. Measured scaling: 4 workers 21 env-steps/s,
+8 → 37, 12 → 36.5. A warm start from a converged policy on a closely related task should not
+need 10M, and the cosine schedule has to complete to be comparable. In practice the run started
+at ~24 steps/s while other jobs held most of the machine (≈ 2.4 days for 5M); throughput
+tracks machine load.
+
+**Baseline to beat** (zero-shot, the starting weights, 20 seeds): **79%** of flights on time,
+**10%** separation lost, **10%** all 20 on time. Two independent 10-flight halves would score
+roughly 0.55² ≈ 0.30 all-on-time.
+
+**Results.** Pending.
 
 ---
 

@@ -58,7 +58,9 @@ cd reinforcement_learning/single_agent_rllib
   --final-lr 1e-5
 ```
 
-Conda env: `tada`, Python 3.12.
+Conda env: `tada`, Python 3.12. Simulator: `flight_simulator` **0.2.80**, installed from
+`simulator/wheels/` (`setup.py` picks the highest version there). Same API as 0.1.52, but the
+same seed generates a different scenario.
 
 ### CLI arguments
 
@@ -70,6 +72,9 @@ Conda env: `tada`, Python 3.12.
 | `--total-timesteps N` | 2 000 000 (fresh) / 3 000 000 (resume) | Cumulative timestep target. |
 | `--final-lr F` | `3e-5` | LR at end of training. On resume, the schedule decays **linearly from the starting LR** to this value. Set equal to the starting LR for a flat schedule. |
 | `--initial-lr F` | *(checkpoint LR)* | Override the LR the resumed schedule **starts** from. If unset, it starts from the LR reached at the checkpoint (read from the optimizer state). Ignored for fresh runs. |
+| `--env {default,windowed}` | `default` | `windowed` trains the [20-flight windowed env](windowed.md). Recorded as `env` in `run_meta.json`. |
+| `--n-envs N` | `4` | Parallel training workers. Rollout buffer held at 4096 transitions and eval/checkpoint cadence in timesteps, so it only changes wall-clock time. Worth it for the windowed env, which is compute-bound: 4 → 21, 8 → 37, 12 → 36.5 env-steps/s measured. A `--resume` must pass the same value, because the checkpoint stores the per-worker step count. |
+| `--init-weights ZIP` | *(none)* | Fresh runs only: initialise the policy from a checkpoint's weights, with a **fresh** VecNormalize, LR schedule and step counter. Use it for a new MDP whose reward scale differs from the source's; `--resume` would carry over the source's reward-normalisation statistics. Loads with `strict=True`, so a different `ACTION_SET` fails loudly. |
 
 ---
 
@@ -218,6 +223,10 @@ The policy owns its encoder and both action heads; no separate `features_extract
 | Final fusion | Linear(256→128) + LayerNorm + ReLU | → `[B, 128]` |
 
 **Aircraft head** — `Linear(128 → N_aircraft)` + softmax over valid aircraft (mask from obs).
+When any visible aircraft is under control, only under-control slots can be picked; otherwise
+every visible slot can. The 10-aircraft env never mixes the two kinds in one observation, so
+there this is exactly `mask_aircraft`. It exists for the [windowed env](windowed.md), which
+shows not-yet-spawned flights in their queue slot.
 
 **Clearance head** — `Linear(128 + aircraft_embed → N_clearances)` conditioned on the sampled aircraft embedding; masked over valid clearances for that aircraft.
 

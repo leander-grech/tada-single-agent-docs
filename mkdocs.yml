@@ -51,6 +51,7 @@ nav:
       - Loss of separation: separation.md
       - Training: training.md
       - Instrumentation: instrumentation.md
+  - Windowed env (20 flights): windowed.md
   - Experiments:
       - Experiment log: experiments.md
       - Successful results: successful_results.md
