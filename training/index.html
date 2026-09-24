@@ -245,6 +245,25 @@
   
   
   
+    <li class="md-tabs__item">
+      <a href="../windowed/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Windowed env (20 flights)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
     
     
       <li class="md-tabs__item">
@@ -845,6 +864,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../windowed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Windowed env (20 flights)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -859,10 +905,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -880,8 +926,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -974,10 +1020,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -995,8 +1041,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1385,7 +1431,9 @@ not a usable measurement.</p>
 <a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="w">  </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">  </span>--final-lr<span class="w"> </span>1e-5
 </code></pre></div>
-<p>Conda env: <code>tada</code>, Python 3.12.</p>
+<p>Conda env: <code>tada</code>, Python 3.12. Simulator: <code>flight_simulator</code> <strong>0.2.80</strong>, installed from
+<code>simulator/wheels/</code> (<code>setup.py</code> picks the highest version there). Same API as 0.1.52, but the
+same seed generates a different scenario.</p>
 <h3 id="cli-arguments">CLI arguments<a class="headerlink" href="#cli-arguments" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1425,6 +1473,21 @@ not a usable measurement.</p>
 <td><code>--initial-lr F</code></td>
 <td><em>(checkpoint LR)</em></td>
 <td>Override the LR the resumed schedule <strong>starts</strong> from. If unset, it starts from the LR reached at the checkpoint (read from the optimizer state). Ignored for fresh runs.</td>
+</tr>
+<tr>
+<td><code>--env {default,windowed}</code></td>
+<td><code>default</code></td>
+<td><code>windowed</code> trains the <a href="../windowed/">20-flight windowed env</a>. Recorded as <code>env</code> in <code>run_meta.json</code>.</td>
+</tr>
+<tr>
+<td><code>--n-envs N</code></td>
+<td><code>4</code></td>
+<td>Parallel training workers. Rollout buffer held at 4096 transitions and eval/checkpoint cadence in timesteps, so it only changes wall-clock time. Worth it for the windowed env, which is compute-bound: 4 → 21, 8 → 37, 12 → 36.5 env-steps/s measured. A <code>--resume</code> must pass the same value, because the checkpoint stores the per-worker step count.</td>
+</tr>
+<tr>
+<td><code>--init-weights ZIP</code></td>
+<td><em>(none)</em></td>
+<td>Fresh runs only: initialise the policy from a checkpoint's weights, with a <strong>fresh</strong> VecNormalize, LR schedule and step counter. Use it for a new MDP whose reward scale differs from the source's; <code>--resume</code> would carry over the source's reward-normalisation statistics. Loads with <code>strict=True</code>, so a different <code>ACTION_SET</code> fails loudly.</td>
 </tr>
 </tbody>
 </table>
@@ -1652,7 +1715,11 @@ gives a <strong>flat schedule</strong> for the remainder. The chosen <code>start
 </tr>
 </tbody>
 </table>
-<p><strong>Aircraft head</strong> — <code>Linear(128 → N_aircraft)</code> + softmax over valid aircraft (mask from obs).</p>
+<p><strong>Aircraft head</strong> — <code>Linear(128 → N_aircraft)</code> + softmax over valid aircraft (mask from obs).
+When any visible aircraft is under control, only under-control slots can be picked; otherwise
+every visible slot can. The 10-aircraft env never mixes the two kinds in one observation, so
+there this is exactly <code>mask_aircraft</code>. It exists for the <a href="../windowed/">windowed env</a>, which
+shows not-yet-spawned flights in their queue slot.</p>
 <p><strong>Clearance head</strong> — <code>Linear(128 + aircraft_embed → N_clearances)</code> conditioned on the sampled aircraft embedding; masked over valid clearances for that aircraft.</p>
 <h3 id="legacy-path-maskableppo-atcfeatureextractor">Legacy path: <code>MaskablePPO</code> + <code>ATCFeatureExtractor</code><a class="headerlink" href="#legacy-path-maskableppo-atcfeatureextractor" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">policy_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>

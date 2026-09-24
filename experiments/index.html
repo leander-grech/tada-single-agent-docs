@@ -11,7 +11,7 @@
       
       
       
-        <link rel="prev" href="../instrumentation/">
+        <link rel="prev" href="../windowed/">
       
       
         <link rel="next" href="../successful_results/">
@@ -235,6 +235,25 @@
         </a>
       </li>
     
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../windowed/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Windowed env (20 flights)
+
+      </a>
+    </li>
   
 
       
@@ -624,6 +643,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../windowed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Windowed env (20 flights)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -645,10 +691,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -666,8 +712,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -926,6 +972,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#run-1_31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 1_31 — windowed 20-flight stream (atc_run_1_31_windowed, in progress)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#non-mdp-changes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1039,10 +1096,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -1060,8 +1117,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1398,6 +1455,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#run-1_31" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 1_31 — windowed 20-flight stream (atc_run_1_31_windowed, in progress)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#non-mdp-changes" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1477,6 +1545,8 @@ optimiser tuning had left intact, taking clean-subset success from <strong>0.537
 and <strong>did not improve on it</strong> — it learns markedly faster and converges slightly worse, with
 a confound that stops the comparison being decisive. Full analysis:
 <a href="../analysis_v1_v2/">22 clearances vs 15</a>.</p>
+<p><strong>Run <a href="#run-1_31">1_31</a></strong> is the first on the <a href="../windowed/">windowed 20-flight env</a>, a
+different MDP, so its numbers are not comparable with the table below.</p>
 <p>Also here: <a href="#non-mdp-changes">changes outside the MDP</a> — rendering, tooling, and seven
 infrastructure bugs, several of which had been silently wrong for many runs.</p>
 </div>
@@ -2045,6 +2115,30 @@ better. Attempts, censored counts, precision-bound split, cap-25 solve rate and
 advantage in schedule precision is a property of the action set, and the <code>SHORTEN_TROMBONE</code>
 result now rests on two independent runs with different optimiser schedules. Details:
 <a href="../analysis_log/#t-1_27a-confound">test log, 18 Aug</a>.</p>
+<hr />
+<h2 id="run-1_31">Run 1_31 — windowed 20-flight stream (<code>atc_run_1_31_windowed</code>, in progress)<a class="headerlink" href="#run-1_31" title="Permanent link">&para;</a></h2>
+<p><strong>Changes.</strong> A new MDP, not a change to the old one: <code>main.py --env windowed</code> trains the
+<a href="../windowed/">windowed env</a> in place of the 10-aircraft one:</p>
+<ul>
+<li>20-flight trombone scenarios, seen through the next 10 flights in the landing queue.</li>
+<li>Per-flight landing reward instead of the tier ladder + PBRS.</li>
+<li>Stream-stationary observables and a receding prediction rollout.</li>
+<li>Continuing-task semantics.</li>
+</ul>
+<p>Warm-started from <code>atc_run_1_29_pbrs_attn_d/best</code> with <code>--init-weights</code>: policy weights only,
+with a fresh VecNormalize and a fresh warm-up → cosine LR schedule. <strong>5M steps, 8 workers.</strong>
+First run on <code>flight_simulator</code> 0.2.80.</p>
+<p><strong>Why 5M.</strong> The windowed step costs ~131 ms against ~36 ms for the 10-aircraft env: twice the
+aircraft in every rollout, and an always-full window to encode. Four workers gave ~27
+steps/s, so 10M would have taken four days. Measured scaling: 4 workers 21 env-steps/s,
+8 → 37, 12 → 36.5. A warm start from a converged policy on a closely related task should not
+need 10M, and the cosine schedule has to complete to be comparable. In practice the run started
+at ~24 steps/s while other jobs held most of the machine (≈ 2.4 days for 5M); throughput
+tracks machine load.</p>
+<p><strong>Baseline to beat</strong> (zero-shot, the starting weights, 20 seeds): <strong>79%</strong> of flights on time,
+<strong>10%</strong> separation lost, <strong>10%</strong> all 20 on time. Two independent 10-flight halves would score
+roughly 0.55² ≈ 0.30 all-on-time.</p>
+<p><strong>Results.</strong> Pending.</p>
 <hr />
 <h2 id="non-mdp-changes">Changes outside the MDP<a class="headerlink" href="#non-mdp-changes" title="Permanent link">&para;</a></h2>
 <p>Work that does not change what the agent optimises but does change what you can see or trust.</p>

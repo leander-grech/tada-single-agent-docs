@@ -11,10 +11,10 @@
       
       
       
-        <link rel="prev" href="../mdp/">
+        <link rel="prev" href="../instrumentation/">
       
       
-        <link rel="next" href="../reward/">
+        <link rel="next" href="../experiments/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Observations - TADA Single-Agent RL</title>
+        <title>Windowed env (20 flights) - TADA Single-Agent RL</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#observations" class="md-skip">
+        <a href="#windowed-env-a-20-flight-stream" class="md-skip">
           Skip to content
         </a>
       
@@ -112,7 +112,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Observations
+              Windowed env (20 flights)
             
           </span>
         </div>
@@ -222,12 +222,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../mdp/" class="md-tabs__link">
           
   
@@ -244,9 +242,11 @@
   
   
   
+    
   
-    <li class="md-tabs__item">
-      <a href="../windowed/" class="md-tabs__link">
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
         
   
   
@@ -388,31 +388,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   
@@ -430,7 +425,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -473,37 +468,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Observations
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../observations/" class="md-nav__link">
         
   
   
@@ -519,103 +487,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#observation-space-at-a-glance" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Observation space at a glance
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#global-4-global-features-modelsobservationspy62" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        global — 4 global features (models/observations.py:62)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#aircraft-12-per-aircraft-scalar-features-modelsobservationspy18" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        aircraft — 12 per-aircraft scalar features (models/observations.py:18)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mask_aircraft-and-mask_action_per_ac" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        mask_aircraft and mask_action_per_ac
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#flight_plans_rel-relative-waypoint-sequences-modelsobservationspy92" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        flight_plans_rel — relative waypoint sequences (models/observations.py:92)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#action_histories-recent-actions-per-aircraft" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        action_histories — recent actions per aircraft
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#normalization-helpers-modelsobservationspy167" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Normalization helpers (models/observations.py:167)
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -772,10 +643,37 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../windowed/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Windowed env (20 flights)
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -791,6 +689,109 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-a-window-and-why-this-one" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why a window, and why this one
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#observables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Observables: what was scenario-dependent, and what replaced it
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Observables: what was scenario-dependent, and what replaced it">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#time-to-target-bug" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The time_to_target bug
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reward: per flight, not per episode
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generator-not-stationary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Generated scenarios get harder down the queue
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#running-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Running it
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1107,10 +1108,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#observation-space-at-a-glance" class="md-nav__link">
+  <a href="#why-a-window-and-why-this-one" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Observation space at a glance
+        Why a window, and why this one
       
     </span>
   </a>
@@ -1118,10 +1119,38 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#global-4-global-features-modelsobservationspy62" class="md-nav__link">
+  <a href="#observables" class="md-nav__link">
     <span class="md-ellipsis">
       
-        global — 4 global features (models/observations.py:62)
+        Observables: what was scenario-dependent, and what replaced it
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Observables: what was scenario-dependent, and what replaced it">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#time-to-target-bug" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The time_to_target bug
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reward: per flight, not per episode
       
     </span>
   </a>
@@ -1129,10 +1158,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#aircraft-12-per-aircraft-scalar-features-modelsobservationspy18" class="md-nav__link">
+  <a href="#results" class="md-nav__link">
     <span class="md-ellipsis">
       
-        aircraft — 12 per-aircraft scalar features (models/observations.py:18)
+        Results
       
     </span>
   </a>
@@ -1140,10 +1169,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#mask_aircraft-and-mask_action_per_ac" class="md-nav__link">
+  <a href="#generator-not-stationary" class="md-nav__link">
     <span class="md-ellipsis">
       
-        mask_aircraft and mask_action_per_ac
+        Generated scenarios get harder down the queue
       
     </span>
   </a>
@@ -1151,32 +1180,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#flight_plans_rel-relative-waypoint-sequences-modelsobservationspy92" class="md-nav__link">
+  <a href="#running-it" class="md-nav__link">
     <span class="md-ellipsis">
       
-        flight_plans_rel — relative waypoint sequences (models/observations.py:92)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#action_histories-recent-actions-per-aircraft" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        action_histories — recent actions per aircraft
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#normalization-helpers-modelsobservationspy167" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Normalization helpers (models/observations.py:167)
+        Running it
       
     </span>
   </a>
@@ -1200,414 +1207,371 @@
 
 
 
-<h1 id="observations">Observations<a class="headerlink" href="#observations" title="Permanent link">&para;</a></h1>
+<h1 id="windowed-env-a-20-flight-stream">Windowed env: a 20-flight stream<a class="headerlink" href="#windowed-env-a-20-flight-stream" title="Permanent link">&para;</a></h1>
 <div class="admonition abstract">
 <p class="admonition-title">TL;DR</p>
-<p>A <code>Dict</code> observation: per-aircraft scalars, a global vector, relative flight plans, a
-per-aircraft action history, and the two masks. Everything is normalised to <code>[-1, 1]</code>.</p>
-<p>Two deliberate choices to know about:</p>
+<p><code>WindowedATCEnv</code> (<code>main.py --env windowed</code>) runs a <strong>20-flight</strong> MXP trombone scenario
+through a window of the <strong>next 10 flights in the landing queue</strong>. When a flight lands, the
+next one in the queue takes its slot. The observation and action spaces match the
+10-aircraft env exactly, so existing checkpoints load unchanged.</p>
+<p><strong>Design rule: nothing the agent observes, and nothing its critic has to predict, depends
+on how many flights the scenario has.</strong> A scenario is treated as a finite excerpt of an
+endless arrival stream, so the same agent can be run on longer streams at evaluation. Those
+runs are stability tests of whether it can be used continuously.</p>
+<p><strong>The reward is per flight instead of per episode.</strong> The tier ladder assumes a fixed set of
+aircraft, so it can't survive a window whose membership keeps changing. Each flight earns
+a bonus once, at touchdown, from its actual landing deviation.</p>
+<p><strong>Zero-shot, before any training</strong> (run <code>1_29</code>'s best checkpoint, 20 seeds): <strong>79%</strong> of
+flights on time, <strong>10%</strong> of episodes lose separation, <strong>10%</strong> land all 20 flights on time.
+Run <code>1_31_windowed</code> is training from that checkpoint now.</p>
+<p>Two findings affect the existing env too:</p>
 <ul>
-<li><strong>Time features are log-scaled.</strong> Linear encoding put every tier boundary the agent is
-  graded on into the bottom 13% of the range and rendered a 10 s error as <code>0.011</code>.</li>
-<li><strong>The agent sees further than it is charged.</strong> <code>predicted_infringement</code> reads a wide
-  3–10 NM detection band, while the <a href="../reward/#conflict-penalty">conflict penalty</a>
-  only bites inside 5 NM — so a conflict can be watched developing long before it costs
-  anything.</li>
+<li><a href="#time-to-target-bug"><code>time_to_target</code> has been a dead feature</a> in every run so far.</li>
+<li><a href="#generator-not-stationary">Generated scenarios get harder further down the queue</a>.</li>
 </ul>
 </div>
-<p>Source: <code>models/observations.py</code>, <code>config/config.py</code>, <code>atc_env/single_agent_env.py</code></p>
-<hr />
-<h2 id="observation-space-at-a-glance">Observation space at a glance<a class="headerlink" href="#observation-space-at-a-glance" title="Permanent link">&para;</a></h2>
+<h2 id="why-a-window-and-why-this-one">Why a window, and why this one<a class="headerlink" href="#why-a-window-and-why-this-one" title="Permanent link">&para;</a></h2>
+<p>The trombone generator releases aircraft over time. At t = 0 none of the 20 is under
+control; measured across seeds, <strong>3.6 are active on average and up to 13 at once</strong>. Ten slots
+are almost always enough, but not always, so the queue needs a rule for who is visible.</p>
+<p>"Next in line" is well defined here. On every probed seed, the landing order under
+do-nothing equals the AMAN target order, so the window is simply the AMAN queue:</p>
 <table>
 <thead>
 <tr>
-<th>Key</th>
-<th>Type</th>
-<th>Shape</th>
-<th>Range</th>
-<th>Description</th>
+<th></th>
+<th>rule</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>global</code></td>
-<td>Box</td>
-<td><code>(4,)</code></td>
-<td>[-1, 1]</td>
-<td>Episode-level context</td>
+<td>membership</td>
+<td>the next <code>WINDOW_SIZE = N_AIRCRAFT_MAX = 10</code> <strong>unlanded</strong> flights, in AMAN order, spawned or not</td>
 </tr>
 <tr>
-<td><code>aircraft</code></td>
-<td>Box</td>
-<td><code>(10, 12)</code></td>
-<td>[-1, 1]</td>
-<td>Per-aircraft scalar state</td>
+<td>on landing</td>
+<td>the flight leaves; the next flight in the queue takes the slot</td>
 </tr>
 <tr>
-<td><code>mask_aircraft</code></td>
-<td>MultiBinary</td>
-<td><code>(10,)</code></td>
-<td>{0,1}</td>
-<td>Valid aircraft slots</td>
+<td>not-yet-spawned flights</td>
+<td><strong>visible</strong> (the agent can plan around them; <code>under_control = 0</code>), but only <code>DO_NOTHING</code> is unmasked</td>
 </tr>
 <tr>
-<td><code>mask_action_per_ac</code></td>
-<td>MultiBinary</td>
-<td><code>(10, 22)</code></td>
-<td>{0,1}</td>
-<td>Valid clearances per aircraft</td>
+<td>aircraft head</td>
+<td>picks only under-control slots when any exist; falls back to all visible slots otherwise</td>
 </tr>
 <tr>
-<td><code>flight_plans_rel</code></td>
-<td>Box</td>
-<td><code>(10, 20, 11)</code></td>
-<td>[-1, 1]</td>
-<td>Per-aircraft relative waypoint sequences</td>
-</tr>
-<tr>
-<td><code>flight_plan_mask</code></td>
-<td>MultiBinary</td>
-<td><code>(10, 20)</code></td>
-<td>{0,1}</td>
-<td>Valid waypoints per aircraft</td>
-</tr>
-<tr>
-<td><code>action_histories</code></td>
-<td>Box</td>
-<td><code>(10, 8, 23)</code></td>
-<td>[0, 1]</td>
-<td>Recent actions per aircraft (one-hot)</td>
+<td>slot order</td>
+<td>queue position; the policy is permutation-equivariant, so slot index carries no meaning</td>
 </tr>
 </tbody>
 </table>
-<p>Shapes follow: <code>N_AIRCRAFT_MAX=10</code>, <code>AIRCRAFT_SCALAR_LEN=12</code>, <code>N_CLEARANCES=22</code>,
-<code>MAX_WAYPOINTS=20</code>, <code>FLIGHT_PLAN_WAYPOINT_DIM=11</code>, <code>MAX_HISTORY=8</code>.</p>
-<hr />
-<h2 id="global-4-global-features-modelsobservationspy62"><code>global</code> — 4 global features (<code>models/observations.py:62</code>)<a class="headerlink" href="#global-4-global-features-modelsobservationspy62" title="Permanent link">&para;</a></h2>
-<p>All four are normalized to <strong>[-1, 1]</strong> via <code>map_to_sym_unit(v, vmin, vmax)</code>.</p>
+<p>The aircraft-head rule is not optional. Without it, zero-shot <code>1_29</code> kept <em>picking</em> pending
+flights and spent the step on a no-op: <strong>65%</strong> of episodes lost separation. With the rule,
+<strong>10%</strong>. The 10-aircraft env never mixes under-control and pending slots in one observation
+(0 of 178 checked), so for existing checkpoints the rule is exactly the old mask.</p>
+<p>Flights under control but more than 10 places back are invisible. They are logged as
+<code>window_overflow_frac</code>, about <strong>3%</strong> of steps.</p>
+<h2 id="observables">Observables: what was scenario-dependent, and what replaced it<a class="headerlink" href="#observables" title="Permanent link">&para;</a></h2>
+<p>The base env assumes the whole scenario fits in view. Everything that encoded the
+scenario rather than the window is replaced. The windowed env does this after the shared
+observation builder runs, so the base env is untouched.</p>
 <table>
 <thead>
 <tr>
-<th>Index</th>
-<th>Field</th>
-<th>Raw range</th>
-<th>Normalization</th>
+<th>feature</th>
+<th>base env</th>
+<th>problem in a stream</th>
+<th>windowed env</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>0</td>
-<td>World age (s)</td>
-<td>[0, 2880]</td>
-<td><code>map_to_sym_unit(t, 0, EPISODE_STEPS×TIME_BETWEEN_ACTIONS)</code></td>
+<td>NOOP prediction rollout</td>
+<td>to the scenario's <strong>last</strong> landing</td>
+<td>length (and cost) grows with the scenario</td>
+<td><strong>receding</strong>: <code>max(2880 s, window's last ETA) + 20 steps</code>, cap 200</td>
 </tr>
 <tr>
-<td>1</td>
-<td>Active aircraft count</td>
-<td>[0, 10]</td>
-<td><code>map_to_sym_unit(n, 0, N_AIRCRAFT_MAX)</code></td>
+<td>per-aircraft <code>time_to_target</code></td>
+<td>read from the rollout's <strong>end</strong> world</td>
+<td>encodes rollout length, see <a href="#time-to-target-bug">below</a></td>
+<td>scheduled time to go, <code>eta − now</code></td>
 </tr>
 <tr>
-<td>2</td>
-<td>Mean absolute schedule deviation (s)</td>
-<td>[0, 900]</td>
-<td><code>map_to_sym_unit(dev, 0, TIME_DEVIATION_MAX)</code></td>
+<td><code>global[0]</code> time</td>
+<td>absolute scenario time / 2880 s</td>
+<td>pinned at +1 after 48 min; means nothing mid-stream</td>
+<td><strong>window span</strong>: time until the window's last flight is due</td>
 </tr>
 <tr>
-<td>3</td>
-<td>Max predicted infringement severity</td>
-<td>[0, 1]</td>
-<td><code>map_to_sym_unit(infr, 0, 1)</code></td>
+<td><code>global[1]</code> active count</td>
+<td>slots filled / 10</td>
+<td>a queue window is always full, so it only drops as the scenario <em>ends</em></td>
+<td>window flights <strong>under control</strong> / 10 (the actual traffic load)</td>
+</tr>
+<tr>
+<td><code>global[3]</code> max predicted infringement</td>
+<td>over every aircraft in the world</td>
+<td>includes pairs the agent can't see</td>
+<td>max over the window</td>
 </tr>
 </tbody>
 </table>
-<p>Horizon for time normalization: <code>64 × 45 = 2880 s</code>.</p>
-<hr />
-<h2 id="aircraft-12-per-aircraft-scalar-features-modelsobservationspy18"><code>aircraft</code> — 12 per-aircraft scalar features (<code>models/observations.py:18</code>)<a class="headerlink" href="#aircraft-12-per-aircraft-scalar-features-modelsobservationspy18" title="Permanent link">&para;</a></h2>
-<p><code>AIRCRAFT_SCALAR_LEN = 12</code> (<code>config.py:60</code>). All values are in <code>[-1, 1]</code>.</p>
-<div class="admonition info">
-<p class="admonition-title">Time features are log-scaled (run 1_26 onward)</p>
-<p><code>time_deviation</code> and <code>time_to_target</code> use a <strong>sign-preserving log</strong> encoding:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>obs = sign(d) * ln(1 + |d| / FLOOR) / ln(1 + MAX / FLOOR)
+<p>The two time features use their own <strong>7200 s</strong> signed-log scale (same shape and 30 s knee as
+the base encoding). Ten flights at the generator's 90–600 s spacing span up to ~6000 s; on the
+2880 s scale the window span sat at +1 a quarter of the time.</p>
+<p><strong>Verified stationary.</strong> 20- and 40-flight streams were rolled out with <code>1_29</code>, and every
+feature was compared early vs late in the stream. None drifts, and neither time feature
+saturates (0.0% and 0.1%, down from 25–35% and 5–10%).</p>
+<p>Two saturations remain, and neither depends on flight count:</p>
+<ul>
+<li><code>time_to_conflict</code> sits at −1 when there is no predicted conflict. That is its floor, not
+  clipping.</li>
+<li><code>vel_xy</code> is capped ~62% of the time, because spawn speeds are 375–425 kt against a 350 kt
+  normaliser. That encoding is shared with the base env and was left alone.</li>
+</ul>
+<h3 id="time-to-target-bug">The <code>time_to_target</code> bug<a class="headerlink" href="#time-to-target-bug" title="Permanent link">&para;</a></h3>
+<p><code>build_global_observation</code> computes <code>time_to_target</code> as
+<code>curr_world.calculate_time_to_target_arrival(cs)</code>, where <code>curr_world</code> is the <strong>end state of
+the NOOP rollout</strong>, thousands of seconds in the future. Measured at t = 540 s:</p>
+<table>
+<thead>
+<tr>
+<th>flight</th>
+<th>scheduled time to go</th>
+<th>live world</th>
+<th>rollout-end world (what the obs used)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TEST001</td>
+<td>587 s</td>
+<td>−587</td>
+<td><strong>5381</strong></td>
+</tr>
+<tr>
+<td>TEST002</td>
+<td>807 s</td>
+<td>−807</td>
+<td><strong>5161</strong></td>
+</tr>
+<tr>
+<td>TEST003</td>
+<td>1028 s</td>
+<td>−1028</td>
+<td><strong>4940</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The value is <code>rollout length − time to go</code>. It exceeds the 2880 s scale, so it sits pinned
+near +1 and is <strong>effectively a dead feature in every run so far</strong>. It is fixed in the windowed
+env only; fixing the base env would change what every existing checkpoint sees.</p>
+<h2 id="reward">Reward: per flight, not per episode<a class="headerlink" href="#reward" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>term</th>
+<th>10-aircraft env</th>
+<th>windowed env</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>success signal</td>
+<td>tier ladder over the fixed set + <a href="../pbrs/">PBRS</a></td>
+<td><strong>landing bonus</strong> per flight, once, at touchdown</td>
+</tr>
+<tr>
+<td>dense deviation</td>
+<td>every aircraft, every step, weight 0.2 → 1</td>
+<td>unlanded flights; weight <strong>0 → 1</strong> over the last 2880 s before landing</td>
+</tr>
+<tr>
+<td>dense conflict</td>
+<td>every predicted pair</td>
+<td>pairs with at least one member <strong>in the window</strong></td>
+</tr>
+<tr>
+<td>goal bonus</td>
+<td>on</td>
+<td>off (an episode-set construct, like the ladder)</td>
+</tr>
+<tr>
+<td>end of scenario</td>
+<td>termination</td>
+<td><strong>truncation</strong> (PPO bootstraps)</td>
+</tr>
+<tr>
+<td>bust penalty</td>
+<td>30 + 0.5 × remaining <strong>steps</strong></td>
+<td>constant: 30 + 3 × 10 (a window's worth of landings)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Landing bonus.</strong> <code>Σ_k B_k · σ((D_k − |dev|) / 15 s)</code> with rungs (120 s, 1.0) and (60 s, 2.0).
+A flight within ±60 s earns ~3.0, about what the 10-aircraft ladder's 32.5 total pays per
+aircraft, so the incentive per flight matches the checkpoint being warm-started.</p>
+<p><strong>Why the dense deviation weight starts at 0.</strong> A flight's charge fades in as it approaches.
+It never jumps when a flight enters the window or the rollout. Landed flights stop being
+charged; in a 150-step episode, a per-step charge for an early flight's residual deviation
+would dominate the return.</p>
+<p><strong>Why truncation and a constant penalty.</strong> The critic sees the window, not how many flights
+remain. If the stream running dry ended the episode, or the bust penalty scaled with flights
+left, V(s) would have to predict something unobservable. A real loss of separation is still a
+true termination. The tier ladder is still computed over all 20 flights and logged; it is
+just not rewarded.</p>
+<h2 id="results">Results<a class="headerlink" href="#results" title="Permanent link">&para;</a></h2>
+<p><strong>Zero-shot</strong>, run <code>1_29_pbrs_attn_d</code> best checkpoint, 20 seeds, deterministic, no training:</p>
+<table>
+<thead>
+<tr>
+<th>env</th>
+<th>all flights on time</th>
+<th>flights on time</th>
+<th>separation lost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10-flight</td>
+<td>0.55–0.75 ¹</td>
+<td>—</td>
+<td>0.00–0.05</td>
+</tr>
+<tr>
+<td>20-flight window</td>
+<td><strong>0.10</strong></td>
+<td><strong>0.79</strong></td>
+<td><strong>0.10</strong></td>
+</tr>
+<tr>
+<td>20-flight window, under-control-only ²</td>
+<td>0.20</td>
+<td>0.81</td>
+<td>0.20</td>
+</tr>
+<tr>
+<td>20-flight window, no aircraft-head rule ³</td>
+<td>0.00</td>
+<td>0.34</td>
+<td>0.65</td>
+</tr>
+</tbody>
+</table>
+<p>¹ Two identical runs; the per-episode observation offset is drawn from an unseeded RNG, so 20
+episodes move this much. ² The earlier window rule, where only spawned flights are eligible.
+³ Pending flights selectable: the failure described <a href="#why-a-window-and-why-this-one">above</a>.</p>
+<p>"All 20 on time" is roughly the per-flight rate to the 20th power, so it is the wrong
+headline for a stream. <strong>Quote <code>window_on_time_rate</code></strong>: on-time landings over <em>all</em> flights of
+the scenario, so a bust or a timeout counts every unlanded flight as a miss. It is comparable
+across stream lengths.</p>
+<p><strong>Training:</strong> <code>atc_run_1_31_windowed</code>, warm-started from <code>1_29</code>'s policy weights with a fresh
+VecNormalize and LR schedule, 5M steps on 8 workers. See the <a href="../experiments/#run-1_31">experiment log</a>.</p>
+<p><strong>Cost.</strong> A windowed step takes ~131 ms against ~36 ms in the 10-aircraft env. The rollout
+takes 78 ms of it (20 ms in the base env): twice the aircraft, and mid-stream the airspace
+never empties. The observation build takes 40 ms (11 ms), because the window always holds 10
+flights where the base env shows ~3.4. Train with <code>--n-envs 8</code>.</p>
+<h2 id="generator-not-stationary">Generated scenarios get harder down the queue<a class="headerlink" href="#generator-not-stationary" title="Permanent link">&para;</a></h2>
+<p>The scenario generator is not stationary in queue position. Under do-nothing, 20 seeds each:</p>
+<table>
+<thead>
+<tr>
+<th>flights</th>
+<th>ETA gap</th>
+<th>|dev| 1–10</th>
+<th>11–20</th>
+<th>21–30</th>
+<th>31–40</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>20</td>
+<td>251–279 s</td>
+<td>183 s</td>
+<td>368 s</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>40</td>
+<td>232–249 s</td>
+<td>224 s</td>
+<td>513 s</td>
+<td>687 s</td>
+<td><strong>913 s</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Landing spacing stays flat while the deviation to recover grows along the queue. The
+mechanism is not established: it may be knock-on delay down the trombone, or how the
+generator times spawns. The consequence is concrete, though. <strong>A long-stream stability test
+also tests backlog handling well beyond the 20-flight training range.</strong> Untrained, <code>1_29</code>
+lost separation in every 40-flight episode.</p>
+<h2 id="running-it">Running it<a class="headerlink" href="#running-it" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># train (warm start from an existing checkpoint with the same ACTION_SET)</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>python<span class="w"> </span>-u<span class="w"> </span>main.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>--init-weights<span class="w"> </span>experiments/atc_run_1_29_pbrs_attn_d/best/best_model.zip<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span>--n-envs<span class="w"> </span><span class="m">8</span><span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>windowed
 </code></pre></div>
-<p>with <code>TIME_DEVIATION_LOG_FLOOR_S = 10</code>, <code>TIME_DEVIATION_MAX = 1800</code>. The previous linear
-<code>clip(d / 900)</code> crushed every tier boundary the agent is graded on (±60, 70, 100, 120 s)
-into the bottom 13% of the range and encoded a 10 s error as <strong>0.011</strong> — indistinguishable
-from zero after LayerNorm. Measured effect on saturation (fraction of samples pinned at
-±1): <code>time_to_target</code> <strong>65.6% → 18.1%</strong> on MXP and <strong>71.4% → 15.1%</strong> on PMS;
-<code>time_deviation</code> clipping 3.2% → 0%. Set <code>USE_LOG_DEVIATION_OBS = False</code> for the linear
-encoding as a free ablation.</p>
-<p>Two time features are <strong>not</strong> log-scaled and are known-imperfect: <code>time_to_conflict</code> is a
-linear ramp over 20 min while the reward decays exponentially with a 4-minute half-life,
-and <code>global.time_s</code> normalises against a 2880 s fallback horizon while real episodes run
-3105–5715 s, so it is pinned at +1 for the last ~23% of every episode.</p>
-</div>
+<p>A longer stream at evaluation: construct the env with
+<code>WindowedATCEnv({"evaluation_mode": True, "scenario_aircraft_count": 40})</code>.</p>
+<table>
+<thead>
+<tr>
+<th>setting (<code>config/windowed_config.py</code>)</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DIFFICULTY</code></td>
+<td><code>VALIDATION_USE_CASE_1</code> (trombone; independent of <code>config.py</code>'s default)</td>
+</tr>
+<tr>
+<td><code>SCENARIO_AIRCRAFT_COUNT</code> / <code>WINDOW_SIZE</code></td>
+<td>20 / 10</td>
+</tr>
+<tr>
+<td><code>WINDOW_UNDER_CONTROL_ONLY</code> / <code>PENDING_ACTIONABLE</code></td>
+<td><code>False</code> / <code>False</code></td>
+</tr>
+<tr>
+<td><code>ROLLOUT_LOOKAHEAD_S</code> / <code>ROLLOUT_MARGIN_STEPS</code></td>
+<td>2880 s / 20</td>
+</tr>
+<tr>
+<td><code>TIME_SCALE_S</code></td>
+<td>7200 s</td>
+</tr>
+<tr>
+<td><code>MAX_EPISODE_STEPS</code></td>
+<td>200 (last ETA is 5000–7100 s = 111–158 steps)</td>
+</tr>
+<tr>
+<td><code>CONTINUING_TASK</code></td>
+<td><code>True</code></td>
+</tr>
+</tbody>
+</table>
+<p>Metrics land under <code>window_metrics/</code> (training) and <code>eval_window/</code> (eval): <code>on_time_rate</code>,
+<code>n_landed</code>, <code>mean/max_abs_landing_dev</code>, <code>occupancy_mean</code>, <code>overflow_frac</code>,
+<code>landing_bonus_total</code>.</p>
 <div class="admonition warning">
-<p class="admonition-title"><code>time_to_target</code> encodes the rollout length, not the time to go</p>
-<p>It is computed as <code>curr_world.calculate_time_to_target_arrival(cs)</code> on the <strong>end state of
-the NOOP rollout</strong>, which is thousands of seconds in the future. The value is
-<code>rollout length − time to go</code>: 5381 for a flight 587 s from its target, measured. That is
-past the 2880 s scale, so the feature sits pinned near +1 and has been <strong>effectively dead
-in every run so far</strong>. The <a href="../windowed/#time-to-target-bug">windowed env</a> replaces it with
-the scheduled <code>eta − now</code>; the base env is unchanged so existing checkpoints keep their
-inputs.</p>
+<p class="admonition-title">Simulator 0.2.80 changes the scenarios</p>
+<p>This work moved to <code>flight_simulator</code> <strong>0.2.80</strong> (from 0.1.52). The API is identical, but
+<strong>the same seed now generates a different scenario</strong>. Numbers from before this point are
+not reproducible on the same seeds.</p>
 </div>
-<div class="admonition info">
-<p class="admonition-title"><code>predicted_infringement</code> reads the DETECTION band, not severity</p>
-<p>The observation deliberately sees further than the reward charges: it uses <code>proximity</code>
-over the wide 3–10 NM detection band, so a conflict can be watched developing from 10 NM
-even though closing to 6 NM costs nothing.</p>
-</div>
-<table>
-<thead>
-<tr>
-<th>Index</th>
-<th>Field</th>
-<th>Raw unit</th>
-<th>Normalization</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0</td>
-<td><code>pos_x</code></td>
-<td>NM</td>
-<td><code>map_sym(v, 150.0)</code></td>
-<td>After episode translation matrix</td>
-</tr>
-<tr>
-<td>1</td>
-<td><code>pos_y</code></td>
-<td>NM</td>
-<td><code>map_sym(v, 150.0)</code></td>
-<td>After episode translation matrix</td>
-</tr>
-<tr>
-<td>2</td>
-<td><code>pos_z</code></td>
-<td>ft</td>
-<td><code>map_sym(v, 45000.0)</code></td>
-<td></td>
-</tr>
-<tr>
-<td>3</td>
-<td><code>vel_xy</code></td>
-<td>kts</td>
-<td><code>map_to_sym_unit(v, 0, 350.0)</code></td>
-<td>Horizontal speed magnitude</td>
-</tr>
-<tr>
-<td>4</td>
-<td><code>vz</code></td>
-<td>fpm</td>
-<td><code>map_sym(v, 3000.0)</code></td>
-<td>Vertical speed</td>
-</tr>
-<tr>
-<td>5</td>
-<td><code>heading_sin</code></td>
-<td>—</td>
-<td>raw (from vel vector)</td>
-<td></td>
-</tr>
-<tr>
-<td>6</td>
-<td><code>heading_cos</code></td>
-<td>—</td>
-<td>raw (from vel vector)</td>
-<td></td>
-</tr>
-<tr>
-<td>7</td>
-<td><code>time_to_target</code></td>
-<td>s</td>
-<td>signed-log, max 2880 s</td>
-<td><strong>Read from the rollout's end world — see warning below</strong></td>
-</tr>
-<tr>
-<td>8</td>
-<td><code>time_deviation</code></td>
-<td>s</td>
-<td><code>map_sym(v, 900)</code></td>
-<td>Schedule deviation from rollout</td>
-</tr>
-<tr>
-<td>9</td>
-<td><code>predicted_infringement</code></td>
-<td>[0,1]</td>
-<td><code>map_to_sym_unit(v, 0, 1)</code></td>
-<td>Max conflict severity in look-ahead</td>
-</tr>
-<tr>
-<td>10</td>
-<td><code>time_to_conflict</code></td>
-<td>[0,1]</td>
-<td><code>_map01_to_sym(v)</code></td>
-<td>1=imminent, 0=none/far</td>
-</tr>
-<tr>
-<td>11</td>
-<td><code>under_control</code></td>
-<td>{0,1}</td>
-<td>raw float</td>
-<td>Under ATC control flag</td>
-</tr>
-</tbody>
-</table>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><code>time_to_conflict</code> (<code>tcf</code>) is computed as
-<code>max(0, 1 - ttc / NEAR_CONFLICT_TIME_S)</code> where <code>ttc</code> is the timestamp of the
-earliest predicted loss-of-separation for this aircraft minus the current world
-time (<code>observations.py:521-524</code>). <code>NEAR_CONFLICT_TIME_S = 1200 s</code> (20 min).</p>
-</div>
-<p>Schedule deviation (<code>time_deviation</code>, field 8) comes exclusively from
-<code>MISS_TIMED_LANDING</code> events in the <strong>NOOP rollout world</strong> (<code>get_time_deviations</code>).
-<code>compute_dynamic_deviation</code> was removed — see <code>observations.py:412</code>.</p>
-<hr />
-<p><img alt="Linear versus signed-log encoding of schedule deviation" src="../assets/deviation_encoding.png" /></p>
-<p>The crossover near 750 s is deliberate: resolution is bought where the decision boundaries are
-(±60–120 s) and paid for in the tail, where the exact number does not change what the agent
-should do.</p>
-<h2 id="mask_aircraft-and-mask_action_per_ac"><code>mask_aircraft</code> and <code>mask_action_per_ac</code><a class="headerlink" href="#mask_aircraft-and-mask_action_per_ac" title="Permanent link">&para;</a></h2>
-<ul>
-<li><code>mask_aircraft[i]</code> = 1 if slot <code>i</code> contains a live aircraft (under control and
-  not completed, or at least not completed if none are under control).</li>
-<li><code>mask_action_per_ac[i, j]</code> = 1 if clearance <code>j</code> is geometrically/structurally
-  valid for the aircraft in slot <code>i</code> (computed by <code>action_mask.compute_action_mask</code>).</li>
-</ul>
-<p>These two masks are combined in <code>action_masks()</code> to produce the flat <code>bool[150]</code>
-mask consumed by <code>MaskablePPO</code>.</p>
-<hr />
-<h2 id="flight_plans_rel-relative-waypoint-sequences-modelsobservationspy92"><code>flight_plans_rel</code> — relative waypoint sequences (<code>models/observations.py:92</code>)<a class="headerlink" href="#flight_plans_rel-relative-waypoint-sequences-modelsobservationspy92" title="Permanent link">&para;</a></h2>
-<p>Shape <code>(10, 20, 11)</code>. Each waypoint vector has <code>FLIGHT_PLAN_WAYPOINT_DIM = 11</code>
-features, all in <code>[-1, 1]</code> (or raw sin/cos/flag):</p>
-<table>
-<thead>
-<tr>
-<th>Index</th>
-<th>Field</th>
-<th>Normalization</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>0</td>
-<td>Waypoint global x (NM)</td>
-<td><code>map_sym(v, 150.0)</code></td>
-</tr>
-<tr>
-<td>1</td>
-<td>Waypoint global y (NM)</td>
-<td><code>map_sym(v, 150.0)</code></td>
-</tr>
-<tr>
-<td>2</td>
-<td>Waypoint global z (ft)</td>
-<td><code>map_sym(v, 45000.0)</code></td>
-</tr>
-<tr>
-<td>3</td>
-<td>dx to waypoint (NM)</td>
-<td><code>map_sym(v, 150.0)</code></td>
-</tr>
-<tr>
-<td>4</td>
-<td>dy to waypoint (NM)</td>
-<td><code>map_sym(v, 150.0)</code></td>
-</tr>
-<tr>
-<td>5</td>
-<td>dz to waypoint (ft)</td>
-<td><code>map_sym(v, 40000.0)</code></td>
-</tr>
-<tr>
-<td>6</td>
-<td>Horizontal distance (NM)</td>
-<td><code>map_to_sym_unit(v, 0, 150.0)</code></td>
-</tr>
-<tr>
-<td>7</td>
-<td>Bearing sin</td>
-<td>raw</td>
-</tr>
-<tr>
-<td>8</td>
-<td>Bearing cos</td>
-<td>raw</td>
-</tr>
-<tr>
-<td>9</td>
-<td>Target speed (kts)</td>
-<td><code>map_to_sym_unit(v, 0, 350.0)</code> if available else 0</td>
-</tr>
-<tr>
-<td>10</td>
-<td>Target speed available flag</td>
-<td>raw 0/1</td>
-</tr>
-</tbody>
-</table>
-<p>Coordinates are expressed after the <strong>episode translation matrix</strong> (<code>T_obs</code>), a
-random uniform translation sampled at <code>reset()</code> to avoid positional overfitting
-(<code>single_agent_env.py:275</code>).</p>
-<p><code>flight_plan_mask[i, j]</code> = 1 if waypoint slot <code>j</code> is a real waypoint for aircraft <code>i</code>.</p>
-<hr />
-<h2 id="action_histories-recent-actions-per-aircraft"><code>action_histories</code> — recent actions per aircraft<a class="headerlink" href="#action_histories-recent-actions-per-aircraft" title="Permanent link">&para;</a></h2>
-<p>Shape <code>(10, 8, 23)</code> = <code>(N_AIRCRAFT_MAX, MAX_HISTORY, 1 + N_CLEARANCES)</code>.</p>
-<p>Each history step is a vector of length 23:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>[valid_flag, one_hot_clearance_0, ..., one_hot_clearance_21]
-</code></pre></div>
-<ul>
-<li><code>valid_flag = 1.0</code> if this slot holds a real past action, <code>0.0</code> if padding.</li>
-<li>The one-hot portion encodes the clearance index.</li>
-<li>History is in <strong>reverse chronological order</strong> (most recent first).</li>
-<li>Slots without history are zero-padded.</li>
-</ul>
-<p>Values are in <code>[0, 1]</code> (hence the Box bounds differ from other keys).</p>
-<hr />
-<h2 id="normalization-helpers-modelsobservationspy167">Normalization helpers (<code>models/observations.py:167</code>)<a class="headerlink" href="#normalization-helpers-modelsobservationspy167" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Function</th>
-<th>Formula</th>
-<th>Output range</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>map_sym(v, half_range)</code></td>
-<td><code>clip(v / half_range, -1, 1)</code></td>
-<td>[-1, 1]</td>
-</tr>
-<tr>
-<td><code>map_to_sym_unit(v, vmin, vmax)</code></td>
-<td><code>_map01_to_sym(clip((v-vmin)/(vmax-vmin), 0, 1))</code></td>
-<td>[-1, 1]</td>
-</tr>
-<tr>
-<td><code>_map01_to_sym(x)</code></td>
-<td><code>2 * clip(x, 0, 1) - 1</code></td>
-<td>[-1, 1]</td>
-</tr>
-<tr>
-<td><code>_normalize(v, vmin, vmax)</code></td>
-<td><code>clip((v-vmin)/(vmax-vmin), 0, 1)</code></td>
-<td>[0, 1]</td>
-</tr>
-<tr>
-<td><code>_normalize_sym(v, scale)</code></td>
-<td><code>clip(v / scale, -1, 1)</code></td>
-<td>[-1, 1]</td>
-</tr>
-</tbody>
-</table>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><code>under_control</code> (field 11 of aircraft scalars) and the action history
-<code>valid_flag</code> are passed as raw floats without further normalization.</p>
+<p class="admonition-title">Stitching as the alternative</p>
+<p>Point-merge was solved by stitching two 10-aircraft agents (up to 99% on the validation
+seeds). On trombone the halves overlap in time — flight 11 spawns before flight 10 lands —
+so stitching needs a hand-off rule. The windowed agent is the version that needs none. It
+has to beat roughly 0.55² ≈ 0.30 all-on-time, which is what two independent 10-flight
+halves would score.</p>
 </div>
 
 

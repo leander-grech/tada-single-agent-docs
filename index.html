@@ -243,6 +243,25 @@
   
   
   
+    <li class="md-tabs__item">
+      <a href="windowed/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Windowed env (20 flights)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
     
     
       <li class="md-tabs__item">
@@ -704,6 +723,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="windowed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Windowed env (20 flights)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -718,10 +764,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -739,8 +785,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -833,10 +879,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -854,8 +900,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1074,6 +1120,11 @@ schedule; <strong><code>1_27a</code> re-ran the second half on the correct one a
 0.64 success, deviation 76 s, and no gain at all among clean episodes. The reduced set issues
 <code>SHORTEN_TROMBONE</code>, its one new capability, about <strong>once per thousand clearances</strong> in both
 runs. See <a href="analysis_v1_v2/">22 clearances vs 15</a>.</p>
+<p><strong>New: a <a href="windowed/">windowed env</a></strong> runs a 20-flight trombone stream through a window of
+the next 10 flights to land, with a per-flight reward and no observable that depends on the
+scenario's flight count. Zero-shot from <code>1_29</code>: 79% of flights on time. Run <code>1_31_windowed</code>
+is training on it. This work also moved to <strong><code>flight_simulator</code> 0.2.80</strong>, under which the
+same seed generates a different scenario.</p>
 <p><strong>Read numbers only from <code>analysis/track_run.py</code>.</strong> The in-training <code>success_rate</code> is a
 5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.</p>
 </div>
@@ -1084,6 +1135,7 @@ runs. See <a href="analysis_v1_v2/">22 clearances vs 15</a>.</p>
   See <a href="training/">Training</a>.</li>
 <li><strong>Simulator:</strong> Rust <code>flight_simulator</code> (PyO3 wheel), driven through a deterministic rollout.</li>
 <li><strong>Scenario:</strong> MXP trombone (<code>VALIDATION_USE_CASE_1</code>). BGY point-merge exists but underperforms.</li>
+<li><strong>Windowed variant:</strong> a 20-flight stream through a 10-slot window — <a href="windowed/">Windowed env</a>.</li>
 <li><strong>Branch:</strong> <code>UM-lg</code>.</li>
 </ul>
 <div class="admonition info">
@@ -1099,12 +1151,17 @@ to stand alone.</p>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># fresh run</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>python<span class="w"> </span>-u<span class="w"> </span>main.py<span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">10000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>my_experiment
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># score its checkpoints on the fixed 100-seed pool while it trains</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>python<span class="w"> </span>analysis/track_run.py<span class="w"> </span>--run<span class="w"> </span>experiments/atc_run_1_28_my_experiment
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="c1"># replay an OLD run whose action set differs (see MDP -&gt; action-set versions)</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="nv">TADA_ACTION_SET</span><span class="o">=</span>v1<span class="w"> </span>python<span class="w"> </span>render_policy.py<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span>--model<span class="w"> </span>experiments/atc_run_1_26_sep3nm/best/best_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">1595180635</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># windowed env: 20-flight stream, warm-started from an existing checkpoint</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>python<span class="w"> </span>-u<span class="w"> </span>main.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span>--init-weights<span class="w"> </span>experiments/atc_run_1_29_pbrs_attn_d/best/best_model.zip<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span>--n-envs<span class="w"> </span><span class="m">8</span><span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>windowed
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1"># score its checkpoints on the fixed 100-seed pool while it trains</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>python<span class="w"> </span>analysis/track_run.py<span class="w"> </span>--run<span class="w"> </span>experiments/atc_run_1_28_my_experiment
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="c1"># replay an OLD run whose action set differs (see MDP -&gt; action-set versions)</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="nv">TADA_ACTION_SET</span><span class="o">=</span>v1<span class="w"> </span>python<span class="w"> </span>render_policy.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">  </span>--model<span class="w"> </span>experiments/atc_run_1_26_sep3nm/best/best_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">1595180635</span>
 </code></pre></div>
 <p>Watch it live — TensorBoard is now under each run's <code>tb/</code> sub-directory:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>/home/leander/miniconda3/envs/tada/bin/tensorboard<span class="w"> </span><span class="se">\</span>
@@ -1132,6 +1189,10 @@ lightweight <em>inference</em> set; add <code>pip install -e .[train]</code> for
 <tr>
 <td><a href="reward/">Reward</a></td>
 <td>severity geometry, exponential conflict decay, landing-weighted deviation, tier ladder</td>
+</tr>
+<tr>
+<td><a href="windowed/">Windowed env</a></td>
+<td>the 20-flight stream: queue window, stream-stationary observables, per-flight reward</td>
 </tr>
 <tr>
 <td><a href="training/">Training</a></td>

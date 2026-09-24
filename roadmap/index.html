@@ -241,6 +241,25 @@
   
   
   
+    <li class="md-tabs__item">
+      <a href="../windowed/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Windowed env (20 flights)
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
     
     
       <li class="md-tabs__item">
@@ -624,6 +643,33 @@
   
   
   
+    <li class="md-nav__item">
+      <a href="../windowed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Windowed env (20 flights)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
     
     
     
@@ -638,10 +684,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -659,8 +705,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -753,10 +799,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
             
   
   
@@ -774,8 +820,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1285,6 +1331,11 @@ property of the action set. See <a href="../analysis_v1_v2/#corrected-run">the c
 both issue it about once per thousand clearances, so the capability exists and the incentive
 does not. <a href="../pbrs/#fix-advice">Potential-based advice</a> is the principled mechanism for that,
 and it also removes a policy-distorting action cost on the way.</p>
+<p><strong>Now running:</strong> run <code>1_31</code> on the <a href="../windowed/">windowed 20-flight env</a>, warm-started from
+<code>1_29</code>. Longer streams at evaluation are the next step, as stability tests of whether the
+agent can be used continuously. They will also test <a href="../windowed/#generator-not-stationary">backlog
+handling</a>: generated scenarios get harder further
+down the queue.</p>
 <p><strong>Ruled out:</strong> a bigger network. Measured, the encoder uses ~14% of its width and the context
 ~4% — <a href="../analysis_log/#t-embedding-capacity">see the test log</a>. The productive change is
 shape, not size.</p>
@@ -1317,7 +1368,12 @@ to build next.</p>
 <tr>
 <td><strong>Drop or replace <code>global.time_s</code></strong></td>
 <td>It normalises against a 2880 s fallback horizon while episodes run 3105–5715 s, so it is pinned at +1 for the last ~23% of every episode</td>
-<td><code>timeout</code> fires in <strong>zero</strong> of 800 scored episodes, so the deadline it encodes never arrives</td>
+<td><code>timeout</code> fires in <strong>zero</strong> of 800 scored episodes, so the deadline it encodes never arrives. <strong>Done in the <a href="../windowed/#observables">windowed env</a></strong> (replaced by the window span); the 10-aircraft env still has it</td>
+</tr>
+<tr>
+<td><strong>Fix <code>time_to_target</code></strong></td>
+<td>It is read from the rollout's <em>end</em> world, so it encodes rollout length and sits pinned near +1 — a dead feature in every run so far</td>
+<td><a href="../windowed/#time-to-target-bug">measured</a>; fixed in the windowed env only, since fixing it in the base env changes every checkpoint's inputs</td>
 </tr>
 <tr>
 <td><strong>Δt-stamped action history</strong></td>
