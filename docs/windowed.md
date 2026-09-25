@@ -291,7 +291,21 @@ The random gap is intended as a robustness randomiser: the policy sees segment s
 different amounts of relief between them. Default `STITCH_SEGMENTS = 1`, so no existing run
 changes.
 
-**Evaluation on 2×20 stitched streams:** *running.*
+**Evaluation on 2×20 stitched streams** (same 100 paired seeds, gap 120–900 s):
+
+| `1_32` final, 40 flights | flights 1–20: landed / on time \| landed | flights 21–40: landed / on time \| landed | separation lost |
+|---|---|---|---|
+| generated in one sequence | 0.85 / 0.80 | 0.55 / **0.63** | 53% |
+| **stitched 2×20** | 0.90 / 0.84 | 0.68 / **0.81** | **41%** |
+
+- **The agent is stable over a long stream.** The second stitched segment is landed as
+  precisely as the first (0.81 vs 0.84), so the precision collapse at 40 contiguous flights was
+  the generator's backlog, not drift in the agent.
+- **What limits continuous use is the per-stretch bust rate compounding.** Two independent
+  20-flight episodes at 21% each would lose separation 1 − 0.79² ≈ 38% of the time; stitched
+  streams show 41%.
+- Overall on time 0.650 (`1_29` zero-shot: 0.614, +0.036, n.s.); separation 41% vs 42%.
+  Results in `analysis/2026-09-25_windowed_evals/s2x20*`.
 
 ## Inference-time conflict shield { #shield }
 
