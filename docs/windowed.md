@@ -145,7 +145,9 @@ across stream lengths.
 
 - `1_31` used the fresh-run LR schedule and **got worse**: on-time 0.79 → 0.49.
 - `1_32` retunes it as a fine-tune: 300k steps of critic-only warm-up, then peak LR 3e-5 and
-  entropy coefficient 0.003.
+  entropy coefficient 0.003. Scored paired on 100 seeds, it takes **all 20 on time from 0.08
+  to 0.29** (21 newly solved, none lost). The on-time rate is flat at 0.73 and separation
+  losses unchanged at 21%.
 
 See the [experiment log](experiments.md#run-1_31).
 

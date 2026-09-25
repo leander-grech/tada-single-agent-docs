@@ -16,7 +16,9 @@
     **Runs [1_31](#run-1_31) and [1_32](#run-1_32)** are on the [windowed 20-flight
     env](windowed.md), a different MDP, so their numbers are not comparable with the table
     below. `1_31` made its warm start worse (on-time 0.79 → 0.49) at a fresh-run learning rate;
-    `1_32` re-runs it as a proper fine-tune.
+    `1_32` re-runs it as a proper fine-tune and **works**: all 20 flights on time 0.08 → 0.29
+    (21 seeds newly solved, none lost). Separation losses are unchanged at 21% and are now
+    the limit.
 
     Also here: [changes outside the MDP](#non-mdp-changes) — rendering, tooling, and seven
     infrastructure bugs, several of which had been silently wrong for many runs.
@@ -543,7 +545,7 @@ scale, not the per-flight one. So the actor took full-size steps on bad advantag
 **A warm start onto a new reward needs a fine-tuning schedule, not a fresh-run one.** Retuned
 as [`1_32`](#run-1_32).
 
-## Run 1_32 — windowed, retuned fine-tune (`atc_run_1_32_windowed_ft`, in progress) { #run-1_32 }
+## Run 1_32 — windowed, retuned fine-tune (`atc_run_1_32_windowed_ft`, 5M) { #run-1_32 }
 
 **Changes.** Same MDP and warm start as `1_31`. Only the optimisation changes:
 
@@ -562,7 +564,33 @@ Smoke-testing this caught a boundary bug. SB3's float progress put the switch at
 instead of 8192, so the first unfrozen update ran at the critic's LR, and that single update moved
 the policy by KL **0.055**. The switch now has a half-step tolerance.
 
-**Results.** Pending. Explained variance was **0.63** after the first frozen update.
+**Results.** Scored with `analysis/score_windowed.py`: the same 100 fixed seeds for every model,
+deterministic, with the scenario **and** the observation frame pinned per seed. Every model
+therefore plays the identical episode, and each is compared seed by seed against the zero-shot
+`1_29` reference.
+
+| model | flights on time | separation lost | all 20 on time |
+|---|---|---|---|
+| `1_29` zero-shot (reference) | 0.727 | 0.21 | 0.08 |
+| `1_31` @ 2M | **0.468** (−0.26, sig.) | 0.32 (sig. worse) | 0.01 |
+| `1_32` @ 1M / 2M / 3M / 4M | 0.690 / 0.687 / 0.664 / 0.716 | 0.26 / 0.26 / 0.27 / 0.21 | 0.10 / 0.20 / 0.17 / 0.24 |
+| **`1_32` final** | **0.731** (+0.003, n.s.) | **0.21** (11 fixed, 11 new) | **0.29** |
+| `1_32` best_model | 0.737 (+0.009, n.s.) | 0.18 (n.s.) | 0.23 |
+
+**Finding.** **The fine-tune worked, and the gain is precision, not safety.**
+
+- **All 20 on time: 0.08 → 0.29.** The final model newly solves 21 seeds and loses none
+  (McNemar z = +4.6).
+- **Typical seed improves:** the median per-seed on-time rate is up 0.05, with 51 seeds better
+  and 28 worse.
+- **The mean on-time rate is flat because of separation.** Busts stay at 21%, but on different
+  seeds (11 fixed, 11 new), and 10 of the 12 seeds that lost ≥0.3 on-time were busts. Where
+  neither model busts, the change is +0.02 (SE 0.014).
+- **Separation is now the lever.**
+
+The run's `best_model`, picked by the noisy in-training eval, is not better than `final_model`:
+it busts slightly less but solves fewer. Per-episode rows are in
+`analysis/2026-09-25_windowed_scores.csv`.
 
 ---
 

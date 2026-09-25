@@ -20,7 +20,7 @@
     the next 10 flights to land, with a per-flight reward and no observable that depends on the
     scenario's flight count. Zero-shot from `1_29`: 79% of flights on time. A first fine-tune
     (`1_31`) made that worse at a fresh-run learning rate; `1_32` retrains it with a critic
-    warm-up and a 10× lower LR. This work also moved to **`flight_simulator` 0.2.80**, under which the
+    warm-up and a 10× lower LR, which took all-20-on-time from 0.08 to 0.29 on 100 paired seeds. This work also moved to **`flight_simulator` 0.2.80**, under which the
     same seed generates a different scenario.
 
     **Read numbers only from `analysis/track_run.py`.** The in-training `success_rate` is a
