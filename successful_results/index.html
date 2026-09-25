@@ -1268,6 +1268,13 @@ collapsible per-seed breakdown across all 100 eval seeds. See
 </div>
 <hr />
 <h2 id="run-8-atc_run_1_16">Run 8 — <code>atc_run_1_16</code> best model<a class="headerlink" href="#run-8-atc_run_1_16" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Historical renders: 3D approach view</p>
+<p>Kept as rendered. Run <code>1_16</code> predates the 1_26 observation encoding (log-scaled deviation,
+the conflict-band redesign), which the code deliberately does not replay. A re-render
+today would show the checkpoint reacting to inputs it was never trained on, not the agent
+these clips document.</p>
+</div>
 <p>→ <strong>Experiment log:</strong> <a href="../experiments/#run-8">Run 8 — 5-tier success + autoregressive policy</a>.</p>
 <p>The first checkpoint to post a non-zero success rate (peak <strong>50%</strong> @5.7 M) and to break the
 per-aircraft deviation ceiling that held across Runs 1–7 (worst-aircraft deviation down to
@@ -1679,6 +1686,15 @@ Columns: `raw` = trained_raw, `rd`/`cc`/`both` = reward-drop / critical-conflict
 </code></pre></div>
 <hr />
 <h2 id="run-1_26-1_27">Runs 1_26 / 1_27 — 22 clearances vs 15, side by side<a class="headerlink" href="#run-1_26-1_27" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Historical renders: 3D approach view</p>
+<p>These six clips predate the altitude-vs-time side view and are kept as rendered. They cannot
+be regenerated identically. The <code>--rng-seed</code> that fixed their observation frame was not
+recorded, and re-rendering with a pinned seed produces <em>different</em> episodes. On seed
+1194819984 all three arms then reach tier 4; on seed 1699226064 <code>1_27a</code> no longer
+collapses. The clips were chosen as the largest-margin examples for one frame, so
+replacing them would publish evidence that no longer shows what this section describes.</p>
+</div>
 <p>→ <strong>Experiment log:</strong> <a href="../experiments/#recent-runs">Runs 1_18–1_27</a> ·
 <strong>Analysis:</strong> <a href="../analysis_v1_v2/">22 clearances vs 15</a></p>
 <p>Both checkpoints are at exactly <strong>10M steps</strong>, both deterministic, both replaying the <em>same</em>
@@ -1827,7 +1843,11 @@ shown together precisely so the pair is not an argument for either side.</p>
 </video>
 
 <p>The first eight seeds of the evaluation pool, in pool order, deterministic, no shield. Useful for
-watching <em>how</em> the reduced set flies rather than whether it wins — in particular the trombone
+watching <em>how</em> the reduced set flies rather than whether it wins.</p>
+<p>Re-rendered on 25 Sep with the altitude-vs-time side view, reproducibly this time:
+<code>--rng-seed 0</code>, on <code>flight_simulator</code> 0.1.52, the version the reel was first made on. Under
+0.2.80 the same seeds generate different scenarios. Three of the eight are solved. Script:
+<code>analysis/2026-09-25_renders_reel_1_27/render_reel.sh</code>. Watch — in particular the trombone
 being lengthened and shortened within a single episode, which was impossible under v1.</p>
 
 

@@ -778,10 +778,32 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sequencing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sequencing: where precision is lost
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#stability" class="md-nav__link">
     <span class="md-ellipsis">
       
         Stream stability: drift along the queue, and 40-flight streams
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stitching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stitched streams
       
     </span>
   </a>
@@ -1224,10 +1246,32 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#sequencing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sequencing: where precision is lost
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#stability" class="md-nav__link">
     <span class="md-ellipsis">
       
         Stream stability: drift along the queue, and 40-flight streams
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stitching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stitched streams
       
     </span>
   </a>
@@ -1575,6 +1619,13 @@ Each render reproduces the scorer's outcome for its seed exactly. The seeds are 
 sample: two solved, one typical, one loss of separation.</p>
 <ul>
 <li><strong>Frame title:</strong> the window (as queue positions) and on-time over landed so far.</li>
+<li><strong>Right-hand panel: the side view.</strong> Every flight's predicted do-nothing descent, altitude
+  against time from now, all overlaid (flights outside the window faded). ▼ marks the
+  predicted touchdown and the coloured tick on the ground line the AMAN target, so the gap
+  between them is that flight's deviation. Predicted infringements are drawn on both
+  aircraft's profiles: <strong>solid red</strong> where severity is 1 (a loss of separation) and
+  <strong>dashed orange</strong> in the 3–5 NM band. <code>render_policy.py --approach-view 3d</code> restores the
+  old 3D view.</li>
 <li><strong>Aircraft table:</strong> every flight, with its status: <code>PRE</code> not yet spawned, <code>AIR</code>, <code>LND</code>
   landed.</li>
 <li><strong>Colours:</strong> by queue position.</li>
@@ -1606,6 +1657,65 @@ seed clean:</p>
 
 <p>The agent issues a clearance on <strong>~90% of steps</strong> (121 of 132, 128 of 149): the
 over-commanding pattern seen in earlier runs.</p>
+<h2 id="sequencing">Sequencing: where precision is lost<a class="headerlink" href="#sequencing" title="Permanent link">&para;</a></h2>
+<p>The side view makes one pattern obvious. Losses of separation and timing misses share a
+geometry: <strong>the spacing between consecutive flights compresses.</strong> Touchdown markers sit closer
+together than their target ticks, and the profiles merge on the last few thousand feet of the
+approach. In the solved render above, flight 9 heads for touchdown ~9 minutes early, straight
+into 7 and 8's slots, and a 7/9 loss of separation is predicted there. Later, 18 and 19 have
+targets 4 minutes apart but are predicted 1 minute apart, which is exactly where the orange
+band appears.</p>
+<p><code>analysis/sequence_analysis.py</code> measures it (<code>1_32</code> final, 40 seeds, 20 flights):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sector <strong>entry</strong> order vs AMAN order</td>
+<td><strong>8.1</strong> inverted pairs per scenario, in <strong>every</strong> scenario</td>
+</tr>
+<tr>
+<td>on time, flights that must overtake or be overtaken</td>
+<td><strong>0.78</strong> (median |dev| 17 s)</td>
+</tr>
+<tr>
+<td>on time, flights with no overtake needed</td>
+<td><strong>0.89</strong> (14 s)</td>
+</tr>
+<tr>
+<td>scenarios where <code>1_32</code> lands <strong>out of AMAN order</strong></td>
+<td>32% (1.2 inverted pairs on average)</td>
+</tr>
+<tr>
+<td>on time among landed, sequence <strong>swapped</strong> vs <strong>kept</strong></td>
+<td><strong>0.63</strong> vs <strong>0.91</strong></td>
+</tr>
+<tr>
+<td>scenarios with above- vs below-median entry inversions</td>
+<td>0.75 vs 0.90 on time</td>
+</tr>
+<tr>
+<td>on time if scored by landing order against the same slot times</td>
+<td>0.798 (vs 0.820 by callsign)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Precision is a sequencing problem.</strong> Traffic never enters in the order it must land, and
+  the agent loses precision exactly where it has to reorder it.</li>
+<li><strong>The misses are real timing errors.</strong> Re-assigning slots after a swap would not recover
+  them (last row): when two flights swap, neither lands in the other's slot.</li>
+<li><strong>Nothing in the observation states the sequence.</strong> The policy treats the slots as an
+  unordered set, so the sequence reaches it only through each flight's scheduled time to go.
+  The quantity that governs both conflicts and misses is <strong>per pair</strong>: a flight's predicted
+  landing gap to its AMAN predecessor, minus the target gap. It appears in neither the
+  observation nor the reward. That is the candidate for the next MDP change, as an observed
+  feature and a dense reward term.</li>
+</ul>
 <h2 id="stability">Stream stability: drift along the queue, and 40-flight streams<a class="headerlink" href="#stability" title="Permanent link">&para;</a></h2>
 <p>Same 100 paired seeds, <code>1_29</code> zero-shot vs <code>1_32</code> final, broken down by queue position.
 "Landed" is the share of flights that land at all: a loss of separation ends the episode and
@@ -1705,6 +1815,47 @@ strands every flight behind it. "On time | landed" is precision among those that
 </tr>
 </tbody>
 </table>
+<h2 id="stitching">Stitched streams<a class="headerlink" href="#stitching" title="Permanent link">&para;</a></h2>
+<p>A 40-flight scenario generated in one sequence is a backlog test, not a stability test. Its
+schedule pressure builds along the queue: do-nothing |dev| per 10-flight band is
+224 / 513 / 687 / <strong>913 s</strong>. <code>Simulator._stitched_scenario</code> builds long streams from
+independently generated 20-flight segments instead:</p>
+<ul>
+<li>each next segment's <strong>first</strong> target landing comes a random <strong>cooling gap</strong> after the
+  previous segment's <strong>last</strong> one, drawn uniformly from <code>STITCH_GAP_S</code> (default 120–900 s);</li>
+<li>the segment's spawns and targets shift together, so its internal spacing is untouched;</li>
+<li>callsigns are renumbered to continue the queue (TEST021…), and trombone sections are
+  re-keyed to match;</li>
+<li>the world is rebuilt from JSON, since the aircraft fields are read-only in the bindings.</li>
+</ul>
+<p>Do-nothing |dev| on a 2×20 stitched stream: 183 / 368 / <strong>259</strong> / 502 s. The backlog
+resets at the seam. Stitching is deterministic in content for a pinned seed, gap included.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>training</td>
+<td><code>main.py --env windowed --stitch-segments 2 --stitch-gap 120 900</code></td>
+</tr>
+<tr>
+<td>scoring</td>
+<td><code>analysis/score_windowed.py --segments 2 --gap 120 900</code></td>
+</tr>
+<tr>
+<td>rendering</td>
+<td><code>render_policy.py --env windowed --segments 2</code></td>
+</tr>
+</tbody>
+</table>
+<p>The random gap is intended as a robustness randomiser: the policy sees segment seams with
+different amounts of relief between them. Default <code>STITCH_SEGMENTS = 1</code>, so no existing run
+changes.</p>
+<p><strong>Evaluation on 2×20 stitched streams:</strong> <em>running.</em></p>
 <h2 id="shield">Inference-time conflict shield<a class="headerlink" href="#shield" title="Permanent link">&para;</a></h2>
 <p><code>render_policy</code>'s shield refuses a clearance that introduces a near-horizon conflict
 do-nothing would not, and issues the best clearance that passes instead (<code>next_best</code>).
