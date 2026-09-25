@@ -767,6 +767,50 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#renders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renders: run 1_32 on 20-flight validation seeds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stream stability: drift along the queue, and 40-flight streams
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shield" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inference-time conflict shield
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the compute goes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#generator-not-stationary" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1169,6 +1213,50 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#renders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renders: run 1_32 on 20-flight validation seeds
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#stability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Stream stability: drift along the queue, and 40-flight streams
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shield" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inference-time conflict shield
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the compute goes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#generator-not-stationary" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1481,6 +1569,213 @@ across stream lengths.</p>
 takes 78 ms of it (20 ms in the base env): twice the aircraft, and mid-stream the airspace
 never empties. The observation build takes 40 ms (11 ms), because the window always holds 10
 flights where the base env shows ~3.4. Train with <code>--n-envs 8</code>.</p>
+<h2 id="renders">Renders: run <code>1_32</code> on 20-flight validation seeds<a class="headerlink" href="#renders" title="Permanent link">&para;</a></h2>
+<p><code>1_32</code> final model, deterministic, no shield, with the observation frame pinned per seed.
+Each render reproduces the scorer's outcome for its seed exactly. The seeds are an honest
+sample: two solved, one typical, one loss of separation.</p>
+<ul>
+<li><strong>Frame title:</strong> the window (as queue positions) and on-time over landed so far.</li>
+<li><strong>Aircraft table:</strong> every flight, with its status: <code>PRE</code> not yet spawned, <code>AIR</code>, <code>LND</code>
+  landed.</li>
+<li><strong>Colours:</strong> by queue position.</li>
+</ul>
+<p><strong>Solved</strong>: all 20 on time (seed 1001495968, 132 steps, 121 clearances):</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_32_solved_seed1001495968.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Solved</strong>: all 20 on time (seed 921959045, 149 steps, 128 clearances):</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_32_solved_seed921959045.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Typical</strong>: all landed, 17 of 20 on time (seed 1181241943):</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_32_typical_seed1181241943.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Loss of separation</strong> at step 72 (seed 27911967); <code>1_29</code> zero-shot kept this
+seed clean:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_32_bust_seed27911967.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p>The agent issues a clearance on <strong>~90% of steps</strong> (121 of 132, 128 of 149): the
+over-commanding pattern seen in earlier runs.</p>
+<h2 id="stability">Stream stability: drift along the queue, and 40-flight streams<a class="headerlink" href="#stability" title="Permanent link">&para;</a></h2>
+<p>Same 100 paired seeds, <code>1_29</code> zero-shot vs <code>1_32</code> final, broken down by queue position.
+"Landed" is the share of flights that land at all: a loss of separation ends the episode and
+strands every flight behind it. "On time | landed" is precision among those that did land.</p>
+<table>
+<thead>
+<tr>
+<th>stream</th>
+<th>queue position</th>
+<th>landed (1_29 / 1_32)</th>
+<th>on time | landed</th>
+<th>median |dev| (1_32)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>20</td>
+<td>1–4</td>
+<td>0.99 / 0.95</td>
+<td>0.87 / 0.91</td>
+<td>14 s</td>
+</tr>
+<tr>
+<td>20</td>
+<td>9–12</td>
+<td>0.87 / 0.84</td>
+<td>0.80 / 0.81</td>
+<td>15 s</td>
+</tr>
+<tr>
+<td>20</td>
+<td>17–20</td>
+<td>0.79 / 0.79</td>
+<td>0.91 / 0.89</td>
+<td>0 s</td>
+</tr>
+<tr>
+<td>40</td>
+<td>1–8</td>
+<td>0.95 / 0.94</td>
+<td>0.85 / 0.88</td>
+<td>14 s</td>
+</tr>
+<tr>
+<td>40</td>
+<td>17–24</td>
+<td>0.63 / 0.69</td>
+<td>0.71 / 0.68</td>
+<td>21 s</td>
+</tr>
+<tr>
+<td>40</td>
+<td>25–32</td>
+<td>0.47 / 0.58</td>
+<td>0.63 / <strong>0.57</strong></td>
+<td><strong>40 s</strong></td>
+</tr>
+<tr>
+<td>40</td>
+<td>33–40</td>
+<td>0.38 / 0.47</td>
+<td>0.70 / 0.68</td>
+<td>15 s</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Within the trained length (20 flights), the agent is stable.</strong> Precision is flat along
+  the queue; the whole late-queue drop is episodes ending in a loss of separation.</li>
+<li><strong>At 40 flights, the stability test fails.</strong> Separation is lost in <strong>53%</strong> of episodes
+  (<code>1_29</code>: 62%), and precision drifts as well (median deviation 40 s at positions 25–32).
+  That is the generator's <a href="#generator-not-stationary">growing backlog</a>, well beyond anything
+  the 20-flight training showed. <code>1_32</code> degrades less than <code>1_29</code>, but continuous use needs
+  either longer training streams or a backlog the agent can observe.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>40-flight stream</th>
+<th>on time</th>
+<th>separation lost</th>
+<th>all 40 on time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1_29</code> zero-shot</td>
+<td>0.481</td>
+<td>0.62</td>
+<td>0.00</td>
+</tr>
+<tr>
+<td><code>1_32</code> final</td>
+<td>0.517 (+0.037, n.s.)</td>
+<td>0.53 (21 fixed, 12 new, n.s.)</td>
+<td>0.02</td>
+</tr>
+</tbody>
+</table>
+<h2 id="shield">Inference-time conflict shield<a class="headerlink" href="#shield" title="Permanent link">&para;</a></h2>
+<p><code>render_policy</code>'s shield refuses a clearance that introduces a near-horizon conflict
+do-nothing would not, and issues the best clearance that passes instead (<code>next_best</code>).
+Applied to <code>1_32</code> on the same 100 seeds it is <strong>net harmful</strong>:</p>
+<ul>
+<li>on-time <strong>−0.053</strong> (SE 0.015, significant);</li>
+<li><strong>12 of the 29</strong> solved seeds lost, 1 gained;</li>
+<li>separation 0.21 → 0.19: 7 busts fixed, 5 new, which is noise.</li>
+</ul>
+<p>It can only veto clearances. Busts that come from not acting are out of its reach, which is
+also what the <a href="../successful_results/#refusal-shield-sweep-100-seeds">10-aircraft sweep</a> found.</p>
+<h2 id="compute">Where the compute goes<a class="headerlink" href="#compute" title="Permanent link">&para;</a></h2>
+<p>Per environment step, measured on an idle machine:</p>
+<table>
+<thead>
+<tr>
+<th>component</th>
+<th>time</th>
+<th>share</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rust simulator: NOOP prediction rollout</td>
+<td>23.4 ms</td>
+<td><strong>74%</strong></td>
+</tr>
+<tr>
+<td>Python observation build</td>
+<td>7.5 ms</td>
+<td>24%</td>
+</tr>
+<tr>
+<td>rest of <code>env.step</code></td>
+<td>~1 ms</td>
+<td>3%</td>
+</tr>
+<tr>
+<td>policy forward (single obs, CPU)</td>
+<td>6.4 ms</td>
+<td>outside the env</td>
+</tr>
+</tbody>
+</table>
+<p>The PPO update is roughly 20% of wall-clock at 8 workers; the rest is collecting
+experience.</p>
+<p>The rollout cannot simply run coarser. Measured against 1 s ticks (the rollout's current
+resolution):</p>
+<table>
+<thead>
+<tr>
+<th>tick</th>
+<th>rollout cost</th>
+<th>predicted-deviation error, median / p95 / max</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2 s</td>
+<td>×0.62</td>
+<td>4 s / 203 s / 1182 s</td>
+</tr>
+<tr>
+<td>5 s</td>
+<td>×0.35</td>
+<td>148 s / 308 s / 875 s</td>
+</tr>
+</tbody>
+</table>
+<p>Route following needs the fine integration step. The rollout cost is a floor unless the
+simulator itself gets faster.</p>
 <h2 id="generator-not-stationary">Generated scenarios get harder down the queue<a class="headerlink" href="#generator-not-stationary" title="Permanent link">&para;</a></h2>
 <p>The scenario generator is not stationary in queue position. Under do-nothing, 20 seeds each:</p>
 <table>
