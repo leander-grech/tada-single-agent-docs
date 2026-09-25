@@ -1124,7 +1124,7 @@ runs. See <a href="analysis_v1_v2/">22 clearances vs 15</a>.</p>
 the next 10 flights to land, with a per-flight reward and no observable that depends on the
 scenario's flight count. Zero-shot from <code>1_29</code>: 79% of flights on time. A first fine-tune
 (<code>1_31</code>) made that worse at a fresh-run learning rate; <code>1_32</code> retrains it with a critic
-warm-up and a 10× lower LR. This work also moved to <strong><code>flight_simulator</code> 0.2.80</strong>, under which the
+warm-up and a 10× lower LR, which took all-20-on-time from 0.08 to 0.29 on 100 paired seeds. This work also moved to <strong><code>flight_simulator</code> 0.2.80</strong>, under which the
 same seed generates a different scenario.</p>
 <p><strong>Read numbers only from <code>analysis/track_run.py</code>.</strong> The in-training <code>success_rate</code> is a
 5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.</p>

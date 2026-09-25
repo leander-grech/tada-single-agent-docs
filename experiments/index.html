@@ -986,7 +986,7 @@
   <a href="#run-1_32" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run 1_32 — windowed, retuned fine-tune (atc_run_1_32_windowed_ft, in progress)
+        Run 1_32 — windowed, retuned fine-tune (atc_run_1_32_windowed_ft, 5M)
       
     </span>
   </a>
@@ -1480,7 +1480,7 @@
   <a href="#run-1_32" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run 1_32 — windowed, retuned fine-tune (atc_run_1_32_windowed_ft, in progress)
+        Run 1_32 — windowed, retuned fine-tune (atc_run_1_32_windowed_ft, 5M)
       
     </span>
   </a>
@@ -1570,7 +1570,9 @@ a confound that stops the comparison being decisive. Full analysis:
 <p><strong>Runs <a href="#run-1_31">1_31</a> and <a href="#run-1_32">1_32</a></strong> are on the <a href="../windowed/">windowed 20-flight
 env</a>, a different MDP, so their numbers are not comparable with the table
 below. <code>1_31</code> made its warm start worse (on-time 0.79 → 0.49) at a fresh-run learning rate;
-<code>1_32</code> re-runs it as a proper fine-tune.</p>
+<code>1_32</code> re-runs it as a proper fine-tune and <strong>works</strong>: all 20 flights on time 0.08 → 0.29
+(21 seeds newly solved, none lost). Separation losses are unchanged at 21% and are now
+the limit.</p>
 <p>Also here: <a href="#non-mdp-changes">changes outside the MDP</a> — rendering, tooling, and seven
 infrastructure bugs, several of which had been silently wrong for many runs.</p>
 </div>
@@ -2206,7 +2208,7 @@ scale, not the per-flight one. So the actor took full-size steps on bad advantag
 </ul>
 <p><strong>A warm start onto a new reward needs a fine-tuning schedule, not a fresh-run one.</strong> Retuned
 as <a href="#run-1_32"><code>1_32</code></a>.</p>
-<h2 id="run-1_32">Run 1_32 — windowed, retuned fine-tune (<code>atc_run_1_32_windowed_ft</code>, in progress)<a class="headerlink" href="#run-1_32" title="Permanent link">&para;</a></h2>
+<h2 id="run-1_32">Run 1_32 — windowed, retuned fine-tune (<code>atc_run_1_32_windowed_ft</code>, 5M)<a class="headerlink" href="#run-1_32" title="Permanent link">&para;</a></h2>
 <p><strong>Changes.</strong> Same MDP and warm start as <code>1_31</code>. Only the optimisation changes:</p>
 <table>
 <thead>
@@ -2241,7 +2243,66 @@ cosine schedule then runs over the remaining 4.7M steps, starting from LR 0.</p>
 <p>Smoke-testing this caught a boundary bug. SB3's float progress put the switch at 8191.9999 steps
 instead of 8192, so the first unfrozen update ran at the critic's LR, and that single update moved
 the policy by KL <strong>0.055</strong>. The switch now has a half-step tolerance.</p>
-<p><strong>Results.</strong> Pending. Explained variance was <strong>0.63</strong> after the first frozen update.</p>
+<p><strong>Results.</strong> Scored with <code>analysis/score_windowed.py</code>: the same 100 fixed seeds for every model,
+deterministic, with the scenario <strong>and</strong> the observation frame pinned per seed. Every model
+therefore plays the identical episode, and each is compared seed by seed against the zero-shot
+<code>1_29</code> reference.</p>
+<table>
+<thead>
+<tr>
+<th>model</th>
+<th>flights on time</th>
+<th>separation lost</th>
+<th>all 20 on time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1_29</code> zero-shot (reference)</td>
+<td>0.727</td>
+<td>0.21</td>
+<td>0.08</td>
+</tr>
+<tr>
+<td><code>1_31</code> @ 2M</td>
+<td><strong>0.468</strong> (−0.26, sig.)</td>
+<td>0.32 (sig. worse)</td>
+<td>0.01</td>
+</tr>
+<tr>
+<td><code>1_32</code> @ 1M / 2M / 3M / 4M</td>
+<td>0.690 / 0.687 / 0.664 / 0.716</td>
+<td>0.26 / 0.26 / 0.27 / 0.21</td>
+<td>0.10 / 0.20 / 0.17 / 0.24</td>
+</tr>
+<tr>
+<td><strong><code>1_32</code> final</strong></td>
+<td><strong>0.731</strong> (+0.003, n.s.)</td>
+<td><strong>0.21</strong> (11 fixed, 11 new)</td>
+<td><strong>0.29</strong></td>
+</tr>
+<tr>
+<td><code>1_32</code> best_model</td>
+<td>0.737 (+0.009, n.s.)</td>
+<td>0.18 (n.s.)</td>
+<td>0.23</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Finding.</strong> <strong>The fine-tune worked, and the gain is precision, not safety.</strong></p>
+<ul>
+<li><strong>All 20 on time: 0.08 → 0.29.</strong> The final model newly solves 21 seeds and loses none
+  (McNemar z = +4.6).</li>
+<li><strong>Typical seed improves:</strong> the median per-seed on-time rate is up 0.05, with 51 seeds better
+  and 28 worse.</li>
+<li><strong>The mean on-time rate is flat because of separation.</strong> Busts stay at 21%, but on different
+  seeds (11 fixed, 11 new), and 10 of the 12 seeds that lost ≥0.3 on-time were busts. Where
+  neither model busts, the change is +0.02 (SE 0.014).</li>
+<li><strong>Separation is now the lever.</strong></li>
+</ul>
+<p>The run's <code>best_model</code>, picked by the noisy in-training eval, is not better than <code>final_model</code>:
+it busts slightly less but solves fewer. Per-episode rows are in
+<code>analysis/2026-09-25_windowed_scores.csv</code>.</p>
 <hr />
 <h2 id="non-mdp-changes">Changes outside the MDP<a class="headerlink" href="#non-mdp-changes" title="Permanent link">&para;</a></h2>
 <p>Work that does not change what the agent optimises but does change what you can see or trust.</p>
