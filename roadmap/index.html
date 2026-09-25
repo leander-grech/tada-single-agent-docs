@@ -1339,7 +1339,11 @@ down the queue.</p>
 <p><strong>Windowed, measured (25 Sep):</strong> the <code>1_32</code> fine-tune takes all-20-on-time from 0.08 to
 0.29. It is <strong>stable within 20 flights</strong>, where precision is flat along the queue and
 losses of separation are the whole remaining gap. It is <strong>not yet usable continuously</strong>:
-at 40 flights, 53% of episodes lose separation. The conflict shield makes it worse.
+at 40 flights, 53% of episodes lose separation. On <strong>stitched</strong> 2×20 streams it stays as
+precise in the second segment as in the first, and busts (41%) are what two independent
+20-flight episodes would give. So the long-stream limit is the per-stretch separation
+rate, and <strong>AMAN sequencing</strong> is where precision is lost. The conflict shield makes it
+worse.
 <a href="../windowed/#stability">Details</a>.</p>
 <p><strong>Ruled out:</strong> a bigger network. Measured, the encoder uses ~14% of its width and the context
 ~4% — <a href="../analysis_log/#t-embedding-capacity">see the test log</a>. The productive change is
