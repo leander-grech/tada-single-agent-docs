@@ -23,6 +23,12 @@
     handling](windowed.md#generator-not-stationary): generated scenarios get harder further
     down the queue.
 
+    **Windowed, measured (25 Sep):** the `1_32` fine-tune takes all-20-on-time from 0.08 to
+    0.29. It is **stable within 20 flights**, where precision is flat along the queue and
+    losses of separation are the whole remaining gap. It is **not yet usable continuously**:
+    at 40 flights, 53% of episodes lose separation. The conflict shield makes it worse.
+    [Details](windowed.md#stability).
+
     **Ruled out:** a bigger network. Measured, the encoder uses ~14% of its width and the context
     ~4% — [see the test log](analysis_log.md#t-embedding-capacity). The productive change is
     shape, not size.

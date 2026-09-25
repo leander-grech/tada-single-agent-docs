@@ -156,6 +156,112 @@ takes 78 ms of it (20 ms in the base env): twice the aircraft, and mid-stream th
 never empties. The observation build takes 40 ms (11 ms), because the window always holds 10
 flights where the base env shows ~3.4. Train with `--n-envs 8`.
 
+## Renders: run `1_32` on 20-flight validation seeds { #renders }
+
+`1_32` final model, deterministic, no shield, with the observation frame pinned per seed.
+Each render reproduces the scorer's outcome for its seed exactly. The seeds are an honest
+sample: two solved, one typical, one loss of separation.
+
+- **Frame title:** the window (as queue positions) and on-time over landed so far.
+- **Aircraft table:** every flight, with its status: `PRE` not yet spawned, `AIR`, `LND`
+  landed.
+- **Colours:** by queue position.
+
+<p><strong>Solved</strong>: all 20 on time (seed 1001495968, 132 steps, 121 clearances):</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_32_solved_seed1001495968.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Solved</strong>: all 20 on time (seed 921959045, 149 steps, 128 clearances):</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_32_solved_seed921959045.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Typical</strong>: all landed, 17 of 20 on time (seed 1181241943):</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_32_typical_seed1181241943.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Loss of separation</strong> at step 72 (seed 27911967); <code>1_29</code> zero-shot kept this
+seed clean:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_32_bust_seed27911967.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+The agent issues a clearance on **~90% of steps** (121 of 132, 128 of 149): the
+over-commanding pattern seen in earlier runs.
+
+## Stream stability: drift along the queue, and 40-flight streams { #stability }
+
+Same 100 paired seeds, `1_29` zero-shot vs `1_32` final, broken down by queue position.
+"Landed" is the share of flights that land at all: a loss of separation ends the episode and
+strands every flight behind it. "On time \| landed" is precision among those that did land.
+
+| stream | queue position | landed (1_29 / 1_32) | on time \| landed | median \|dev\| (1_32) |
+|---|---|---|---|---|
+| 20 | 1–4 | 0.99 / 0.95 | 0.87 / 0.91 | 14 s |
+| 20 | 9–12 | 0.87 / 0.84 | 0.80 / 0.81 | 15 s |
+| 20 | 17–20 | 0.79 / 0.79 | 0.91 / 0.89 | 0 s |
+| 40 | 1–8 | 0.95 / 0.94 | 0.85 / 0.88 | 14 s |
+| 40 | 17–24 | 0.63 / 0.69 | 0.71 / 0.68 | 21 s |
+| 40 | 25–32 | 0.47 / 0.58 | 0.63 / **0.57** | **40 s** |
+| 40 | 33–40 | 0.38 / 0.47 | 0.70 / 0.68 | 15 s |
+
+- **Within the trained length (20 flights), the agent is stable.** Precision is flat along
+  the queue; the whole late-queue drop is episodes ending in a loss of separation.
+- **At 40 flights, the stability test fails.** Separation is lost in **53%** of episodes
+  (`1_29`: 62%), and precision drifts as well (median deviation 40 s at positions 25–32).
+  That is the generator's [growing backlog](#generator-not-stationary), well beyond anything
+  the 20-flight training showed. `1_32` degrades less than `1_29`, but continuous use needs
+  either longer training streams or a backlog the agent can observe.
+
+| 40-flight stream | on time | separation lost | all 40 on time |
+|---|---|---|---|
+| `1_29` zero-shot | 0.481 | 0.62 | 0.00 |
+| `1_32` final | 0.517 (+0.037, n.s.) | 0.53 (21 fixed, 12 new, n.s.) | 0.02 |
+
+## Inference-time conflict shield { #shield }
+
+`render_policy`'s shield refuses a clearance that introduces a near-horizon conflict
+do-nothing would not, and issues the best clearance that passes instead (`next_best`).
+Applied to `1_32` on the same 100 seeds it is **net harmful**:
+
+- on-time **−0.053** (SE 0.015, significant);
+- **12 of the 29** solved seeds lost, 1 gained;
+- separation 0.21 → 0.19: 7 busts fixed, 5 new, which is noise.
+
+It can only veto clearances. Busts that come from not acting are out of its reach, which is
+also what the [10-aircraft sweep](successful_results.md#refusal-shield-sweep-100-seeds) found.
+
+## Where the compute goes { #compute }
+
+Per environment step, measured on an idle machine:
+
+| component | time | share |
+|---|---|---|
+| Rust simulator: NOOP prediction rollout | 23.4 ms | **74%** |
+| Python observation build | 7.5 ms | 24% |
+| rest of `env.step` | ~1 ms | 3% |
+| policy forward (single obs, CPU) | 6.4 ms | outside the env |
+
+The PPO update is roughly 20% of wall-clock at 8 workers; the rest is collecting
+experience.
+
+The rollout cannot simply run coarser. Measured against 1 s ticks (the rollout's current
+resolution):
+
+| tick | rollout cost | predicted-deviation error, median / p95 / max |
+|---|---|---|
+| 2 s | ×0.62 | 4 s / 203 s / 1182 s |
+| 5 s | ×0.35 | 148 s / 308 s / 875 s |
+
+Route following needs the fine integration step. The rollout cost is a floor unless the
+simulator itself gets faster.
+
 ## Generated scenarios get harder down the queue { #generator-not-stationary }
 
 The scenario generator is not stationary in queue position. Under do-nothing, 20 seeds each:
