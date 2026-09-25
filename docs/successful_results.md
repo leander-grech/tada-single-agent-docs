@@ -24,6 +24,12 @@ when it works" companion to that narrative.
 
 ## Run 8 — `atc_run_1_16` best model { #run-8-atc_run_1_16 }
 
+!!! note "Historical renders: 3D approach view"
+    Kept as rendered. Run `1_16` predates the 1_26 observation encoding (log-scaled deviation,
+    the conflict-band redesign), which the code deliberately does not replay. A re-render
+    today would show the checkpoint reacting to inputs it was never trained on, not the agent
+    these clips document.
+
 → **Experiment log:** [Run 8 — 5-tier success + autoregressive policy](experiments.md#run-8).
 
 The first checkpoint to post a non-zero success rate (peak **50%** @5.7 M) and to break the
@@ -358,6 +364,14 @@ To add a showcase for run **N** (`atc_run_1_X`):
 
 ## Runs 1_26 / 1_27 — 22 clearances vs 15, side by side { #run-1_26-1_27 }
 
+!!! note "Historical renders: 3D approach view"
+    These six clips predate the altitude-vs-time side view and are kept as rendered. They cannot
+    be regenerated identically. The `--rng-seed` that fixed their observation frame was not
+    recorded, and re-rendering with a pinned seed produces *different* episodes. On seed
+    1194819984 all three arms then reach tier 4; on seed 1699226064 `1_27a` no longer
+    collapses. The clips were chosen as the largest-margin examples for one frame, so
+    replacing them would publish evidence that no longer shows what this section describes.
+
 → **Experiment log:** [Runs 1_18–1_27](experiments.md#recent-runs) ·
 **Analysis:** [22 clearances vs 15](analysis_v1_v2.md)
 
@@ -451,5 +465,10 @@ times and `SHORTEN_TROMBONE` not once.
 </video>
 
 The first eight seeds of the evaluation pool, in pool order, deterministic, no shield. Useful for
-watching *how* the reduced set flies rather than whether it wins — in particular the trombone
+watching *how* the reduced set flies rather than whether it wins.
+
+Re-rendered on 25 Sep with the altitude-vs-time side view, reproducibly this time:
+`--rng-seed 0`, on `flight_simulator` 0.1.52, the version the reel was first made on. Under
+0.2.80 the same seeds generate different scenarios. Three of the eight are solved. Script:
+`analysis/2026-09-25_renders_reel_1_27/render_reel.sh`. Watch — in particular the trombone
 being lengthened and shortened within a single episode, which was impossible under v1.
