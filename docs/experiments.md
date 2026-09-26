@@ -615,7 +615,7 @@ zero-initialised, so it started out computing exactly `1_32`'s function (output 
 position stayed flat at ~0.855 through training, because the reward does not pay for keeping
 the sequence. Details: [windowed env](windowed.md#seq-obs).
 
-## Run 1_34 — the lexicographic objective (`atc_run_1_34_windowed_outcome`, in progress) { #run-1_34 }
+## Run 1_34 — the lexicographic objective (`atc_run_1_34_windowed_outcome`, stopped at 0.8M) { #run-1_34 }
 
 **Changes.** `--reward-mode outcome_pbrs`. The reward is the objective only, in lexicographic
 order: safety, then each flight's deviation bracket, then the fewest real clearances.
@@ -624,8 +624,9 @@ potential-based shaping: the predicted bracket value, predicted conflicts, AMAN-
 and landing-spacing compression. Warm-started from `1_33` final, 300k-step critic warm-up,
 LR 3e-5 → 3e-6. Design and verification: [the objective](windowed.md#objective).
 
-**Results.** Pending; it will be scored against `1_33` and `1_32` at 1M, 2M and final, including
-clearances per stream.
+**Stopped at 799 744 steps**, in favour of `1_35`, which continues from that checkpoint with the
+JAX learner and the faster simulator. At ~40–90 steps/s on a loaded laptop, 5M would have
+taken another day.
 
 **Meanwhile, on the existing policies:**
 
@@ -636,6 +637,21 @@ clearances per stream.
   to absorb more than 650 s, and they hold 16 of the 17 deterministic separation losses.
 - **[Critic-guided lookahead](windowed.md#lookahead):** separation 0.17 → 0.07, at the cost of
   precision, with `1_33`'s legacy critic.
+
+## Run 1_35 — JAX learner, fast simulator, stitched streams (`atc_run_1_35_windowed_jax`, in progress) { #run-1_35 }
+
+**Changes.** The `1_34` design (sequence observations, lexicographic objective), trained with
+`main_jax.py` on `flight_simulator` 0.2.81 ([JAX learner](training.md#jax-learner)). New in
+the MDP: **stitched 2×20 streams with a random cooling gap of 120–900 s** between segments, so
+the policy sees seams with different amounts of relief. The per-clearance cost is halved on
+2-segment streams, so a whole stream's actions still cost less than one bracket gap.
+Warm-started from `1_34` @ 799 744, with a 100k-step critic warm-up (fresh reward
+normalisation). LR 3e-5 → 3e-6, 16 workers, 5M.
+
+**Speed.** ~330 steps/s (collection ~10 s + update 1.3 s per 4 096 steps). `1_33` ran at ~230
+on a quiet machine, and `1_34` at 40–90 under load.
+
+**Results.** Pending.
 
 ---
 

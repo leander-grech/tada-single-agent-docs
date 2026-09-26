@@ -81,6 +81,44 @@ same seed generates a different scenario.
 
 ---
 
+## JAX learner and the vendored simulator (work in progress) { #jax-learner }
+
+!!! note "Added 26 Sep; SB3 (`main.py`) remains the default trainer and is unchanged"
+    **`main_jax.py`** trains the same policy with a PPO learner written in JAX (`jax_ppo/`).
+
+    - **Same everything else:** env stack (SubprocVecEnv, Monitor, VecNormalize), schedules,
+      critic warm-up, run directories and TensorBoard metrics as `main.py`.
+    - **Checkpoints are ordinary SB3 PPO `.zip` + VecNormalize `.pkl`,** under SB3's names.
+      `render_policy.py`, `analysis/score_windowed.py`, the lookahead and `PPO.load` run them
+      unchanged (verified).
+    - **Parameters use PyTorch's own layout.** `jax_ppo/network.py` computes the policy over a
+      parameter dict keyed and laid out exactly like `ATCAutoregressivePolicy.state_dict()`,
+      so converting is an array copy and a fresh run starts from SB3's own initialisation.
+    - **Verified equivalent:**
+        - forward pass vs PyTorch on 64 real observations: ≤ 2.1e-5
+          (`tests/test_jax_equivalence.py`);
+        - one full 5-epoch PPO update vs SB3's own `train()`, from the same start and data:
+          ≤ 1.2e-7, including the critic warm-up (`tests/test_jax_ppo_update.py`).
+    - **The update is ~6× faster:** 1.3 s per 4 096 steps against 7–11 s for SB3 on this GPU.
+    - **Not yet:** resuming a JAX run (warm starts from any SB3 checkpoint work,
+      `--init-weights`); SB3 resuming a JAX checkpoint restarts the Adam moments.
+
+    **`flight_simulator` 0.2.81** is built from the Rust source now vendored in
+    `simulator/rust_simulator/`: monorepo `rust_simulator` @ 222855c, the source of the 0.2.80
+    wheel.
+
+    - **Same output as 0.2.80, bit for bit:** 6 rollouts compared (scenario generation
+      included), 1 680 observation arrays compared, the simulator's 19 Python tests and the
+      Rust tests.
+    - **1.6× faster prediction rollout** (16.1 → ~10.0 ms). Link-time optimisation, plus the
+      infringement history being moved instead of copied on every simulated second.
+      `CHANGES.md` lists everything; `build_fast.sh` rebuilds it.
+    - **The wheel is portable:** CPU-specific tuning measured no gain.
+
+    **Environment:** JAX 0.7.1 (CUDA 12), flax 0.12, optax 0.2.8 are installed next to
+    PyTorch in the `tada` env. They add CUDA packages without replacing PyTorch's; numpy is
+    unchanged.
+
 ## Experiment directory layout
 
 !!! info "Snapshots cover whole packages"

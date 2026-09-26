@@ -58,7 +58,8 @@ seed by seed, deterministic unless stated.
 | `1_33` | + [AMAN-sequence observations](windowed.md#seq-obs) | **0.750** | **17%** | 0.20 | 106 |
 | `1_33`, best of 10 attempts | upper bound, not deployable | 0.829 | 5% | 0.44 | 112 |
 | `1_33` + [lookahead](windowed.md#lookahead) | critic-guided search, deployable | 0.684 | 7% | 0.04 | 103 |
-| `1_34` | [lexicographic objective](windowed.md#objective) | *training* | | | |
+| `1_34` | [lexicographic objective](windowed.md#objective) | *stopped at 0.8M* | | | |
+| `1_35` | 1_34 + [JAX learner, fast simulator](training.md#jax-learner), stitched 2×20 streams with a random cooling gap | *training* | | | |
 
 **What we learned**
 
@@ -111,6 +112,11 @@ TADA_SEQUENCE_OBS=1 python -u main.py --env windowed --reward-mode outcome_pbrs 
   --init-weights experiments/atc_run_1_33_windowed_seqobs/final_model.zip \
   --n-envs 16 --eval-freq 250000 --critic-warmup-steps 300000 \
   --lr-max 3e-5 --final-lr 3e-6 --ent-coef 0.003 --total-timesteps 5000000 --run-suffix windowed_outcome
+
+# the same run with the JAX learner (SB3-compatible checkpoints; see Training -> JAX learner)
+TADA_SEQUENCE_OBS=1 python -u main_jax.py --env windowed --reward-mode outcome_pbrs \
+  --stitch-segments 2 --stitch-gap 120 900 --init-weights <sb3 checkpoint>.zip --n-envs 16 \
+  --critic-warmup-steps 100000 --lr-max 3e-5 --final-lr 3e-6 --ent-coef 0.003 --total-timesteps 5000000
 
 # windowed scoring: 100 paired seeds, 10 attempts each, or critic-guided lookahead
 python analysis/score_windowed.py --models M1.zip [M2.zip ...] --seeds 100 --attempts 9
