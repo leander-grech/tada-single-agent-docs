@@ -676,6 +676,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#jax-learner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JAX learner and the vendored simulator (work in progress)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#experiment-directory-layout" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1225,6 +1236,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#jax-learner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        JAX learner and the vendored simulator (work in progress)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#experiment-directory-layout" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1507,6 +1529,46 @@ same seed generates a different scenario.</p>
 </tbody>
 </table>
 <hr />
+<h2 id="jax-learner">JAX learner and the vendored simulator (work in progress)<a class="headerlink" href="#jax-learner" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Added 26 Sep; SB3 (<code>main.py</code>) remains the default trainer and is unchanged</p>
+<p><strong><code>main_jax.py</code></strong> trains the same policy with a PPO learner written in JAX (<code>jax_ppo/</code>).</p>
+<ul>
+<li><strong>Same everything else:</strong> env stack (SubprocVecEnv, Monitor, VecNormalize), schedules,
+  critic warm-up, run directories and TensorBoard metrics as <code>main.py</code>.</li>
+<li><strong>Checkpoints are ordinary SB3 PPO <code>.zip</code> + VecNormalize <code>.pkl</code>,</strong> under SB3's names.
+  <code>render_policy.py</code>, <code>analysis/score_windowed.py</code>, the lookahead and <code>PPO.load</code> run them
+  unchanged (verified).</li>
+<li><strong>Parameters use PyTorch's own layout.</strong> <code>jax_ppo/network.py</code> computes the policy over a
+  parameter dict keyed and laid out exactly like <code>ATCAutoregressivePolicy.state_dict()</code>,
+  so converting is an array copy and a fresh run starts from SB3's own initialisation.</li>
+<li><strong>Verified equivalent:</strong><ul>
+<li>forward pass vs PyTorch on 64 real observations: ≤ 2.1e-5
+  (<code>tests/test_jax_equivalence.py</code>);</li>
+<li>one full 5-epoch PPO update vs SB3's own <code>train()</code>, from the same start and data:
+  ≤ 1.2e-7, including the critic warm-up (<code>tests/test_jax_ppo_update.py</code>).</li>
+</ul>
+</li>
+<li><strong>The update is ~6× faster:</strong> 1.3 s per 4 096 steps against 7–11 s for SB3 on this GPU.</li>
+<li><strong>Not yet:</strong> resuming a JAX run (warm starts from any SB3 checkpoint work,
+  <code>--init-weights</code>); SB3 resuming a JAX checkpoint restarts the Adam moments.</li>
+</ul>
+<p><strong><code>flight_simulator</code> 0.2.81</strong> is built from the Rust source now vendored in
+<code>simulator/rust_simulator/</code>: monorepo <code>rust_simulator</code> @ 222855c, the source of the 0.2.80
+wheel.</p>
+<ul>
+<li><strong>Same output as 0.2.80, bit for bit:</strong> 6 rollouts compared (scenario generation
+  included), 1 680 observation arrays compared, the simulator's 19 Python tests and the
+  Rust tests.</li>
+<li><strong>1.6× faster prediction rollout</strong> (16.1 → ~10.0 ms). Link-time optimisation, plus the
+  infringement history being moved instead of copied on every simulated second.
+  <code>CHANGES.md</code> lists everything; <code>build_fast.sh</code> rebuilds it.</li>
+<li><strong>The wheel is portable:</strong> CPU-specific tuning measured no gain.</li>
+</ul>
+<p><strong>Environment:</strong> JAX 0.7.1 (CUDA 12), flax 0.12, optax 0.2.8 are installed next to
+PyTorch in the <code>tada</code> env. They add CUDA packages without replacing PyTorch's; numpy is
+unchanged.</p>
+</div>
 <h2 id="experiment-directory-layout">Experiment directory layout<a class="headerlink" href="#experiment-directory-layout" title="Permanent link">&para;</a></h2>
 <div class="admonition info">
 <p class="admonition-title">Snapshots cover whole packages</p>

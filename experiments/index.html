@@ -1008,7 +1008,18 @@
   <a href="#run-1_34" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run 1_34 — the lexicographic objective (atc_run_1_34_windowed_outcome, in progress)
+        Run 1_34 — the lexicographic objective (atc_run_1_34_windowed_outcome, stopped at 0.8M)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-1_35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 1_35 — JAX learner, fast simulator, stitched streams (atc_run_1_35_windowed_jax, in progress)
       
     </span>
   </a>
@@ -1524,7 +1535,18 @@
   <a href="#run-1_34" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run 1_34 — the lexicographic objective (atc_run_1_34_windowed_outcome, in progress)
+        Run 1_34 — the lexicographic objective (atc_run_1_34_windowed_outcome, stopped at 0.8M)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-1_35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 1_35 — JAX learner, fast simulator, stitched streams (atc_run_1_35_windowed_jax, in progress)
       
     </span>
   </a>
@@ -2366,15 +2388,16 @@ zero-initialised, so it started out computing exactly <code>1_32</code>'s functi
 <p><strong>Finding.</strong> <strong>Seeing the sequence alone is not enough.</strong> The share of flights landing in AMAN
 position stayed flat at ~0.855 through training, because the reward does not pay for keeping
 the sequence. Details: <a href="../windowed/#seq-obs">windowed env</a>.</p>
-<h2 id="run-1_34">Run 1_34 — the lexicographic objective (<code>atc_run_1_34_windowed_outcome</code>, in progress)<a class="headerlink" href="#run-1_34" title="Permanent link">&para;</a></h2>
+<h2 id="run-1_34">Run 1_34 — the lexicographic objective (<code>atc_run_1_34_windowed_outcome</code>, stopped at 0.8M)<a class="headerlink" href="#run-1_34" title="Permanent link">&para;</a></h2>
 <p><strong>Changes.</strong> <code>--reward-mode outcome_pbrs</code>. The reward is the objective only, in lexicographic
 order: safety, then each flight's deviation bracket, then the fewest real clearances.
 DO_NOTHING is now free; before, it cost the same as a clearance. Everything else is
 potential-based shaping: the predicted bracket value, predicted conflicts, AMAN-order swaps,
 and landing-spacing compression. Warm-started from <code>1_33</code> final, 300k-step critic warm-up,
 LR 3e-5 → 3e-6. Design and verification: <a href="../windowed/#objective">the objective</a>.</p>
-<p><strong>Results.</strong> Pending; it will be scored against <code>1_33</code> and <code>1_32</code> at 1M, 2M and final, including
-clearances per stream.</p>
+<p><strong>Stopped at 799 744 steps</strong>, in favour of <code>1_35</code>, which continues from that checkpoint with the
+JAX learner and the faster simulator. At ~40–90 steps/s on a loaded laptop, 5M would have
+taken another day.</p>
 <p><strong>Meanwhile, on the existing policies:</strong></p>
 <ul>
 <li><strong><a href="../windowed/#attempts">10 attempts per seed</a>:</strong> <code>1_33</code> solves 0.20 of seeds
@@ -2385,6 +2408,17 @@ clearances per stream.</p>
 <li><strong><a href="../windowed/#lookahead">Critic-guided lookahead</a>:</strong> separation 0.17 → 0.07, at the cost of
   precision, with <code>1_33</code>'s legacy critic.</li>
 </ul>
+<h2 id="run-1_35">Run 1_35 — JAX learner, fast simulator, stitched streams (<code>atc_run_1_35_windowed_jax</code>, in progress)<a class="headerlink" href="#run-1_35" title="Permanent link">&para;</a></h2>
+<p><strong>Changes.</strong> The <code>1_34</code> design (sequence observations, lexicographic objective), trained with
+<code>main_jax.py</code> on <code>flight_simulator</code> 0.2.81 (<a href="../training/#jax-learner">JAX learner</a>). New in
+the MDP: <strong>stitched 2×20 streams with a random cooling gap of 120–900 s</strong> between segments, so
+the policy sees seams with different amounts of relief. The per-clearance cost is halved on
+2-segment streams, so a whole stream's actions still cost less than one bracket gap.
+Warm-started from <code>1_34</code> @ 799 744, with a 100k-step critic warm-up (fresh reward
+normalisation). LR 3e-5 → 3e-6, 16 workers, 5M.</p>
+<p><strong>Speed.</strong> ~330 steps/s (collection ~10 s + update 1.3 s per 4 096 steps). <code>1_33</code> ran at ~230
+on a quiet machine, and <code>1_34</code> at 40–90 under load.</p>
+<p><strong>Results.</strong> Pending.</p>
 <hr />
 <h2 id="non-mdp-changes">Changes outside the MDP<a class="headerlink" href="#non-mdp-changes" title="Permanent link">&para;</a></h2>
 <p>Work that does not change what the agent optimises but does change what you can see or trust.</p>

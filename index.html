@@ -1237,6 +1237,14 @@ seed by seed, deterministic unless stated.</p>
 <tr>
 <td><code>1_34</code></td>
 <td><a href="windowed/#objective">lexicographic objective</a></td>
+<td><em>stopped at 0.8M</em></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>1_35</code></td>
+<td>1_34 + <a href="training/#jax-learner">JAX learner, fast simulator</a>, stitched 2×20 streams with a random cooling gap</td>
 <td><em>training</em></td>
 <td></td>
 <td></td>
@@ -1292,16 +1300,21 @@ separation; the gap between ▼ and a flight's tick on the ground line is its de
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span>--n-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span>--eval-freq<span class="w"> </span><span class="m">250000</span><span class="w"> </span>--critic-warmup-steps<span class="w"> </span><span class="m">300000</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span>--lr-max<span class="w"> </span>3e-5<span class="w"> </span>--final-lr<span class="w"> </span>3e-6<span class="w"> </span>--ent-coef<span class="w"> </span><span class="m">0</span>.003<span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>windowed_outcome
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># windowed scoring: 100 paired seeds, 10 attempts each, or critic-guided lookahead</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>M1.zip<span class="w"> </span><span class="o">[</span>M2.zip<span class="w"> </span>...<span class="o">]</span><span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--attempts<span class="w"> </span><span class="m">9</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>M.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--lookahead<span class="w"> </span><span class="m">4</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1"># score its checkpoints on the fixed 100-seed pool while it trains</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>python<span class="w"> </span>analysis/track_run.py<span class="w"> </span>--run<span class="w"> </span>experiments/atc_run_1_28_my_experiment
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="c1"># replay an OLD run whose action set differs (see MDP -&gt; action-set versions)</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="nv">TADA_ACTION_SET</span><span class="o">=</span>v1<span class="w"> </span>python<span class="w"> </span>render_policy.py<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">  </span>--model<span class="w"> </span>experiments/atc_run_1_26_sep3nm/best/best_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">1595180635</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># the same run with the JAX learner (SB3-compatible checkpoints; see Training -&gt; JAX learner)</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="nv">TADA_SEQUENCE_OBS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>-u<span class="w"> </span>main_jax.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span>--reward-mode<span class="w"> </span>outcome_pbrs<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">  </span>--stitch-segments<span class="w"> </span><span class="m">2</span><span class="w"> </span>--stitch-gap<span class="w"> </span><span class="m">120</span><span class="w"> </span><span class="m">900</span><span class="w"> </span>--init-weights<span class="w"> </span>&lt;sb3<span class="w"> </span>checkpoint&gt;.zip<span class="w"> </span>--n-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">  </span>--critic-warmup-steps<span class="w"> </span><span class="m">100000</span><span class="w"> </span>--lr-max<span class="w"> </span>3e-5<span class="w"> </span>--final-lr<span class="w"> </span>3e-6<span class="w"> </span>--ent-coef<span class="w"> </span><span class="m">0</span>.003<span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="c1"># windowed scoring: 100 paired seeds, 10 attempts each, or critic-guided lookahead</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>M1.zip<span class="w"> </span><span class="o">[</span>M2.zip<span class="w"> </span>...<span class="o">]</span><span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--attempts<span class="w"> </span><span class="m">9</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>M.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--lookahead<span class="w"> </span><span class="m">4</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="c1"># score its checkpoints on the fixed 100-seed pool while it trains</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>python<span class="w"> </span>analysis/track_run.py<span class="w"> </span>--run<span class="w"> </span>experiments/atc_run_1_28_my_experiment
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="c1"># replay an OLD run whose action set differs (see MDP -&gt; action-set versions)</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="nv">TADA_ACTION_SET</span><span class="o">=</span>v1<span class="w"> </span>python<span class="w"> </span>render_policy.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="w">  </span>--model<span class="w"> </span>experiments/atc_run_1_26_sep3nm/best/best_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">1595180635</span>
 </code></pre></div>
 <p>Watch it live — TensorBoard is now under each run's <code>tb/</code> sub-directory:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>/home/leander/miniconda3/envs/tada/bin/tensorboard<span class="w"> </span><span class="se">\</span>
