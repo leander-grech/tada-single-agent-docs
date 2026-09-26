@@ -422,6 +422,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#windowed-track" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The windowed track: 20-flight streams
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#quickstart" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1056,6 +1067,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#windowed-track" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The windowed track: 20-flight streams
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#quickstart" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1120,12 +1142,12 @@ schedule; <strong><code>1_27a</code> re-ran the second half on the correct one a
 0.64 success, deviation 76 s, and no gain at all among clean episodes. The reduced set issues
 <code>SHORTEN_TROMBONE</code>, its one new capability, about <strong>once per thousand clearances</strong> in both
 runs. See <a href="analysis_v1_v2/">22 clearances vs 15</a>.</p>
-<p><strong>New: a <a href="windowed/">windowed env</a></strong> runs a 20-flight trombone stream through a window of
-the next 10 flights to land, with a per-flight reward and no observable that depends on the
-scenario's flight count. Zero-shot from <code>1_29</code>: 79% of flights on time. A first fine-tune
-(<code>1_31</code>) made that worse at a fresh-run learning rate; <code>1_32</code> retrains it with a critic
-warm-up and a 10× lower LR, which took all-20-on-time from 0.08 to 0.29 on 100 paired seeds. This work also moved to <strong><code>flight_simulator</code> 0.2.80</strong>, under which the
-same seed generates a different scenario.</p>
+<p><strong>A second track, <a href="#windowed-track">20-flight streams</a></strong>, builds on this agent: a 20-flight
+trombone stream seen through a window of the next 10 flights to land. Best so far: <code>1_33</code>,
+75% of flights on time, and all 20 on time in <strong>44% of scenarios in at least one of 10
+attempts</strong>. Most remaining separation losses sit in scenarios that need more delay than
+the airspace can absorb. <code>1_34</code> (in progress) trains on a lexicographic objective: safety,
+then each flight's deviation bracket, then the fewest actions.</p>
 <p><strong>Read numbers only from <code>analysis/track_run.py</code>.</strong> The in-training <code>success_rate</code> is a
 5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.</p>
 </div>
@@ -1145,6 +1167,117 @@ same seed generates a different scenario.</p>
 below it is not repeated across pages, so follow the links rather than expecting each page
 to stand alone.</p>
 </div>
+<h2 id="windowed-track">The windowed track: 20-flight streams<a class="headerlink" href="#windowed-track" title="Permanent link">&para;</a></h2>
+<p>The 10-aircraft agent above sees a whole scenario at once. The <a href="windowed/">windowed env</a>
+asks it to control a <strong>stream</strong>: 20 flights, seen through a window of the next 10 in the
+landing queue. The AMAN sequence stays fixed, and each landed flight is replaced by the next in
+the queue. Nothing the agent observes depends on how many flights the stream has, so the same
+agent can in principle run continuously. Everything below is on the same 100 seeds, paired
+seed by seed, deterministic unless stated.</p>
+<table>
+<thead>
+<tr>
+<th>run</th>
+<th>what changed</th>
+<th>flights on time</th>
+<th>separation lost</th>
+<th>all 20 on time</th>
+<th>clearances / stream</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1_29</code>, zero-shot</td>
+<td>the 10-aircraft agent, untrained on streams</td>
+<td>0.727</td>
+<td>21%</td>
+<td>0.08</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>1_31</code></td>
+<td>fine-tune at a fresh-run learning rate</td>
+<td>0.468</td>
+<td>32%</td>
+<td>0.01</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>1_32</code></td>
+<td>proper fine-tune: critic warm-up, 10× lower LR</td>
+<td>0.731</td>
+<td>21%</td>
+<td><strong>0.29</strong></td>
+<td>100</td>
+</tr>
+<tr>
+<td><code>1_33</code></td>
+<td>+ <a href="windowed/#seq-obs">AMAN-sequence observations</a></td>
+<td><strong>0.750</strong></td>
+<td><strong>17%</strong></td>
+<td>0.20</td>
+<td>106</td>
+</tr>
+<tr>
+<td><code>1_33</code>, best of 10 attempts</td>
+<td>upper bound, not deployable</td>
+<td>0.829</td>
+<td>5%</td>
+<td>0.44</td>
+<td>112</td>
+</tr>
+<tr>
+<td><code>1_33</code> + <a href="windowed/#lookahead">lookahead</a></td>
+<td>critic-guided search, deployable</td>
+<td>0.684</td>
+<td>7%</td>
+<td>0.04</td>
+<td>103</td>
+</tr>
+<tr>
+<td><code>1_34</code></td>
+<td><a href="windowed/#objective">lexicographic objective</a></td>
+<td><em>training</em></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>What we learned</strong></p>
+<ul>
+<li><strong>Precision is a sequencing problem.</strong> Traffic never enters the sector in AMAN order. Where
+  the agent keeps the order, 91% of landed flights are on time; where it swaps two, 63%.
+  <a href="windowed/#sequencing">Details</a>.</li>
+<li><strong>The agent is stable along a stream.</strong> On <a href="windowed/#stitching">stitched</a> 2×20 streams
+  the second segment is flown as precisely as the first; what compounds is separation risk
+  per stretch of traffic.</li>
+<li><strong>The policy holds more than it shows.</strong> All 20 on time in at least one of 10 attempts on
+  44% of seeds, against 20% deterministically. <a href="windowed/#attempts">Details</a>.</li>
+<li><strong>Most separation losses are over-capacity scenarios.</strong> 49 of the 100 seeds need some flight
+  to absorb more than 650 s. They account for 16 of <code>1_33</code>'s 17 losses.
+  <a href="windowed/#feasibility">Details</a>.</li>
+<li><strong>The reward was not measuring the goal.</strong> Dense per-step costs outweighed the landing
+  rewards 4:1, and doing nothing cost the same as a clearance. <code>1_34</code> fixes both.
+  <a href="windowed/#objective">Details</a>.</li>
+</ul>
+<p><strong>One scenario, two outcomes</strong> (`1_33`, seed 438989805): the deterministic policy
+loses separation at step 82…</p>
+<video controls preload="metadata" width="100%">
+  <source src="assets/renders/1_33_rescued_deterministic_seed438989805.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p>…while one of its own sampled attempts lands all 20 on time. The right-hand panel is each
+flight's predicted descent under do-nothing, against time. Solid red marks a predicted loss of
+separation; the gap between ▼ and a flight's tick on the ground line is its deviation.</p>
+<video controls preload="metadata" width="100%">
+  <source src="assets/renders/1_33_rescued_best_seed438989805.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p>More renders, including precision-bound and safety-bound seeds, are on the
+<a href="windowed/#failed-renders">windowed page</a>.</p>
 <h2 id="quickstart">Quickstart<a class="headerlink" href="#quickstart" title="Permanent link">&para;</a></h2>
 <p>Training runs in the conda env <strong><code>tada</code></strong> (Python 3.12):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>reinforcement_learning/single_agent_rllib
@@ -1152,18 +1285,23 @@ to stand alone.</p>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># fresh run</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>python<span class="w"> </span>-u<span class="w"> </span>main.py<span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">10000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>my_experiment
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># windowed env: 20-flight stream, warm-started from an existing checkpoint</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>python<span class="w"> </span>-u<span class="w"> </span>main.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">  </span>--init-weights<span class="w"> </span>experiments/atc_run_1_29_pbrs_attn_d/best/best_model.zip<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span>--n-envs<span class="w"> </span><span class="m">8</span><span class="w"> </span>--critic-warmup-steps<span class="w"> </span><span class="m">300000</span><span class="w"> </span>--lr-max<span class="w"> </span>3e-5<span class="w"> </span>--final-lr<span class="w"> </span>3e-6<span class="w"> </span>--ent-coef<span class="w"> </span><span class="m">0</span>.003<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>windowed_ft
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="c1"># score its checkpoints on the fixed 100-seed pool while it trains</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>python<span class="w"> </span>analysis/track_run.py<span class="w"> </span>--run<span class="w"> </span>experiments/atc_run_1_28_my_experiment
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="c1"># replay an OLD run whose action set differs (see MDP -&gt; action-set versions)</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="nv">TADA_ACTION_SET</span><span class="o">=</span>v1<span class="w"> </span>python<span class="w"> </span>render_policy.py<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">  </span>--model<span class="w"> </span>experiments/atc_run_1_26_sep3nm/best/best_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">1595180635</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># windowed env (20-flight stream), current recipe: sequence observations + lexicographic</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># objective, warm-started from an existing checkpoint</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nv">TADA_SEQUENCE_OBS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>-u<span class="w"> </span>main.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span>--reward-mode<span class="w"> </span>outcome_pbrs<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span>--init-weights<span class="w"> </span>experiments/atc_run_1_33_windowed_seqobs/final_model.zip<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span>--n-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span>--eval-freq<span class="w"> </span><span class="m">250000</span><span class="w"> </span>--critic-warmup-steps<span class="w"> </span><span class="m">300000</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span>--lr-max<span class="w"> </span>3e-5<span class="w"> </span>--final-lr<span class="w"> </span>3e-6<span class="w"> </span>--ent-coef<span class="w"> </span><span class="m">0</span>.003<span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>windowed_outcome
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># windowed scoring: 100 paired seeds, 10 attempts each, or critic-guided lookahead</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>M1.zip<span class="w"> </span><span class="o">[</span>M2.zip<span class="w"> </span>...<span class="o">]</span><span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--attempts<span class="w"> </span><span class="m">9</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>M.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--lookahead<span class="w"> </span><span class="m">4</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1"># score its checkpoints on the fixed 100-seed pool while it trains</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>python<span class="w"> </span>analysis/track_run.py<span class="w"> </span>--run<span class="w"> </span>experiments/atc_run_1_28_my_experiment
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="c1"># replay an OLD run whose action set differs (see MDP -&gt; action-set versions)</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="nv">TADA_ACTION_SET</span><span class="o">=</span>v1<span class="w"> </span>python<span class="w"> </span>render_policy.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">  </span>--model<span class="w"> </span>experiments/atc_run_1_26_sep3nm/best/best_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">1595180635</span>
 </code></pre></div>
 <p>Watch it live — TensorBoard is now under each run's <code>tb/</code> sub-directory:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>/home/leander/miniconda3/envs/tada/bin/tensorboard<span class="w"> </span><span class="se">\</span>

@@ -1345,6 +1345,12 @@ precise in the second segment as in the first, and busts (41%) are what two inde
 rate, and <strong>AMAN sequencing</strong> is where precision is lost. The conflict shield makes it
 worse.
 <a href="../windowed/#stability">Details</a>.</p>
+<p><strong>Windowed, next (26 Sep):</strong>
+- score <code>1_34</code> on the lexicographic objective;
+- run the lookahead with <code>1_34</code>'s critic;
+- report the separation rate split by scenario capacity, since
+  <a href="../windowed/#feasibility">over-capacity scenarios</a> hold 16 of 17 losses;
+- decide whether the scenario filter should reject them.</p>
 <p><strong>Ruled out:</strong> a bigger network. Measured, the encoder uses ~14% of its width and the context
 ~4% — <a href="../analysis_log/#t-embedding-capacity">see the test log</a>. The productive change is
 shape, not size.</p>

@@ -811,6 +811,72 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#seq-obs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seeing the sequence: run 1_33
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objective" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The objective, made lexicographic: run 1_34
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#attempts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How much is left in the policy: 10 attempts per seed
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feasibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the failures come from: over-capacity scenarios
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lookahead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inference-time lookahead
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#failed-renders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renders: failed seeds, best of 10 attempts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#shield" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1279,6 +1345,72 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#seq-obs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Seeing the sequence: run 1_33
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#objective" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The objective, made lexicographic: run 1_34
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#attempts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How much is left in the policy: 10 attempts per seed
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#feasibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Where the failures come from: over-capacity scenarios
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lookahead" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inference-time lookahead
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#failed-renders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renders: failed seeds, best of 10 attempts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#shield" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1501,6 +1633,12 @@ the NOOP rollout</strong>, thousands of seconds in the future. Measured at t = 5
 near +1 and is <strong>effectively a dead feature in every run so far</strong>. It is fixed in the windowed
 env only; fixing the base env would change what every existing checkpoint sees.</p>
 <h2 id="reward">Reward: per flight, not per episode<a class="headerlink" href="#reward" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Superseded by the lexicographic objective from run <code>1_34</code></p>
+<p>This section describes the <code>"legacy"</code> windowed reward (runs <code>1_31</code>–<code>1_33</code>). From <code>1_34</code> the
+reward is the objective only, plus potential-based shaping; see
+<a href="#objective">the objective</a>.</p>
+</div>
 <table>
 <thead>
 <tr>
@@ -1890,6 +2028,298 @@ changes.</p>
 <li>Overall on time 0.650 (<code>1_29</code> zero-shot: 0.614, +0.036, n.s.); separation 41% vs 42%.
   Results in <code>analysis/2026-09-25_windowed_evals/s2x20*</code>.</li>
 </ul>
+<h2 id="seq-obs">Seeing the sequence: run <code>1_33</code><a class="headerlink" href="#seq-obs" title="Permanent link">&para;</a></h2>
+<p><code>1_33</code> adds four AMAN-sequence columns per aircraft to the observation
+(<code>TADA_SEQUENCE_OBS=1</code>), computed from the do-nothing prediction:</p>
+<ul>
+<li><strong>rank shift:</strong> predicted landing rank minus AMAN rank;</li>
+<li><strong>crossings:</strong> how many flights it is predicted to cross;</li>
+<li><strong>gap errors:</strong> the landing-gap error to its AMAN predecessor and successor (negative =
+  compression).</li>
+</ul>
+<p>The reward is unchanged. It was warm-started from <code>1_32</code> with the new input columns
+zero-initialised, so it started out computing exactly <code>1_32</code>'s function (verified: output
+difference 0.0 over 60 states).</p>
+<p>Paired against <code>1_32</code> at matched checkpoints (100 seeds, same frames; * = significant at 95%):</p>
+<table>
+<thead>
+<tr>
+<th>checkpoint</th>
+<th>on time, 1_33 − 1_32</th>
+<th>separation, fixed / new</th>
+<th>all 20 on time, gained / lost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1M</td>
+<td>−0.018</td>
+<td>11 / 9</td>
+<td>12 / 3 *</td>
+</tr>
+<tr>
+<td>2M</td>
+<td><strong>+0.041 *</strong></td>
+<td><strong>15 / 5 *</strong></td>
+<td>9 / 11</td>
+</tr>
+<tr>
+<td>3M</td>
+<td>+0.036</td>
+<td>11 / 7</td>
+<td>8 / 9</td>
+</tr>
+<tr>
+<td>4M</td>
+<td>−0.021</td>
+<td>7 / 7</td>
+<td>4 / 13 *</td>
+</tr>
+<tr>
+<td>final</td>
+<td>+0.019</td>
+<td>9 / 5</td>
+<td><strong>4 / 13 *</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Seeing the sequence alone is not enough.</strong> No gain holds from one checkpoint to the next,
+and in training the share of flights landing in AMAN position stayed flat at ~0.855 for all
+5M steps. The agent can see the sequence, but nothing in the reward pays it to keep it.</p>
+<h2 id="objective">The objective, made lexicographic: run <code>1_34</code><a class="headerlink" href="#objective" title="Permanent link">&para;</a></h2>
+<p>Two measurements on <code>1_33</code>'s reward motivated a redesign:</p>
+<ul>
+<li><strong>The dense terms swamped the goal.</strong> Per step: predicted deviation −0.47, predicted conflict
+  −0.36, and landing bonuses net of busts only +0.21. PPO was optimising how good the
+  do-nothing prediction looks at every step, summed over time, more than the outcome.</li>
+<li><strong>DO_NOTHING cost the same as a real clearance.</strong> It returns one command with
+  <code>command=None</code>, and the action cost counted commands. The agent issued a clearance on ~92%
+  of steps.</li>
+</ul>
+<p><strong>An optimal ATFM policy is lexicographic: safety, then each flight's deviation bracket, then
+the fewest actions.</strong> Two solutions with the same safety and the same brackets must differ only
+by how many clearances they issued. <code>REWARD_MODE = "outcome_pbrs"</code> (<code>main.py --reward-mode</code>)
+implements exactly that as the objective:</p>
+<table>
+<thead>
+<tr>
+<th>criterion</th>
+<th>reward</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>deviation bracket, per flight at touchdown (a step function)</td>
+<td>|dev| ≤ 60 s: <strong>3</strong> · ≤ 120 s: <strong>1</strong> · ≤ 300 s: <strong>0</strong> · ≤ 600 s: <strong>−1.5</strong> · beyond: <strong>−3</strong></td>
+</tr>
+<tr>
+<td>actions</td>
+<td><strong>−0.006 per real clearance</strong>; DO_NOTHING free; a pure count, with no lateness weighting</td>
+</tr>
+<tr>
+<td>safety</td>
+<td>a loss of separation costs <strong>90</strong> and ends the stream</td>
+</tr>
+</tbody>
+</table>
+<p>The scales enforce the order:</p>
+<ul>
+<li><strong>Actions:</strong> a clearance on <em>every</em> step of a ~160-step stream costs 0.96, less than the
+  smallest gap between brackets (1.0). Saving actions can never buy a worse bracket.</li>
+<li><strong>Safety:</strong> 90 exceeds moving the whole visible window from the best bracket to the worst.</li>
+</ul>
+<p>Everything else is <strong>potential-based shaping</strong>, γΦ(s′) − Φ(s), which cannot change which
+policy is optimal (Ng et al. 1999). Φ comes from the do-nothing prediction:</p>
+<ul>
+<li>the brackets smoothed with sigmoids, for gradient;</li>
+<li>predicted conflicts;</li>
+<li>predicted AMAN-order swaps;</li>
+<li>compression below the 90 s minimum landing spacing.</li>
+</ul>
+<p>Verified:</p>
+<ul>
+<li><strong>Exactly potential-based:</strong> the discounted shaping sum equals γᵀΦ_T − Φ_0 to ~2e-15.</li>
+<li><strong>Legacy reward untouched:</strong> <code>"legacy"</code> rewards are identical to before (0 of 93 steps
+  differ).</li>
+</ul>
+<p><code>1_34</code> fine-tunes <code>1_33</code> on this objective: 300k-step critic warm-up, LR 3e-5 → 3e-6.
+<strong>In progress.</strong></p>
+<h2 id="attempts">How much is left in the policy: 10 attempts per seed<a class="headerlink" href="#attempts" title="Permanent link">&para;</a></h2>
+<p><code>analysis/score_windowed.py --attempts 9</code> (capacity table: <code>analysis/scenario_capacity.py</code>): per seed, the deterministic policy plus 9 sampled
+attempts, all on the same scenario and frame. The best attempt is chosen by the objective (no
+loss of separation, then bracket score, then fewest clearances).</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>1_32</code> final</th>
+<th><code>1_33</code> final</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>all on time, deterministic</td>
+<td>0.29</td>
+<td>0.20</td>
+</tr>
+<tr>
+<td>all on time, one sampled attempt (pass@1)</td>
+<td>0.20</td>
+<td>0.16</td>
+</tr>
+<tr>
+<td><strong>all on time in at least one of 10 attempts (pass@10)</strong></td>
+<td><strong>0.41</strong></td>
+<td><strong>0.44</strong></td>
+</tr>
+<tr>
+<td>separation lost: deterministic → best attempt</td>
+<td>0.21 → <strong>0.06</strong></td>
+<td>0.17 → <strong>0.05</strong></td>
+</tr>
+<tr>
+<td>flights on time: deterministic → best attempt</td>
+<td>0.731 → 0.819</td>
+<td>0.750 → 0.829</td>
+</tr>
+<tr>
+<td>never solved: safety-bound / precision-bound</td>
+<td>6 / 53</td>
+<td>5 / 51</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>The policy holds much more than it shows deterministically.</strong> A good episode exists in
+  its own distribution on twice as many seeds, and all but ~5 separation losses are avoidable
+  by some attempt.</li>
+<li><strong>Most unsolved seeds are precision-bound.</strong> The best attempt is safe but not all 20 are on
+  time, often 19 of 20.</li>
+</ul>
+<h2 id="feasibility">Where the failures come from: over-capacity scenarios<a class="headerlink" href="#feasibility" title="Permanent link">&para;</a></h2>
+<p>How early does the most-early flight arrive at t = 0, if nothing is done? Grouped by <code>1_33</code>'s
+outcome over 10 attempts:</p>
+<table>
+<thead>
+<tr>
+<th>outcome</th>
+<th>seeds</th>
+<th>largest early arrival, median</th>
+<th>predicted LoS pairs at t = 0, median</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>solved at least once</td>
+<td>44</td>
+<td>531 s</td>
+<td>3</td>
+</tr>
+<tr>
+<td>precision-bound</td>
+<td>51</td>
+<td>839 s</td>
+<td>4</td>
+</tr>
+<tr>
+<td><strong>safety-bound</strong></td>
+<td>5</td>
+<td><strong>1 889 s</strong></td>
+<td><strong>11</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>49 of the 100 seeds contain a flight more than 650 s early.</strong> That exceeds the generator's own
+cap on the delay a flight may need (<code>max_extra_ttl_s = 650</code>). The deterministic policy loses
+separation on <strong>16 of those 49, against 1 of the other 51.</strong></p>
+<p>650 s is not a hard limit: seeds needing up to ~900 s were solved, using speed and vectoring as
+well as the trombone. But the safety-bound seeds need ~30 minutes of absorption and start with
+a pile-up already predicted (render below). <strong>The headline separation rate is mostly a statement
+about scenario capacity.</strong> It should be reported split by feasibility, and the scenario filter
+(today: no realised LoS in the first ~270 s) does not catch over-capacity scenarios.</p>
+<h2 id="lookahead">Inference-time lookahead<a class="headerlink" href="#lookahead" title="Permanent link">&para;</a></h2>
+<p><code>analysis/lookahead.py</code> makes a critic-guided one-step lookahead:</p>
+<ol>
+<li>At each decision, take the policy's 4 most likely actions.</li>
+<li>Try each for one real step on an exact snapshot of the environment.</li>
+<li>Score it as r + γ·V(s′) with the policy's <em>own</em> critic, in the units it was trained in.</li>
+<li>Act with the best.</li>
+</ol>
+<p>It is deployable: it needs only the simulator and 4 steps per 45 s decision, not a replay of
+the future. The snapshot/restore is verified exact: episodes that try and undo 4 candidates per
+step are identical to plain runs.</p>
+<table>
+<thead>
+<tr>
+<th><code>1_33</code> final, 100 paired seeds</th>
+<th>deterministic</th>
+<th>with lookahead</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>separation lost</td>
+<td>0.17</td>
+<td><strong>0.07</strong> (12 fixed, 2 new; McNemar z +2.67)</td>
+</tr>
+<tr>
+<td>flights on time</td>
+<td>0.750</td>
+<td>0.684</td>
+</tr>
+<tr>
+<td>all 20 on time</td>
+<td>0.20</td>
+<td>0.04</td>
+</tr>
+<tr>
+<td>AMAN swaps per stream</td>
+<td>0.95</td>
+<td>2.51</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The lookahead makes the policy much safer and much less precise.</strong> <code>1_33</code>'s critic learned
+the legacy reward, where the dense conflict cost dominated, so it trades timing for conflict
+avoidance. By the objective, per seed it is better on 27 seeds and worse on 72. The meaningful
+test is the lookahead with <code>1_34</code>'s critic, which learned the lexicographic objective.</p>
+<h2 id="failed-renders">Renders: failed seeds, best of 10 attempts<a class="headerlink" href="#failed-renders" title="Permanent link">&para;</a></h2>
+<p><code>render_policy.py --paired-attempts 9</code> replays exactly the attempts the analysis scored and
+renders the best by the objective. <code>1_33</code> final, 20-flight streams.</p>
+<p><strong>Rescued, seed 438989805.</strong> The deterministic policy loses separation at step 82
+with 11 of 20 on time:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_33_rescued_deterministic_seed438989805.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p>Sampled attempt 3 on the same scenario lands all 20 on time (121 steps, 112 clearances):</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_33_rescued_best_seed438989805.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Precision-bound, seed 373399426.</strong> The best of 10 attempts is safe with 19 of 20 on
+time; none of the 10 gets all 20:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_33_precision_best_seed373399426.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Safety-bound, seed 1947382419.</strong> Every attempt loses separation; the best at step 43:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_33_safety_best_seed1947382419.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Lost from the start, seed 1159417075.</strong> At t = 0 every flight is predicted
+early, by up to 2 549 s, and the side view already shows a string of predicted losses of
+separation on final. Every attempt loses separation, the best at step 12:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_33_safety_best_seed1159417075.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 <h2 id="shield">Inference-time conflict shield<a class="headerlink" href="#shield" title="Permanent link">&para;</a></h2>
 <p><code>render_policy</code>'s shield refuses a clearance that introduces a near-horizon conflict
 do-nothing would not, and issues the best clearance that passes instead (<code>next_best</code>).
@@ -1961,6 +2391,19 @@ resolution):</p>
 </table>
 <p>Route following needs the fine integration step. The rollout cost is a floor unless the
 simulator itself gets faster.</p>
+<p><strong>On this laptop the ceiling is thermal.</strong> Under sustained load the CPU reaches ~98 °C. The
+firmware then clamps it to 400 MHz for 2–3 minutes in every ~5, and anything else running
+shares the same power budget. Measured: <code>1_32</code> ran at ~170 steps/s with the machine to itself
+and ~90 with other jobs running; <code>1_33</code> averaged 227 steps/s once they stopped. More workers
+help only up to that budget (8 → 16 workers: +35–58% in a short benchmark, less sustained).
+An earlier note blamed ~70 s per 25k steps on the in-training eval; those were mostly thermal
+clamps, and the eval's real cost is ~20 s per 25k.</p>
+<p><strong>Speed-ups made:</strong></p>
+<ul>
+<li>the observation build is 3.4× faster (3.69 → 1.09 ms per step), byte-identical;</li>
+<li><code>--eval-freq</code> and <code>--n-envs</code> flags;</li>
+<li>the do-nothing prediction remains the floor.</li>
+</ul>
 <h2 id="generator-not-stationary">Generated scenarios get harder down the queue<a class="headerlink" href="#generator-not-stationary" title="Permanent link">&para;</a></h2>
 <p>The scenario generator is not stationary in queue position. Under do-nothing, 20 seeds each:</p>
 <table>
