@@ -33,6 +33,13 @@
     worse.
     [Details](windowed.md#stability).
 
+    **Windowed, next (26 Sep):**
+    - score `1_34` on the lexicographic objective;
+    - run the lookahead with `1_34`'s critic;
+    - report the separation rate split by scenario capacity, since
+      [over-capacity scenarios](windowed.md#feasibility) hold 16 of 17 losses;
+    - decide whether the scenario filter should reject them.
+
     **Ruled out:** a bigger network. Measured, the encoder uses ~14% of its width and the context
     ~4% — [see the test log](analysis_log.md#t-embedding-capacity). The productive change is
     shape, not size.

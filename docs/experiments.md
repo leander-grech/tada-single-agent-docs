@@ -18,7 +18,9 @@
     below. `1_31` made its warm start worse (on-time 0.79 → 0.49) at a fresh-run learning rate;
     `1_32` re-runs it as a proper fine-tune and **works**: all 20 flights on time 0.08 → 0.29
     (21 seeds newly solved, none lost). Separation losses are unchanged at 21% and are now
-    the limit.
+    the limit. [`1_33`](#run-1_33) adds sequence observations, with no consistent gain;
+    [`1_34`](#run-1_34) (in progress) makes the objective lexicographic: safety, then deviation
+    bracket, then the fewest actions.
 
     Also here: [changes outside the MDP](#non-mdp-changes) — rendering, tooling, and seven
     infrastructure bugs, several of which had been silently wrong for many runs.
@@ -591,6 +593,49 @@ therefore plays the identical episode, and each is compared seed by seed against
 The run's `best_model`, picked by the noisy in-training eval, is not better than `final_model`:
 it busts slightly less but solves fewer. Per-episode rows are in
 `analysis/2026-09-25_windowed_scores.csv`.
+
+---
+
+## Run 1_33 — sequence observations (`atc_run_1_33_windowed_seqobs`, 5M) { #run-1_33 }
+
+**Changes.** Four AMAN-sequence columns per aircraft (`TADA_SEQUENCE_OBS=1`): rank shift,
+crossings, and the landing-gap error to the AMAN predecessor and successor. The reward is
+unchanged (`legacy`). Warm-started from `1_32` final with the new input columns
+zero-initialised, so it started out computing exactly `1_32`'s function (output difference 0.0).
+100k-step critic warm-up, 16 workers, eval every 250k. 5M in 6.4 h.
+
+**Results** (paired against `1_32` at matched checkpoints, 100 seeds, same frames):
+
+- **Final:** 0.750 on time vs 0.731; separation 17% vs 21% (9 fixed, 5 new); both within noise.
+  All 20 on time is *significantly worse*, 0.20 vs 0.29 (4 seeds gained, 13 lost).
+- **The 2M checkpoint looked best** (+0.041 on time, 15 separation losses fixed and 5 new, both
+  significant), but that did not hold.
+
+**Finding.** **Seeing the sequence alone is not enough.** The share of flights landing in AMAN
+position stayed flat at ~0.855 through training, because the reward does not pay for keeping
+the sequence. Details: [windowed env](windowed.md#seq-obs).
+
+## Run 1_34 — the lexicographic objective (`atc_run_1_34_windowed_outcome`, in progress) { #run-1_34 }
+
+**Changes.** `--reward-mode outcome_pbrs`. The reward is the objective only, in lexicographic
+order: safety, then each flight's deviation bracket, then the fewest real clearances.
+DO_NOTHING is now free; before, it cost the same as a clearance. Everything else is
+potential-based shaping: the predicted bracket value, predicted conflicts, AMAN-order swaps,
+and landing-spacing compression. Warm-started from `1_33` final, 300k-step critic warm-up,
+LR 3e-5 → 3e-6. Design and verification: [the objective](windowed.md#objective).
+
+**Results.** Pending; it will be scored against `1_33` and `1_32` at 1M, 2M and final, including
+clearances per stream.
+
+**Meanwhile, on the existing policies:**
+
+- **[10 attempts per seed](windowed.md#attempts):** `1_33` solves 0.20 of seeds
+  deterministically but **0.44 in at least one of 10 attempts**. Its best attempt loses
+  separation on only 5 seeds.
+- **[Over-capacity scenarios](windowed.md#feasibility):** 49 of the 100 seeds need some flight
+  to absorb more than 650 s, and they hold 16 of the 17 deterministic separation losses.
+- **[Critic-guided lookahead](windowed.md#lookahead):** separation 0.17 → 0.07, at the cost of
+  precision, with `1_33`'s legacy critic.
 
 ---
 

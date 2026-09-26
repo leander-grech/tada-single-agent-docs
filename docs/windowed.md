@@ -96,6 +96,11 @@ env only; fixing the base env would change what every existing checkpoint sees.
 
 ## Reward: per flight, not per episode { #reward }
 
+!!! note "Superseded by the lexicographic objective from run `1_34`"
+    This section describes the `"legacy"` windowed reward (runs `1_31`–`1_33`). From `1_34` the
+    reward is the objective only, plus potential-based shaping; see
+    [the objective](#objective).
+
 | term | 10-aircraft env | windowed env |
 |---|---|---|
 | success signal | tier ladder over the fixed set + [PBRS](pbrs.md) | **landing bonus** per flight, once, at touchdown |
@@ -307,6 +312,185 @@ changes.
 - Overall on time 0.650 (`1_29` zero-shot: 0.614, +0.036, n.s.); separation 41% vs 42%.
   Results in `analysis/2026-09-25_windowed_evals/s2x20*`.
 
+## Seeing the sequence: run `1_33` { #seq-obs }
+
+`1_33` adds four AMAN-sequence columns per aircraft to the observation
+(`TADA_SEQUENCE_OBS=1`), computed from the do-nothing prediction:
+
+- **rank shift:** predicted landing rank minus AMAN rank;
+- **crossings:** how many flights it is predicted to cross;
+- **gap errors:** the landing-gap error to its AMAN predecessor and successor (negative =
+  compression).
+
+The reward is unchanged. It was warm-started from `1_32` with the new input columns
+zero-initialised, so it started out computing exactly `1_32`'s function (verified: output
+difference 0.0 over 60 states).
+
+Paired against `1_32` at matched checkpoints (100 seeds, same frames; * = significant at 95%):
+
+| checkpoint | on time, 1_33 − 1_32 | separation, fixed / new | all 20 on time, gained / lost |
+|---|---|---|---|
+| 1M | −0.018 | 11 / 9 | 12 / 3 * |
+| 2M | **+0.041 \*** | **15 / 5 \*** | 9 / 11 |
+| 3M | +0.036 | 11 / 7 | 8 / 9 |
+| 4M | −0.021 | 7 / 7 | 4 / 13 * |
+| final | +0.019 | 9 / 5 | **4 / 13 \*** |
+
+**Seeing the sequence alone is not enough.** No gain holds from one checkpoint to the next,
+and in training the share of flights landing in AMAN position stayed flat at ~0.855 for all
+5M steps. The agent can see the sequence, but nothing in the reward pays it to keep it.
+
+## The objective, made lexicographic: run `1_34` { #objective }
+
+Two measurements on `1_33`'s reward motivated a redesign:
+
+- **The dense terms swamped the goal.** Per step: predicted deviation −0.47, predicted conflict
+  −0.36, and landing bonuses net of busts only +0.21. PPO was optimising how good the
+  do-nothing prediction looks at every step, summed over time, more than the outcome.
+- **DO_NOTHING cost the same as a real clearance.** It returns one command with
+  `command=None`, and the action cost counted commands. The agent issued a clearance on ~92%
+  of steps.
+
+**An optimal ATFM policy is lexicographic: safety, then each flight's deviation bracket, then
+the fewest actions.** Two solutions with the same safety and the same brackets must differ only
+by how many clearances they issued. `REWARD_MODE = "outcome_pbrs"` (`main.py --reward-mode`)
+implements exactly that as the objective:
+
+| criterion | reward |
+|---|---|
+| deviation bracket, per flight at touchdown (a step function) | \|dev\| ≤ 60 s: **3** · ≤ 120 s: **1** · ≤ 300 s: **0** · ≤ 600 s: **−1.5** · beyond: **−3** |
+| actions | **−0.006 per real clearance**; DO_NOTHING free; a pure count, with no lateness weighting |
+| safety | a loss of separation costs **90** and ends the stream |
+
+The scales enforce the order:
+
+- **Actions:** a clearance on *every* step of a ~160-step stream costs 0.96, less than the
+  smallest gap between brackets (1.0). Saving actions can never buy a worse bracket.
+- **Safety:** 90 exceeds moving the whole visible window from the best bracket to the worst.
+
+Everything else is **potential-based shaping**, γΦ(s′) − Φ(s), which cannot change which
+policy is optimal (Ng et al. 1999). Φ comes from the do-nothing prediction:
+
+- the brackets smoothed with sigmoids, for gradient;
+- predicted conflicts;
+- predicted AMAN-order swaps;
+- compression below the 90 s minimum landing spacing.
+
+Verified:
+
+- **Exactly potential-based:** the discounted shaping sum equals γᵀΦ_T − Φ_0 to ~2e-15.
+- **Legacy reward untouched:** `"legacy"` rewards are identical to before (0 of 93 steps
+  differ).
+
+`1_34` fine-tunes `1_33` on this objective: 300k-step critic warm-up, LR 3e-5 → 3e-6.
+**In progress.**
+
+## How much is left in the policy: 10 attempts per seed { #attempts }
+
+`analysis/score_windowed.py --attempts 9` (capacity table: `analysis/scenario_capacity.py`): per seed, the deterministic policy plus 9 sampled
+attempts, all on the same scenario and frame. The best attempt is chosen by the objective (no
+loss of separation, then bracket score, then fewest clearances).
+
+| | `1_32` final | `1_33` final |
+|---|---|---|
+| all on time, deterministic | 0.29 | 0.20 |
+| all on time, one sampled attempt (pass@1) | 0.20 | 0.16 |
+| **all on time in at least one of 10 attempts (pass@10)** | **0.41** | **0.44** |
+| separation lost: deterministic → best attempt | 0.21 → **0.06** | 0.17 → **0.05** |
+| flights on time: deterministic → best attempt | 0.731 → 0.819 | 0.750 → 0.829 |
+| never solved: safety-bound / precision-bound | 6 / 53 | 5 / 51 |
+
+- **The policy holds much more than it shows deterministically.** A good episode exists in
+  its own distribution on twice as many seeds, and all but ~5 separation losses are avoidable
+  by some attempt.
+- **Most unsolved seeds are precision-bound.** The best attempt is safe but not all 20 are on
+  time, often 19 of 20.
+
+## Where the failures come from: over-capacity scenarios { #feasibility }
+
+How early does the most-early flight arrive at t = 0, if nothing is done? Grouped by `1_33`'s
+outcome over 10 attempts:
+
+| outcome | seeds | largest early arrival, median | predicted LoS pairs at t = 0, median |
+|---|---|---|---|
+| solved at least once | 44 | 531 s | 3 |
+| precision-bound | 51 | 839 s | 4 |
+| **safety-bound** | 5 | **1 889 s** | **11** |
+
+**49 of the 100 seeds contain a flight more than 650 s early.** That exceeds the generator's own
+cap on the delay a flight may need (`max_extra_ttl_s = 650`). The deterministic policy loses
+separation on **16 of those 49, against 1 of the other 51.**
+
+650 s is not a hard limit: seeds needing up to ~900 s were solved, using speed and vectoring as
+well as the trombone. But the safety-bound seeds need ~30 minutes of absorption and start with
+a pile-up already predicted (render below). **The headline separation rate is mostly a statement
+about scenario capacity.** It should be reported split by feasibility, and the scenario filter
+(today: no realised LoS in the first ~270 s) does not catch over-capacity scenarios.
+
+## Inference-time lookahead { #lookahead }
+
+`analysis/lookahead.py` makes a critic-guided one-step lookahead:
+
+1. At each decision, take the policy's 4 most likely actions.
+2. Try each for one real step on an exact snapshot of the environment.
+3. Score it as r + γ·V(s′) with the policy's *own* critic, in the units it was trained in.
+4. Act with the best.
+
+It is deployable: it needs only the simulator and 4 steps per 45 s decision, not a replay of
+the future. The snapshot/restore is verified exact: episodes that try and undo 4 candidates per
+step are identical to plain runs.
+
+| `1_33` final, 100 paired seeds | deterministic | with lookahead |
+|---|---|---|
+| separation lost | 0.17 | **0.07** (12 fixed, 2 new; McNemar z +2.67) |
+| flights on time | 0.750 | 0.684 |
+| all 20 on time | 0.20 | 0.04 |
+| AMAN swaps per stream | 0.95 | 2.51 |
+
+**The lookahead makes the policy much safer and much less precise.** `1_33`'s critic learned
+the legacy reward, where the dense conflict cost dominated, so it trades timing for conflict
+avoidance. By the objective, per seed it is better on 27 seeds and worse on 72. The meaningful
+test is the lookahead with `1_34`'s critic, which learned the lexicographic objective.
+
+## Renders: failed seeds, best of 10 attempts { #failed-renders }
+
+`render_policy.py --paired-attempts 9` replays exactly the attempts the analysis scored and
+renders the best by the objective. `1_33` final, 20-flight streams.
+
+<p><strong>Rescued, seed 438989805.</strong> The deterministic policy loses separation at step 82
+with 11 of 20 on time:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_33_rescued_deterministic_seed438989805.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p>Sampled attempt 3 on the same scenario lands all 20 on time (121 steps, 112 clearances):</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_33_rescued_best_seed438989805.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Precision-bound, seed 373399426.</strong> The best of 10 attempts is safe with 19 of 20 on
+time; none of the 10 gets all 20:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_33_precision_best_seed373399426.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Safety-bound, seed 1947382419.</strong> Every attempt loses separation; the best at step 43:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_33_safety_best_seed1947382419.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Lost from the start, seed 1159417075.</strong> At t = 0 every flight is predicted
+early, by up to 2 549 s, and the side view already shows a string of predicted losses of
+separation on final. Every attempt loses separation, the best at step 12:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_33_safety_best_seed1159417075.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 ## Inference-time conflict shield { #shield }
 
 `render_policy`'s shield refuses a clearance that introduces a near-horizon conflict
@@ -344,6 +528,20 @@ resolution):
 
 Route following needs the fine integration step. The rollout cost is a floor unless the
 simulator itself gets faster.
+
+**On this laptop the ceiling is thermal.** Under sustained load the CPU reaches ~98 °C. The
+firmware then clamps it to 400 MHz for 2–3 minutes in every ~5, and anything else running
+shares the same power budget. Measured: `1_32` ran at ~170 steps/s with the machine to itself
+and ~90 with other jobs running; `1_33` averaged 227 steps/s once they stopped. More workers
+help only up to that budget (8 → 16 workers: +35–58% in a short benchmark, less sustained).
+An earlier note blamed ~70 s per 25k steps on the in-training eval; those were mostly thermal
+clamps, and the eval's real cost is ~20 s per 25k.
+
+**Speed-ups made:**
+
+- the observation build is 3.4× faster (3.69 → 1.09 ms per step), byte-identical;
+- `--eval-freq` and `--n-envs` flags;
+- the do-nothing prediction remains the floor.
 
 ## Generated scenarios get harder down the queue { #generator-not-stationary }
 

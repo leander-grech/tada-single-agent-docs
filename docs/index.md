@@ -16,12 +16,12 @@
     `SHORTEN_TROMBONE`, its one new capability, about **once per thousand clearances** in both
     runs. See [22 clearances vs 15](analysis_v1_v2.md).
 
-    **New: a [windowed env](windowed.md)** runs a 20-flight trombone stream through a window of
-    the next 10 flights to land, with a per-flight reward and no observable that depends on the
-    scenario's flight count. Zero-shot from `1_29`: 79% of flights on time. A first fine-tune
-    (`1_31`) made that worse at a fresh-run learning rate; `1_32` retrains it with a critic
-    warm-up and a 10× lower LR, which took all-20-on-time from 0.08 to 0.29 on 100 paired seeds. This work also moved to **`flight_simulator` 0.2.80**, under which the
-    same seed generates a different scenario.
+    **A second track, [20-flight streams](#windowed-track)**, builds on this agent: a 20-flight
+    trombone stream seen through a window of the next 10 flights to land. Best so far: `1_33`,
+    75% of flights on time, and all 20 on time in **44% of scenarios in at least one of 10
+    attempts**. Most remaining separation losses sit in scenarios that need more delay than
+    the airspace can absorb. `1_34` (in progress) trains on a lexicographic objective: safety,
+    then each flight's deviation bracket, then the fewest actions.
 
     **Read numbers only from `analysis/track_run.py`.** The in-training `success_rate` is a
     5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.
@@ -41,6 +41,60 @@
     below it is not repeated across pages, so follow the links rather than expecting each page
     to stand alone.
 
+## The windowed track: 20-flight streams { #windowed-track }
+
+The 10-aircraft agent above sees a whole scenario at once. The [windowed env](windowed.md)
+asks it to control a **stream**: 20 flights, seen through a window of the next 10 in the
+landing queue. The AMAN sequence stays fixed, and each landed flight is replaced by the next in
+the queue. Nothing the agent observes depends on how many flights the stream has, so the same
+agent can in principle run continuously. Everything below is on the same 100 seeds, paired
+seed by seed, deterministic unless stated.
+
+| run | what changed | flights on time | separation lost | all 20 on time | clearances / stream |
+|---|---|---|---|---|---|
+| `1_29`, zero-shot | the 10-aircraft agent, untrained on streams | 0.727 | 21% | 0.08 | — |
+| `1_31` | fine-tune at a fresh-run learning rate | 0.468 | 32% | 0.01 | — |
+| `1_32` | proper fine-tune: critic warm-up, 10× lower LR | 0.731 | 21% | **0.29** | 100 |
+| `1_33` | + [AMAN-sequence observations](windowed.md#seq-obs) | **0.750** | **17%** | 0.20 | 106 |
+| `1_33`, best of 10 attempts | upper bound, not deployable | 0.829 | 5% | 0.44 | 112 |
+| `1_33` + [lookahead](windowed.md#lookahead) | critic-guided search, deployable | 0.684 | 7% | 0.04 | 103 |
+| `1_34` | [lexicographic objective](windowed.md#objective) | *training* | | | |
+
+**What we learned**
+
+- **Precision is a sequencing problem.** Traffic never enters the sector in AMAN order. Where
+  the agent keeps the order, 91% of landed flights are on time; where it swaps two, 63%.
+  [Details](windowed.md#sequencing).
+- **The agent is stable along a stream.** On [stitched](windowed.md#stitching) 2×20 streams
+  the second segment is flown as precisely as the first; what compounds is separation risk
+  per stretch of traffic.
+- **The policy holds more than it shows.** All 20 on time in at least one of 10 attempts on
+  44% of seeds, against 20% deterministically. [Details](windowed.md#attempts).
+- **Most separation losses are over-capacity scenarios.** 49 of the 100 seeds need some flight
+  to absorb more than 650 s. They account for 16 of `1_33`'s 17 losses.
+  [Details](windowed.md#feasibility).
+- **The reward was not measuring the goal.** Dense per-step costs outweighed the landing
+  rewards 4:1, and doing nothing cost the same as a clearance. `1_34` fixes both.
+  [Details](windowed.md#objective).
+
+<p><strong>One scenario, two outcomes</strong> (`1_33`, seed 438989805): the deterministic policy
+loses separation at step 82…</p>
+<video controls preload="metadata" width="100%">
+  <source src="assets/renders/1_33_rescued_deterministic_seed438989805.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p>…while one of its own sampled attempts lands all 20 on time. The right-hand panel is each
+flight's predicted descent under do-nothing, against time. Solid red marks a predicted loss of
+separation; the gap between ▼ and a flight's tick on the ground line is its deviation.</p>
+<video controls preload="metadata" width="100%">
+  <source src="assets/renders/1_33_rescued_best_seed438989805.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+More renders, including precision-bound and safety-bound seeds, are on the
+[windowed page](windowed.md#failed-renders).
+
 ## Quickstart
 
 Training runs in the conda env **`tada`** (Python 3.12):
@@ -51,11 +105,16 @@ cd reinforcement_learning/single_agent_rllib
 # fresh run
 python -u main.py --total-timesteps 10000000 --run-suffix my_experiment
 
-# windowed env: 20-flight stream, warm-started from an existing checkpoint
-python -u main.py --env windowed \
-  --init-weights experiments/atc_run_1_29_pbrs_attn_d/best/best_model.zip \
-  --n-envs 8 --critic-warmup-steps 300000 --lr-max 3e-5 --final-lr 3e-6 --ent-coef 0.003 \
-  --total-timesteps 5000000 --run-suffix windowed_ft
+# windowed env (20-flight stream), current recipe: sequence observations + lexicographic
+# objective, warm-started from an existing checkpoint
+TADA_SEQUENCE_OBS=1 python -u main.py --env windowed --reward-mode outcome_pbrs \
+  --init-weights experiments/atc_run_1_33_windowed_seqobs/final_model.zip \
+  --n-envs 16 --eval-freq 250000 --critic-warmup-steps 300000 \
+  --lr-max 3e-5 --final-lr 3e-6 --ent-coef 0.003 --total-timesteps 5000000 --run-suffix windowed_outcome
+
+# windowed scoring: 100 paired seeds, 10 attempts each, or critic-guided lookahead
+python analysis/score_windowed.py --models M1.zip [M2.zip ...] --seeds 100 --attempts 9
+python analysis/score_windowed.py --models M.zip --seeds 100 --lookahead 4
 
 # score its checkpoints on the fixed 100-seed pool while it trains
 python analysis/track_run.py --run experiments/atc_run_1_28_my_experiment
