@@ -132,8 +132,17 @@ one step.</p>
   Your browser does not support the video tag.
 </video>
 
-More renders, including precision-bound and safety-bound seeds, are on the
-[windowed page](windowed.md#failed-renders).
+<p><strong>After 5M more steps</strong> (`1_38`, the best agent, same seed, deterministic): all 20
+on time, every flight within 30 s of its AMAN target and none out of order. 56 of its 183
+decisions are second picks.</p>
+<video controls preload="metadata" width="100%">
+  <source src="assets/renders/1_38_deterministic_seed599310825.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+The same scenario flown by the one-pick control and by the higher-penalty run is on the
+[windowed page](windowed.md#reselection-renders), with more renders of precision-bound and
+safety-bound seeds [further down](windowed.md#failed-renders).
 
 ## Quickstart
 

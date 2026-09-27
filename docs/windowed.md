@@ -511,6 +511,38 @@ though not on stitched 40-flight streams (15% vs the control's 11%). A bust pena
 training stream (`1_39`, 240 instead of 90) cost precision and helped only on long streams; it
 was not adopted. With lookahead the reselection policy is both safe and precise (table above).
 
+### One scenario, four agents { #reselection-renders }
+
+Seed 599310825, 20 flights, each run's deterministic policy. `1_36`
+[loses separation at step 56](#failed-renders-1-36) with 5 of 20 on time.
+
+| | on time | worst / mean deviation | AMAN swaps | second picks | clearances |
+|---|---|---|---|---|---|
+| `1_37` control | 17 / 20 | 453 s / 46 s | 1 | — | 100 |
+| **`1_38`** | **20 / 20** | **30 s / 5 s** | **0** | 56 of 183 decisions | 128 |
+| `1_39` (penalty 240) | 12 / 20 | 398 s / 60 s | 1 | 30 of 151 | 122 |
+
+<p><strong>`1_37`, the one-pick control:</strong> safe, but three flights land outside ±60 s, one
+7½ minutes off.</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_37_deterministic_seed599310825.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>`1_38`, reselection after 10M steps:</strong> all 20 on time, the worst 30 s off, in AMAN
+order. The second pick is used on 56 of 127 steps.</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_38_deterministic_seed599310825.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>`1_39`, the same training with the bust penalty at 240:</strong> safe, but 8 flights land
+outside ±60 s. It uses the second pick about half as often.</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_39_deterministic_seed599310825.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 ## Renders: failed seeds, best of 10 attempts { #failed-renders }
 
 `render_policy.py --paired-attempts 9` replays exactly the attempts the analysis scored and
