@@ -6,13 +6,13 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Single-agent ATC arrival sequencing with sb3-contrib MaskablePPO">
+        <meta name="description" content="Single-agent RL arrival sequencing into Milan Malpensa: models, findings and how to train one">
       
       
       
       
       
-        <link rel="next" href="mdp/">
+        <link rel="next" href="models/best/">
       
       
         
@@ -23,7 +23,7 @@
     
     
       
-        <title>TADA Single-Agent RL</title>
+        <title>TADA · single-agent RL</title>
       
     
     
@@ -41,13 +41,11 @@
     
     
       
-        
-        
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-      
     
+    
+      <link rel="stylesheet" href="stylesheets/tada-components.css">
+    
+      <link rel="stylesheet" href="stylesheets/theme.css">
     
     <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -65,7 +63,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -74,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#tada-single-agent-rl" class="md-skip">
+        <a href="#tada-single-agent-arrival-sequencing" class="md-skip">
           Skip to content
         </a>
       
@@ -90,10 +88,10 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="." title="TADA Single-Agent RL" class="md-header__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+    <a href="." title="TADA · single-agent RL" class="md-header__button md-logo" aria-label="TADA · single-agent RL" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.56 3.91c.59.59.59 1.54 0 2.12l-3.89 3.89 2.12 9.19-1.41 1.42-3.88-7.43L9.6 17l.36 2.47-1.07 1.06-1.76-3.18-3.19-1.77L5 14.5l2.5.37L11.37 11 3.94 7.09l1.42-1.41 9.19 2.12 3.89-3.89c.56-.58 1.56-.58 2.12 0"/></svg>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -104,7 +102,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            TADA Single-Agent RL
+            TADA · single-agent RL
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -123,20 +121,20 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
     
-      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
       </label>
     
   
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
     
-      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
       </label>
     
   
@@ -226,11 +224,11 @@
     
     
       <li class="md-tabs__item">
-        <a href="mdp/" class="md-tabs__link">
+        <a href="models/best/" class="md-tabs__link">
           
   
   
-  Reference
+  Models
 
         </a>
       </li>
@@ -244,13 +242,13 @@
   
   
     <li class="md-tabs__item">
-      <a href="windowed/" class="md-tabs__link">
+      <a href="renders/" class="md-tabs__link">
         
   
   
     
   
-  Windowed env (20 flights)
+  Renders
 
       </a>
     </li>
@@ -265,11 +263,11 @@
     
     
       <li class="md-tabs__item">
-        <a href="experiments/" class="md-tabs__link">
+        <a href="how/problem/" class="md-tabs__link">
           
   
   
-  Experiments
+  How it works
 
         </a>
       </li>
@@ -285,15 +283,73 @@
     
     
       <li class="md-tabs__item">
-        <a href="analysis_methods/" class="md-tabs__link">
+        <a href="training/" class="md-tabs__link">
           
   
   
-  Analysis
+  Training
 
         </a>
       </li>
     
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="evaluation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Evaluation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="findings/" class="md-tabs__link">
+          
+  
+  
+  Findings
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="log/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Log
+
+      </a>
+    </li>
   
 
       
@@ -310,6 +366,45 @@
     
   
   Roadmap
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="archive/" class="md-tabs__link">
+          
+  
+  
+  Archive
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="glossary/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Glossary
 
       </a>
     </li>
@@ -344,13 +439,13 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="." title="TADA Single-Agent RL" class="md-nav__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+    <a href="." title="TADA · single-agent RL" class="md-nav__button md-logo" aria-label="TADA · single-agent RL" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.56 3.91c.59.59.59 1.54 0 2.12l-3.89 3.89 2.12 9.19-1.41 1.42-3.88-7.43L9.6 17l.36 2.47-1.07 1.06-1.76-3.18-3.19-1.77L5 14.5l2.5.37L11.37 11 3.94 7.09l1.42-1.41 9.19 2.12 3.89-3.89c.56-.58 1.56-.58 2.12 0"/></svg>
 
     </a>
-    TADA Single-Agent RL
+    TADA · single-agent RL
   </label>
   
   <ul class="md-nav__list" data-md-scrollfix>
@@ -422,43 +517,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#windowed-track" class="md-nav__link">
+  <a href="#what-changed-recently" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The windowed track: 20-flight streams
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quickstart" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quickstart
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#where-to-look" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Where to look
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#build-the-docs" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Build the docs
+        What changed recently
       
     </span>
   </a>
@@ -503,7 +565,7 @@
   <span class="md-ellipsis">
     
   
-    Reference
+    Models
   
 
     
@@ -519,7 +581,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Reference
+    Models
   
 
           </label>
@@ -532,14 +594,14 @@
   
   
     <li class="md-nav__item">
-      <a href="mdp/" class="md-nav__link">
+      <a href="models/best/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    MDP & Environment
+    Best model
   
 
     
@@ -560,14 +622,94 @@
   
   
     <li class="md-nav__item">
-      <a href="observations/" class="md-nav__link">
+      <a href="models/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Observations
+    Leaderboard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Windowed
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Windowed
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_43/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_43
   
 
     
@@ -588,14 +730,14 @@
   
   
     <li class="md-nav__item">
-      <a href="reward/" class="md-nav__link">
+      <a href="models/1_42/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Reward
+    1_42
   
 
     
@@ -616,14 +758,14 @@
   
   
     <li class="md-nav__item">
-      <a href="pbrs/" class="md-nav__link">
+      <a href="models/1_41/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Reward shaping (PBRS)
+    1_41
   
 
     
@@ -644,14 +786,14 @@
   
   
     <li class="md-nav__item">
-      <a href="separation/" class="md-nav__link">
+      <a href="models/1_40/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Loss of separation
+    1_40
   
 
     
@@ -672,14 +814,14 @@
   
   
     <li class="md-nav__item">
-      <a href="training/" class="md-nav__link">
+      <a href="models/1_39/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Training
+    1_39
   
 
     
@@ -700,14 +842,210 @@
   
   
     <li class="md-nav__item">
-      <a href="instrumentation/" class="md-nav__link">
+      <a href="models/1_38/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Instrumentation
+    1_38
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_37/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_37
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_36/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_36
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_35/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_35
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_34/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_34
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_33/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_33
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_32/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_32
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_31/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_31
   
 
     
@@ -727,6 +1065,606 @@
     </li>
   
 
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10-aircraft
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    10-aircraft
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_30_pms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_30_pms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_29/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_29
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_28/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_28
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_27a/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_27a
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_27/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_27
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_26/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_26
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_25/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_25
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_24_pms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_24_pms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_24/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_24
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_23/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_23
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_22/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_22
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_21
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_20
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_19
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_18
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_17
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_16_b/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_16_b
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_16_a/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_16_a
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_16
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
@@ -735,14 +1673,14 @@
   
   
     <li class="md-nav__item">
-      <a href="windowed/" class="md-nav__link">
+      <a href="renders/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Windowed env (20 flights)
+    Renders
   
 
     
@@ -785,7 +1723,7 @@
   <span class="md-ellipsis">
     
   
-    Experiments
+    How it works
   
 
     
@@ -801,7 +1739,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Experiments
+    How it works
   
 
           </label>
@@ -814,14 +1752,14 @@
   
   
     <li class="md-nav__item">
-      <a href="experiments/" class="md-nav__link">
+      <a href="how/problem/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Experiment log
+    The problem
   
 
     
@@ -842,14 +1780,126 @@
   
   
     <li class="md-nav__item">
-      <a href="successful_results/" class="md-nav__link">
+      <a href="how/environments/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Successful results
+    Environments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="how/observations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observations
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="how/actions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Actions & reselection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="how/objective/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Objective & reward
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="how/separation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Loss-of-separation rules
   
 
     
@@ -900,7 +1950,7 @@
   <span class="md-ellipsis">
     
   
-    Analysis
+    Training
   
 
     
@@ -916,7 +1966,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Analysis
+    Training
   
 
           </label>
@@ -929,14 +1979,14 @@
   
   
     <li class="md-nav__item">
-      <a href="analysis_methods/" class="md-nav__link">
+      <a href="training/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    How an agent is tested
+    From scratch
   
 
     
@@ -957,14 +2007,14 @@
   
   
     <li class="md-nav__item">
-      <a href="analysis_log/" class="md-nav__link">
+      <a href="training/reference/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Test log
+    Reference
   
 
     
@@ -985,14 +2035,42 @@
   
   
     <li class="md-nav__item">
-      <a href="analysis_v1_v2/" class="md-nav__link">
+      <a href="training/compute/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    22 clearances vs 15
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="training/tensorboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TensorBoard
   
 
     
@@ -1020,6 +2098,343 @@
   
   
     <li class="md-nav__item">
+      <a href="evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Findings
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Findings
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="findings/reselection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reselection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="findings/sequencing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sequencing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="findings/order-first/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Order first? (Phase 0)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="findings/capacity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Over-capacity & long streams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="findings/lookahead/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search at inference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="findings/curriculum/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Training from scratch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="findings/evaluation-noise/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation noise
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="log/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="roadmap/" class="md-nav__link">
         
   
@@ -1028,6 +2443,260 @@
     
   
     Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archive
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Archive
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="archive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="archive/clearance-sets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    22 clearances vs 15
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="archive/ten-aircraft-reward/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The 10-aircraft reward
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="archive/ten-aircraft-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10-aircraft tests
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="archive/early-runs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Early runs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="archive/point-merge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Point merge
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
   
 
     
@@ -1067,43 +2736,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#windowed-track" class="md-nav__link">
+  <a href="#what-changed-recently" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The windowed track: 20-flight streams
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quickstart" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quickstart
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#where-to-look" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Where to look
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#build-the-docs" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Build the docs
+        What changed recently
       
     </span>
   </a>
@@ -1127,374 +2763,65 @@
 
 
 
-<h1 id="tada-single-agent-rl">TADA Single-Agent RL<a class="headerlink" href="#tada-single-agent-rl" title="Permanent link">&para;</a></h1>
-<div class="admonition abstract">
-<p class="admonition-title">TL;DR</p>
-<p>A single RL agent sequences up to 10 inbound aircraft into Milan Malpensa, issuing one
-clearance per 45 s to hit AMAN target landing times without losing separation.</p>
-<p><strong>Current best — run <code>1_26</code>, 22 clearances, scored on 100 fixed seeds:</strong> success <strong>0.70</strong>,
-losses of separation <strong>0.07</strong>, worst-aircraft deviation <strong>43 s</strong>. The clean-subset success
-rate that had held near 53.7% across twenty runs reached <strong>0.753</strong>.</p>
-<p><strong>Run <code>1_27</code> tested a reduced 15-clearance set on top and did not beat it</strong> — success
-<strong>0.64</strong>, a statistical tie, but worst-aircraft deviation nearly doubled, to <strong>87 s</strong>. It
-learns much faster and converges worse. A mid-run crash had changed its learning-rate
-schedule; <strong><code>1_27a</code> re-ran the second half on the correct one and the result held</strong> — same
-0.64 success, deviation 76 s, and no gain at all among clean episodes. The reduced set issues
-<code>SHORTEN_TROMBONE</code>, its one new capability, about <strong>once per thousand clearances</strong> in both
-runs. See <a href="analysis_v1_v2/">22 clearances vs 15</a>.</p>
-<p><strong>A second track, <a href="#windowed-track">20-flight streams</a></strong>, builds on this agent: a 20-flight
-trombone stream seen through a window of the next 10 flights to land, trained on a
-lexicographic objective (safety, then each flight's deviation bracket, then the fewest
-actions). <strong>Best so far: <code>1_38</code>, which may issue a second clearance within the same 45 s
-step (<a href="windowed/#reselection">reselection</a>): 93% of flights on time, all 20 on time in 63%
-of scenarios, separation lost in 3%</strong> — against 83% / 34% / 4% for a one-pick control from
-the same start (which had 5M training steps to <code>1_38</code>'s 10M; at equal steps reselection cost
-some safety, which the extra 5M removed). With a critic-guided lookahead it loses separation
-in 1%. On 40-flight streams
-it is still riskier than the one-pick agent (15% vs 11%). Most remaining losses sit in
-scenarios that need more delay than the airspace can absorb.</p>
-<p><strong>Read numbers only from <code>analysis/track_run.py</code>.</strong> The in-training <code>success_rate</code> is a
-5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.</p>
+<h1 id="tada-single-agent-arrival-sequencing">TADA: single-agent arrival sequencing<a class="headerlink" href="#tada-single-agent-arrival-sequencing" title="Permanent link">&para;</a></h1>
+<p>One reinforcement-learning agent sequences arrival traffic into <strong>Milan Malpensa</strong> through the
+trombone arrival. Every 45 s it issues a clearance, two with <a href="how/actions/#reselection">reselection</a>,
+to land every flight on its AMAN target time without ever losing separation, using as few
+clearances as it can. The current agent flies a stream of 20 flights through a window of the next
+10 in the landing queue.</p>
+<!-- gen:best-box -->
+<div class="tada-best">
+<div class="tada-best__head"><span class="tada-best__label">Current best</span><a class="tada-best__model" href="models/1_38/">1_38</a><span class="tada-best__what">1_36 continued for another 5M steps on the same settings (reselection, budget 2).</span></div>
+<div class="tada-tiles"><div class="tada-tile tada-tile--ok"><span class="tada-tile__label">Solved</span><span class="tada-tile__value">63<span class="tada-tile__unit">/100</span></span><span class="tada-tile__delta">1_36: 65</span></div><div class="tada-tile tada-tile--ok"><span class="tada-tile__label">Hard-solved ±30 s</span><span class="tada-tile__value">24<span class="tada-tile__unit">/100</span></span><span class="tada-tile__delta">1_36: 29</span></div><div class="tada-tile tada-tile--bad"><span class="tada-tile__label">Separation lost</span><span class="tada-tile__value">3<span class="tada-tile__unit">/100</span></span><span class="tada-tile__delta">1_36: 9</span></div><div class="tada-tile tada-tile--champ"><span class="tada-tile__label">Flights on time</span><span class="tada-tile__value">92.7<span class="tada-tile__unit">%</span></span><span class="tada-tile__delta">1_36: 91.6%</span></div><div class="tada-tile tada-tile--"><span class="tada-tile__label">Clearances</span><span class="tada-tile__value">121.9<span class="tada-tile__unit"></span></span><span class="tada-tile__delta">1_36: 128.3</span></div></div>
+<div class="tada-best__foot">20-flight streams · 100 validation seeds · deterministic · tile footnotes: parent 1_36 · source <code>analysis/2026-09-26_1_36_multipick/eval_cont/f20.csv</code> · <a href="models/">champion rule</a></div>
 </div>
-<p><img alt="All three arms scored on 100 fixed eval seeds" src="assets/1_26_vs_1_27_vs_1_27a.png" /></p>
+<!-- /gen -->
+
+<div class="grid cards">
 <ul>
-<li><strong>Algorithm:</strong> PPO with a custom autoregressive policy (<code>ATCAutoregressivePolicy</code>) — aircraft
-  head → clearance head conditioned on the sampled aircraft, masks read from the observation.
-  See <a href="training/">Training</a>.</li>
-<li><strong>Simulator:</strong> Rust <code>flight_simulator</code> (PyO3 wheel), driven through a deterministic rollout.</li>
-<li><strong>Scenario:</strong> MXP trombone (<code>VALIDATION_USE_CASE_1</code>). BGY point-merge exists but underperforms.</li>
-<li><strong>Windowed variant:</strong> a 20-flight stream through a 10-slot window — <a href="windowed/">Windowed env</a>.</li>
-<li><strong>Branch:</strong> <code>UM-lg</code>.</li>
+<li>
+<p><strong><a href="models/">Leaderboard</a></strong></p>
+<p>Every model, sortable, with the champion rule. Each links to a report card.</p>
+</li>
+<li>
+<p><strong><a href="how/problem/">How it works</a></strong></p>
+<p>The problem, the environments, what the agent sees and can do, the objective, the separation rules.</p>
+</li>
+<li>
+<p><strong><a href="findings/">Findings</a></strong></p>
+<p>What the experiments established: reselection, sequencing, capacity, search, training from scratch.</p>
+</li>
+<li>
+<p><strong><a href="training/">Train one yourself</a></strong></p>
+<p>The from-scratch recipe, how to score it while it trains, and reference curves to compare against.</p>
+</li>
+<li>
+<p><strong><a href="renders/">Renders</a></strong></p>
+<p>Every video, credited to the model, checkpoint and seed that produced it.</p>
+</li>
+<li>
+<p><strong><a href="evaluation/">Evaluation protocol</a></strong></p>
+<p>100 validation seeds, a pinned frame, the standard battery, paired tests.</p>
+</li>
 </ul>
+</div>
+<h2 id="what-changed-recently">What changed recently<a class="headerlink" href="#what-changed-recently" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Reselection</strong> (a second clearance within the 45 s step) was the largest single gain: precision
+  had been limited by bandwidth (<a href="findings/reselection/">Findings</a>).</li>
+<li><strong>Order first?</strong> Forcing the AMAN order early makes every model tested worse
+  (<a href="findings/order-first/">Phase 0</a>).</li>
+<li><strong>From scratch:</strong> the full design learns from random weights; a traffic-curriculum run is in
+  progress (<a href="findings/curriculum/">Training from scratch</a>).</li>
+</ul>
+<p>Full history: <a href="log/">experiment log</a>. What's next: <a href="roadmap/">roadmap</a>. Terms: <a href="glossary/">glossary</a>.</p>
 <div class="admonition info">
-<p class="admonition-title">This site is the current source of truth</p>
-<p>Pages are kept in sync with the code on <code>UM-lg</code>. Each page opens with a TL;DR; the detail
-below it is not repeated across pages, so follow the links rather than expecting each page
-to stand alone.</p>
+<p class="admonition-title">Sources</p>
+<p>Every model number on this site is generated from the code repo's evaluation files by
+<code>tools/build_model_docs.py</code> from <code>models.yaml</code>. The in-training success rate is never quoted
+(<a href="findings/evaluation-noise/">why</a>). Code: <code>reinforcement_learning/single_agent_rllib</code> on
+branch <code>UM-lg</code>.</p>
 </div>
-<h2 id="windowed-track">The windowed track: 20-flight streams<a class="headerlink" href="#windowed-track" title="Permanent link">&para;</a></h2>
-<p>The 10-aircraft agent above sees a whole scenario at once. The <a href="windowed/">windowed env</a>
-asks it to control a <strong>stream</strong>: 20 flights, seen through a window of the next 10 in the
-landing queue. The AMAN sequence stays fixed, and each landed flight is replaced by the next in
-the queue. Nothing the agent observes depends on how many flights the stream has, so the same
-agent can in principle run continuously. Everything below is on the same 100 seeds, paired
-seed by seed, deterministic unless stated.</p>
-<table>
-<thead>
-<tr>
-<th>run</th>
-<th>what changed</th>
-<th>flights on time</th>
-<th>separation lost</th>
-<th>all 20 on time</th>
-<th>clearances / stream</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>1_29</code>, zero-shot</td>
-<td>the 10-aircraft agent, untrained on streams</td>
-<td>0.727</td>
-<td>21%</td>
-<td>0.08</td>
-<td>—</td>
-</tr>
-<tr>
-<td><code>1_31</code></td>
-<td>fine-tune at a fresh-run learning rate</td>
-<td>0.468</td>
-<td>32%</td>
-<td>0.01</td>
-<td>—</td>
-</tr>
-<tr>
-<td><code>1_32</code></td>
-<td>proper fine-tune: critic warm-up, 10× lower LR</td>
-<td>0.731</td>
-<td>21%</td>
-<td><strong>0.29</strong></td>
-<td>100</td>
-</tr>
-<tr>
-<td><code>1_33</code></td>
-<td>+ <a href="windowed/#seq-obs">AMAN-sequence observations</a></td>
-<td><strong>0.750</strong></td>
-<td><strong>17%</strong></td>
-<td>0.20</td>
-<td>106</td>
-</tr>
-<tr>
-<td><code>1_33</code>, best of 10 attempts</td>
-<td>upper bound, not deployable</td>
-<td>0.829</td>
-<td>5%</td>
-<td>0.44</td>
-<td>112</td>
-</tr>
-<tr>
-<td><code>1_33</code> + <a href="windowed/#lookahead">lookahead</a></td>
-<td>critic-guided search, deployable</td>
-<td>0.684</td>
-<td>7%</td>
-<td>0.04</td>
-<td>103</td>
-</tr>
-<tr>
-<td><code>1_34</code> @ 0.8M</td>
-<td><a href="windowed/#objective">lexicographic objective</a> (stopped early)</td>
-<td>0.773</td>
-<td>13%</td>
-<td>0.21</td>
-<td>110</td>
-</tr>
-<tr>
-<td><code>1_35</code> @ 4.65M</td>
-<td>1_34 + <a href="training/#jax-learner">JAX learner, fast simulator</a>, stitched 2×20 streams with a random cooling gap</td>
-<td>0.826</td>
-<td>8%</td>
-<td>0.24</td>
-<td>87</td>
-</tr>
-<tr>
-<td><code>1_37</code></td>
-<td>1_35 + 5M steps (control for 1_36)</td>
-<td>0.832</td>
-<td><strong>4%</strong></td>
-<td>0.34</td>
-<td>81</td>
-</tr>
-<tr>
-<td><strong><code>1_36</code></strong></td>
-<td>1_35 + 5M steps with <a href="windowed/#reselection">reselection</a>: a second clearance within the 45 s step</td>
-<td><strong>0.916</strong></td>
-<td>9%</td>
-<td><strong>0.65</strong></td>
-<td>128</td>
-</tr>
-<tr>
-<td><code>1_36</code>, best of 10 attempts</td>
-<td>upper bound, not deployable</td>
-<td>0.949</td>
-<td>2%</td>
-<td>0.80</td>
-<td>134</td>
-</tr>
-<tr>
-<td><strong><code>1_36</code> + <a href="windowed/#lookahead">lookahead</a></strong></td>
-<td>critic-guided search, deployable</td>
-<td>0.896</td>
-<td><strong>2%</strong></td>
-<td>0.39</td>
-<td>139</td>
-</tr>
-<tr>
-<td><strong><code>1_38</code></strong></td>
-<td>1_36 + 5M steps</td>
-<td><strong>0.927</strong></td>
-<td><strong>3%</strong></td>
-<td>0.63</td>
-<td>122</td>
-</tr>
-<tr>
-<td><code>1_38</code>, best of 10 attempts</td>
-<td>upper bound, not deployable</td>
-<td>0.943</td>
-<td>2%</td>
-<td>0.76</td>
-<td>124</td>
-</tr>
-<tr>
-<td><strong><code>1_38</code> + lookahead</strong></td>
-<td>critic-guided search, deployable</td>
-<td>0.893</td>
-<td><strong>1%</strong></td>
-<td>0.30</td>
-<td>130</td>
-</tr>
-<tr>
-<td><code>1_39</code></td>
-<td>1_36 + 5M steps, bust penalty 240 (sized to the training stream)</td>
-<td>0.859</td>
-<td>5%</td>
-<td>0.40</td>
-<td>125</td>
-</tr>
-</tbody>
-</table>
-<p><strong>What we learned</strong></p>
-<ul>
-<li><strong>Precision was bandwidth-limited.</strong> Allowed a second clearance within the same 45 s step,
-  the policy asks for it on about a third of its decisions: all 20 on time rises from 0.34 to 0.65 against
-  an identical control, and flights almost never land out of AMAN order. It also loses
-  separation more often (9% vs 4%). <a href="windowed/#reselection">Details</a>.</li>
-<li><strong>Reselection's safety cost trains away on 20-flight streams, not yet on 40.</strong> Another 5M steps
-  (<code>1_38</code>) fixed 6 of <code>1_36</code>'s separation losses and lost none, at unchanged precision. On
-  stitched 2×20 streams it still loses separation on 15% of seeds (one-pick control: 11%).
-  Raising the bust penalty to 240 (<code>1_39</code>) instead cost precision (on time −0.07) and helped
-  only on the long streams. <a href="experiments/#run-1_38">Run log</a>.</li>
-<li><strong>More training alone buys mostly safety.</strong> <code>1_37</code>, the same 5M extra steps with one pick,
-  halves <code>1_35</code>'s separation losses (8% → 4%) and lifts all 20 on time from 0.24 to 0.34;
-  reselection on the same budget reaches 0.65.</li>
-<li><strong>Precision is a sequencing problem.</strong> Traffic never enters the sector in AMAN order. Where
-  the agent keeps the order, 91% of landed flights are on time; where it swaps two, 63%.
-  <a href="windowed/#sequencing">Details</a>.</li>
-<li><strong>The agent is stable along a stream.</strong> On <a href="windowed/#stitching">stitched</a> 2×20 streams
-  the second segment is flown as precisely as the first; what compounds is separation risk
-  per stretch of traffic.</li>
-<li><strong>The policy holds more than it shows.</strong> All 20 on time in at least one of 10 attempts on
-  44% of seeds, against 20% deterministically. <a href="windowed/#attempts">Details</a>.</li>
-<li><strong>Most separation losses are over-capacity scenarios.</strong> 49 of the 100 seeds need some flight
-  to absorb more than 650 s. They account for 16 of <code>1_33</code>'s 17 losses.
-  <a href="windowed/#feasibility">Details</a>.</li>
-<li><strong>The reward was not measuring the goal.</strong> Dense per-step costs outweighed the landing
-  rewards 4:1, and doing nothing cost the same as a clearance. <code>1_34</code> fixes both.
-  <a href="windowed/#objective">Details</a>.</li>
-</ul>
-<p><strong>One scenario, two outcomes</strong> (`1_33`, seed 438989805): the deterministic policy
-loses separation at step 82…</p>
-<video controls preload="metadata" width="100%">
-  <source src="assets/renders/1_33_rescued_deterministic_seed438989805.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p>…while one of its own sampled attempts lands all 20 on time. The right-hand panel is each
-flight's predicted descent under do-nothing, against time. Solid red marks a predicted loss of
-separation; the gap between ▼ and a flight's tick on the ground line is its deviation.</p>
-<video controls preload="metadata" width="100%">
-  <source src="assets/renders/1_33_rescued_best_seed438989805.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p><strong>With reselection</strong> (`1_36`, seed 599310825): the deterministic policy loses
-separation at step 56…</p>
-<video controls preload="metadata" width="100%">
-  <source src="assets/renders/1_36_rescued_deterministic_seed599310825.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p>…and three of its ten sampled attempts land all 20 on time, often issuing two clearances in
-one step.</p>
-<video controls preload="metadata" width="100%">
-  <source src="assets/renders/1_36_rescued_best_seed599310825.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p><strong>After 5M more steps</strong> (`1_38`, the best agent, same seed, deterministic): all 20
-on time, every flight within 30 s of its AMAN target and none out of order. 56 of its 183
-decisions are second picks.</p>
-<video controls preload="metadata" width="100%">
-  <source src="assets/renders/1_38_deterministic_seed599310825.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p>The same scenario flown by the one-pick control and by the higher-penalty run is on the
-<a href="windowed/#reselection-renders">windowed page</a>, with more renders of precision-bound and
-safety-bound seeds <a href="windowed/#failed-renders">further down</a>.</p>
-<h2 id="quickstart">Quickstart<a class="headerlink" href="#quickstart" title="Permanent link">&para;</a></h2>
-<p>Training runs in the conda env <strong><code>tada</code></strong> (Python 3.12):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>reinforcement_learning/single_agent_rllib
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># fresh run</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>python<span class="w"> </span>-u<span class="w"> </span>main.py<span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">10000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>my_experiment
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="c1"># windowed env (20-flight stream), current recipe: sequence observations + lexicographic</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># objective, warm-started from an existing checkpoint</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nv">TADA_SEQUENCE_OBS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>-u<span class="w"> </span>main.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span>--reward-mode<span class="w"> </span>outcome_pbrs<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">  </span>--init-weights<span class="w"> </span>experiments/atc_run_1_33_windowed_seqobs/final_model.zip<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">  </span>--n-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span>--eval-freq<span class="w"> </span><span class="m">250000</span><span class="w"> </span>--critic-warmup-steps<span class="w"> </span><span class="m">300000</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span>--lr-max<span class="w"> </span>3e-5<span class="w"> </span>--final-lr<span class="w"> </span>3e-6<span class="w"> </span>--ent-coef<span class="w"> </span><span class="m">0</span>.003<span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span><span class="w"> </span>--run-suffix<span class="w"> </span>windowed_outcome
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="c1"># the same run with the JAX learner (SB3-compatible checkpoints; see Training -&gt; JAX learner)</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="nv">TADA_SEQUENCE_OBS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python<span class="w"> </span>-u<span class="w"> </span>main_jax.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span>--reward-mode<span class="w"> </span>outcome_pbrs<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">  </span>--stitch-segments<span class="w"> </span><span class="m">2</span><span class="w"> </span>--stitch-gap<span class="w"> </span><span class="m">120</span><span class="w"> </span><span class="m">900</span><span class="w"> </span>--init-weights<span class="w"> </span>&lt;sb3<span class="w"> </span>checkpoint&gt;.zip<span class="w"> </span>--n-envs<span class="w"> </span><span class="m">16</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">  </span>--critic-warmup-steps<span class="w"> </span><span class="m">100000</span><span class="w"> </span>--lr-max<span class="w"> </span>3e-5<span class="w"> </span>--final-lr<span class="w"> </span>3e-6<span class="w"> </span>--ent-coef<span class="w"> </span><span class="m">0</span>.003<span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="c1"># reselection: the policy may ask for a second clearance per step (JAX learner only)</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="nv">TADA_SEQUENCE_OBS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">TADA_MAX_PICKS</span><span class="o">=</span><span class="m">2</span><span class="w"> </span>python<span class="w"> </span>-u<span class="w"> </span>main_jax.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span>--reward-mode<span class="w"> </span>outcome_pbrs<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">  </span>--stitch-segments<span class="w"> </span><span class="m">2</span><span class="w"> </span>--stitch-gap<span class="w"> </span><span class="m">120</span><span class="w"> </span><span class="m">900</span><span class="w"> </span>--init-weights<span class="w"> </span>&lt;checkpoint&gt;.zip<span class="w"> </span>--n-envs<span class="w"> </span><span class="m">32</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">  </span>--critic-warmup-steps<span class="w"> </span><span class="m">100000</span><span class="w"> </span>--lr-max<span class="w"> </span>3e-5<span class="w"> </span>--final-lr<span class="w"> </span>3e-6<span class="w"> </span>--ent-coef<span class="w"> </span><span class="m">0</span>.003<span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span>
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="c1"># windowed scoring: 100 paired seeds, 10 attempts each, or critic-guided lookahead</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>M1.zip<span class="w"> </span><span class="o">[</span>M2.zip<span class="w"> </span>...<span class="o">]</span><span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--attempts<span class="w"> </span><span class="m">9</span>
-<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>M.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--lookahead<span class="w"> </span><span class="m">4</span>
-<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>
-<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a><span class="c1"># score its checkpoints on the fixed 100-seed pool while it trains</span>
-<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>python<span class="w"> </span>analysis/track_run.py<span class="w"> </span>--run<span class="w"> </span>experiments/atc_run_1_28_my_experiment
-<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>
-<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a><span class="c1"># replay an OLD run whose action set differs (see MDP -&gt; action-set versions)</span>
-<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a><span class="nv">TADA_ACTION_SET</span><span class="o">=</span>v1<span class="w"> </span>python<span class="w"> </span>render_policy.py<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="w">  </span>--model<span class="w"> </span>experiments/atc_run_1_26_sep3nm/best/best_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">1595180635</span>
-</code></pre></div>
-<p>Watch it live — TensorBoard is now under each run's <code>tb/</code> sub-directory:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>/home/leander/miniconda3/envs/tada/bin/tensorboard<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>--logdir<span class="w"> </span>reinforcement_learning/single_agent_rllib/experiments
-</code></pre></div>
-<p>There are <strong>no console entry scripts</strong> — run <code>main.py</code> directly. Base install is a
-lightweight <em>inference</em> set; add <code>pip install -e .[train]</code> for the full training stack.</p>
-<h2 id="where-to-look">Where to look<a class="headerlink" href="#where-to-look" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Page</th>
-<th>What's in it</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="mdp/">MDP &amp; Environment</a></td>
-<td>action space, episode, termination &amp; success criteria</td>
-</tr>
-<tr>
-<td><a href="observations/">Observations</a></td>
-<td>the Dict obs, per-aircraft features, normalization</td>
-</tr>
-<tr>
-<td><a href="reward/">Reward</a></td>
-<td>severity geometry, exponential conflict decay, landing-weighted deviation, tier ladder</td>
-</tr>
-<tr>
-<td><a href="windowed/">Windowed env</a></td>
-<td>the 20-flight stream: queue window, stream-stationary observables, per-flight reward</td>
-</tr>
-<tr>
-<td><a href="training/">Training</a></td>
-<td>PPO + VecNormalize config, callbacks, network, snapshots</td>
-</tr>
-<tr>
-<td><a href="instrumentation/">Instrumentation</a></td>
-<td>every TensorBoard metric and what to watch</td>
-</tr>
-<tr>
-<td><a href="experiments/">Experiment log</a></td>
-<td>what changed in each run and what we learned</td>
-</tr>
-<tr>
-<td><a href="successful_results/">Successful results</a></td>
-<td>curated renders + refusal-shield sweeps for the best checkpoints, per run</td>
-</tr>
-<tr>
-<td><a href="analysis_methods/">How an agent is tested</a></td>
-<td>every metric defined from the code — success, the clean set, pass@k, what not to quote</td>
-</tr>
-<tr>
-<td><a href="analysis_log/">Test log</a></td>
-<td>every test run against an agent, in order, with the question it settled</td>
-</tr>
-<tr>
-<td><a href="analysis_v1_v2/">22 clearances vs 15</a></td>
-<td>the <code>1_26</code> vs <code>1_27</code> head-to-head</td>
-</tr>
-<tr>
-<td><a href="roadmap/">Roadmap</a></td>
-<td>what's next, and what is designed but unbuilt</td>
-</tr>
-</tbody>
-</table>
-<h2 id="build-the-docs">Build the docs<a class="headerlink" href="#build-the-docs" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.<span class="o">[</span>docs<span class="o">]</span><span class="w">      </span><span class="c1"># mkdocs + mkdocs-material</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>mkdocs<span class="w"> </span>serve<span class="w">                </span><span class="c1"># live preview at http://127.0.0.1:8000</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>mkdocs<span class="w"> </span>build<span class="w">                </span><span class="c1"># static site -&gt; ./site</span>
-</code></pre></div>
 
 
 
@@ -1525,6 +2852,30 @@ lightweight <em>inference</em> set; add <code>pip install -e .[train]</code> for
       
         <footer class="md-footer">
   
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+        
+          
+          <a href="models/best/" class="md-footer__link md-footer__link--next" aria-label="Next: Best model">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Best model
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
       <div class="md-copyright">
@@ -1550,10 +2901,12 @@ lightweight <em>inference</em> set; add <code>pip install -e .[train]</code> for
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="javascripts/tada.js"></script>
       
     
   </body>

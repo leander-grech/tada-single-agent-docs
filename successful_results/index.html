@@ -6,15 +6,11 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Single-agent ATC arrival sequencing with sb3-contrib MaskablePPO">
+        <meta name="description" content="Single-agent RL arrival sequencing into Milan Malpensa: models, findings and how to train one">
       
       
       
       
-        <link rel="prev" href="../experiments/">
-      
-      
-        <link rel="next" href="../analysis_methods/">
       
       
         
@@ -25,7 +21,7 @@
     
     
       
-        <title>Successful results - TADA Single-Agent RL</title>
+        <title>This page has moved - TADA · single-agent RL</title>
       
     
     
@@ -43,13 +39,11 @@
     
     
       
-        
-        
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-      
     
+    
+      <link rel="stylesheet" href="../stylesheets/tada-components.css">
+    
+      <link rel="stylesheet" href="../stylesheets/theme.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -67,7 +61,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -76,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#successful-results" class="md-skip">
+        <a href="#this-page-has-moved" class="md-skip">
           Skip to content
         </a>
       
@@ -92,10 +86,10 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="TADA Single-Agent RL" class="md-header__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+    <a href=".." title="TADA · single-agent RL" class="md-header__button md-logo" aria-label="TADA · single-agent RL" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.56 3.91c.59.59.59 1.54 0 2.12l-3.89 3.89 2.12 9.19-1.41 1.42-3.88-7.43L9.6 17l.36 2.47-1.07 1.06-1.76-3.18-3.19-1.77L5 14.5l2.5.37L11.37 11 3.94 7.09l1.42-1.41 9.19 2.12 3.89-3.89c.56-.58 1.56-.58 2.12 0"/></svg>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -106,13 +100,13 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            TADA Single-Agent RL
+            TADA · single-agent RL
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Successful results
+              This page has moved
             
           </span>
         </div>
@@ -125,20 +119,20 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
     
-      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
       </label>
     
   
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
     
-      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
       </label>
     
   
@@ -226,11 +220,11 @@
     
     
       <li class="md-tabs__item">
-        <a href="../mdp/" class="md-tabs__link">
+        <a href="../models/best/" class="md-tabs__link">
           
   
   
-  Reference
+  Models
 
         </a>
       </li>
@@ -244,13 +238,13 @@
   
   
     <li class="md-tabs__item">
-      <a href="../windowed/" class="md-tabs__link">
+      <a href="../renders/" class="md-tabs__link">
         
   
   
     
   
-  Windowed env (20 flights)
+  Renders
 
       </a>
     </li>
@@ -261,17 +255,15 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../experiments/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../how/problem/" class="md-tabs__link">
           
   
   
-  Experiments
+  How it works
 
         </a>
       </li>
@@ -287,15 +279,73 @@
     
     
       <li class="md-tabs__item">
-        <a href="../analysis_methods/" class="md-tabs__link">
+        <a href="../training/" class="md-tabs__link">
           
   
   
-  Analysis
+  Training
 
         </a>
       </li>
     
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../evaluation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Evaluation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../findings/" class="md-tabs__link">
+          
+  
+  
+  Findings
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../log/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Log
+
+      </a>
+    </li>
   
 
       
@@ -312,6 +362,45 @@
     
   
   Roadmap
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../archive/" class="md-tabs__link">
+          
+  
+  
+  Archive
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../glossary/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Glossary
 
       </a>
     </li>
@@ -346,13 +435,13 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="TADA Single-Agent RL" class="md-nav__button md-logo" aria-label="TADA Single-Agent RL" data-md-component="logo">
+    <a href=".." title="TADA · single-agent RL" class="md-nav__button md-logo" aria-label="TADA · single-agent RL" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.56 3.91c.59.59.59 1.54 0 2.12l-3.89 3.89 2.12 9.19-1.41 1.42-3.88-7.43L9.6 17l.36 2.47-1.07 1.06-1.76-3.18-3.19-1.77L5 14.5l2.5.37L11.37 11 3.94 7.09l1.42-1.41 9.19 2.12 3.89-3.89c.56-.58 1.56-.58 2.12 0"/></svg>
 
     </a>
-    TADA Single-Agent RL
+    TADA · single-agent RL
   </label>
   
   <ul class="md-nav__list" data-md-scrollfix>
@@ -414,7 +503,7 @@
   <span class="md-ellipsis">
     
   
-    Reference
+    Models
   
 
     
@@ -430,7 +519,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Reference
+    Models
   
 
           </label>
@@ -443,14 +532,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../mdp/" class="md-nav__link">
+      <a href="../models/best/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    MDP & Environment
+    Best model
   
 
     
@@ -471,7 +560,1193 @@
   
   
     <li class="md-nav__item">
-      <a href="../observations/" class="md-nav__link">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Leaderboard
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Windowed
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Windowed
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_43/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_43
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_42/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_42
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_41/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_41
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_40/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_40
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_39/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_39
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_38/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_38
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_37/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_37
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_36/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_36
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_35/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_35
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_34/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_34
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_33/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_33
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_32/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_32
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_31/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_31
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10-aircraft
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    10-aircraft
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_30_pms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_30_pms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_29/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_29
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_28/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_28
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_27a/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_27a
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_27/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_27
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_26/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_26
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_25/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_25
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_24_pms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_24_pms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_24/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_24
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_23/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_23
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_22/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_22
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_21/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_21
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_20/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_20
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_19/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_19
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_18/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_18
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_17/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_17
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_16_b/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_16_b
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_16_a/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_16_a
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_16/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_16
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../renders/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Renders
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How it works
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    How it works
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how/problem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The problem
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how/environments/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Environments
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../how/observations/" class="md-nav__link">
         
   
   
@@ -499,14 +1774,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../reward/" class="md-nav__link">
+      <a href="../how/actions/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Reward
+    Actions & reselection
   
 
     
@@ -527,14 +1802,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../pbrs/" class="md-nav__link">
+      <a href="../how/objective/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Reward shaping (PBRS)
+    Objective & reward
   
 
     
@@ -555,14 +1830,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../separation/" class="md-nav__link">
+      <a href="../how/separation/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Loss of separation
+    Loss-of-separation rules
   
 
     
@@ -571,356 +1846,6 @@
   
 
       </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../training/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Training
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../instrumentation/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Instrumentation
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../windowed/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Windowed env (20 flights)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-    
-  
-  
-  
-    
-    
-    
-    
-      
-        
-        
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Experiments
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_4">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Experiments
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../experiments/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Experiment log
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Successful results
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Successful results
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#run-8-atc_run_1_16" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Run 8 — atc_run_1_16 best model
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Run 8 — atc_run_1_16 best model">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#renders" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Renders
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#refusal-shield-sweep-100-seeds" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Refusal-shield sweep (100 seeds)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adding-a-new-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Adding a new run
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#run-1_26-1_27" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Runs 1_26 / 1_27 — 22 clearances vs 15, side by side
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Runs 1_26 / 1_27 — 22 clearances vs 15, side by side">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#seed-1194819984-the-reduced-set-wins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Seed 1194819984 — the reduced set wins
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#seed-1699226064-the-reduced-set-fails-badly" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Seed 1699226064 — the reduced set fails badly
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-15-clearance-agent-over-eight-consecutive-eval-scenarios" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The 15-clearance agent over eight consecutive eval scenarios
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -963,7 +1888,7 @@
   <span class="md-ellipsis">
     
   
-    Analysis
+    Training
   
 
     
@@ -979,7 +1904,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Analysis
+    Training
   
 
           </label>
@@ -992,14 +1917,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../analysis_methods/" class="md-nav__link">
+      <a href="../training/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    How an agent is tested
+    From scratch
   
 
     
@@ -1020,14 +1945,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../analysis_log/" class="md-nav__link">
+      <a href="../training/reference/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Test log
+    Reference
   
 
     
@@ -1048,14 +1973,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../analysis_v1_v2/" class="md-nav__link">
+      <a href="../training/compute/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    22 clearances vs 15
+    Compute
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../training/tensorboard/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    TensorBoard
   
 
     
@@ -1083,6 +2036,343 @@
   
   
     <li class="md-nav__item">
+      <a href="../evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Findings
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Findings
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../findings/reselection/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reselection
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../findings/sequencing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sequencing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../findings/order-first/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Order first? (Phase 0)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../findings/capacity/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Over-capacity & long streams
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../findings/lookahead/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search at inference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../findings/curriculum/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Training from scratch
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../findings/evaluation-noise/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Evaluation noise
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../log/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Log
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../roadmap/" class="md-nav__link">
         
   
@@ -1091,6 +2381,260 @@
     
   
     Roadmap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archive
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Archive
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../archive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../archive/clearance-sets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    22 clearances vs 15
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../archive/ten-aircraft-reward/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The 10-aircraft reward
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../archive/ten-aircraft-tests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    10-aircraft tests
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../archive/early-runs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Early runs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../archive/point-merge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Point merge
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../glossary/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Glossary
   
 
     
@@ -1123,114 +2667,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#run-8-atc_run_1_16" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Run 8 — atc_run_1_16 best model
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Run 8 — atc_run_1_16 best model">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#renders" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Renders
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#refusal-shield-sweep-100-seeds" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Refusal-shield sweep (100 seeds)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adding-a-new-run" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Adding a new run
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#run-1_26-1_27" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Runs 1_26 / 1_27 — 22 clearances vs 15, side by side
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Runs 1_26 / 1_27 — 22 clearances vs 15, side by side">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#seed-1194819984-the-reduced-set-wins" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Seed 1194819984 — the reduced set wins
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#seed-1699226064-the-reduced-set-fails-badly" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Seed 1699226064 — the reduced set fails badly
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-15-clearance-agent-over-eight-consecutive-eval-scenarios" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The 15-clearance agent over eight consecutive eval scenarios
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -1246,615 +2682,21 @@
 
 
 
-<h1 id="successful-results">Successful results<a class="headerlink" href="#successful-results" title="Permanent link">&para;</a></h1>
-<div class="admonition abstract">
-<p class="admonition-title">TL;DR</p>
-<p>Curated renders and shield sweeps per run. For the comparable cross-run numbers see the
-<a href="../experiments/#recent-runs">experiment log</a> instead — everything there is scored on the
-same fixed 100-seed pool, which the per-run material on this page is not.</p>
-</div>
-<p>Curated highlights from the <strong>best checkpoints</strong> of individual runs: deterministic render
-clips, plus the full eval-time <strong>refusal-shield sweep</strong> over all 100 evaluation seeds. Each
-subsection links back to the matching entry in the <a href="../experiments/">experiment log</a>, which
-explains <em>what changed</em> in that run and <em>why</em> — this page is the "here's what it looks like
-when it works" companion to that narrative.</p>
-<div class="admonition note">
-<p class="admonition-title">How this page grows</p>
-<p>One subsection per run, added as a checkpoint becomes worth showcasing. Each carries
-(1) a hyperlink to its <a href="../experiments/">experiment-log</a> entry (by run number), (2) a few
-curated render <code>.mp4</code>s, and (3) the refusal-shield sweep table — a 9-row summary plus a
-collapsible per-seed breakdown across all 100 eval seeds. See
-<a href="#adding-a-new-run">Adding a new run</a> for the template.</p>
-</div>
-<hr />
-<h2 id="run-8-atc_run_1_16">Run 8 — <code>atc_run_1_16</code> best model<a class="headerlink" href="#run-8-atc_run_1_16" title="Permanent link">&para;</a></h2>
-<div class="admonition note">
-<p class="admonition-title">Historical renders: 3D approach view</p>
-<p>Kept as rendered. Run <code>1_16</code> predates the 1_26 observation encoding (log-scaled deviation,
-the conflict-band redesign), which the code deliberately does not replay. A re-render
-today would show the checkpoint reacting to inputs it was never trained on, not the agent
-these clips document.</p>
-</div>
-<p>→ <strong>Experiment log:</strong> <a href="../experiments/#run-8">Run 8 — 5-tier success + autoregressive policy</a>.</p>
-<p>The first checkpoint to post a non-zero success rate (peak <strong>50%</strong> @5.7 M) and to break the
-per-aircraft deviation ceiling that held across Runs 1–7 (worst-aircraft deviation down to
-<strong>~99 s</strong>). Autoregressive PPO (aircraft head → clearance head), 5-tier graduated success
-bonus. Model: <code>experiments/atc_run_1_16/best/best_model.zip</code>.</p>
-<h3 id="renders">Renders<a class="headerlink" href="#renders" title="Permanent link">&para;</a></h3>
-<p>A/B on the <strong>same scenario</strong> (eval seed <code>1595180635</code>): the raw greedy policy versus the same
-policy under a reward-drop → next-best refusal shield. Note how <em>heavily</em> the shield intervenes —
-and that it does <strong>not</strong> help. As the <a href="#refusal-shield-sweep-100-seeds">sweep</a> below shows, for this
-tier-trained checkpoint the <strong>raw policy is already the strongest variant</strong> and every shield
-<em>degrades</em> it (on this very seed the shield's deviation blows out to ~1930 s vs. the raw policy's
-<strong>293 s</strong>).</p>
-<p><strong>Raw policy — no shield</strong> (seed 1595180635):</p>
-<video controls preload="metadata" width="100%">
-  <source src="../assets/renders/atc_run_1_16_best_model_det_legacy45s_noshield_ep1_seed1595180635.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p><strong>Reward-drop → next-best shield</strong> (same seed 1595180635):</p>
-<video controls preload="metadata" width="100%">
-  <source src="../assets/renders/atc_run_1_16_best_model_det_legacy45s_rdrop_next_best_ep1_seed1595180635.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p><strong>Full eval montage</strong> — every eval scenario, reward-drop → next-best shield:</p>
-<video controls preload="metadata" width="100%">
-  <source src="../assets/renders/atc_run_1_16_best_model_det_rdrop_next_best_alleval.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p>More clips from this checkpoint:</p>
+<h1 id="this-page-has-moved">This page has moved<a class="headerlink" href="#this-page-has-moved" title="Permanent link">&para;</a></h1>
+<p>The site was reorganised on 28 Sep 2026. This content now lives at:</p>
 <ul>
-<li><a href="../assets/renders/atc_run_1_16_best_model_det_legacy45s_noshield_ep1_seed1181241943.mp4">Raw policy, seed 1181241943</a> · <a href="../assets/renders/atc_run_1_16_best_model_det_legacy45s_rdrop_next_best_ep1_seed1181241943.mp4">same seed, reward-drop → next-best</a></li>
-<li><a href="../assets/renders/atc_run_1_16_best_model_det_legacy45s_noshield_ep10.mp4">10-episode reel, raw policy (45 s interval)</a></li>
-<li><a href="../assets/renders/atc_run_1_16_best_model_det_noshield_ep5.mp4">5-episode reel, raw policy</a> · <a href="../assets/renders/atc_run_1_16_best_model_det_noshield_ep10_NOTlegacyinterval.mp4">10-episode reel, raw policy (non-legacy interval)</a></li>
+<li><a href="../renders/">Render gallery</a></li>
+<li><a href="../archive/ten-aircraft-tests/">10-aircraft tests (shield sweep)</a></li>
 </ul>
-<h3 id="refusal-shield-sweep-100-seeds">Refusal-shield sweep (100 seeds)<a class="headerlink" href="#refusal-shield-sweep-100-seeds" title="Permanent link">&para;</a></h3>
-<p>Does eval-time <strong>postprocessing</strong> squeeze more out of this checkpoint? A <em>refusal shield</em>
-(see <a href="../mdp/#eval-time-action-shield">MDP → eval-time action shield</a>) is a read-only one-step
-look-ahead (<code>env.peek_action</code>): it refuses the policy's chosen clearance
-when that action either <strong>drops predicted reward</strong> (<code>reward-drop</code>) or <strong>risks a critical
-conflict</strong> (<code>critical-conflict</code>) — or <strong>both</strong> — and substitutes either <code>do_nothing</code> or the
-<strong><code>next_best</code></strong> valid clearance. Every variant is run on the <strong>same 100 eval scenarios</strong>
-(seeds re-seeded deterministically per reset), alongside <code>NOOP</code> and <code>random</code> baselines and the
-unshielded <code>trained_raw</code> policy.</p>
-<p>Columns: <strong>mean tier</strong> = mean success tier reached (0–5), <strong>success %</strong> = episodes reaching
-<strong>Tier 5</strong> (<code>is_success</code> — all aircraft landed within ±60 s), <strong>abs_dev</strong> = mean total absolute
-landing deviation (s, lower is better), <strong>sep %</strong> / <strong>exit %</strong> = episodes with a separation loss /
-airspace exit, <strong>refusals/ep</strong> = mean shield overrides per episode.</p>
-<table>
-<thead>
-<tr>
-<th>variant</th>
-<th>refusal fallback</th>
-<th style="text-align: right;">mean tier</th>
-<th style="text-align: right;">success %</th>
-<th style="text-align: right;">abs_dev (s)</th>
-<th style="text-align: right;">sep %</th>
-<th style="text-align: right;">exit %</th>
-<th style="text-align: right;">refusals/ep</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>NOOP (do-nothing)</td>
-<td>—</td>
-<td style="text-align: right;">0.14</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">2552</td>
-<td style="text-align: right;">89</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.0</td>
-</tr>
-<tr>
-<td>random valid</td>
-<td>—</td>
-<td style="text-align: right;">0.00</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">3941</td>
-<td style="text-align: right;">95</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.0</td>
-</tr>
-<tr>
-<td>trained_raw</td>
-<td>none</td>
-<td style="text-align: right;">3.37</td>
-<td style="text-align: right;">52</td>
-<td style="text-align: right;">336</td>
-<td style="text-align: right;">19</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.0</td>
-</tr>
-<tr>
-<td>reward-drop</td>
-<td>do_nothing</td>
-<td style="text-align: right;">2.72</td>
-<td style="text-align: right;">38</td>
-<td style="text-align: right;">807</td>
-<td style="text-align: right;">25</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">77.2</td>
-</tr>
-<tr>
-<td>reward-drop</td>
-<td>next_best</td>
-<td style="text-align: right;">2.65</td>
-<td style="text-align: right;">40</td>
-<td style="text-align: right;">707</td>
-<td style="text-align: right;">26</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">79.9</td>
-</tr>
-<tr>
-<td>critical-conflict</td>
-<td>do_nothing</td>
-<td style="text-align: right;">2.66</td>
-<td style="text-align: right;">35</td>
-<td style="text-align: right;">682</td>
-<td style="text-align: right;">18</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">16.1</td>
-</tr>
-<tr>
-<td>critical-conflict</td>
-<td>next_best</td>
-<td style="text-align: right;">2.95</td>
-<td style="text-align: right;">43</td>
-<td style="text-align: right;">581</td>
-<td style="text-align: right;">17</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">12.4</td>
-</tr>
-<tr>
-<td>both</td>
-<td>do_nothing</td>
-<td style="text-align: right;">2.52</td>
-<td style="text-align: right;">32</td>
-<td style="text-align: right;">927</td>
-<td style="text-align: right;">20</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">80.5</td>
-</tr>
-<tr>
-<td>both</td>
-<td>next_best</td>
-<td style="text-align: right;">2.76</td>
-<td style="text-align: right;">41</td>
-<td style="text-align: right;">809</td>
-<td style="text-align: right;">20</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">81.0</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Takeaways.</strong> This inverts the older pre-tier <code>atc_run_1_14</code> result (where shields recovered a
-lot; see <code>analysis/2026-06-24_shield_benchmark/</code>). For this <strong>tier-trained</strong> 1_16 best model the
-<strong>raw policy is the single strongest variant</strong> — mean tier <strong>3.37</strong>, <strong>52 %</strong> Tier-5 success,
-<strong>336 s</strong> deviation and the lowest separation rate (<strong>19 %</strong>) — and <strong>every shield makes it
-worse</strong>, while firing <strong>12–81 refusals/episode</strong>. The gentlest is <code>critical-conflict + next_best</code>
-(tier 2.95, 581 s, 17 % sep, ~12 refusals): it shaves separation a touch but still costs
-tier/punctuality; the <code>reward-drop</code> and <code>both</code> shields override ~77–81×/episode and hurt most. The
-<code>NOOP</code> / <code>random</code> baselines (89–95 % of episodes lose separation, ~0 tier) confirm the task is far
-from trivial.</p>
-<p>This is exactly what the <a href="../mdp/#eval-time-action-shield">shield hypothesis</a> predicts when an agent
-is <strong>near-optimal for its own objective</strong>: postprocessing can't recover performance the policy
-didn't leave on the table, so the remaining lever is better <em>training</em>, not more eval-time shielding.</p>
-<p>Raw per-episode rows: <code>analysis/2026-06-26_shield_benchmark_1_16/results.csv</code>
-(harness: <code>analysis/2026-06-24_shield_benchmark/shield_benchmark.py</code>).</p>
-<details>
-<summary><strong>Per-seed sweep</strong> — total absolute deviation (s), all 100 seeds × 9 variants</summary>
-
-Columns: `raw` = trained_raw, `rd`/`cc`/`both` = reward-drop / critical-conflict / both checks,
-`DN`/`NB` = do_nothing / next_best fallback.
-
-| seed | noop | rand | raw | rd·DN | rd·NB | cc·DN | cc·NB | both·DN | both·NB |
-|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
-| 41 | 1060 | 4951 | 247 | 161 | 272 | 247 | 247 | 161 | 148 |
-| 786551703 | 502 | 5821 | 202 | 104 | 88 | 202 | 202 | 104 | 88 |
-| 1595180635 | 4926 | 3593 | 293 | 2709 | 1930 | 1299 | 827 | 2639 | 2654 |
-| 1001495968 | 696 | 3906 | 113 | 0 | 12 | 113 | 113 | 0 | 12 |
-| 1123251507 | 2916 | 5607 | 331 | 319 | 318 | 562 | 562 | 1048 | 313 |
-| 921959045 | 2250 | 3989 | 102 | 17 | 0 | 117 | 104 | 486 | 32 |
-| 478163327 | 993 | 5345 | 138 | 108 | 94 | 138 | 138 | 108 | 94 |
-| 107420369 | 845 | 6485 | 216 | 52 | 52 | 159 | 169 | 59 | 52 |
-| 1181241943 | 3243 | 2813 | 319 | 768 | 1204 | 772 | 536 | 679 | 1671 |
-| 1051802512 | 2292 | 3695 | 99 | 125 | 88 | 274 | 59 | 262 | 89 |
-| 958682846 | 2336 | 4290 | 155 | 42 | 348 | 683 | 572 | 491 | 62 |
-| 599310825 | 462 | 3871 | 97 | 13 | 10 | 97 | 97 | 13 | 10 |
-| 440213415 | 3603 | 1454 | 301 | 845 | 1157 | 1067 | 1099 | 1542 | 1728 |
-| 373399426 | 3773 | 4360 | 970 | 1044 | 905 | 1007 | 493 | 1419 | 1334 |
-| 1812140441 | 3286 | 1871 | 116 | 273 | 254 | 237 | 237 | 273 | 254 |
-| 136505587 | 4165 | 2908 | 573 | 2138 | 1724 | 1646 | 999 | 2138 | 1750 |
-| 127978094 | 1234 | 4226 | 125 | 67 | 39 | 59 | 110 | 371 | 39 |
-| 402418010 | 5404 | 3471 | 155 | 2260 | 1467 | 2362 | 1656 | 3411 | 1930 |
-| 939042955 | 2079 | 4737 | 70 | 1444 | 512 | 86 | 75 | 1444 | 512 |
-| 999270936 | 5038 | 3535 | 429 | 2043 | 1877 | 3006 | 2143 | 2354 | 3001 |
-| 113971123 | 3468 | 3324 | 782 | 2200 | 1598 | 1217 | 931 | 1518 | 1600 |
-| 854001193 | 1146 | 4526 | 197 | 87 | 45 | 305 | 66 | 197 | 68 |
-| 1801823908 | 2505 | 2646 | 46 | 135 | 61 | 75 | 100 | 496 | 64 |
-| 946785248 | 4273 | 3688 | 193 | 1647 | 1755 | 107 | 148 | 1417 | 2507 |
-| 1929338154 | 452 | 4870 | 170 | 21 | 0 | 170 | 170 | 21 | 0 |
-| 1194819984 | 1328 | 4345 | 93 | 159 | 146 | 98 | 103 | 132 | 132 |
-| 27911967 | 729 | 2449 | 194 | 110 | 104 | 310 | 310 | 110 | 104 |
-| 685731524 | 2064 | 3925 | 74 | 55 | 47 | 202 | 189 | 58 | 58 |
-| 1815115025 | 3030 | 2293 | 158 | 230 | 294 | 634 | 618 | 227 | 392 |
-| 1461364854 | 2365 | 3168 | 145 | 99 | 67 | 588 | 187 | 373 | 160 |
-| 1193448329 | 2535 | 4276 | 97 | 71 | 29 | 140 | 126 | 70 | 32 |
-| 667779376 | 6440 | 3312 | 1135 | 4904 | 5162 | 2855 | 2855 | 4904 | 5162 |
-| 924765563 | 4158 | 2180 | 203 | 683 | 814 | 386 | 779 | 2320 | 817 |
-| 1445662585 | 2956 | 2974 | 102 | 112 | 570 | 115 | 115 | 132 | 823 |
-| 438989805 | 2756 | 3058 | 188 | 108 | 388 | 183 | 225 | 170 | 238 |
-| 398340369 | 1066 | 4503 | 101 | 48 | 10 | 101 | 101 | 48 | 10 |
-| 1631775357 | 1557 | 2644 | 201 | 84 | 436 | 196 | 172 | 84 | 436 |
-| 415393687 | 1000 | 5308 | 226 | 52 | 36 | 57 | 93 | 52 | 36 |
-| 1541804686 | 2433 | 3381 | 78 | 34 | 26 | 871 | 864 | 87 | 717 |
-| 1477278577 | 3827 | 4722 | 285 | 2006 | 393 | 768 | 352 | 518 | 936 |
-| 1136108454 | 5605 | 3442 | 650 | 3430 | 2084 | 2308 | 1920 | 3450 | 2086 |
-| 186618211 | 1668 | 4122 | 65 | 192 | 304 | 79 | 75 | 937 | 237 |
-| 1973214822 | 2518 | 3803 | 148 | 156 | 135 | 146 | 145 | 174 | 112 |
-| 536124280 | 3640 | 2246 | 131 | 391 | 373 | 572 | 451 | 1168 | 455 |
-| 1625792787 | 4767 | 4927 | 215 | 1488 | 1066 | 970 | 972 | 1526 | 1184 |
-| 338444264 | 1233 | 3824 | 96 | 152 | 44 | 107 | 107 | 152 | 44 |
-| 1259191105 | 601 | 3082 | 139 | 163 | 46 | 147 | 147 | 163 | 46 |
-| 1553210608 | 1462 | 3478 | 262 | 270 | 196 | 246 | 225 | 270 | 212 |
-| 825873196 | 1128 | 5433 | 180 | 114 | 103 | 205 | 205 | 114 | 103 |
-| 298737106 | 975 | 6147 | 138 | 60 | 38 | 143 | 116 | 65 | 38 |
-| 196814233 | 5642 | 4685 | 2260 | 4036 | 3187 | 2298 | 2298 | 4036 | 3187 |
-| 978815630 | 841 | 4259 | 162 | 152 | 78 | 162 | 162 | 152 | 78 |
-| 1242911821 | 2346 | 2251 | 155 | 310 | 150 | 848 | 141 | 873 | 104 |
-| 342703921 | 354 | 3676 | 119 | 32 | 32 | 119 | 119 | 32 | 32 |
-| 999829240 | 928 | 3214 | 131 | 22 | 33 | 113 | 136 | 22 | 33 |
-| 433797840 | 663 | 4802 | 171 | 125 | 111 | 171 | 171 | 125 | 111 |
-| 1632629719 | 3325 | 3681 | 176 | 764 | 1022 | 787 | 787 | 764 | 1022 |
-| 1193887545 | 1995 | 3620 | 120 | 112 | 311 | 108 | 86 | 59 | 83 |
-| 1947382419 | 5406 | 4728 | 1952 | 2873 | 2813 | 1858 | 1858 | 3398 | 3530 |
-| 1566942273 | 2051 | 5146 | 181 | 154 | 144 | 242 | 188 | 197 | 122 |
-| 698594025 | 589 | 3519 | 148 | 94 | 94 | 154 | 173 | 94 | 105 |
-| 1589915144 | 6471 | 6441 | 1888 | 4806 | 3882 | 3252 | 2773 | 4806 | 4475 |
-| 1525876051 | 1522 | 3952 | 78 | 44 | 37 | 49 | 49 | 44 | 39 |
-| 899825838 | 2086 | 3307 | 105 | 59 | 54 | 131 | 130 | 59 | 69 |
-| 1146660997 | 4715 | 3314 | 330 | 2015 | 1768 | 1270 | 1244 | 2015 | 2267 |
-| 306671447 | 2198 | 4291 | 158 | 81 | 82 | 145 | 145 | 81 | 82 |
-| 735034881 | 979 | 4949 | 64 | 66 | 64 | 64 | 64 | 66 | 64 |
-| 1051454923 | 2881 | 3181 | 118 | 1622 | 988 | 1113 | 153 | 1331 | 67 |
-| 701808367 | 1905 | 3525 | 88 | 42 | 61 | 107 | 66 | 60 | 61 |
-| 1985392498 | 1415 | 4460 | 112 | 110 | 98 | 134 | 134 | 110 | 92 |
-| 1629748727 | 1464 | 3740 | 82 | 0 | 0 | 94 | 68 | 0 | 0 |
-| 1159417075 | 1163 | 4154 | 111 | 10 | 0 | 87 | 118 | 10 | 0 |
-| 943239974 | 1699 | 3252 | 128 | 433 | 372 | 118 | 659 | 114 | 47 |
-| 1392783743 | 952 | 5316 | 298 | 222 | 229 | 255 | 325 | 222 | 229 |
-| 240251661 | 2576 | 4307 | 212 | 478 | 476 | 736 | 824 | 478 | 476 |
-| 983753977 | 1114 | 3748 | 35 | 46 | 67 | 452 | 72 | 69 | 14 |
-| 137869475 | 3941 | 3673 | 216 | 1192 | 761 | 702 | 701 | 1303 | 905 |
-| 1354860540 | 517 | 5360 | 150 | 15 | 0 | 150 | 150 | 15 | 0 |
-| 1722989659 | 4026 | 4836 | 608 | 660 | 611 | 2278 | 651 | 2332 | 2653 |
-| 1149938334 | 2046 | 4771 | 123 | 138 | 36 | 147 | 144 | 138 | 36 |
-| 284277889 | 642 | 4720 | 96 | 78 | 67 | 96 | 96 | 78 | 67 |
-| 906164396 | 720 | 3581 | 144 | 0 | 0 | 124 | 115 | 0 | 0 |
-| 1351531223 | 1835 | 4735 | 181 | 112 | 403 | 181 | 181 | 144 | 377 |
-| 913224047 | 1225 | 2860 | 130 | 26 | 37 | 104 | 89 | 26 | 37 |
-| 2144181937 | 3634 | 2772 | 360 | 786 | 1065 | 399 | 268 | 1014 | 491 |
-| 1699226064 | 6449 | 4710 | 4093 | 3296 | 3245 | 4438 | 3988 | 4182 | 3330 |
-| 1970753705 | 4713 | 2689 | 402 | 2772 | 1473 | 3113 | 3028 | 3229 | 2967 |
-| 613628803 | 2186 | 3983 | 94 | 349 | 62 | 451 | 151 | 410 | 62 |
-| 1137651678 | 2127 | 4167 | 144 | 241 | 218 | 303 | 280 | 220 | 197 |
-| 599707677 | 5955 | 3339 | 1499 | 4721 | 4428 | 2434 | 2153 | 4721 | 4807 |
-| 1059257080 | 6859 | 5028 | 2368 | 4216 | 4259 | 2853 | 3052 | 4712 | 4672 |
-| 1128466620 | 1393 | 3777 | 88 | 96 | 31 | 84 | 96 | 29 | 28 |
-| 1840109255 | 2185 | 3681 | 90 | 60 | 32 | 70 | 70 | 60 | 32 |
-| 1715412119 | 1010 | 3325 | 107 | 138 | 224 | 159 | 141 | 132 | 193 |
-| 1554762903 | 1586 | 3825 | 146 | 198 | 65 | 234 | 229 | 433 | 65 |
-| 941975480 | 4793 | 2866 | 267 | 2398 | 3197 | 1936 | 2025 | 2515 | 3082 |
-| 594130308 | 1319 | 4904 | 131 | 113 | 103 | 124 | 141 | 114 | 103 |
-| 2119634399 | 4358 | 3491 | 274 | 1116 | 1516 | 542 | 640 | 1967 | 1472 |
-| 390452952 | 4574 | 4150 | 252 | 3086 | 1649 | 1179 | 1318 | 2901 | 2307 |
-| 202363285 | 5058 | 4268 | 504 | 2350 | 2359 | 2783 | 2185 | 2863 | 2003 |
-
-</details>
-
-<details>
-<summary><strong>Per-seed sweep</strong> — success-tier bonus, all 100 seeds × 9 variants</summary>
-
-| seed | noop | rand | raw | rd·DN | rd·NB | cc·DN | cc·NB | both·DN | both·NB |
-|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
-| 41 | 0.0 | 0.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 |
-| 786551703 | 0.0 | 0.0 | 5.0 | 4.0 | 4.0 | 5.0 | 5.0 | 4.0 | 4.0 |
-| 1595180635 | 0.0 | 0.0 | 3.0 | 0.0 | 0.0 | 1.0 | 2.0 | 0.0 | 0.0 |
-| 1001495968 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 1123251507 | 0.0 | 0.0 | 3.0 | 3.0 | 3.0 | 2.0 | 2.0 | 1.0 | 3.0 |
-| 921959045 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 2.0 | 5.0 |
-| 478163327 | 0.0 | 0.0 | 4.0 | 5.0 | 5.0 | 4.0 | 4.0 | 5.0 | 5.0 |
-| 107420369 | 0.0 | 0.0 | 3.0 | 5.0 | 5.0 | 3.0 | 3.0 | 5.0 | 5.0 |
-| 1181241943 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.0 | 1.0 | 1.0 | 0.0 |
-| 1051802512 | 0.0 | 0.0 | 5.0 | 4.0 | 5.0 | 0.0 | 5.0 | 4.0 | 4.0 |
-| 958682846 | 0.0 | 0.0 | 5.0 | 5.0 | 2.0 | 2.0 | 2.0 | 2.0 | 5.0 |
-| 599310825 | 2.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 440213415 | 0.0 | 0.0 | 3.0 | 0.0 | 0.0 | 1.0 | 1.0 | 0.0 | 0.0 |
-| 373399426 | 0.0 | 0.0 | 1.0 | 1.0 | 2.0 | 1.0 | 2.0 | 1.0 | 0.0 |
-| 1812140441 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 136505587 | 0.0 | 0.0 | 2.0 | 0.0 | 0.0 | 1.0 | 1.0 | 0.0 | 0.0 |
-| 127978094 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 2.0 | 5.0 |
-| 402418010 | 0.0 | 0.0 | 0.0 | 0.0 | 1.0 | 0.0 | 1.0 | 0.0 | 1.0 |
-| 939042955 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 999270936 | 0.0 | 0.0 | 3.0 | 0.0 | 0.0 | 0.0 | 1.0 | 0.0 | 0.0 |
-| 113971123 | 0.0 | 0.0 | 2.0 | 0.0 | 1.0 | 1.0 | 1.0 | 0.0 | 1.0 |
-| 854001193 | 0.0 | 0.0 | 4.0 | 5.0 | 5.0 | 3.0 | 5.0 | 4.0 | 5.0 |
-| 1801823908 | 0.0 | 0.0 | 5.0 | 4.0 | 5.0 | 5.0 | 5.0 | 2.0 | 5.0 |
-| 946785248 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 1929338154 | 0.0 | 0.0 | 4.0 | 5.0 | 5.0 | 4.0 | 4.0 | 5.0 | 5.0 |
-| 1194819984 | 0.0 | 0.0 | 5.0 | 4.0 | 4.0 | 5.0 | 5.0 | 4.0 | 4.0 |
-| 27911967 | 1.0 | 0.0 | 3.0 | 4.0 | 4.0 | 3.0 | 0.0 | 4.0 | 4.0 |
-| 685731524 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 4.0 | 4.0 | 5.0 | 5.0 |
-| 1815115025 | 0.0 | 0.0 | 4.0 | 4.0 | 3.0 | 2.0 | 2.0 | 4.0 | 2.0 |
-| 1461364854 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 2.0 | 5.0 | 2.0 | 4.0 |
-| 1193448329 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 667779376 | 0.0 | 0.0 | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 924765563 | 0.0 | 0.0 | 5.0 | 1.0 | 1.0 | 3.0 | 1.0 | 0.0 | 1.0 |
-| 1445662585 | 0.0 | 0.0 | 0.0 | 0.0 | 2.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 438989805 | 0.0 | 0.0 | 5.0 | 5.0 | 2.0 | 5.0 | 4.0 | 5.0 | 4.0 |
-| 398340369 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 1631775357 | 0.0 | 0.0 | 4.0 | 4.0 | 0.0 | 4.0 | 5.0 | 4.0 | 0.0 |
-| 415393687 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 1541804686 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 2.0 | 2.0 | 5.0 | 2.0 |
-| 1477278577 | 0.0 | 0.0 | 4.0 | 1.0 | 2.0 | 2.0 | 4.0 | 2.0 | 1.0 |
-| 1136108454 | 0.0 | 0.0 | 1.0 | 0.0 | 0.0 | 0.0 | 1.0 | 0.0 | 0.0 |
-| 186618211 | 0.0 | 0.0 | 5.0 | 3.0 | 0.0 | 5.0 | 5.0 | 1.0 | 3.0 |
-| 1973214822 | 0.0 | 0.0 | 3.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 |
-| 536124280 | 0.0 | 0.0 | 5.0 | 2.0 | 2.0 | 2.0 | 2.0 | 1.0 | 2.0 |
-| 1625792787 | 0.0 | 0.0 | 5.0 | 1.0 | 0.0 | 2.0 | 2.0 | 0.0 | 0.0 |
-| 338444264 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 1259191105 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 1553210608 | 0.0 | 0.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 |
-| 825873196 | 0.0 | 0.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 |
-| 298737106 | 2.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 196814233 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 978815630 | 0.0 | 0.0 | 5.0 | 4.0 | 5.0 | 5.0 | 5.0 | 4.0 | 5.0 |
-| 1242911821 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 342703921 | 3.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 999829240 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 433797840 | 2.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 1632629719 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 1193887545 | 0.0 | 0.0 | 5.0 | 5.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 1947382419 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 1566942273 | 0.0 | 0.0 | 4.0 | 4.0 | 4.0 | 4.0 | 5.0 | 4.0 | 4.0 |
-| 698594025 | 2.0 | 0.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 |
-| 1589915144 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.0 | 1.0 | 0.0 | 0.0 |
-| 1525876051 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 899825838 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 1146660997 | 0.0 | 0.0 | 3.0 | 0.0 | 1.0 | 1.0 | 1.0 | 0.0 | 1.0 |
-| 306671447 | 0.0 | 0.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 |
-| 735034881 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 1051454923 | 0.0 | 0.0 | 5.0 | 0.0 | 0.0 | 1.0 | 5.0 | 1.0 | 5.0 |
-| 701808367 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 1985392498 | 0.0 | 0.0 | 5.0 | 5.0 | 4.0 | 5.0 | 5.0 | 5.0 | 4.0 |
-| 1629748727 | 1.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 1159417075 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 943239974 | 0.0 | 0.0 | 5.0 | 2.0 | 2.0 | 5.0 | 0.0 | 4.0 | 5.0 |
-| 1392783743 | 0.0 | 0.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 |
-| 240251661 | 0.0 | 0.0 | 4.0 | 0.0 | 0.0 | 2.0 | 2.0 | 0.0 | 0.0 |
-| 983753977 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 2.0 | 5.0 | 5.0 | 5.0 |
-| 137869475 | 0.0 | 0.0 | 4.0 | 1.0 | 1.0 | 2.0 | 2.0 | 1.0 | 1.0 |
-| 1354860540 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 1722989659 | 0.0 | 0.0 | 1.0 | 1.0 | 2.0 | 0.0 | 2.0 | 0.0 | 0.0 |
-| 1149938334 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 284277889 | 1.0 | 0.0 | 4.0 | 4.0 | 5.0 | 4.0 | 4.0 | 4.0 | 5.0 |
-| 906164396 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 1351531223 | 0.0 | 0.0 | 4.0 | 4.0 | 2.0 | 4.0 | 4.0 | 4.0 | 2.0 |
-| 913224047 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 2144181937 | 0.0 | 0.0 | 3.0 | 2.0 | 0.0 | 2.0 | 4.0 | 1.0 | 2.0 |
-| 1699226064 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 1970753705 | 0.0 | 0.0 | 3.0 | 0.0 | 0.0 | 0.0 | 1.0 | 0.0 | 1.0 |
-| 613628803 | 0.0 | 0.0 | 5.0 | 0.0 | 5.0 | 0.0 | 5.0 | 2.0 | 5.0 |
-| 1137651678 | 0.0 | 0.0 | 4.0 | 4.0 | 4.0 | 3.0 | 3.0 | 4.0 | 4.0 |
-| 599707677 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 1059257080 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 1128466620 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 1840109255 | 0.0 | 0.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 | 5.0 |
-| 1715412119 | 0.0 | 0.0 | 5.0 | 5.0 | 4.0 | 0.0 | 4.0 | 4.0 | 4.0 |
-| 1554762903 | 0.0 | 0.0 | 5.0 | 4.0 | 5.0 | 4.0 | 4.0 | 1.0 | 5.0 |
-| 941975480 | 0.0 | 0.0 | 4.0 | 0.0 | 0.0 | 1.0 | 1.0 | 0.0 | 0.0 |
-| 594130308 | 0.0 | 0.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 | 4.0 |
-| 2119634399 | 0.0 | 0.0 | 4.0 | 0.0 | 1.0 | 2.0 | 2.0 | 1.0 | 1.0 |
-| 390452952 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 1.0 | 1.0 | 0.0 | 0.0 |
-| 202363285 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-
-</details>
-
-<hr />
-<h2 id="adding-a-new-run">Adding a new run<a class="headerlink" href="#adding-a-new-run" title="Permanent link">&para;</a></h2>
-<p>To add a showcase for run <strong>N</strong> (<code>atc_run_1_X</code>):</p>
-<ol>
-<li><strong>Renders.</strong> Drop the curated <code>.mp4</code>s into <code>docs/assets/renders/</code> and embed them with a
-   <code>&lt;video controls preload="metadata" width="100%"&gt;</code> block (src is <code>../assets/renders/&lt;file&gt;.mp4</code>,
-   relative to this page). Keep a couple of short single-episode clips inline; link the long reels.</li>
-<li><strong>Sweep.</strong> Run the shield benchmark on that checkpoint's best model over all 100 seeds:
-   <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>/home/leander/miniconda3/envs/tada/bin/python<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>analysis/2026-06-24_shield_benchmark/shield_benchmark.py<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>--model<span class="w"> </span>experiments/atc_run_1_X/best/best_model.zip<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--out-dir<span class="w"> </span>analysis/&lt;date&gt;_shield_benchmark_1_X
-</code></pre></div>
-   then render the summary + per-seed pivots from the resulting <code>results.csv</code>.</li>
-<li><strong>Cross-link.</strong> Add a heading whose first line points back at the experiment log — those
-   headings carry stable anchors for exactly this purpose:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="gu">## Run N — `atc_run_1_X` best model { #run-N-atc_run_1_X }</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>→ <span class="gs">**Experiment log:**</span> [<span class="nt">Run N — what changed</span>](<span class="na">experiments.md#run-N</span>).
-</code></pre></div>
-<hr />
-<h2 id="run-1_26-1_27">Runs 1_26 / 1_27 — 22 clearances vs 15, side by side<a class="headerlink" href="#run-1_26-1_27" title="Permanent link">&para;</a></h2>
-<div class="admonition note">
-<p class="admonition-title">Historical renders: 3D approach view</p>
-<p>These six clips predate the altitude-vs-time side view and are kept as rendered. They cannot
-be regenerated identically. The <code>--rng-seed</code> that fixed their observation frame was not
-recorded, and re-rendering with a pinned seed produces <em>different</em> episodes. On seed
-1194819984 all three arms then reach tier 4; on seed 1699226064 <code>1_27a</code> no longer
-collapses. The clips were chosen as the largest-margin examples for one frame, so
-replacing them would publish evidence that no longer shows what this section describes.</p>
-</div>
-<p>→ <strong>Experiment log:</strong> <a href="../experiments/#recent-runs">Runs 1_18–1_27</a> ·
-<strong>Analysis:</strong> <a href="../analysis_v1_v2/">22 clearances vs 15</a></p>
-<p>Both checkpoints are at exactly <strong>10M steps</strong>, both deterministic, both replaying the <em>same</em>
-scenario with the <em>same</em> pinned observation frame. Run <code>1_26</code> uses the 22-clearance set
-(<code>TADA_ACTION_SET=v1</code>), run <code>1_27</code> the 15-clearance set. The action markers on the map decode
-against the legend in the left column, which is generated from whichever set is active — <strong>the
-ids do not mean the same thing in the two clips</strong>. Marker <code>8</code> is a right turn under v1 and
-<code>LENGTHEN_TROMBONE</code> under v2.</p>
-<div class="admonition warning">
-<p class="admonition-title">Both sides pin <code>--rng-seed</code>, and that is not optional</p>
-<p>The observation frame is drawn from a global RNG that <code>reset()</code> never reseeds, so the <em>same</em>
-deterministic checkpoint on the <em>same</em> scenario can reach a different outcome in a different
-process. Measured: run <code>1_27</code> at 10M solves eval seed <code>41</code> at tier 5 in one invocation and
-stalls at tier 4 in another, with nothing changed but the frame. Any single-episode A/B
-without <code>--rng-seed</code> is partly comparing noise. See
-<a href="../analysis_methods/#repro">How an agent is tested</a>.</p>
-</div>
-<h3 id="seed-1194819984-the-reduced-set-wins">Seed 1194819984 — the reduced set wins<a class="headerlink" href="#seed-1194819984-the-reduced-set-wins" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>end reason</th>
-<th>tier</th>
-<th>total |deviation|</th>
-<th>clearances issued</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>1_26</code> — 22 clearances</td>
-<td><code>delayed</code></td>
-<td>4</td>
-<td>137.1 s</td>
-<td>40</td>
-</tr>
-<tr>
-<td><strong><code>1_27</code> — 15 clearances</strong></td>
-<td><strong><code>success</code></strong></td>
-<td><strong>5</strong></td>
-<td><strong>14.8 s</strong></td>
-<td>36</td>
-</tr>
-<tr>
-<td><strong><code>1_27a</code> — 15 clearances, corrected LR</strong></td>
-<td><strong><code>success</code></strong></td>
-<td><strong>5</strong></td>
-<td><strong>27.5 s</strong></td>
-<td>36</td>
-</tr>
-</tbody>
-</table>
-<p><strong>22 clearances</strong> — lands everyone, misses the ±60 s bar:</p>
-<video controls preload="metadata" width="100%">
-  <source src="../assets/renders/ab_seed1194819984_v1_22clr.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p><strong>15 clearances</strong> — same scenario, solved, with fewer clearances:</p>
-<video controls preload="metadata" width="100%">
-  <source src="../assets/renders/ab_seed1194819984_v2_15clr.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p><strong>15 clearances, corrected learning rate</strong> — still solved:</p>
-<video controls preload="metadata" width="100%">
-  <source src="../assets/renders/ab_seed1194819984_v2cos_15clr.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<h3 id="seed-1699226064-the-reduced-set-fails-badly">Seed 1699226064 — the reduced set fails badly<a class="headerlink" href="#seed-1699226064-the-reduced-set-fails-badly" title="Permanent link">&para;</a></h3>
-<p>The largest margin the other way, and not a near miss: <code>1_27</code> empties the airspace in <strong>28
-steps</strong> against <code>1_26</code>'s 70, landing the fleet 4 748 s off schedule in aggregate. It is also
-censored under <a href="../analysis_log/#t-attempts-1_27">attempts-to-solution</a> — unsolved in 20
-stochastic tries, best tier 2 — so this is a capability failure, not an unlucky rollout.</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>steps</th>
-<th>end reason</th>
-<th>tier</th>
-<th>total |deviation|</th>
-<th>clearances issued</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong><code>1_26</code> — 22 clearances</strong></td>
-<td>70</td>
-<td><strong><code>success</code></strong></td>
-<td><strong>5</strong></td>
-<td><strong>113.3 s</strong></td>
-<td>54</td>
-</tr>
-<tr>
-<td><code>1_27</code> — 15 clearances</td>
-<td>28</td>
-<td><code>delayed</code></td>
-<td>0</td>
-<td>4 747.9 s</td>
-<td>20</td>
-</tr>
-<tr>
-<td><code>1_27a</code> — 15 clearances, corrected LR</td>
-<td>52</td>
-<td><code>delayed</code></td>
-<td>0</td>
-<td>3 027.8 s</td>
-<td>37</td>
-</tr>
-</tbody>
-</table>
-<p>The third row is the point: <strong>fixing the learning rate does not fix this scenario.</strong> The
-corrected run works it for longer and still throws it away, issuing <code>LENGTHEN_TROMBONE</code> eight
-times and <code>SHORTEN_TROMBONE</code> not once.</p>
-<p><strong>22 clearances</strong> — works the fleet for 70 steps and solves it:</p>
-<video controls preload="metadata" width="100%">
-  <source src="../assets/renders/ab_seed1699226064_v1_22clr.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p><strong>15 clearances</strong> — same scenario, collapses:</p>
-<video controls preload="metadata" width="100%">
-  <source src="../assets/renders/ab_seed1699226064_v2_15clr.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p><strong>15 clearances, corrected learning rate</strong> — collapses the same way:</p>
-<video controls preload="metadata" width="100%">
-  <source src="../assets/renders/ab_seed1699226064_v2cos_15clr.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<div class="admonition note">
-<p class="admonition-title">Neither clip is the result</p>
-<p>The result is the <a href="../analysis_v1_v2/#head-to-head">100-seed table</a>. Across the pool the two
-policies disagree in <strong>both</strong> directions — 49 scenarios both solve, 20 only <code>1_26</code>, 11 only
-<code>1_27</code>, 20 neither. These two clips are the largest margin from each of the middle columns,
-shown together precisely so the pair is not an argument for either side.</p>
-</div>
-<h3 id="the-15-clearance-agent-over-eight-consecutive-eval-scenarios">The 15-clearance agent over eight consecutive eval scenarios<a class="headerlink" href="#the-15-clearance-agent-over-eight-consecutive-eval-scenarios" title="Permanent link">&para;</a></h3>
-<video controls preload="metadata" width="100%">
-  <source src="../assets/renders/1_27_v2_15clr_det_ep8_reel.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
-
-<p>The first eight seeds of the evaluation pool, in pool order, deterministic, no shield. Useful for
-watching <em>how</em> the reduced set flies rather than whether it wins.</p>
-<p>Re-rendered on 25 Sep with the altitude-vs-time side view, reproducibly this time:
-<code>--rng-seed 0</code>, on <code>flight_simulator</code> 0.1.52, the version the reel was first made on. Under
-0.2.80 the same seeds generate different scenarios. Three of the eight are solved. Script:
-<code>analysis/2026-09-25_renders_reel_1_27/render_reel.sh</code>. Watch — in particular the trombone
-being lengthened and shortened within a single episode, which was impossible under v1.</p>
 
 
 
 
 
 
+
+  
+  
 
 
 
@@ -1878,6 +2720,8 @@ being lengthened and shortened within a single episode, which was impossible und
       </main>
       
         <footer class="md-footer">
+  
+    
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
@@ -1904,10 +2748,12 @@ being lengthened and shortened within a single episode, which was impossible und
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/tada.js"></script>
       
     
   </body>
