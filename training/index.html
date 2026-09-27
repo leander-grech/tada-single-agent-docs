@@ -679,7 +679,18 @@
   <a href="#jax-learner" class="md-nav__link">
     <span class="md-ellipsis">
       
-        JAX learner and the vendored simulator (work in progress)
+        JAX learner and the vendored simulator
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training on a rented GPU host (vast.ai)
       
     </span>
   </a>
@@ -1239,7 +1250,18 @@
   <a href="#jax-learner" class="md-nav__link">
     <span class="md-ellipsis">
       
-        JAX learner and the vendored simulator (work in progress)
+        JAX learner and the vendored simulator
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vast" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training on a rented GPU host (vast.ai)
       
     </span>
   </a>
@@ -1529,7 +1551,7 @@ same seed generates a different scenario.</p>
 </tbody>
 </table>
 <hr />
-<h2 id="jax-learner">JAX learner and the vendored simulator (work in progress)<a class="headerlink" href="#jax-learner" title="Permanent link">&para;</a></h2>
+<h2 id="jax-learner">JAX learner and the vendored simulator<a class="headerlink" href="#jax-learner" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Added 26 Sep; SB3 (<code>main.py</code>) remains the default trainer and is unchanged</p>
 <p><strong><code>main_jax.py</code></strong> trains the same policy with a PPO learner written in JAX (<code>jax_ppo/</code>).</p>
@@ -1549,7 +1571,14 @@ same seed generates a different scenario.</p>
   ≤ 1.2e-7, including the critic warm-up (<code>tests/test_jax_ppo_update.py</code>).</li>
 </ul>
 </li>
-<li><strong>The update is ~6× faster:</strong> 1.3 s per 4 096 steps against 7–11 s for SB3 on this GPU.</li>
+<li><strong>The update is one compiled call per epoch</strong> (a <code>lax.scan</code> over the 16 minibatches,
+  SB3's target-KL early stop kept exactly: the minibatch that crosses it is counted but not
+  applied, verified by a third test case). <strong>0.13 s per 4 096 steps on an RTX 4090</strong>; the
+  first version made two calls per minibatch and took 1.3 s on the laptop and 4.9 s on a host
+  with slow cores, where the per-call overhead, not the GPU, set the time. SB3: 7–11 s.</li>
+<li><strong>Per-transition discount</strong> for <a href="../windowed/#reselection">reselection</a>: a pick that takes
+  no simulated time is discounted by 1 in GAE. With none, the advantages are bit-exact with
+  SB3's.</li>
 <li><strong>Not yet:</strong> resuming a JAX run (warm starts from any SB3 checkpoint work,
   <code>--init-weights</code>); SB3 resuming a JAX checkpoint restarts the Adam moments.</li>
 </ul>
@@ -1569,6 +1598,62 @@ wheel.</p>
 PyTorch in the <code>tada</code> env. They add CUDA packages without replacing PyTorch's; numpy is
 unchanged.</p>
 </div>
+<h2 id="vast">Training on a rented GPU host (vast.ai)<a class="headerlink" href="#vast" title="Permanent link">&para;</a></h2>
+<p>Runs <code>1_36</code>–<code>1_39</code> trained on a rented host, set up and torn down by scripts in
+<code>analysis/2026-09-26_1_36_multipick/vast/</code> of the code repo:</p>
+<ul>
+<li><strong>Upload:</strong> a <code>git archive</code> of the commit (the host has no <code>.git</code>, so <code>PROVENANCE.json</code>
+  records it into each run's <code>run_meta.json</code>), the dereferenced scenario configuration and
+  the checkpoints a run needs. The same package versions are installed and the equivalence
+  tests run on the host's GPU before anything trains.</li>
+<li><strong>Pipeline</strong> (<code>remote_pipeline.sh</code>, <code>extra_run.sh</code>): training, the 100-seed evaluations
+  (20-flight, stitched 2×20, 10 attempts, lookahead) and the failed-seed renders.</li>
+<li><strong>The laptop copies everything back every 10 minutes</strong> (checkpoints, VecNormalize,
+  TensorBoard, logs, results, renders). When all runs are done it makes a final copy, checks it
+  by checksum, and destroys the host. A failsafe on the host destroys it with its own
+  instance-scoped key if the laptop cannot (8 h after the end, 14 h at most).</li>
+</ul>
+<p><strong>What makes a host fast is per-core speed, not core count.</strong> Each environment steps its own
+Rust prediction rollout on one core.</p>
+<table>
+<thead>
+<tr>
+<th>host</th>
+<th>cores</th>
+<th>env steps/s (32 / 64 envs)</th>
+<th>PPO update</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>laptop, i7-1260P</td>
+<td>4P + 8E</td>
+<td>~356 (16 envs)</td>
+<td>1.3 s</td>
+<td>~320 steps/s; clamps to 375 MHz when hot</td>
+</tr>
+<tr>
+<td>2× EPYC 7B12 (Zen 2, 2.2 GHz)</td>
+<td>256 threads</td>
+<td>— / 491</td>
+<td>4.9 s</td>
+<td>no faster than the laptop: rejected</td>
+</tr>
+<tr>
+<td><strong>Threadripper PRO 7975WX (5.3 GHz)</strong> + RTX 4090</td>
+<td>64 threads</td>
+<td><strong>1 150 / 1 452</strong></td>
+<td><strong>0.13 s</strong></td>
+<td><strong>1 050–1 400 steps/s per run, two runs at once</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Two runs at once each kept ~1 400 steps/s: trained policies step faster than the random
+actions of the benchmark, and the host was never saturated. A 5M-step run takes ~65 minutes.
+One offered host was re-signing HTTPS traffic with its own certificate authority (package
+downloads failed verification) and was dropped. Check a new host first, by hand:
+<code>openssl s_client -connect files.pythonhosted.org:443</code> should show a public issuer.</p>
 <h2 id="experiment-directory-layout">Experiment directory layout<a class="headerlink" href="#experiment-directory-layout" title="Permanent link">&para;</a></h2>
 <div class="admonition info">
 <p class="admonition-title">Snapshots cover whole packages</p>

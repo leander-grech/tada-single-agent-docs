@@ -866,6 +866,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#reselection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reselection: a second clearance per step
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#failed-renders" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -873,6 +884,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Renders: failed seeds, best of 10 attempts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#failed-renders-1-36" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 1_36 (reselection)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-renders-1-35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 1_35
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1400,6 +1439,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#reselection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reselection: a second clearance per step
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#failed-renders" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1407,6 +1457,34 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Renders: failed seeds, best of 10 attempts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#failed-renders-1-36" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 1_36 (reselection)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-renders-1-35" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run 1_35
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1488,6 +1566,8 @@ a bonus once, at touchdown, from its actual landing deviation.</p>
 <p><strong>Zero-shot, before any training</strong> (run <code>1_29</code>'s best checkpoint, 20 seeds): <strong>79%</strong> of
 flights on time, <strong>10%</strong> of episodes lose separation, <strong>10%</strong> land all 20 flights on time.
 Run <code>1_31_windowed</code> is training from that checkpoint now.</p>
+<p><strong>Best agent: <code>1_38</code>, with <a href="#reselection">reselection</a></strong> (a second clearance within the
+45 s step): 93% of flights on time, all 20 on time in 63% of streams, separation lost in 3%.</p>
 <p>Two findings affect the existing env too:</p>
 <ul>
 <li><a href="#time-to-target-bug"><code>time_to_target</code> has been a dead feature</a> in every run so far.</li>
@@ -2154,6 +2234,10 @@ loss of separation, then bracket score, then fewest clearances).</p>
 <th></th>
 <th><code>1_32</code> final</th>
 <th><code>1_33</code> final</th>
+<th><code>1_35</code></th>
+<th><code>1_37</code> control</th>
+<th><code>1_36</code> reselection</th>
+<th><code>1_38</code> reselection</th>
 </tr>
 </thead>
 <tbody>
@@ -2161,31 +2245,55 @@ loss of separation, then bracket score, then fewest clearances).</p>
 <td>all on time, deterministic</td>
 <td>0.29</td>
 <td>0.20</td>
+<td>0.24</td>
+<td>0.34</td>
+<td><strong>0.65</strong></td>
+<td>0.63</td>
 </tr>
 <tr>
 <td>all on time, one sampled attempt (pass@1)</td>
 <td>0.20</td>
 <td>0.16</td>
+<td>0.17</td>
+<td>0.22</td>
+<td><strong>0.51</strong></td>
+<td>0.42</td>
 </tr>
 <tr>
 <td><strong>all on time in at least one of 10 attempts (pass@10)</strong></td>
 <td><strong>0.41</strong></td>
 <td><strong>0.44</strong></td>
+<td>0.47</td>
+<td>0.54</td>
+<td><strong>0.80</strong></td>
+<td>0.76</td>
 </tr>
 <tr>
 <td>separation lost: deterministic → best attempt</td>
 <td>0.21 → <strong>0.06</strong></td>
 <td>0.17 → <strong>0.05</strong></td>
+<td>0.08 → 0.04</td>
+<td>0.04 → 0.01</td>
+<td>0.09 → 0.02</td>
+<td>0.03 → 0.02</td>
 </tr>
 <tr>
 <td>flights on time: deterministic → best attempt</td>
 <td>0.731 → 0.819</td>
 <td>0.750 → 0.829</td>
+<td>0.826 → 0.875</td>
+<td>0.832 → 0.873</td>
+<td>0.916 → 0.949</td>
+<td>0.927 → 0.943</td>
 </tr>
 <tr>
 <td>never solved: safety-bound / precision-bound</td>
 <td>6 / 53</td>
 <td>5 / 51</td>
+<td>4 / 49</td>
+<td>1 / 45</td>
+<td>2 / 18</td>
+<td>2 / 22</td>
 </tr>
 </tbody>
 </table>
@@ -2283,6 +2391,85 @@ step are identical to plain runs.</p>
 the legacy reward, where the dense conflict cost dominated, so it trades timing for conflict
 avoidance. By the objective, per seed it is better on 27 seeds and worse on 72. The meaningful
 test is the lookahead with <code>1_34</code>'s critic, which learned the lexicographic objective.</p>
+<p><strong>With critics that learned the lexicographic objective</strong> (same 100 seeds, 4 candidates):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>1_35</code></th>
+<th><code>1_37</code> control</th>
+<th><code>1_36</code> reselection</th>
+<th><code>1_38</code> reselection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>separation lost: deterministic → lookahead</td>
+<td>0.08 → 0.05</td>
+<td>0.04 → 0.07</td>
+<td>0.09 → 0.02</td>
+<td>0.03 → <strong>0.01</strong></td>
+</tr>
+<tr>
+<td>all 20 on time: deterministic → lookahead</td>
+<td>0.24 → 0.08</td>
+<td>0.34 → 0.07</td>
+<td>0.65 → <strong>0.39</strong></td>
+<td>0.63 → 0.30</td>
+</tr>
+<tr>
+<td>flights on time: deterministic → lookahead</td>
+<td>0.826 → 0.781</td>
+<td>0.832 → 0.774</td>
+<td>0.916 → 0.896</td>
+<td>0.927 → 0.893</td>
+</tr>
+</tbody>
+</table>
+<p>Search on a one-pick critic still buys safety with most of the precision (and on the control it
+does not even buy safety). <strong>On the reselection policy it keeps most of both</strong>: 2% separation
+loss with 39% of streams all on time; <code>1_38</code> with lookahead loses separation on 1 seed in 100.</p>
+<h2 id="reselection">Reselection: a second clearance per step<a class="headerlink" href="#reselection" title="Permanent link">&para;</a></h2>
+<p>With one clearance per 45 s, the agent cannot act on two flights that both need it now. In a
+crowded stretch that is exactly what the failed seeds show. <strong>Reselection</strong> (<code>TADA_MAX_PICKS=N</code>)
+lets the policy ask for another pick before the clock moves. The env never offers one; only the
+policy asks.</p>
+<ul>
+<li><strong>Action:</strong> (aircraft, clearance, <strong>again</strong>). With again = 1 the clearance is queued, the
+  clock does not move, and the next observation's prediction includes every queued clearance:
+  the second pick sees the first one's effect. With again = 0 the queued clearances and this one
+  are applied together and the clock advances 45 s, as a one-pick step does.</li>
+<li><strong>Masks:</strong> a new <code>mask_select</code> (under-control flights not yet cleared at this step); an aircraft
+  cleared at this step can only be left alone until the clock moves; <code>mask_again</code> allows another
+  pick only with budget left and another aircraft to clear; DO_NOTHING always ends the step. A
+  per-aircraft "cleared at this step" input tells the network which flight got the queued
+  clearance.</li>
+<li><strong>The flag is a third autoregressive stage</strong> (Bernoulli), conditioned on the chosen aircraft and
+  clearance, with the exact entropy of the whole tree. A one-pick checkpoint warm-starts exactly:
+  on a step's first pick the new input is zero, and the new head starts at a 5% chance of asking.</li>
+</ul>
+<p><strong>Two rewards at the same time.</strong> A queued pick pays its clearance cost plus the change in the
+shaping potential, and takes no simulated time, so the learner discounts it by <strong>1</strong>, not γ, in
+GAE and in the truncation bootstrap (<code>jax_ppo</code>; the env marks it with <code>info["zero_time"]</code>).
+Discounting it by γ would charge every extra pick (1 − γ)·V(s′), a cost whose sign follows the
+value: a bonus whenever the value is negative. That is not in the lexicographic objective. With
+discount 1 a second clearance costs exactly one clearance, and the potential-based shaping still
+telescopes: over random episodes with frequent extra picks, Σ Γₜ Fₜ = Γ_T Φ(s_T) − Φ(s₀) holds to
+10⁻¹⁵, where discounting the extra picks by γ leaves residuals of 0.06–0.29. SB3's GAE cannot
+discount per transition, so SB3 refuses to <em>train</em> with reselection; it still loads, scores,
+renders and replays those checkpoints, which record their mode. Verified: GAE bit-exact with SB3
+when there are no extra picks, torch policy = JAX network (logits, log-probabilities, exact
+entropy) with the again head, one PPO update equal to SB3's to 1.2·10⁻⁷, and again = 0 throughout
+reproducing the one-pick env exactly (<code>tests/test_multi_pick.py</code>).</p>
+<p><strong>Results</strong> (<code>1_36</code>, budget 2, against the <code>1_37</code> control; <a href="../experiments/#run-1_36">run log</a>):
+the policy learned to ask for a second pick on ~35% of decisions. All 20 on time rose from
+0.34 to <strong>0.65</strong>, mean landing deviation fell from 56 s to 18 s, and AMAN swaps almost vanished
+(1.02 → 0.07 per stream). <strong>Precision was bandwidth-limited.</strong> The price is safety: the
+deterministic loss-of-separation rate rose from 4% to 9%. <strong>Another 5M steps (<code>1_38</code>) removed
+that cost on 20-flight streams</strong> (3% lost, 6 losses fixed and none added, precision unchanged),
+though not on stitched 40-flight streams (15% vs the control's 11%). A bust penalty sized to the
+training stream (<code>1_39</code>, 240 instead of 90) cost precision and helped only on long streams; it
+was not adopted. With lookahead the reselection policy is both safe and precise (table above).</p>
 <h2 id="failed-renders">Renders: failed seeds, best of 10 attempts<a class="headerlink" href="#failed-renders" title="Permanent link">&para;</a></h2>
 <p><code>render_policy.py --paired-attempts 9</code> replays exactly the attempts the analysis scored and
 renders the best by the objective. <code>1_33</code> final, 20-flight streams.</p>
@@ -2320,6 +2507,47 @@ separation on final. Every attempt loses separation, the best at step 12:</p>
   Your browser does not support the video tag.
 </video>
 
+<h3 id="failed-renders-1-36">Run <code>1_36</code> (reselection)<a class="headerlink" href="#failed-renders-1-36" title="Permanent link">&para;</a></h3>
+<p><strong>Rescued, seed 599310825.</strong> The deterministic policy loses separation at step 56
+with 5 of 20 on time:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_36_rescued_deterministic_seed599310825.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p>Three of its own sampled attempts land all 20 on time; the best by the objective (attempt 5,
+151 clearances, many of them second picks):</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_36_rescued_best_seed599310825.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Precision-bound, seed 1595180635.</strong> Safe, but at best 14 of 20 on time: at t = 0 one
+flight is 24 minutes early, far over the generator's 650 s cap. `1_35`'s best attempt on this seed
+gets 8 of 20:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_36_precision_best_seed1595180635.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>Safety-bound, seed 1566942273.</strong> At t = 0 one flight is 38 minutes early and six
+losses of separation are already predicted. Every attempt of `1_36` (and of `1_35`) loses
+separation before step 40:</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_36_safety_best_seed1566942273.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<h3 id="failed-renders-1-35">Run <code>1_35</code><a class="headerlink" href="#failed-renders-1-35" title="Permanent link">&para;</a></h3>
+<p><strong>Rescued, seed 41.</strong> Deterministically 19 of 20 on time; sampled attempt 1 lands
+all 20 with fewer clearances (84 vs 89):</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_35_rescued_best_seed41.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p>All 14 renders (7 per run, with their per-attempt logs and replayable solutions) are in
+<code>analysis/2026-09-26_renders_failed_1_35/</code> and <code>…_1_36/</code> of the code repo.</p>
 <h2 id="shield">Inference-time conflict shield<a class="headerlink" href="#shield" title="Permanent link">&para;</a></h2>
 <p><code>render_policy</code>'s shield refuses a clearance that introduces a near-horizon conflict
 do-nothing would not, and issues the best clearance that passes instead (<code>next_best</code>).
