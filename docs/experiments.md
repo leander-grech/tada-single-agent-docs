@@ -726,18 +726,42 @@ per step. It separates the effect of reselection from that of 5M more steps.
 ## Run 1_38 — reselection, continued (`atc_run_1_38_windowed_cont`, 5M) { #run-1_38 }
 
 **Changes.** `1_36` final, another 5M on the same settings: whether the reselection policy is
-still improving.
+still improving. Trained concurrently with `1_39` on the same host, ~1 365 steps/s each.
 
-**Results.** Pending.
+**Results — the best windowed agent** (100 paired seeds, deterministic):
 
-## Run 1_39 — reselection with a bust penalty sized to the training stream (`atc_run_1_39_windowed_safety`, 5M) { #run-1_39 }
+| | `1_37` control | `1_36` | **`1_38`** | `1_39` |
+|---|---|---|---|---|
+| flights on time, 20-flight | 0.832 | 0.916 | **0.927** | 0.859 |
+| all 20 on time | 0.34 | **0.65** | 0.63 | 0.40 |
+| separation lost, 20-flight | 4% | 9% | **3%** | 5% |
+| clearances / stream | 81 | 128 | 122 | 125 |
+| flights on time, stitched 2×20 | 0.765 | **0.873** | 0.860 | 0.818 |
+| all 40 on time, stitched | 0.08 | **0.36** | 0.32 | 0.12 |
+| separation lost, stitched | 11% | 16% | 15% | **9%** |
+| pass@10 | 0.54 | **0.80** | 0.76 | 0.67 |
+| with lookahead: separation / all 20 on time | 7% / 0.07 | 2% / **0.39** | **1%** / 0.30 | 5% / 0.26 |
+
+- **More training removed reselection's safety cost on 20-flight streams:** against `1_36`,
+  separation fixed on 6 seeds and newly lost on none (McNemar z +2.45), precision unchanged
+  (on time +0.010, SE 0.009).
+- **Against the control** (which has 5M fewer steps): on time +0.094 (SE 0.014), all 20 on time
+  on 32 more seeds and 3 fewer, 20-flight safety tied (2 fixed, 1 lost). **On stitched streams
+  it is still riskier** (4 fixed, 8 lost; z −1.15).
+
+## Run 1_39 — reselection with a bust penalty sized to the training stream (`atc_run_1_39_windowed_safety`, 5M, not adopted) { #run-1_39 }
 
 **Changes.** As `1_38`, with the outcome_pbrs bust penalty raised from 90 to **240**, the full
 bracket range of a stitched 40-flight training stream (40 × 6). No amount of precision on a
 training stream can then outweigh a loss of separation, which is what the lexicographic objective
 means. `--violation-penalty 240`; `score_windowed --lookahead` scores it with its own penalty.
 
-**Results.** Pending.
+**Results** (table under `1_38`, which is the same run with the old penalty): **the larger penalty
+costs precision and buys safety only on long streams.** Against `1_38`: on time −0.068
+(SE 0.015), all 20 on time lost on 31 seeds and gained on 8; separation on 20-flight streams no
+better (0 fixed, 2 lost), on stitched streams better (9 fixed, 3 lost; z +1.73). Not adopted:
+the default (90) stays. The lexicographic order is not reached by scaling one penalty: the
+policy becomes more cautious everywhere, not only where separation is at stake.
 
 ---
 

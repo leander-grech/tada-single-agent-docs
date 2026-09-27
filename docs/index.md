@@ -17,11 +17,16 @@
     runs. See [22 clearances vs 15](analysis_v1_v2.md).
 
     **A second track, [20-flight streams](#windowed-track)**, builds on this agent: a 20-flight
-    trombone stream seen through a window of the next 10 flights to land. Best so far: `1_33`,
-    75% of flights on time, and all 20 on time in **44% of scenarios in at least one of 10
-    attempts**. Most remaining separation losses sit in scenarios that need more delay than
-    the airspace can absorb. `1_34` (in progress) trains on a lexicographic objective: safety,
-    then each flight's deviation bracket, then the fewest actions.
+    trombone stream seen through a window of the next 10 flights to land, trained on a
+    lexicographic objective (safety, then each flight's deviation bracket, then the fewest
+    actions). **Best so far: `1_38`, which may issue a second clearance within the same 45 s
+    step ([reselection](windowed.md#reselection)): 93% of flights on time, all 20 on time in 63%
+    of scenarios, separation lost in 3%** — against 83% / 34% / 4% for a one-pick control from
+    the same start (which had 5M training steps to `1_38`'s 10M; at equal steps reselection cost
+    some safety, which the extra 5M removed). With a critic-guided lookahead it loses separation
+    in 1%. On 40-flight streams
+    it is still riskier than the one-pick agent (15% vs 11%). Most remaining losses sit in
+    scenarios that need more delay than the airspace can absorb.
 
     **Read numbers only from `analysis/track_run.py`.** The in-training `success_rate` is a
     5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.
@@ -64,8 +69,10 @@ seed by seed, deterministic unless stated.
 | **`1_36`** | 1_35 + 5M steps with [reselection](windowed.md#reselection): a second clearance within the 45 s step | **0.916** | 9% | **0.65** | 128 |
 | `1_36`, best of 10 attempts | upper bound, not deployable | 0.949 | 2% | 0.80 | 134 |
 | **`1_36` + [lookahead](windowed.md#lookahead)** | critic-guided search, deployable | 0.896 | **2%** | 0.39 | 139 |
-| `1_38` | 1_36 + 5M steps | *training* | | | |
-| `1_39` | 1_36 + 5M steps, bust penalty sized to the training stream (240) | *training* | | | |
+| **`1_38`** | 1_36 + 5M steps | **0.927** | **3%** | 0.63 | 122 |
+| `1_38`, best of 10 attempts | upper bound, not deployable | 0.943 | 2% | 0.76 | 124 |
+| **`1_38` + lookahead** | critic-guided search, deployable | 0.893 | **1%** | 0.30 | 130 |
+| `1_39` | 1_36 + 5M steps, bust penalty 240 (sized to the training stream) | 0.859 | 5% | 0.40 | 125 |
 
 **What we learned**
 
@@ -73,6 +80,11 @@ seed by seed, deterministic unless stated.
   the policy asks for it on about a third of its decisions: all 20 on time rises from 0.34 to 0.65 against
   an identical control, and flights almost never land out of AMAN order. It also loses
   separation more often (9% vs 4%). [Details](windowed.md#reselection).
+- **Reselection's safety cost trains away on 20-flight streams, not yet on 40.** Another 5M steps
+  (`1_38`) fixed 6 of `1_36`'s separation losses and lost none, at unchanged precision. On
+  stitched 2×20 streams it still loses separation on 15% of seeds (one-pick control: 11%).
+  Raising the bust penalty to 240 (`1_39`) instead cost precision (on time −0.07) and helped
+  only on the long streams. [Run log](experiments.md#run-1_38).
 - **More training alone buys mostly safety.** `1_37`, the same 5M extra steps with one pick,
   halves `1_35`'s separation losses (8% → 4%) and lifts all 20 on time from 0.24 to 0.34;
   reselection on the same budget reaches 0.65.

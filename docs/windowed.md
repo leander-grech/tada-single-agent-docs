@@ -19,6 +19,9 @@
     flights on time, **10%** of episodes lose separation, **10%** land all 20 flights on time.
     Run `1_31_windowed` is training from that checkpoint now.
 
+    **Best agent: `1_38`, with [reselection](#reselection)** (a second clearance within the
+    45 s step): 93% of flights on time, all 20 on time in 63% of streams, separation lost in 3%.
+
     Two findings affect the existing env too:
 
     - [`time_to_target` has been a dead feature](#time-to-target-bug) in every run so far.
@@ -391,14 +394,14 @@ Verified:
 attempts, all on the same scenario and frame. The best attempt is chosen by the objective (no
 loss of separation, then bracket score, then fewest clearances).
 
-| | `1_32` final | `1_33` final | `1_35` | `1_37` control | `1_36` reselection |
-|---|---|---|---|---|---|
-| all on time, deterministic | 0.29 | 0.20 | 0.24 | 0.34 | **0.65** |
-| all on time, one sampled attempt (pass@1) | 0.20 | 0.16 | 0.17 | 0.22 | **0.51** |
-| **all on time in at least one of 10 attempts (pass@10)** | **0.41** | **0.44** | 0.47 | 0.54 | **0.80** |
-| separation lost: deterministic → best attempt | 0.21 → **0.06** | 0.17 → **0.05** | 0.08 → 0.04 | 0.04 → 0.01 | 0.09 → 0.02 |
-| flights on time: deterministic → best attempt | 0.731 → 0.819 | 0.750 → 0.829 | 0.826 → 0.875 | 0.832 → 0.873 | 0.916 → 0.949 |
-| never solved: safety-bound / precision-bound | 6 / 53 | 5 / 51 | 4 / 49 | 1 / 45 | 2 / 18 |
+| | `1_32` final | `1_33` final | `1_35` | `1_37` control | `1_36` reselection | `1_38` reselection |
+|---|---|---|---|---|---|---|
+| all on time, deterministic | 0.29 | 0.20 | 0.24 | 0.34 | **0.65** | 0.63 |
+| all on time, one sampled attempt (pass@1) | 0.20 | 0.16 | 0.17 | 0.22 | **0.51** | 0.42 |
+| **all on time in at least one of 10 attempts (pass@10)** | **0.41** | **0.44** | 0.47 | 0.54 | **0.80** | 0.76 |
+| separation lost: deterministic → best attempt | 0.21 → **0.06** | 0.17 → **0.05** | 0.08 → 0.04 | 0.04 → 0.01 | 0.09 → 0.02 | 0.03 → 0.02 |
+| flights on time: deterministic → best attempt | 0.731 → 0.819 | 0.750 → 0.829 | 0.826 → 0.875 | 0.832 → 0.873 | 0.916 → 0.949 | 0.927 → 0.943 |
+| never solved: safety-bound / precision-bound | 6 / 53 | 5 / 51 | 4 / 49 | 1 / 45 | 2 / 18 | 2 / 22 |
 
 - **The policy holds much more than it shows deterministically.** A good episode exists in
   its own distribution on twice as many seeds, and all but ~5 separation losses are avoidable
@@ -454,15 +457,15 @@ test is the lookahead with `1_34`'s critic, which learned the lexicographic obje
 
 **With critics that learned the lexicographic objective** (same 100 seeds, 4 candidates):
 
-| | `1_35` | `1_37` control | `1_36` reselection |
-|---|---|---|---|
-| separation lost: deterministic → lookahead | 0.08 → 0.05 | 0.04 → 0.07 | 0.09 → **0.02** |
-| all 20 on time: deterministic → lookahead | 0.24 → 0.08 | 0.34 → 0.07 | 0.65 → **0.39** |
-| flights on time: deterministic → lookahead | 0.826 → 0.781 | 0.832 → 0.774 | 0.916 → 0.896 |
+| | `1_35` | `1_37` control | `1_36` reselection | `1_38` reselection |
+|---|---|---|---|---|
+| separation lost: deterministic → lookahead | 0.08 → 0.05 | 0.04 → 0.07 | 0.09 → 0.02 | 0.03 → **0.01** |
+| all 20 on time: deterministic → lookahead | 0.24 → 0.08 | 0.34 → 0.07 | 0.65 → **0.39** | 0.63 → 0.30 |
+| flights on time: deterministic → lookahead | 0.826 → 0.781 | 0.832 → 0.774 | 0.916 → 0.896 | 0.927 → 0.893 |
 
 Search on a one-pick critic still buys safety with most of the precision (and on the control it
 does not even buy safety). **On the reselection policy it keeps most of both**: 2% separation
-loss with 39% of streams all on time, the best combination any variant has reached.
+loss with 39% of streams all on time; `1_38` with lookahead loses separation on 1 seed in 100.
 
 ## Reselection: a second clearance per step { #reselection }
 
@@ -502,9 +505,11 @@ reproducing the one-pick env exactly (`tests/test_multi_pick.py`).
 the policy learned to ask for a second pick on ~35% of decisions. All 20 on time rose from
 0.34 to **0.65**, mean landing deviation fell from 56 s to 18 s, and AMAN swaps almost vanished
 (1.02 → 0.07 per stream). **Precision was bandwidth-limited.** The price is safety: the
-deterministic loss-of-separation rate rose from 4% to 9%, and the bust penalty is the reason
-(`1_39` tests a larger one). With lookahead the reselection policy is both safe and precise
-(2% / 0.39, table above).
+deterministic loss-of-separation rate rose from 4% to 9%. **Another 5M steps (`1_38`) removed
+that cost on 20-flight streams** (3% lost, 6 losses fixed and none added, precision unchanged),
+though not on stitched 40-flight streams (15% vs the control's 11%). A bust penalty sized to the
+training stream (`1_39`, 240 instead of 90) cost precision and helped only on long streams; it
+was not adopted. With lookahead the reselection policy is both safe and precise (table above).
 
 ## Renders: failed seeds, best of 10 attempts { #failed-renders }
 
