@@ -638,7 +638,7 @@ taken another day.
 - **[Critic-guided lookahead](windowed.md#lookahead):** separation 0.17 → 0.07, at the cost of
   precision, with `1_33`'s legacy critic.
 
-## Run 1_35 — JAX learner, fast simulator, stitched streams (`atc_run_1_35_windowed_jax`, in progress) { #run-1_35 }
+## Run 1_35 — JAX learner, fast simulator, stitched streams (`atc_run_1_35_windowed_jax`, stopped at 4.65M) { #run-1_35 }
 
 **Changes.** The `1_34` design (sequence observations, lexicographic objective), trained with
 `main_jax.py` on `flight_simulator` 0.2.81 ([JAX learner](training.md#jax-learner)). New in
@@ -648,8 +648,94 @@ the policy sees seams with different amounts of relief. The per-clearance cost i
 Warm-started from `1_34` @ 799 744, with a 100k-step critic warm-up (fresh reward
 normalisation). LR 3e-5 → 3e-6, 16 workers, 5M.
 
-**Speed.** ~330 steps/s (collection ~10 s + update 1.3 s per 4 096 steps). `1_33` ran at ~230
-on a quiet machine, and `1_34` at 40–90 under load.
+**Stopped at 4 648 960 steps** (93%). The laptop was clamped to ~375 MHz and training had slowed
+to 71 steps/s; the learning rate was already 3.4e-6 of its 3e-6 floor. Its last state is the
+model every later run starts from. At full speed it ran ~330 steps/s.
+
+**Results** (100 paired seeds, deterministic; evaluated on the [vast.ai host](training.md#vast)):
+
+| | `1_33` | `1_34` @ 0.8M | **`1_35`** |
+|---|---|---|---|
+| flights on time, 20-flight | 0.750 | 0.773 | **0.826** |
+| separation lost, 20-flight | 17% | 13% | **8%** |
+| all 20 on time | 0.20 | 0.21 | **0.24** |
+| clearances / stream | 106 | 110 | **87** |
+| flights on time, stitched 2×20 | 0.651 | 0.666 | **0.784** |
+| separation lost, stitched 2×20 | 29% | 37% | **10%** |
+
+- **Best windowed agent at the time, on every measure.** Against `1_33`, paired: on time +0.075
+  (SE 0.015) on 20-flight streams, separation fixed on 10 seeds and newly lost on 1 (McNemar
+  z +2.71); on stitched streams +0.133, fixed on 19 and lost on 0 (z +4.36).
+- **The objective works as designed.** DO_NOTHING on 30% of steps instead of 8%, with better
+  precision: the fewest-actions criterion is being optimised, not traded for timing.
+- **10 attempts:** pass@10 0.47; best-attempt separation loss 0.04. Of the 53 seeds never solved,
+  4 are safety-bound and 49 precision-bound.
+- **Lookahead with its own (lexicographic) critic:** separation 0.08 → 0.05, but all 20 on time
+  0.24 → 0.08. Search on this critic still trades precision for safety.
+
+## Run 1_36 — reselection: a second clearance per step (`atc_run_1_36_windowed_multipick`, 5M) { #run-1_36 }
+
+**Changes.** [Reselection](windowed.md#reselection) with a budget of 2 (`TADA_MAX_PICKS=2`). The
+policy may ask for another clearance before the clock advances, and the second pick is made on an
+observation whose prediction already includes the first. Warm-started from `1_35` @ 4.65M, with
+the new "again" head starting at a 5% chance of asking and a zero-initialised "cleared at this
+step" input; on a step's first pick it computes exactly `1_35`'s function. 100k-step critic
+warm-up, LR 3e-5 → 3e-6, 5M. **32 workers × 128 steps** (4 096 samples per update, as before),
+on a rented [vast.ai](training.md#vast) host: 1 050–1 400 steps/s, 63 minutes.
+
+**The policy learned to use it.** The share of decisions asking for another pick grew from 3.5%
+to ~35%; by the end about a third of all 45 s steps issue two clearances.
+
+**Results** against the `1_37` control (identical, without reselection), 100 paired seeds:
+
+| | `1_37` control | **`1_36` reselection** |
+|---|---|---|
+| flights on time, 20-flight | 0.832 | **0.916** (+0.084, SE 0.016) |
+| all 20 on time | 0.34 | **0.65** (65 vs 34 seeds) |
+| mean landing deviation | 56 s | **18 s** |
+| AMAN swaps per stream | 1.02 | **0.07** |
+| separation lost, 20-flight | **4%** | 9% (6 newly lost, 1 fixed; z −1.89) |
+| clearances / stream | **81** | 128 |
+| flights on time, stitched 2×20 | 0.765 | **0.873** |
+| all 40 on time, stitched | 0.08 | **0.36** |
+| separation lost, stitched | **11%** | 16% (10 newly lost, 5 fixed; z −1.29) |
+| pass@10 (all 20 on time in one of 10 attempts) | 0.54 | **0.80** |
+| with lookahead: separation / all 20 on time | 7% / 0.07 | **2% / 0.39** |
+
+- **Precision was bandwidth-limited.** With one clearance per 45 s the policy could not act on
+  two flights that both needed it; with two, precision jumps and flights almost never swap
+  order.
+- **It pays for it in safety, a little.** The loss-of-separation rate rises on both stream
+  lengths, not significantly on either alone but consistently. The bust penalty (90) was sized to
+  exceed one window's bracket range (10 flights × 6), while training streams hold 40 flights: a
+  policy this precise can rationally accept some extra risk. `1_39` tests a penalty sized to the
+  training stream.
+- **With lookahead it is both safe and precise:** 2% separation loss with 39% of streams all on
+  time, where every earlier lookahead bought safety with almost all of its precision.
+
+## Run 1_37 — control: `1_36` without reselection (`atc_run_1_37_windowed_control`, 5M) { #run-1_37 }
+
+**Changes.** None: `1_35` @ 4.65M trained for another 5M on exactly `1_36`'s settings, one pick
+per step. It separates the effect of reselection from that of 5M more steps.
+
+**Results.** 0.832 on time, 4% separation lost, 0.34 all on time, 81 clearances per stream
+(20-flight); 0.765 / 11% / 0.08 on stitched streams. **More training alone helps**, safety most
+(`1_35`'s 8% → 4%) and all 20 on time 0.24 → 0.34; **reselection on the same budget reaches 0.65**
+(table above).
+
+## Run 1_38 — reselection, continued (`atc_run_1_38_windowed_cont`, 5M) { #run-1_38 }
+
+**Changes.** `1_36` final, another 5M on the same settings: whether the reselection policy is
+still improving.
+
+**Results.** Pending.
+
+## Run 1_39 — reselection with a bust penalty sized to the training stream (`atc_run_1_39_windowed_safety`, 5M) { #run-1_39 }
+
+**Changes.** As `1_38`, with the outcome_pbrs bust penalty raised from 90 to **240**, the full
+bracket range of a stitched 40-flight training stream (40 × 6). No amount of precision on a
+training stream can then outweigh a loss of separation, which is what the lexicographic objective
+means. `--violation-penalty 240`; `score_windowed --lookahead` scores it with its own penalty.
 
 **Results.** Pending.
 

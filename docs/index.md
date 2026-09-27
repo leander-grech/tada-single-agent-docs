@@ -58,11 +58,24 @@ seed by seed, deterministic unless stated.
 | `1_33` | + [AMAN-sequence observations](windowed.md#seq-obs) | **0.750** | **17%** | 0.20 | 106 |
 | `1_33`, best of 10 attempts | upper bound, not deployable | 0.829 | 5% | 0.44 | 112 |
 | `1_33` + [lookahead](windowed.md#lookahead) | critic-guided search, deployable | 0.684 | 7% | 0.04 | 103 |
-| `1_34` | [lexicographic objective](windowed.md#objective) | *stopped at 0.8M* | | | |
-| `1_35` | 1_34 + [JAX learner, fast simulator](training.md#jax-learner), stitched 2×20 streams with a random cooling gap | *training* | | | |
+| `1_34` @ 0.8M | [lexicographic objective](windowed.md#objective) (stopped early) | 0.773 | 13% | 0.21 | 110 |
+| `1_35` @ 4.65M | 1_34 + [JAX learner, fast simulator](training.md#jax-learner), stitched 2×20 streams with a random cooling gap | 0.826 | 8% | 0.24 | 87 |
+| `1_37` | 1_35 + 5M steps (control for 1_36) | 0.832 | **4%** | 0.34 | 81 |
+| **`1_36`** | 1_35 + 5M steps with [reselection](windowed.md#reselection): a second clearance within the 45 s step | **0.916** | 9% | **0.65** | 128 |
+| `1_36`, best of 10 attempts | upper bound, not deployable | 0.949 | 2% | 0.80 | 134 |
+| **`1_36` + [lookahead](windowed.md#lookahead)** | critic-guided search, deployable | 0.896 | **2%** | 0.39 | 139 |
+| `1_38` | 1_36 + 5M steps | *training* | | | |
+| `1_39` | 1_36 + 5M steps, bust penalty sized to the training stream (240) | *training* | | | |
 
 **What we learned**
 
+- **Precision was bandwidth-limited.** Allowed a second clearance within the same 45 s step,
+  the policy asks for it on about a third of its decisions: all 20 on time rises from 0.34 to 0.65 against
+  an identical control, and flights almost never land out of AMAN order. It also loses
+  separation more often (9% vs 4%). [Details](windowed.md#reselection).
+- **More training alone buys mostly safety.** `1_37`, the same 5M extra steps with one pick,
+  halves `1_35`'s separation losses (8% → 4%) and lifts all 20 on time from 0.24 to 0.34;
+  reselection on the same budget reaches 0.65.
 - **Precision is a sequencing problem.** Traffic never enters the sector in AMAN order. Where
   the agent keeps the order, 91% of landed flights are on time; where it swaps two, 63%.
   [Details](windowed.md#sequencing).
@@ -93,6 +106,20 @@ separation; the gap between ▼ and a flight's tick on the ground line is its de
   Your browser does not support the video tag.
 </video>
 
+<p><strong>With reselection</strong> (`1_36`, seed 599310825): the deterministic policy loses
+separation at step 56…</p>
+<video controls preload="metadata" width="100%">
+  <source src="assets/renders/1_36_rescued_deterministic_seed599310825.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p>…and three of its ten sampled attempts land all 20 on time, often issuing two clearances in
+one step.</p>
+<video controls preload="metadata" width="100%">
+  <source src="assets/renders/1_36_rescued_best_seed599310825.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 More renders, including precision-bound and safety-bound seeds, are on the
 [windowed page](windowed.md#failed-renders).
 
@@ -116,6 +143,11 @@ TADA_SEQUENCE_OBS=1 python -u main.py --env windowed --reward-mode outcome_pbrs 
 # the same run with the JAX learner (SB3-compatible checkpoints; see Training -> JAX learner)
 TADA_SEQUENCE_OBS=1 python -u main_jax.py --env windowed --reward-mode outcome_pbrs \
   --stitch-segments 2 --stitch-gap 120 900 --init-weights <sb3 checkpoint>.zip --n-envs 16 \
+  --critic-warmup-steps 100000 --lr-max 3e-5 --final-lr 3e-6 --ent-coef 0.003 --total-timesteps 5000000
+
+# reselection: the policy may ask for a second clearance per step (JAX learner only)
+TADA_SEQUENCE_OBS=1 TADA_MAX_PICKS=2 python -u main_jax.py --env windowed --reward-mode outcome_pbrs \
+  --stitch-segments 2 --stitch-gap 120 900 --init-weights <checkpoint>.zip --n-envs 32 \
   --critic-warmup-steps 100000 --lr-max 3e-5 --final-lr 3e-6 --ent-coef 0.003 --total-timesteps 5000000
 
 # windowed scoring: 100 paired seeds, 10 attempts each, or critic-guided lookahead
