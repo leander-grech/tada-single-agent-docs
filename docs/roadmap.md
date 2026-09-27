@@ -1,179 +1,53 @@
 # Roadmap
 
-!!! abstract "TL;DR"
-    The deviation ceiling **broke** in run 1_26 — see the [experiment log](experiments.md#recent-runs).
-    Run 1_27's reduced clearance set **did not build on it**, and the run that would settle why
-    has not been done. What remains splits cleanly: about two-thirds of residual failures are a
-    *precision* problem, one-third *reliability*, and there is a queue of designed-but-unbuilt
-    observation fixes.
+!!! abstract "Summary"
+    **In progress:** the traffic-curriculum run `1_43`, and the evaluation backfill (the standard
+    battery and renders for every model that lacks them). **Next questions:** can the
+    reselection policy's safety on long, stitched streams catch up with its safety on 20-flight
+    streams? Does the from-scratch recipe close the gap to the fine-tuned lineage with more steps
+    or a curriculum? Should separation be reported split by scenario capacity, and should the
+    scenario filter reject over-capacity scenarios? **Ruled out, with evidence:** a bigger
+    network, forcing the AMAN order first, a larger separation penalty, a shorter action interval,
+    refusal shields.
 
-    **Done since:** the learning-rate confound on run 1_27 was removed by re-running its second
-    half on the correct cosine (`1_27a`). It changed nothing — same 0.64 success, and no
-    deviation gain at all among clean episodes. The reduced clearance set's disadvantage is a
-    property of the action set. See [the corrected run](analysis_v1_v2.md#corrected-run).
+## In progress
 
-    **Top of the list now:** make `SHORTEN_TROMBONE` worth learning. Two runs on two schedules
-    both issue it about once per thousand clearances, so the capability exists and the incentive
-    does not. [Potential-based advice](pbrs.md#fix-advice) is the principled mechanism for that,
-    and it also removes a policy-distorting action cost on the way.
-
-    **Now running:** run `1_31` on the [windowed 20-flight env](windowed.md), warm-started from
-    `1_29`. Longer streams at evaluation are the next step, as stability tests of whether the
-    agent can be used continuously. They will also test [backlog
-    handling](windowed.md#generator-not-stationary): generated scenarios get harder further
-    down the queue.
-
-    **Windowed, measured (25 Sep):** the `1_32` fine-tune takes all-20-on-time from 0.08 to
-    0.29. It is **stable within 20 flights**, where precision is flat along the queue and
-    losses of separation are the whole remaining gap. It is **not yet usable continuously**:
-    at 40 flights, 53% of episodes lose separation. On **stitched** 2×20 streams it stays as
-    precise in the second segment as in the first, and busts (41%) are what two independent
-    20-flight episodes would give. So the long-stream limit is the per-stretch separation
-    rate, and **AMAN sequencing** is where precision is lost. The conflict shield makes it
-    worse.
-    [Details](windowed.md#stability).
-
-    **Windowed, next (26 Sep):**
-    - score `1_34` on the lexicographic objective;
-    - run the lookahead with `1_34`'s critic;
-    - report the separation rate split by scenario capacity, since
-      [over-capacity scenarios](windowed.md#feasibility) hold 16 of 17 losses;
-    - decide whether the scenario filter should reject them.
-
-    **Ruled out:** a bigger network. Measured, the encoder uses ~14% of its width and the context
-    ~4% — [see the test log](analysis_log.md#t-embedding-capacity). The productive change is
-    shape, not size.
-
-## Where the frontier actually is
-
-Measured, not inferred — from `analysis/attempts_to_solve.py` over all 100 eval seeds:
-
-- Deterministic **0.63**, pass@1 **0.56**, pass@20 **0.82**. The gap from the single-shot rate
-  to the asymptote — **0.26** — is **reliability**, recoverable at inference by best-of-n, a
-  shield, or a lower sampling temperature, with no retraining at all. This is the cheapest win
-  available.
-- Of the 18 never solved in 20 attempts: **12 precision-bound** (under 20% of attempts bust,
-  tier 4 on 73% of attempts, tier 5 never) and **6 safety-bound** (four bust on 100% of
-  attempts, the others on 95% and 70%). Classification rule and seed lists on the
-  [test log](analysis_log.md#t-attempts-1_26).
-
-Those need opposite fixes, which is why a plain success rate was never going to tell us what
-to build next.
-
-## Designed, not built
-
-Each has a worked-out design and measurements behind it.
-
-| item | why | evidence |
-|---|---|---|
-| **Drop or replace `global.time_s`** | It normalises against a 2880 s fallback horizon while episodes run 3105–5715 s, so it is pinned at +1 for the last ~23% of every episode | `timeout` fires in **zero** of 800 scored episodes, so the deadline it encodes never arrives. **Done in the [windowed env](windowed.md#observables)** (replaced by the window span); the 10-aircraft env still has it |
-| **Fix `time_to_target`** | It is read from the rollout's *end* world, so it encodes rollout length and sits pinned near +1 — a dead feature in every run so far | [measured](windowed.md#time-to-target-bug); fixed in the windowed env only, since fixing it in the base env changes every checkpoint's inputs |
-| **Δt-stamped action history** | History rows carry no time and per-aircraft buffers are mutually unaligned | the `step` field already exists in `_action_history` and is discarded at the observation boundary. **Now also measured:** the history GRU spans 4.5 of 64 effective directions — [test log](analysis_log.md#t-embedding-capacity) |
-| **Pairwise aircraft interaction** | The context is a masked *mean* over aircraft, which cannot represent "*i* and *j* are converging" — the core relation in a separation problem | context effective rank 3–4% of 256; mean cosine between aircraft embeddings 0.70. One self-attention block over the ten slots, same parameter budget |
-| **Continuous tier potential** | Φ moves only when an aircraft crosses a band edge, because it depends on *counts* of aircraft; between crossings the shaping is ~zero | [PBRS](pbrs.md#diagnosis) |
-| **Action cost as potential-based advice** | The action cost is not potential-based, so it changes which policy is optimal | [PBRS](pbrs.md#fix-advice); Harutyunyan et al. (2015) |
-| **`time_to_conflict` should match the reward** | Observable ramps linearly over 20 min; the [conflict penalty](reward.md#conflict-penalty) decays exponentially with a 4-min half-life | at 240 s out the reward has halved while the observable still reads 0.80 |
-| **Action cost waived under urgency** | Scale the cost by `(1 − urgency)` rather than switching on a conflict flag | a binary switch is exploitable — hovering a pair at 4.9 NM costs ~0.025/step and would waive up to 0.30; the continuous form is self-policing at ~33:1 |
-| **Finer clearance magnitudes (CD2)** | The 12 precision-bound seeds reach tier 4 and cannot cross it | **tested and did not deliver.** v2's MEDIUM steps and `SHORTEN_TROMBONE` left worst-aircraft deviation at 87 s against 1_26's 43 s — [the head-to-head](analysis_v1_v2.md#head-to-head) |
-
-## Tried and abandoned
-
-- **NOOP rollout horizon cut** — built, measured **0.96×**, reverted. The rollout stops once
-  every aircraft lands, so the requested step count is a cap that never binds; cost tracks
-  airborne aircraft. It remains **71% of an env step** and is unaddressed. Cutting it means
-  computing deviation less often, which is a behavioural change needing its own experiment.
-- **Multi-select CHOOSE/STEP head** — deprioritised: the precision-bound seeds never lose
-  separation, so intra-step coordination is not their problem.
-
-## Never run
-
-- **The `USE_LOG_DEVIATION_OBS = False` ablation.** Run 1_26 shipped three changes together,
-  so its result attributes to the bundle and not to a part. The flag exists to make this cheap.
-- [x] ~~**A clean v2 re-run**~~ — **done** as `1_27a` (18 Aug): resumed from `1_27`'s own
-  4.98M checkpoint on the correct cosine. The confound accounted for a quarter of the deviation
-  gap on paper and none of it among clean episodes.
-- **`cd4_reachability_probe.py` / `cd4_granularity_probe.py`** — would answer the reachability
-  question directly rather than by inference. Still hardcode v1 action names, so they need a
-  small fix before they run under v2.
-- **PMS transfer.** More attractive than it was: point-merge's known blocker was the
-  observation norms, which is exactly what the log-scaling fixed
-  (`time_to_target` saturation 71.4% → 15.1% on PMS).
-
----
-
-## Historical (pre-1_26)
-
-## Done since
-
-- [x] **Larger gradient clip** — `max_grad_norm` 0.5 → 1.5. Shipped in **Run 5**
-  (`atc_run_1_10`): `clip_frac` dropped 1.0 → ~0.2 and reward improved (−51 → −45 best), but
-  the deviation ceiling held.
-- [x] **Dense goal "carrot"** (a flat, non-potential version of item 2 below) —
-  `MAX·exp(−total_abs_dev/SCALE)`. Shipped in **Runs 6–7**: best reward yet (−33) and the best
-  deviation numbers (`frac_under_30s` 0.35, worst aircraft 367 s), but still no full success.
-- [x] **KL control** — LR decay `3e-4→3e-5`, `n_epochs` 5, `target_kl` 0.03 (**Run 7**) fixed
-  Run 6's late-training KL blow-up (`approx_kl` 0.22 → 0.002) but didn't lift the ceiling.
-- [x] **5-tier success + autoregressive policy + per-scenario horizon** — Run 8 (`atc_run_1_16`):
-  the graduated terminal ladder (replacing the all-or-nothing ±30 s gate) gave the first non-zero
-  success (**0 → ~30%**, peak **50%** by ~7 M) and **broke the deviation ceiling** — worst-aircraft
-  deviation 360–390 s → **~99 s**. Remaining issue: training oscillates past ~3 M rather than
-  converging.
-
-## In flight
-
-- [x] **Reduced clearance set (v2, 15 actions)** — Run 1_27, complete at 10M on 12 Aug. Success
-  0.64 against 1_26's 0.70 (a tie), worst-aircraft deviation **87 s against 43 s** (not a tie).
-  Markedly more sample-efficient early — 0.25 success at 2M where 1_26 is at 0.00 — then
-  plateaus. **Confounded by a mid-run crash and resume**; a clean re-run is item 1 above.
-- [ ] **Finer / continuous actions** (item 1) — still open. Note that 1_27 moved *coarser* on
-  turns and the trombone while adding MEDIUM speed steps, so it is not a test of this.
-- [~] **Finer temporal control** — `TIME_BETWEEN_ACTIONS` 45 → 22 s so the agent acts ~2× as often
-  per scenario (a *structural* limit distinct from item 1: only one aircraft can be commanded per
-  step). **First data (Run 9):** a 22 s warm-restart of Run 8's 2 M checkpoint (`atc_run_1_16_b`)
-  transiently hit the best worst-aircraft deviation of any run (~99 s) but regressed harder than the
-  45 s control — transferring an off-regime policy mid-run is destabilising, so the result is
-  **inconclusive**. A clean fresh 22 s run (`atc_run_1_17`, Run 10) is in early training. See
-  [experiments](experiments.md).
-
-## Next (on hold, agreed)
-
-### 1. Finer / continuous actions
-Speed comes in ±10/±30 kt buckets and trombone in whole 1–4 groups — too coarse to trim a
-landing time to ±30 s. Options, increasing effort:
-
-| Path | Mechanism | Effort | Notes |
-|------|-----------|--------|-------|
-| **B (start here)** | factored `MultiDiscrete([aircraft, type, magnitude_bucket])` with per-dim masking | low | fully supported by MaskablePPO; ~16–20 magnitude levels per type; no custom distribution |
-| **A** | hybrid `Discrete(aircraft×type, masked)` + `Box(magnitude)` | high | true continuous; needs a **custom policy + composite distribution** (MaskableCategorical × DiagGaussian) — stock SB3 has no masked hybrid space |
-| C | more discrete buckets on the flat `Discrete` | trivial | clumsy; inflates the 220-space |
-
-**Plan:** try **B** first to confirm finer control helps before investing in **A**.
-
-### 2. Reward peaking / marginal-progress bonus
-A first, **dense flat** carrot shipped in Runs 6–7 — `goal = MAX·exp(−total_abs_dev/SCALE)`
-(`MAX=2.0`, `SCALE=400 s`). It lifted reward and nudged deviation but did **not** clear the
-ceiling, so the remaining variants are still open:
-
-- **Staircase threshold bonuses** — per-aircraft `+b` as `|dev|` crosses 120 s / 60 s / 30 s,
-  and/or a step bonus `+k·frac_under_30s` (sharper, per-aircraft gradient than the global
-  `exp` already tried).
-- **Potential-based shaping** — `r += γΦ(s′)−Φ(s)` with a *peaked* `Φ = Σ exp(−|dev|/τ)`
-  (per-aircraft and provably policy-preserving, unlike the flat bonus shipped so far).
-
-Note the dense bonus alone helped little **without finer actions** — likely best calibrated
-*together* with item 1. Thresholds/coefficients to be tuned jointly.
+- **`1_43`, from scratch with a traffic curriculum** (arm C). Its [card](models/1_43.md) updates as
+  checkpoints are scored. Verdict at 10M, against arm A's two seeds
+  ([Training from scratch](findings/curriculum.md)).
+- **Backfill.** Every missing evaluation and render is listed per model in [BACKFILL](backfill.md),
+  with the exact seeds for the standard render slots. The training session runs them on a rented
+  host; the generator picks them up from `models.yaml` without hand-editing any page.
 
 ## Open questions
 
-- **Is ±30 s physically reachable** for these scenarios? Needs a per-action probe
-  (does a speed/trombone change actually move predicted landing time enough?). If not, the
-  success threshold itself needs revisiting.
-- **Success-criteria relaxation** beyond the near-conflict gate (e.g. total-only vs
-  per-aircraft) if 30 s proves too strict.
-- **LR schedule** — *tried* in Run 7 (linear `3e-4→3e-5`); it tamed KL but may have capped
-  late improvement (best @425k, then flat). Revisit the decay shape/floor alongside item 1.
+| question | why it is open | evidence |
+|---|---|---|
+| Long-stream safety with reselection | `1_38` fixed `1_36`'s extra losses on 20-flight streams but is still riskier than the one-pick control on stitched 2×20 | [Reselection](findings/reselection.md) |
+| How far does from-scratch training go? | arm A was still climbing steeply at 10M; seed variance is as large as the arm differences | [Training from scratch](findings/curriculum.md) |
+| More seeds per arm | one seed per arm cannot separate arms that differ by less than the seed spread | same |
+| Report separation by feasibility | most losses are in seeds needing more delay than the airspace absorbs | [Over-capacity scenarios](findings/capacity.md) |
+| Should the scenario filter reject over-capacity scenarios? | it only rejects a realised loss in the first ~270 s | same |
+| Deploy the lookahead | on reselection policies it keeps most of both safety and precision; it costs 4 simulator steps per decision | [Search at inference](findings/lookahead.md) |
+| Attribute `1_26`'s bundle | three changes shipped together; the `USE_LOG_DEVIATION_OBS = False` ablation was never run | [Archive](archive/ten-aircraft-reward.md) |
 
-## Parked
+## Designed, not built
 
-- **SAC** — not applicable under masked discrete actions (SB3 SAC is continuous-only).
-  Revisit only if the action space becomes continuous.
+| item | why | evidence |
+|---|---|---|
+| Δt-stamped action history | history rows carry no time, and the history GRU uses ~4.5 of 64 effective directions | [Archive → network capacity](archive/ten-aircraft-tests.md#embedding-capacity) |
+| `time_to_conflict` matched to the conflict cost | the feature ramps linearly over 20 min while the cost halves every 4 min | [Observations](how/observations.md) |
+| Fix `time_to_target` in the 10-aircraft env | read from the rollout's end, dead in every 10-aircraft run; fixed in the windowed env only | [Observations](how/observations.md#time-to-target-bug) |
+
+## Ruled out
+
+| idea | result |
+|---|---|
+| A bigger network | the encoder uses ~1/8 of its width; shape, not size, was the lever (attention, from `1_29`) |
+| Forcing the AMAN order first | early order does not predict success; an order-first override made all three models worse ([Phase 0](findings/order-first.md)) |
+| A larger separation penalty | `1_39`: cautious everywhere, precision lost, safer only on long streams |
+| A 22 s action interval | `1_16_b`, `1_17`: destabilised training and lost; reselection gives the extra bandwidth without shortening the step |
+| Refusal shields | net harmful in both tracks ([Search at inference](findings/lookahead.md)) |
+| Seeing the sequence without being paid for it | `1_33`: no consistent gain ([Sequencing](findings/sequencing.md)) |
+| A smaller clearance set | `1_27`, `1_27a`: faster to learn, worse at the end ([Archive](archive/clearance-sets.md)) |
+| Cutting the prediction rollout's horizon | measured 0.96×; the rollout already stops when every aircraft has landed |

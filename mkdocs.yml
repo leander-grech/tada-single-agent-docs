@@ -1,36 +1,46 @@
-site_name: TADA Single-Agent RL
-site_description: Single-agent ATC arrival sequencing with sb3-contrib MaskablePPO
+site_name: TADA · single-agent RL
+site_description: "Single-agent RL arrival sequencing into Milan Malpensa: models, findings and how to train one"
 docs_dir: docs
 
 theme:
   name: material
+  font: false
+  icon:
+    logo: material/airplane
   features:
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
     - navigation.top
+    - navigation.footer
     - navigation.tracking
     - content.code.copy
     - toc.follow
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: indigo
-      accent: indigo
+    - scheme: slate
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+
+extra_css:
+  - stylesheets/tada-components.css
+  - stylesheets/theme.css
+
+extra_javascript:
+  - javascripts/tada.js
 
 markdown_extensions:
   - admonition
   - attr_list
+  - md_in_html
   - tables
   - pymdownx.details
   - pymdownx.superfences
@@ -41,22 +51,93 @@ markdown_extensions:
   - toc:
       permalink: true
 
+not_in_nav: |
+  /analysis_log.md
+  /analysis_methods.md
+  /analysis_v1_v2.md
+  /experiments.md
+  /instrumentation.md
+  /mdp.md
+  /observations.md
+  /pbrs.md
+  /reward.md
+  /separation.md
+  /successful_results.md
+  /training.md
+  /windowed.md
+  /backfill.md
+
 nav:
   - Home: index.md
-  - Reference:
-      - MDP & Environment: mdp.md
-      - Observations: observations.md
-      - Reward: reward.md
-      - Reward shaping (PBRS): pbrs.md
-      - Loss of separation: separation.md
-      - Training: training.md
-      - Instrumentation: instrumentation.md
-  - Windowed env (20 flights): windowed.md
-  - Experiments:
-      - Experiment log: experiments.md
-      - Successful results: successful_results.md
-  - Analysis:
-      - How an agent is tested: analysis_methods.md
-      - Test log: analysis_log.md
-      - 22 clearances vs 15: analysis_v1_v2.md
+  - Models:
+      - Best model: models/best.md
+      - Leaderboard: models/index.md
+      # BEGIN generated model nav (tools/build_model_docs.py)
+      - Windowed:
+          - "1_43": models/1_43.md
+          - "1_42": models/1_42.md
+          - "1_41": models/1_41.md
+          - "1_40": models/1_40.md
+          - "1_39": models/1_39.md
+          - "1_38": models/1_38.md
+          - "1_37": models/1_37.md
+          - "1_36": models/1_36.md
+          - "1_35": models/1_35.md
+          - "1_34": models/1_34.md
+          - "1_33": models/1_33.md
+          - "1_32": models/1_32.md
+          - "1_31": models/1_31.md
+      - 10-aircraft:
+          - "1_30_pms": models/1_30_pms.md
+          - "1_29": models/1_29.md
+          - "1_28": models/1_28.md
+          - "1_27a": models/1_27a.md
+          - "1_27": models/1_27.md
+          - "1_26": models/1_26.md
+          - "1_25": models/1_25.md
+          - "1_24_pms": models/1_24_pms.md
+          - "1_24": models/1_24.md
+          - "1_23": models/1_23.md
+          - "1_22": models/1_22.md
+          - "1_21": models/1_21.md
+          - "1_20": models/1_20.md
+          - "1_19": models/1_19.md
+          - "1_18": models/1_18.md
+          - "1_17": models/1_17.md
+          - "1_16_b": models/1_16_b.md
+          - "1_16_a": models/1_16_a.md
+          - "1_16": models/1_16.md
+      # END generated model nav
+  - Renders: renders.md
+  - How it works:
+      - The problem: how/problem.md
+      - Environments: how/environments.md
+      - Observations: how/observations.md
+      - Actions & reselection: how/actions.md
+      - Objective & reward: how/objective.md
+      - Loss-of-separation rules: how/separation.md
+  - Training:
+      - From scratch: training/index.md
+      - Reference: training/reference.md
+      - Compute: training/compute.md
+      - TensorBoard: training/tensorboard.md
+  - Evaluation: evaluation.md
+  - Findings:
+      - Overview: findings/index.md
+      - Reselection: findings/reselection.md
+      - Sequencing: findings/sequencing.md
+      - Order first? (Phase 0): findings/order-first.md
+      - Over-capacity & long streams: findings/capacity.md
+      - Search at inference: findings/lookahead.md
+      - Training from scratch: findings/curriculum.md
+      - Evaluation noise: findings/evaluation-noise.md
+  - Log: log.md
   - Roadmap: roadmap.md
+  - Archive:
+      - Overview: archive/index.md
+      - 22 clearances vs 15: archive/clearance-sets.md
+      - The 10-aircraft reward: archive/ten-aircraft-reward.md
+      - 10-aircraft tests: archive/ten-aircraft-tests.md
+      - Early runs: archive/early-runs.md
+      - Point merge: archive/point-merge.md
+  - Glossary: glossary.md

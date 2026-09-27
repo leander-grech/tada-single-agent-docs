@@ -1,0 +1,284 @@
+/* TADA shared components. Each theme file sets the --tada-* tokens and the
+   Material --md-* colours; this file only uses them. */
+
+:root {
+  --md-text-font: var(--tada-font-body);
+  --md-code-font: var(--tada-font-mono);
+}
+
+/* ---- Typography ------------------------------------------------------- */
+
+.md-typeset {
+  font-size: 0.8rem;
+  line-height: 1.65;
+}
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4,
+.md-header__title,
+.md-tabs__link,
+.md-nav,
+.md-footer,
+.md-typeset table:not([class]) th,
+.md-typeset .tada-table th,
+.md-typeset .admonition-title,
+.md-typeset summary {
+  font-family: var(--tada-font-head);
+}
+
+.md-typeset h1 { font-weight: 600; letter-spacing: 0.01em; color: var(--md-default-fg-color); }
+.md-typeset h2 { font-weight: 600; letter-spacing: 0.02em; }
+.md-typeset h3 { font-weight: 600; }
+
+/* Numbers: monospaced, tabular. tada.js tags numeric table cells with .num. */
+.md-typeset code,
+.md-typeset .num,
+.md-typeset td.num,
+.tada-tile__value,
+.tada-tile__delta,
+.tada-mono {
+  font-family: var(--tada-font-mono);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+.md-typeset td.num,
+.md-typeset th.num { text-align: right; white-space: nowrap; }
+
+/* ---- Status chips ----------------------------------------------------- */
+
+.tada-chip {
+  display: inline-block;
+  padding: 0.05em 0.55em;
+  border: 1px solid currentColor;
+  border-radius: var(--tada-radius, 0.2rem);
+  font-family: var(--tada-font-head);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.tada-chip::before {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin-right: 0.4em;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: 0.08em;
+}
+.tada-chip--ok    { color: var(--tada-ok); }
+.tada-chip--warn  { color: var(--tada-warn); }
+.tada-chip--bad   { color: var(--tada-bad); }
+.tada-chip--champ { color: var(--tada-champion); }
+.tada-chip--muted { color: var(--md-default-fg-color--light); }
+
+/* ---- Current-best box and instrument tiles ---------------------------- */
+
+.tada-best {
+  margin: 1.5em 0;
+  padding: 1rem 1.1rem 0.9rem;
+  border: 1px solid var(--tada-rule);
+  border-left: 4px solid var(--tada-champion);
+  border-radius: var(--tada-radius, 0.2rem);
+  background: var(--tada-surface);
+}
+.tada-best__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.8rem;
+  margin-bottom: 0.8rem;
+  font-family: var(--tada-font-head);
+}
+.tada-best__label {
+  color: var(--tada-champion);
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.tada-best__model {
+  font-family: var(--tada-font-mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--md-default-fg-color);
+}
+.tada-best__what { color: var(--md-default-fg-color--light); font-size: 0.75rem; }
+.tada-best__foot {
+  margin-top: 0.7rem;
+  font-size: 0.65rem;
+  color: var(--md-default-fg-color--light);
+}
+
+.tada-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 5.5rem), 1fr));
+  gap: 0.5rem;
+}
+.tada-tile {
+  position: relative;
+  min-width: 0;
+  padding: 0.5rem 0.6rem 0.45rem;
+  border: 1px solid var(--tada-tile-border);
+  border-radius: var(--tada-radius, 0.2rem);
+  background: var(--tada-tile-bg);
+  color: var(--tada-tile-fg);
+}
+.tada-tile__label {
+  font-family: var(--tada-font-head);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tada-tile-label);
+}
+.tada-tile__value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.tada-tile__unit { font-size: 0.65rem; opacity: 0.75; margin-left: 0.15em; }
+.tada-tile__delta { display: block; font-size: 0.55rem; color: var(--tada-tile-label); white-space: nowrap; }
+.tada-tile__label { display: block; min-height: 2.5em; line-height: 1.25; }
+.tada-tile--ok   .tada-tile__value { color: var(--tada-ok); }
+.tada-tile--warn .tada-tile__value { color: var(--tada-warn); }
+.tada-tile--bad  .tada-tile__value { color: var(--tada-bad); }
+.tada-tile--champ .tada-tile__value { color: var(--tada-champion); }
+
+/* ---- Tables: sticky header, champion row, sortable -------------------- */
+
+.md-typeset .tada-table-wrap {
+  max-height: 70vh;
+  overflow: auto;
+  border: 1px solid var(--tada-rule);
+  border-radius: var(--tada-radius, 0.2rem);
+  margin: 1em 0;
+}
+.md-typeset table.tada-table {
+  display: table;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.72rem;
+  margin: 0;
+  border: 0;
+}
+.md-typeset table.tada-table th,
+.md-typeset table.tada-table td {
+  padding: 0.45em 0.6em;
+  border-bottom: 1px solid var(--tada-rule);
+  vertical-align: top;
+}
+.md-typeset table.tada-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--tada-table-head-bg);
+  color: var(--tada-table-head-fg);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: left;
+}
+.md-typeset table.tada-table td:nth-child(2) { min-width: 9em; }
+.md-typeset table.tada-table tbody tr:hover { background: var(--md-accent-fg-color--transparent); }
+.md-typeset table.tada-table tr.is-champion td { background: var(--tada-champion-bg); }
+.md-typeset table.tada-table tr.is-champion td:first-child {
+  box-shadow: inset 4px 0 0 var(--tada-champion);
+  font-weight: 700;
+}
+.md-typeset table.tada-sortable thead th { cursor: pointer; user-select: none; }
+.md-typeset table.tada-sortable thead th::after {
+  content: "↕";
+  margin-left: 0.35em;
+  opacity: 0.35;
+  font-size: 0.85em;
+}
+.md-typeset table.tada-sortable thead th[aria-sort="ascending"]::after  { content: "▲"; opacity: 0.9; }
+.md-typeset table.tada-sortable thead th[aria-sort="descending"]::after { content: "▼"; opacity: 0.9; }
+
+/* ---- Credited render --------------------------------------------------- */
+
+.md-typeset figure.tada-render {
+  margin: 1.5em 0;
+  max-width: 100%;
+  border: 1px solid var(--tada-rule);
+  border-radius: var(--tada-radius, 0.2rem);
+  overflow: hidden;
+  background: #000;
+}
+.md-typeset figure.tada-render video { display: block; width: 100%; }
+.md-typeset figure.tada-render figcaption {
+  margin: 0;
+  max-width: none;
+  padding: 0.45em 0.6em;
+  background: var(--tada-caption-bg);
+  color: var(--tada-caption-fg);
+  font-family: var(--tada-font-mono);
+  font-size: 0.65rem;
+  text-align: left;
+  border-top: 2px solid var(--tada-champion);
+}
+.tada-render__by { color: var(--tada-caption-accent); font-weight: 600; }
+
+/* ---- Report-card pieces ------------------------------------------------- */
+
+.md-typeset table.tada-facts th {
+  width: 8.5em;
+  text-align: left;
+  vertical-align: top;
+  color: var(--md-default-fg-color--light);
+  font-weight: 500;
+  background: transparent;
+  position: static;
+}
+.md-typeset table.tada-table tr.tada-group th {
+  position: static;
+  background: var(--tada-surface);
+  color: var(--tada-tile-label);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+}
+.md-typeset .tada-placeholder {
+  margin: 0.8em 0 1.2em;
+  padding: 1.6em 1em;
+  border: 1px dashed var(--tada-rule);
+  border-radius: var(--tada-radius, 0.2rem);
+  color: var(--md-default-fg-color--light);
+  font-family: var(--tada-font-mono);
+  font-size: 0.65rem;
+  text-align: center;
+}
+
+/* ---- Learning curve (inline SVG from the generator) ---------------------- */
+
+.tada-curve-wrap {
+  margin: 1em 0 0.5em;
+  padding: 0.6rem 0.4rem 0.2rem;
+  border: 1px solid var(--tada-rule);
+  border-radius: var(--tada-radius, 0.2rem);
+  background: var(--tada-surface);
+}
+svg.tada-curve { display: block; width: 100%; height: auto; overflow: visible; }
+svg.tada-curve .grid { stroke: var(--tada-rule); stroke-width: 1; }
+svg.tada-curve .tick,
+svg.tada-curve .axis {
+  fill: var(--md-default-fg-color--light);
+  font-family: var(--tada-font-mono);
+  font-size: 10px;
+}
+svg.tada-curve .axis { font-family: var(--tada-font-head); letter-spacing: 0.04em; }
+svg.tada-curve .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+svg.tada-curve .pt { stroke: var(--tada-surface); stroke-width: 2; }
+svg.tada-curve .pt:hover { stroke: var(--md-default-fg-color); }
+svg.tada-curve .dlabel {
+  fill: var(--md-default-fg-color);
+  font-family: var(--tada-font-head);
+  font-size: 11px;
+}
+.md-typeset table.tada-table td .tada-what { display: inline-block; min-width: 14em; }
+.md-typeset table.tada-compare th:not(:first-child) { text-align: right; }
+.md-typeset figure.tada-render figcaption { font-style: normal; }

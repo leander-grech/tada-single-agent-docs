@@ -1,0 +1,110 @@
+# Training: the from-scratch recipe
+
+!!! abstract "Summary"
+    `recipes/windowed_from_scratch.sh SEED ARM` trains the windowed agent from random weights in
+    10M steps, with no checkpoint needed. Everything that defines the run is in the script: the
+    design, the hyperparameters and the seed. With the same seed a run draws the same training
+    scenarios and starts from the same weights. Score it while it trains with `track_windowed.py`
+    and compare your curve with the reference runs. This page is the student guide; the
+    [reference](reference.md) has every flag, and [compute](compute.md) has the hardware.
+
+## 1. Set up
+
+From `reinforcement_learning/single_agent_rllib/`, Python 3.12:
+
+```bash
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -r recipes/requirements-windowed.txt
+pip install simulator/wheels/flight_simulator-0.2.81-cp312-cp312-manylinux_2_34_x86_64.whl
+# optional, ~5 min: checks this machine computes what ours does
+TADA_SEQUENCE_OBS=1 TADA_MAX_PICKS=2 JAX_PLATFORMS=cpu python tests/test_multi_pick.py
+```
+
+## 2. Train
+
+```bash
+recipes/windowed_from_scratch.sh 1 A      # SEED=1, ARM=A
+```
+
+| arm | what it trains |
+|---|---|
+| **A** (default) | the design the fine-tuned models ended up with, from step 0 |
+| B | A with flat (un-ramped) sequence and conflict potentials |
+| C | A with a traffic curriculum: 10-flight streams to 2.5M, 20-flight to 5.5M, stitched 2×20 to 10M |
+
+The design is fixed by environment variables read at import time:
+
+| setting | value | meaning |
+|---|---|---|
+| `TADA_ACTION_SET` | `v2` | the [15 clearances](../how/actions.md) |
+| `TADA_SEQUENCE_OBS` | `1` | [AMAN-sequence observations](../how/observations.md) |
+| `TADA_MAX_PICKS` | `2` | [reselection](../how/actions.md#reselection) |
+
+The script then runs `main_jax.py` with the windowed env, the [lexicographic
+objective](../how/objective.md) (`--reward-mode outcome_pbrs`), stitched 2×20 streams with a
+120–900 s gap, 32 workers, 10M steps, LR 3e-4 → 3e-5 (8% warm-up, cosine), entropy 0.01,
+value coefficient 0.25, target KL 0.05, a checkpoint every 25k steps. Extra flags are passed through
+and override the recipe (argparse keeps the last): `--total-timesteps 4096` makes a smoke test.
+
+Output goes to `experiments/atc_run_1_<N>_scratch_<arm>_s<SEED>/`: checkpoints, VecNormalize,
+TensorBoard, `run_meta.json`, and a `snapshot/` of the source packages.
+
+## 3. Score it while it trains
+
+In a second terminal:
+
+```bash
+python analysis/track_windowed.py --run experiments/atc_run_1_<N>_scratch_a_s1 --every 1000000 --workers 8
+```
+
+Every 1M steps it scores the newest checkpoint deterministically on the 100 validation seeds (which
+training never draws), then the final model, appending to `<run>/track.csv`:
+`step, solved, hard_solved, separation_lost, all_on_time, on_time, clearances`. The per-seed rows go
+to `<run>/track_scores/`.
+
+## 4. Compare with the reference runs
+
+The same recipe on our hardware. Curves are on each card:
+
+| run | arm, seed | status |
+|---|---|---|
+| [`1_40`](../models/1_40.md) | A, 1 | complete |
+| [`1_42`](../models/1_42.md) | A, 2 | complete |
+| [`1_41`](../models/1_41.md) | B, 1 | complete |
+| [`1_43`](../models/1_43.md) | C, 1 | in progress |
+
+<!-- gen:compare models=1_40,1_42,1_41 batteries=f20,s2x20,att10,la4 -->
+<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../models/1_40/">1_40</a></th><th><a href="../models/1_42/">1_42</a></th><th><a href="../models/1_41/">1_41</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>22</td><td>16</td><td>14</td></tr><tr><td>20-flight: hard-solved</td><td>2</td><td>1</td><td>2</td></tr><tr><td>20-flight: separation lost</td><td>9</td><td>7</td><td>9</td></tr><tr><td>20-flight: flights on time</td><td>0.779</td><td>0.790</td><td>0.793</td></tr><tr><td>20-flight: clearances / stream</td><td>161.9</td><td>155.8</td><td>158.1</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>0.98</td><td>0.62</td><td>0.60</td></tr><tr><td>stitched 2×20: solved</td><td>1</td><td>1</td><td>3</td></tr><tr><td>stitched 2×20: hard-solved</td><td>0</td><td>0</td><td>0</td></tr><tr><td>stitched 2×20: separation lost</td><td>13</td><td>21</td><td>20</td></tr><tr><td>stitched 2×20: flights on time</td><td>0.729</td><td>0.701</td><td>0.723</td></tr><tr><td>pass@10 (seeds)</td><td>38</td><td>37</td><td>34</td></tr><tr><td>separation lost, best of 10</td><td>0</td><td>1</td><td>2</td></tr><tr><td>with lookahead: solved</td><td>19</td><td>29</td><td>22</td></tr><tr><td>with lookahead: hard-solved</td><td>0</td><td>1</td><td>1</td></tr><tr><td>with lookahead: separation lost</td><td>7</td><td>5</td><td>2</td></tr><tr><td>with lookahead: flights on time</td><td>0.802</td><td>0.817</td><td>0.835</td></tr></tbody></table>
+
+<!-- /gen -->
+
+**Your numbers will not be bit-identical.** GPU arithmetic differs between machines. Compare
+statistically, against the spread between our two arm-A seeds, which is large
+([Findings → training from scratch](../findings/curriculum.md)). A run that lands between or near
+them is behaving normally.
+
+## 5. Run the full battery
+
+When training ends, score the final model the way every card is scored ([Evaluation
+protocol](../evaluation.md)):
+
+```bash
+export TADA_SEQUENCE_OBS=1 TADA_MAX_PICKS=2
+M=experiments/atc_run_1_<N>_scratch_a_s1/final_model.zip
+python analysis/score_windowed.py --models $M --seeds 100 --attempts 9
+python analysis/score_windowed.py --models $M --seeds 100 --segments 2 --gap 120 900
+python analysis/score_windowed.py --models $M --seeds 100 --lookahead 4
+```
+
+## Time
+
+~1 400 steps/s on a 32-core Threadripper with an RTX 4090 (2 h for 10M); a laptop with a GPU does
+~300 steps/s (9 h). Without a GPU the PPO updates add several hours. Why per-core speed matters more
+than core count: [Compute](compute.md).
+
+## Fine-tuning instead
+
+Every model up to `1_39` was trained by warm-starting from the previous one (`--init-weights`, a
+critic warm-up, a 10× lower learning rate). Each card's *Reproduce* section gives its command, and
+the [reference](reference.md#fine-tuning) explains why a warm start onto a new reward needs a
+fine-tuning schedule.

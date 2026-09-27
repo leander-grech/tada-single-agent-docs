@@ -1,0 +1,408 @@
+# Model registry. tools/build_model_docs.py reads this plus the code repo's evaluation files
+# (read-only) and writes the leaderboard, the best-model page, one report card per model,
+# the render gallery, the Home box and BACKFILL.md.
+#
+# Paths under `run`, `evals`, `curve`, `attempts` and render `meta` are relative to the code
+# repo (override with --code-repo or TADA_CODE_REPO). Render `file` is under docs/assets/renders/.
+#
+# Per model:
+#   id           run id as used on the site
+#   track        windowed | ten_aircraft
+#   run          experiment directory
+#   checkpoint   the checkpoint the card is about, relative to `run`
+#   parent       id whose weights this run started from (null = random init)
+#   compare      id to compute "vs parent" deltas against (default: parent)
+#   status       complete | stopped | in_progress | not_adopted
+#   steps        steps trained in this run, when the run did not reach total_timesteps
+#   whats_new    one line: what this run changed
+#   evals        battery -> CSV (windowed: f20, s2x20, att10, la4, f40; ten_aircraft: d100)
+#   headline     ten_aircraft only: {file, steps} row of a progress_scored.csv to headline
+#   curve        list of {file, kind: track | progress | ckpts}
+#   attempts     ten_aircraft only: attempts_per_seed.csv from attempts_to_solve.py
+#   renders      list of {file, meta} (meta = solutions.json) or
+#                {file, attribution: filename, checkpoint, seed | reel, mode}
+#                or {file, attribution: unknown, claimed}  -> Archive, "attribution unknown"
+
+code_repo: /home/leander/code/tada/monorepo/reinforcement_learning/single_agent_rllib
+comparison_seed: 599310825
+
+champion:
+  windowed:
+    battery: f20
+    gate_max_separation_lost: 5        # per 100 seeds; models above it cannot be champion
+    order: [solved desc, separation_lost asc, hard_solved desc, clearances asc]
+  ten_aircraft:
+    battery: d100
+    order: [success desc, separation_lost asc]
+
+models:
+
+  # ---------------------------------------------------------------- windowed, from scratch
+  - id: "1_43"
+    track: windowed
+    run: experiments/atc_run_1_43_scratch_c_s1
+    checkpoint: final_model.zip
+    parent: null
+    status: in_progress
+    whats_new: "From scratch, arm C: arm A plus a traffic curriculum in one run (10-flight streams to 2.5M, 20-flight to 5.5M, stitched 2x20 to 10M). Seed 1."
+    curve: [{file: experiments/atc_run_1_43_scratch_c_s1/track.csv, kind: track}]
+
+  - id: "1_42"
+    track: windowed
+    run: experiments/atc_run_1_42_scratch_a_s2
+    checkpoint: final_model.zip
+    parent: null
+    status: complete
+    whats_new: "From scratch, arm A (the current design, no checkpoint), seed 2: the seed-to-seed spread for 1_40."
+    curve: [{file: experiments/atc_run_1_42_scratch_a_s2/track.csv, kind: track}]
+    evals: {f20: experiments/atc_run_1_42_scratch_a_s2/track_scores/final_model.csv}   # track_windowed.py's score of the final model
+
+  - id: "1_41"
+    track: windowed
+    run: experiments/atc_run_1_41_scratch_b_s1
+    checkpoint: final_model.zip
+    parent: null
+    status: complete
+    whats_new: "From scratch, arm B: arm A with flat (un-ramped) sequence and conflict potentials. Seed 1."
+    curve: [{file: experiments/atc_run_1_41_scratch_b_s1/track.csv, kind: track}]
+    evals: {f20: experiments/atc_run_1_41_scratch_b_s1/track_scores/final_model.csv}   # track_windowed.py's score of the final model
+
+  - id: "1_40"
+    track: windowed
+    run: experiments/atc_run_1_40_scratch_a_s1
+    checkpoint: final_model.zip
+    parent: null
+    status: complete
+    whats_new: "From scratch, arm A: the whole design (lexicographic objective, sequence observations, reselection, attention) from random weights in 10M steps. Seed 1."
+    curve: [{file: experiments/atc_run_1_40_scratch_a_s1/track.csv, kind: track}]
+    evals: {f20: experiments/atc_run_1_40_scratch_a_s1/track_scores/final_model.csv}   # track_windowed.py's score of the final model
+
+  # ---------------------------------------------------------------- windowed, fine-tunes
+  - id: "1_39"
+    track: windowed
+    run: experiments/atc_run_1_39_windowed_safety
+    checkpoint: final_model.zip
+    parent: "1_36"
+    status: not_adopted
+    extra_flags: "--violation-penalty 240"   # not recorded in run_meta.json; from the experiment log
+    whats_new: "As 1_38, with the loss-of-separation penalty raised from 90 to 240 (sized to a stitched 40-flight training stream)."
+    evals:
+      f20: analysis/2026-09-26_1_36_multipick/eval_safety/f20.csv
+      s2x20: analysis/2026-09-26_1_36_multipick/eval_safety/s2x20.csv
+      att10: analysis/2026-09-26_1_36_multipick/eval_safety/att10.csv
+      la4: analysis/2026-09-26_1_36_multipick/eval_safety/la4.csv
+    renders:
+      - {file: 1_39_deterministic_seed599310825.mp4, meta: analysis/2026-09-27_renders_seed599310825/1_39_deterministic_seed599310825_solutions.json}
+
+  - id: "1_38"
+    track: windowed
+    run: experiments/atc_run_1_38_windowed_cont
+    checkpoint: final_model.zip
+    parent: "1_36"
+    status: complete
+    whats_new: "1_36 continued for another 5M steps on the same settings (reselection, budget 2)."
+    evals:
+      f20: analysis/2026-09-26_1_36_multipick/eval_cont/f20.csv
+      s2x20: analysis/2026-09-26_1_36_multipick/eval_cont/s2x20.csv
+      att10: analysis/2026-09-26_1_36_multipick/eval_cont/att10.csv
+      la4: analysis/2026-09-26_1_36_multipick/eval_cont/la4.csv
+    renders:
+      - {file: 1_38_deterministic_seed599310825.mp4, meta: analysis/2026-09-27_renders_seed599310825/1_38_deterministic_seed599310825_solutions.json}
+
+  - id: "1_37"
+    track: windowed
+    run: experiments/atc_run_1_37_windowed_control
+    checkpoint: final_model.zip
+    parent: "1_35"
+    status: complete
+    whats_new: "Control for 1_36: 1_35 trained another 5M steps on 1_36's settings, one clearance per step."
+    evals:
+      f20: analysis/2026-09-26_1_36_multipick/eval_control/f20.csv
+      s2x20: analysis/2026-09-26_1_36_multipick/eval_control/s2x20.csv
+      att10: analysis/2026-09-26_1_36_multipick/eval_control/att10.csv
+      la4: analysis/2026-09-26_1_36_multipick/eval_control/la4.csv
+    renders:
+      - {file: 1_37_deterministic_seed599310825.mp4, meta: analysis/2026-09-27_renders_seed599310825/1_37_deterministic_seed599310825_solutions.json}
+
+  - id: "1_36"
+    track: windowed
+    run: experiments/atc_run_1_36_windowed_multipick
+    checkpoint: final_model.zip
+    parent: "1_35"
+    status: complete
+    whats_new: "Reselection: the policy may ask for a second clearance within the same 45 s step (budget 2)."
+    evals:
+      f20: analysis/2026-09-26_1_36_multipick/eval/f20.csv
+      s2x20: analysis/2026-09-26_1_36_multipick/eval/s2x20.csv
+      att10: analysis/2026-09-26_1_36_multipick/eval/1_36_att10.csv
+      la4: analysis/2026-09-26_1_36_multipick/eval/1_36_la4.csv
+    renders:
+      - {file: 1_36_rescued_deterministic_seed599310825.mp4, meta: analysis/2026-09-26_renders_failed_1_36/1_36_rescued_deterministic_seed599310825_solutions.json}
+      - {file: 1_36_rescued_best_seed599310825.mp4, meta: analysis/2026-09-26_renders_failed_1_36/1_36_rescued_best_seed599310825_solutions.json}
+      - {file: 1_36_precision_best_seed1595180635.mp4, meta: analysis/2026-09-26_renders_failed_1_36/1_36_precision_best_seed1595180635_solutions.json}
+      - {file: 1_36_safety_best_seed1566942273.mp4, meta: analysis/2026-09-26_renders_failed_1_36/1_36_safety_best_seed1566942273_solutions.json}
+
+  - id: "1_35"
+    track: windowed
+    run: experiments/atc_run_1_35_windowed_jax
+    checkpoint: final_model.zip
+    parent: "1_34"
+    status: stopped
+    steps: 4648960        # stopped at 93% (experiment log, run 1_35)
+    whats_new: "1_34's design trained with the JAX learner on the faster simulator, on stitched 2x20 streams with a random 120-900 s cooling gap."
+    evals:
+      f20: analysis/2026-09-26_1_35_final/f20.csv
+      s2x20: analysis/2026-09-26_1_35_final/s2x20.csv
+      att10: analysis/2026-09-26_1_35_final/1_35_att10.csv
+      la4: analysis/2026-09-26_1_35_final/1_35_la4.csv
+    renders:
+      - {file: 1_35_rescued_best_seed41.mp4, meta: analysis/2026-09-26_renders_failed_1_35/1_35_rescued_best_seed41_solutions.json}
+
+  - id: "1_34"
+    track: windowed
+    run: experiments/atc_run_1_34_windowed_outcome
+    checkpoint: checkpoints/ppo_tada_799744_steps.zip
+    parent: "1_33"
+    status: stopped
+    whats_new: "The lexicographic objective (safety, then each flight's deviation bracket, then fewest clearances) plus potential-based shaping. Stopped at 0.8M in favour of 1_35."
+    evals:
+      f20: analysis/2026-09-26_1_35_final/f20.csv
+      s2x20: analysis/2026-09-26_1_35_final/s2x20.csv
+
+  - id: "1_33"
+    track: windowed
+    run: experiments/atc_run_1_33_windowed_seqobs
+    checkpoint: final_model.zip
+    parent: "1_32"
+    status: complete
+    whats_new: "Four AMAN-sequence observation columns per aircraft (rank shift, crossings, gap errors to predecessor and successor); reward unchanged."
+    evals:
+      f20: analysis/2026-09-26_1_35_final/f20.csv
+      s2x20: analysis/2026-09-26_1_35_final/s2x20.csv
+      att10: analysis/2026-09-26_attempts/1_33_final_att10.csv
+      la4: analysis/2026-09-26_lookahead/1_33_final_la4.csv
+    curve:
+      - {file: analysis/2026-09-26_1_33_early/1_33_at_999680.csv, kind: ckpts}
+      - {file: analysis/2026-09-26_1_33_early/1_33_ckpts.csv, kind: ckpts}
+    renders:
+      - {file: 1_33_rescued_deterministic_seed438989805.mp4, meta: analysis/2026-09-26_renders_failed_1_33/1_33_rescued_deterministic_seed438989805_solutions.json}
+      - {file: 1_33_rescued_best_seed438989805.mp4, meta: analysis/2026-09-26_renders_failed_1_33/1_33_rescued_best_seed438989805_solutions.json}
+      - {file: 1_33_precision_best_seed373399426.mp4, meta: analysis/2026-09-26_renders_failed_1_33/1_33_precision_best_seed373399426_solutions.json}
+      - {file: 1_33_safety_best_seed1947382419.mp4, meta: analysis/2026-09-26_renders_failed_1_33/1_33_safety_best_seed1947382419_solutions.json}
+      - {file: 1_33_safety_best_seed1159417075.mp4, meta: analysis/2026-09-26_renders_failed_1_33/1_33_safety_best_seed1159417075_solutions.json}
+
+  - id: "1_32"
+    track: windowed
+    run: experiments/atc_run_1_32_windowed_ft
+    checkpoint: final_model.zip
+    parent: "1_29"
+    status: complete
+    whats_new: "1_31 redone as a fine-tune: 300k-step critic warm-up, then peak LR 3e-5 and entropy coefficient 0.003."
+    evals:
+      f20: analysis/2026-09-25_windowed_evals/f20.csv
+      s2x20: analysis/2026-09-25_windowed_evals/s2x20.csv
+      att10: analysis/2026-09-26_attempts/1_32_final_att10.csv
+      f40: analysis/2026-09-25_windowed_evals/f40.csv
+    curve:
+      - {file: analysis/2026-09-25_windowed_scores.csv, kind: ckpts}
+    renders:
+      - {file: 1_32_solved_seed1001495968.mp4, meta: analysis/2026-09-25_renders_1_32/1_32_solved_seed1001495968_solutions.json}
+      - {file: 1_32_solved_seed921959045.mp4, meta: analysis/2026-09-25_renders_1_32/1_32_solved_seed921959045_solutions.json}
+      - {file: 1_32_typical_seed1181241943.mp4, meta: analysis/2026-09-25_renders_1_32/1_32_typical_seed1181241943_solutions.json}
+      - {file: 1_32_bust_seed27911967.mp4, meta: analysis/2026-09-25_renders_1_32/1_32_bust_seed27911967_solutions.json}
+
+  - id: "1_31"
+    track: windowed
+    run: experiments/atc_run_1_31_windowed
+    checkpoint: checkpoints/ppo_tada_2000000_steps.zip
+    parent: "1_29"
+    status: stopped
+    no_backfill: "abandoned run; the 20-flight score is enough to show it failed"
+    whats_new: "First windowed run: 1_29's weights on the 20-flight stream with a fresh-run learning-rate schedule. Made the policy worse; stopped at 2M."
+    evals:
+      f20: analysis/2026-09-25_windowed_scores.csv
+
+  # ---------------------------------------------------------------- 10-aircraft
+  - id: "1_30_pms"
+    track: ten_aircraft
+    run: experiments/atc_run_1_30_pms
+    checkpoint: final_model.zip
+    parent: null
+    status: complete
+    pending: "A 100-seed score of this checkpoint is scheduled on the rented host (10-aircraft env with its own settings)."
+    whats_new: "BGY point-merge scenario. Not described in the docs or commit messages beyond its run name."
+    backfill_note: "100-seed deterministic score on its own scenario (BGY point merge), `score_checkpoints.py`"
+
+  - id: "1_29"
+    track: ten_aircraft
+    run: experiments/atc_run_1_29_pbrs_attn_d
+    checkpoint: best/best_model.zip
+    parent: null
+    status: complete
+    pending: "A 100-seed score of this checkpoint is scheduled on the rented host (10-aircraft env with its own settings)."
+    steps: 20000000       # 1_29_pbrs_attn to 10M, resumed in 1_29_pbrs_attn_d to 20M
+    whats_new: "Continuous PBRS coverage (the tier potential no longer a staircase) and one masked self-attention block over the aircraft slots (commit f6e0bcc). Its best checkpoint seeds the windowed track."
+    headline: {file: experiments/atc_run_1_29_pbrs_attn_d/progress_scored.csv, steps: 20000000}
+    curve:
+      - {file: experiments/atc_run_1_29_pbrs_attn/progress_scored.csv, kind: progress}
+      - {file: experiments/atc_run_1_29_pbrs_attn_d/progress_scored.csv, kind: progress}
+    windowed_zero_shot:
+      f20: analysis/2026-09-25_windowed_evals/f20.csv
+      s2x20: analysis/2026-09-25_windowed_evals/s2x20.csv
+      f40: analysis/2026-09-25_windowed_evals/f40.csv
+
+  - id: "1_28"
+    track: ten_aircraft
+    run: experiments/atc_run_1_28_lr_decays_more_and_smaller_warmup
+    checkpoint: final_model.zip
+    parent: null
+    status: complete
+    pending: "A 100-seed score of this checkpoint is scheduled on the rented host (10-aircraft env with its own settings)."
+    whats_new: "Learning-rate schedule only, per its run_meta.json: warm-up 1% of training (1_26: 8%) and a floor of 3e-6 (1_26: 3e-5)."
+
+  - id: "1_27a"
+    track: ten_aircraft
+    run: experiments/atc_run_1_27_actionset_v2_a
+    checkpoint: checkpoints/ppo_tada_10000000_steps.zip
+    parent: "1_27"
+    compare: "1_27"
+    status: complete
+    steps: 5025000        # resumed from 1_27 @ 4 975 000
+    whats_new: "1_27 re-run from its 4.975M checkpoint on the cosine schedule it should have had: removes 1_27's learning-rate confound."
+    evals: {d100: analysis/2026-08-18_1_27a_at10M_perseed.csv}
+    headline: {file: experiments/atc_run_1_27_actionset_v2_a/progress_scored.csv, steps: 10000000}
+    attempts: analysis/2026-08-18_1_27a_attempts_100seeds/attempts_per_seed.csv
+    curve: [{file: experiments/atc_run_1_27_actionset_v2_a/progress_scored.csv, kind: progress}]
+    renders:
+      - {file: ab_seed1194819984_v2cos_15clr.mp4, attribution: unknown, claimed: "1_27a at 10M, deterministic, seed 1194819984 (per the old Successful results page; no metadata, frame seed not recorded)"}
+      - {file: ab_seed1699226064_v2cos_15clr.mp4, attribution: unknown, claimed: "1_27a at 10M, deterministic, seed 1699226064 (per the old Successful results page; no metadata, frame seed not recorded)"}
+
+  - id: "1_27"
+    track: ten_aircraft
+    run: experiments/atc_run_1_27_actionset_v2
+    checkpoint: checkpoints/ppo_tada_10000000_steps.zip
+    parent: null
+    compare: "1_26"
+    status: complete
+    whats_new: "Clearance set v2: 15 clearances instead of 22, with a reversible trombone (SHORTEN_TROMBONE) and no SPEED_UP_LARGE."
+    evals: {d100: analysis/2026-08-17_1_27_at10M_perseed.csv}
+    headline: {file: experiments/atc_run_1_27_actionset_v2/progress_scored.csv, steps: 10000000}
+    attempts: analysis/2026-08-17_1_27_attempts_100seeds/attempts_per_seed.csv
+    curve: [{file: experiments/atc_run_1_27_actionset_v2/progress_scored.csv, kind: progress}]
+    renders:
+      - {file: 1_27_v2_15clr_det_ep8_reel.mp4, meta: analysis/2026-09-25_renders_reel_1_27/1_27_v2_15clr_det_ep8_reel_solutions.json}
+      - {file: ab_seed1194819984_v2_15clr.mp4, attribution: unknown, claimed: "1_27 at 10M, deterministic, seed 1194819984 (per the old Successful results page; no metadata, frame seed not recorded)"}
+      - {file: ab_seed1699226064_v2_15clr.mp4, attribution: unknown, claimed: "1_27 at 10M, deterministic, seed 1699226064 (per the old Successful results page; no metadata, frame seed not recorded)"}
+
+  - id: "1_26"
+    track: ten_aircraft
+    run: experiments/atc_run_1_26_sep3nm
+    checkpoint: checkpoints/ppo_tada_10000000_steps.zip
+    parent: null
+    compare: "1_25"
+    status: complete
+    whats_new: "Severity band 3-5 NM (so severity 1 means a real loss of separation), termination on a realised loss with a horizon-aware penalty, and log-scaled time observations."
+    evals: {d100: analysis/2026-08-17_1_26_at10M_perseed.csv}
+    headline: {file: experiments/atc_run_1_26_sep3nm/progress_scored.csv, steps: 10000000}
+    attempts: analysis/2026-08-11_1_26_attempts_100seeds/attempts_per_seed.csv
+    curve: [{file: experiments/atc_run_1_26_sep3nm/progress_scored.csv, kind: progress}]
+    renders:
+      - {file: ab_seed1194819984_v1_22clr.mp4, attribution: unknown, claimed: "1_26 at 10M, deterministic, seed 1194819984 (per the old Successful results page; no metadata, frame seed not recorded)"}
+      - {file: ab_seed1699226064_v1_22clr.mp4, attribution: unknown, claimed: "1_26 at 10M, deterministic, seed 1699226064 (per the old Successful results page; no metadata, frame seed not recorded)"}
+
+  - id: "1_25"
+    track: ten_aircraft
+    run: experiments/atc_run_1_25_trombone_relaxed
+    checkpoint: best/best_model.zip
+    parent: null
+    compare: "1_22"
+    status: complete
+    whats_new: "1_22's code with the success gate on realised (not predicted) losses of separation: a semantics fix."
+    evals: {d100: analysis/2026-08-04_1_22_vs_1_25.csv}
+
+  - id: "1_24_pms"
+    track: ten_aircraft
+    run: experiments/atc_run_1_24_pms
+    checkpoint: best/best_model.zip
+    parent: null
+    status: complete
+    whats_new: "BGY point-merge campaign with a sixth success tier (commit f9ecc24)."
+    renders:
+      - {file: atc_run_1_24_pms_best_model_det_noshield_ep3.mp4, attribution: filename, checkpoint: best/best_model.zip, reel: 3, mode: deterministic}
+      - {file: atc_run_1_24_pms_ppo_tada_7470000_steps_det_noshield_ep10.mp4, attribution: filename, checkpoint: checkpoints/ppo_tada_7470000_steps.zip, reel: 10, mode: deterministic}
+
+  - id: "1_24"
+    track: ten_aircraft
+    run: experiments/atc_run_1_24
+    checkpoint: final_model.zip
+    parent: null
+    status: complete
+    whats_new: "MXP trombone on the six-tier ladder (to ±30 s). Not otherwise described."
+
+  - id: "1_23"
+    track: ten_aircraft
+    run: experiments/atc_run_1_23
+    checkpoint: final_model.zip
+    parent: null
+    status: complete
+    whats_new: "First run on the six-tier ladder (to ±30 s). Not otherwise described."
+
+  - id: "1_22"
+    track: ten_aircraft
+    run: experiments/atc_run_1_22
+    checkpoint: best/best_model.zip
+    parent: null
+    status: complete
+    whats_new: "The best run before 1_26; its in-training success rate read 1.00, which prompted offline scoring."
+    evals: {d100: analysis/2026-08-04_1_22_vs_1_25.csv}
+    renders:
+      - {file: atc_run_1_22_best_model_det_noshield_ep5.mp4, attribution: filename, checkpoint: best/best_model.zip, reel: 5, mode: deterministic}
+      - {file: atc_run_1_22_best_model_det_noshield_ep20.mp4, attribution: filename, checkpoint: best/best_model.zip, reel: 20, mode: deterministic}
+      - {file: atc_run_1_22_best_model_det_rdrop_do_nothing_ep20.mp4, attribution: filename, checkpoint: best/best_model.zip, reel: 20, mode: "deterministic, reward-drop shield (do-nothing fallback)"}
+
+  - {id: "1_21", track: ten_aircraft, run: experiments/atc_run_1_21, checkpoint: final_model.zip, parent: null, status: complete, whats_new: "45 s interval restored after the 22 s test. Not otherwise described."}
+  - {id: "1_20", track: ten_aircraft, run: experiments/atc_run_1_20, checkpoint: final_model.zip, parent: null, status: complete, whats_new: "45 s interval. Not otherwise described."}
+  - {id: "1_19", track: ten_aircraft, run: experiments/atc_run_1_19, checkpoint: final_model.zip, parent: null, status: complete, whats_new: "45 s interval. Not otherwise described."}
+  - {id: "1_18", track: ten_aircraft, run: experiments/atc_run_1_18, checkpoint: final_model.zip, parent: null, status: complete, whats_new: "Back on the 45 s interval after the 22 s test. Not otherwise described."}
+
+  - id: "1_17"
+    track: ten_aircraft
+    run: experiments/atc_run_1_17
+    checkpoint: final_model.zip
+    parent: null
+    status: complete
+    whats_new: "A fresh run on a 22 s action interval, every duration constant doubled: the clean test of finer temporal control. It lost; 45 s restored."
+
+  - id: "1_16_b"
+    track: ten_aircraft
+    run: experiments/atc_run_1_16_b
+    checkpoint: final_model.zip
+    parent: "1_16"
+    status: complete
+    whats_new: "1_16's 2M checkpoint continued on a 22 s interval with a warm LR restart."
+
+  - id: "1_16_a"
+    track: ten_aircraft
+    run: experiments/atc_run_1_16_a
+    checkpoint: final_model.zip
+    parent: "1_16"
+    status: complete
+    whats_new: "1_16's 2M checkpoint continued unchanged on 45 s: the control for 1_16_b."
+
+  - id: "1_16"
+    track: ten_aircraft
+    run: experiments/atc_run_1_16
+    checkpoint: best/best_model.zip
+    parent: null
+    status: complete
+    whats_new: "Five-tier success ladder, autoregressive policy (aircraft head, then clearance head), per-scenario horizon and a degrees-of-freedom action cost."
+    shield_benchmark: analysis/2026-06-26_shield_benchmark_1_16/results.csv
+    renders:
+      - {file: atc_run_1_16_best_model_det_legacy45s_noshield_ep1_seed1595180635.mp4, attribution: filename, checkpoint: best/best_model.zip, seed: 1595180635, mode: deterministic}
+      - {file: atc_run_1_16_best_model_det_legacy45s_rdrop_next_best_ep1_seed1595180635.mp4, attribution: filename, checkpoint: best/best_model.zip, seed: 1595180635, mode: "deterministic, reward-drop shield (next-best fallback)"}
+      - {file: atc_run_1_16_best_model_det_legacy45s_noshield_ep1_seed1181241943.mp4, attribution: filename, checkpoint: best/best_model.zip, seed: 1181241943, mode: deterministic}
+      - {file: atc_run_1_16_best_model_det_legacy45s_rdrop_next_best_ep1_seed1181241943.mp4, attribution: filename, checkpoint: best/best_model.zip, seed: 1181241943, mode: "deterministic, reward-drop shield (next-best fallback)"}
+      - {file: atc_run_1_16_best_model_det_legacy45s_noshield_ep10.mp4, attribution: filename, checkpoint: best/best_model.zip, reel: 10, mode: deterministic}
+      - {file: atc_run_1_16_best_model_det_noshield_ep5.mp4, attribution: filename, checkpoint: best/best_model.zip, reel: 5, mode: deterministic}
+      - {file: atc_run_1_16_best_model_det_noshield_ep10_NOTlegacyinterval.mp4, attribution: filename, checkpoint: best/best_model.zip, reel: 10, mode: "deterministic, 22 s interval (not its training interval)"}
+      - {file: atc_run_1_16_best_model_det_rdrop_next_best_alleval.mp4, attribution: filename, checkpoint: best/best_model.zip, reel: all, mode: "deterministic, reward-drop shield (next-best fallback)"}

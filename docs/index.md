@@ -1,219 +1,60 @@
-# TADA Single-Agent RL
+# TADA: single-agent arrival sequencing
 
-!!! abstract "TL;DR"
-    A single RL agent sequences up to 10 inbound aircraft into Milan Malpensa, issuing one
-    clearance per 45 s to hit AMAN target landing times without losing separation.
+One reinforcement-learning agent sequences arrival traffic into **Milan Malpensa** through the
+trombone arrival. Every 45 s it issues a clearance, two with [reselection](how/actions.md#reselection),
+to land every flight on its AMAN target time without ever losing separation, using as few
+clearances as it can. The current agent flies a stream of 20 flights through a window of the next
+10 in the landing queue.
 
-    **Current best — run `1_26`, 22 clearances, scored on 100 fixed seeds:** success **0.70**,
-    losses of separation **0.07**, worst-aircraft deviation **43 s**. The clean-subset success
-    rate that had held near 53.7% across twenty runs reached **0.753**.
+<!-- gen:best-box -->
+<div class="tada-best">
+<div class="tada-best__head"><span class="tada-best__label">Current best</span><a class="tada-best__model" href="models/1_38/">1_38</a><span class="tada-best__what">1_36 continued for another 5M steps on the same settings (reselection, budget 2).</span></div>
+<div class="tada-tiles"><div class="tada-tile tada-tile--ok"><span class="tada-tile__label">Solved</span><span class="tada-tile__value">63<span class="tada-tile__unit">/100</span></span><span class="tada-tile__delta">1_36: 65</span></div><div class="tada-tile tada-tile--ok"><span class="tada-tile__label">Hard-solved ±30 s</span><span class="tada-tile__value">24<span class="tada-tile__unit">/100</span></span><span class="tada-tile__delta">1_36: 29</span></div><div class="tada-tile tada-tile--bad"><span class="tada-tile__label">Separation lost</span><span class="tada-tile__value">3<span class="tada-tile__unit">/100</span></span><span class="tada-tile__delta">1_36: 9</span></div><div class="tada-tile tada-tile--champ"><span class="tada-tile__label">Flights on time</span><span class="tada-tile__value">92.7<span class="tada-tile__unit">%</span></span><span class="tada-tile__delta">1_36: 91.6%</span></div><div class="tada-tile tada-tile--"><span class="tada-tile__label">Clearances</span><span class="tada-tile__value">121.9<span class="tada-tile__unit"></span></span><span class="tada-tile__delta">1_36: 128.3</span></div></div>
+<div class="tada-best__foot">20-flight streams · 100 validation seeds · deterministic · tile footnotes: parent 1_36 · source <code>analysis/2026-09-26_1_36_multipick/eval_cont/f20.csv</code> · <a href="models/">champion rule</a></div>
+</div>
+<!-- /gen -->
 
-    **Run `1_27` tested a reduced 15-clearance set on top and did not beat it** — success
-    **0.64**, a statistical tie, but worst-aircraft deviation nearly doubled, to **87 s**. It
-    learns much faster and converges worse. A mid-run crash had changed its learning-rate
-    schedule; **`1_27a` re-ran the second half on the correct one and the result held** — same
-    0.64 success, deviation 76 s, and no gain at all among clean episodes. The reduced set issues
-    `SHORTEN_TROMBONE`, its one new capability, about **once per thousand clearances** in both
-    runs. See [22 clearances vs 15](analysis_v1_v2.md).
+<div class="grid cards" markdown>
 
-    **A second track, [20-flight streams](#windowed-track)**, builds on this agent: a 20-flight
-    trombone stream seen through a window of the next 10 flights to land, trained on a
-    lexicographic objective (safety, then each flight's deviation bracket, then the fewest
-    actions). **Best so far: `1_38`, which may issue a second clearance within the same 45 s
-    step ([reselection](windowed.md#reselection)): 93% of flights on time, all 20 on time in 63%
-    of scenarios, separation lost in 3%** — against 83% / 34% / 4% for a one-pick control from
-    the same start (which had 5M training steps to `1_38`'s 10M; at equal steps reselection cost
-    some safety, which the extra 5M removed). With a critic-guided lookahead it loses separation
-    in 1%. On 40-flight streams
-    it is still riskier than the one-pick agent (15% vs 11%). Most remaining losses sit in
-    scenarios that need more delay than the airspace can absorb.
+-   **[Leaderboard](models/index.md)**
 
-    **Read numbers only from `analysis/track_run.py`.** The in-training `success_rate` is a
-    5-episode rolling window and reported 1.00 for a run whose true rate was 0.38.
+    Every model, sortable, with the champion rule. Each links to a report card.
 
-![All three arms scored on 100 fixed eval seeds](assets/1_26_vs_1_27_vs_1_27a.png)
+-   **[How it works](how/problem.md)**
 
-- **Algorithm:** PPO with a custom autoregressive policy (`ATCAutoregressivePolicy`) — aircraft
-  head → clearance head conditioned on the sampled aircraft, masks read from the observation.
-  See [Training](training.md).
-- **Simulator:** Rust `flight_simulator` (PyO3 wheel), driven through a deterministic rollout.
-- **Scenario:** MXP trombone (`VALIDATION_USE_CASE_1`). BGY point-merge exists but underperforms.
-- **Windowed variant:** a 20-flight stream through a 10-slot window — [Windowed env](windowed.md).
-- **Branch:** `UM-lg`.
+    The problem, the environments, what the agent sees and can do, the objective, the separation rules.
 
-!!! info "This site is the current source of truth"
-    Pages are kept in sync with the code on `UM-lg`. Each page opens with a TL;DR; the detail
-    below it is not repeated across pages, so follow the links rather than expecting each page
-    to stand alone.
+-   **[Findings](findings/index.md)**
 
-## The windowed track: 20-flight streams { #windowed-track }
+    What the experiments established: reselection, sequencing, capacity, search, training from scratch.
 
-The 10-aircraft agent above sees a whole scenario at once. The [windowed env](windowed.md)
-asks it to control a **stream**: 20 flights, seen through a window of the next 10 in the
-landing queue. The AMAN sequence stays fixed, and each landed flight is replaced by the next in
-the queue. Nothing the agent observes depends on how many flights the stream has, so the same
-agent can in principle run continuously. Everything below is on the same 100 seeds, paired
-seed by seed, deterministic unless stated.
+-   **[Train one yourself](training/index.md)**
 
-| run | what changed | flights on time | separation lost | all 20 on time | clearances / stream |
-|---|---|---|---|---|---|
-| `1_29`, zero-shot | the 10-aircraft agent, untrained on streams | 0.727 | 21% | 0.08 | — |
-| `1_31` | fine-tune at a fresh-run learning rate | 0.468 | 32% | 0.01 | — |
-| `1_32` | proper fine-tune: critic warm-up, 10× lower LR | 0.731 | 21% | **0.29** | 100 |
-| `1_33` | + [AMAN-sequence observations](windowed.md#seq-obs) | **0.750** | **17%** | 0.20 | 106 |
-| `1_33`, best of 10 attempts | upper bound, not deployable | 0.829 | 5% | 0.44 | 112 |
-| `1_33` + [lookahead](windowed.md#lookahead) | critic-guided search, deployable | 0.684 | 7% | 0.04 | 103 |
-| `1_34` @ 0.8M | [lexicographic objective](windowed.md#objective) (stopped early) | 0.773 | 13% | 0.21 | 110 |
-| `1_35` @ 4.65M | 1_34 + [JAX learner, fast simulator](training.md#jax-learner), stitched 2×20 streams with a random cooling gap | 0.826 | 8% | 0.24 | 87 |
-| `1_37` | 1_35 + 5M steps (control for 1_36) | 0.832 | **4%** | 0.34 | 81 |
-| **`1_36`** | 1_35 + 5M steps with [reselection](windowed.md#reselection): a second clearance within the 45 s step | **0.916** | 9% | **0.65** | 128 |
-| `1_36`, best of 10 attempts | upper bound, not deployable | 0.949 | 2% | 0.80 | 134 |
-| **`1_36` + [lookahead](windowed.md#lookahead)** | critic-guided search, deployable | 0.896 | **2%** | 0.39 | 139 |
-| **`1_38`** | 1_36 + 5M steps | **0.927** | **3%** | 0.63 | 122 |
-| `1_38`, best of 10 attempts | upper bound, not deployable | 0.943 | 2% | 0.76 | 124 |
-| **`1_38` + lookahead** | critic-guided search, deployable | 0.893 | **1%** | 0.30 | 130 |
-| `1_39` | 1_36 + 5M steps, bust penalty 240 (sized to the training stream) | 0.859 | 5% | 0.40 | 125 |
+    The from-scratch recipe, how to score it while it trains, and reference curves to compare against.
 
-**What we learned**
+-   **[Renders](renders.md)**
 
-- **Precision was bandwidth-limited.** Allowed a second clearance within the same 45 s step,
-  the policy asks for it on about a third of its decisions: all 20 on time rises from 0.34 to 0.65 against
-  an identical control, and flights almost never land out of AMAN order. It also loses
-  separation more often (9% vs 4%). [Details](windowed.md#reselection).
-- **Reselection's safety cost trains away on 20-flight streams, not yet on 40.** Another 5M steps
-  (`1_38`) fixed 6 of `1_36`'s separation losses and lost none, at unchanged precision. On
-  stitched 2×20 streams it still loses separation on 15% of seeds (one-pick control: 11%).
-  Raising the bust penalty to 240 (`1_39`) instead cost precision (on time −0.07) and helped
-  only on the long streams. [Run log](experiments.md#run-1_38).
-- **More training alone buys mostly safety.** `1_37`, the same 5M extra steps with one pick,
-  halves `1_35`'s separation losses (8% → 4%) and lifts all 20 on time from 0.24 to 0.34;
-  reselection on the same budget reaches 0.65.
-- **Precision is a sequencing problem.** Traffic never enters the sector in AMAN order. Where
-  the agent keeps the order, 91% of landed flights are on time; where it swaps two, 63%.
-  [Details](windowed.md#sequencing).
-- **The agent is stable along a stream.** On [stitched](windowed.md#stitching) 2×20 streams
-  the second segment is flown as precisely as the first; what compounds is separation risk
-  per stretch of traffic.
-- **The policy holds more than it shows.** All 20 on time in at least one of 10 attempts on
-  44% of seeds, against 20% deterministically. [Details](windowed.md#attempts).
-- **Most separation losses are over-capacity scenarios.** 49 of the 100 seeds need some flight
-  to absorb more than 650 s. They account for 16 of `1_33`'s 17 losses.
-  [Details](windowed.md#feasibility).
-- **The reward was not measuring the goal.** Dense per-step costs outweighed the landing
-  rewards 4:1, and doing nothing cost the same as a clearance. `1_34` fixes both.
-  [Details](windowed.md#objective).
+    Every video, credited to the model, checkpoint and seed that produced it.
 
-<p><strong>One scenario, two outcomes</strong> (`1_33`, seed 438989805): the deterministic policy
-loses separation at step 82…</p>
-<video controls preload="metadata" width="100%">
-  <source src="assets/renders/1_33_rescued_deterministic_seed438989805.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+-   **[Evaluation protocol](evaluation.md)**
 
-<p>…while one of its own sampled attempts lands all 20 on time. The right-hand panel is each
-flight's predicted descent under do-nothing, against time. Solid red marks a predicted loss of
-separation; the gap between ▼ and a flight's tick on the ground line is its deviation.</p>
-<video controls preload="metadata" width="100%">
-  <source src="assets/renders/1_33_rescued_best_seed438989805.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+    100 validation seeds, a pinned frame, the standard battery, paired tests.
 
-<p><strong>With reselection</strong> (`1_36`, seed 599310825): the deterministic policy loses
-separation at step 56…</p>
-<video controls preload="metadata" width="100%">
-  <source src="assets/renders/1_36_rescued_deterministic_seed599310825.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+</div>
 
-<p>…and three of its ten sampled attempts land all 20 on time, often issuing two clearances in
-one step.</p>
-<video controls preload="metadata" width="100%">
-  <source src="assets/renders/1_36_rescued_best_seed599310825.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+## What changed recently
 
-<p><strong>After 5M more steps</strong> (`1_38`, the best agent, same seed, deterministic): all 20
-on time, every flight within 30 s of its AMAN target and none out of order. 56 of its 183
-decisions are second picks.</p>
-<video controls preload="metadata" width="100%">
-  <source src="assets/renders/1_38_deterministic_seed599310825.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+- **Reselection** (a second clearance within the 45 s step) was the largest single gain: precision
+  had been limited by bandwidth ([Findings](findings/reselection.md)).
+- **Order first?** Forcing the AMAN order early makes every model tested worse
+  ([Phase 0](findings/order-first.md)).
+- **From scratch:** the full design learns from random weights; a traffic-curriculum run is in
+  progress ([Training from scratch](findings/curriculum.md)).
 
-The same scenario flown by the one-pick control and by the higher-penalty run is on the
-[windowed page](windowed.md#reselection-renders), with more renders of precision-bound and
-safety-bound seeds [further down](windowed.md#failed-renders).
+Full history: [experiment log](log.md). What's next: [roadmap](roadmap.md). Terms: [glossary](glossary.md).
 
-## Quickstart
-
-Training runs in the conda env **`tada`** (Python 3.12):
-
-```bash
-cd reinforcement_learning/single_agent_rllib
-
-# fresh run
-python -u main.py --total-timesteps 10000000 --run-suffix my_experiment
-
-# windowed env (20-flight stream), current recipe: sequence observations + lexicographic
-# objective, warm-started from an existing checkpoint
-TADA_SEQUENCE_OBS=1 python -u main.py --env windowed --reward-mode outcome_pbrs \
-  --init-weights experiments/atc_run_1_33_windowed_seqobs/final_model.zip \
-  --n-envs 16 --eval-freq 250000 --critic-warmup-steps 300000 \
-  --lr-max 3e-5 --final-lr 3e-6 --ent-coef 0.003 --total-timesteps 5000000 --run-suffix windowed_outcome
-
-# the same run with the JAX learner (SB3-compatible checkpoints; see Training -> JAX learner)
-TADA_SEQUENCE_OBS=1 python -u main_jax.py --env windowed --reward-mode outcome_pbrs \
-  --stitch-segments 2 --stitch-gap 120 900 --init-weights <sb3 checkpoint>.zip --n-envs 16 \
-  --critic-warmup-steps 100000 --lr-max 3e-5 --final-lr 3e-6 --ent-coef 0.003 --total-timesteps 5000000
-
-# reselection: the policy may ask for a second clearance per step (JAX learner only)
-TADA_SEQUENCE_OBS=1 TADA_MAX_PICKS=2 python -u main_jax.py --env windowed --reward-mode outcome_pbrs \
-  --stitch-segments 2 --stitch-gap 120 900 --init-weights <checkpoint>.zip --n-envs 32 \
-  --critic-warmup-steps 100000 --lr-max 3e-5 --final-lr 3e-6 --ent-coef 0.003 --total-timesteps 5000000
-
-# windowed scoring: 100 paired seeds, 10 attempts each, or critic-guided lookahead
-python analysis/score_windowed.py --models M1.zip [M2.zip ...] --seeds 100 --attempts 9
-python analysis/score_windowed.py --models M.zip --seeds 100 --lookahead 4
-
-# score its checkpoints on the fixed 100-seed pool while it trains
-python analysis/track_run.py --run experiments/atc_run_1_28_my_experiment
-
-# replay an OLD run whose action set differs (see MDP -> action-set versions)
-TADA_ACTION_SET=v1 python render_policy.py \
-  --model experiments/atc_run_1_26_sep3nm/best/best_model.zip --seeds 1595180635
-```
-
-Watch it live — TensorBoard is now under each run's `tb/` sub-directory:
-
-```bash
-/home/leander/miniconda3/envs/tada/bin/tensorboard \
-  --logdir reinforcement_learning/single_agent_rllib/experiments
-```
-
-There are **no console entry scripts** — run `main.py` directly. Base install is a
-lightweight *inference* set; add `pip install -e .[train]` for the full training stack.
-
-## Where to look
-
-| Page | What's in it |
-|------|--------------|
-| [MDP & Environment](mdp.md) | action space, episode, termination & success criteria |
-| [Observations](observations.md) | the Dict obs, per-aircraft features, normalization |
-| [Reward](reward.md) | severity geometry, exponential conflict decay, landing-weighted deviation, tier ladder |
-| [Windowed env](windowed.md) | the 20-flight stream: queue window, stream-stationary observables, per-flight reward |
-| [Training](training.md) | PPO + VecNormalize config, callbacks, network, snapshots |
-| [Instrumentation](instrumentation.md) | every TensorBoard metric and what to watch |
-| [Experiment log](experiments.md) | what changed in each run and what we learned |
-| [Successful results](successful_results.md) | curated renders + refusal-shield sweeps for the best checkpoints, per run |
-| [How an agent is tested](analysis_methods.md) | every metric defined from the code — success, the clean set, pass@k, what not to quote |
-| [Test log](analysis_log.md) | every test run against an agent, in order, with the question it settled |
-| [22 clearances vs 15](analysis_v1_v2.md) | the `1_26` vs `1_27` head-to-head |
-| [Roadmap](roadmap.md) | what's next, and what is designed but unbuilt |
-
-## Build the docs
-
-```bash
-pip install -e .[docs]      # mkdocs + mkdocs-material
-mkdocs serve                # live preview at http://127.0.0.1:8000
-mkdocs build                # static site -> ./site
-```
+!!! info "Sources"
+    Every model number on this site is generated from the code repo's evaluation files by
+    `tools/build_model_docs.py` from `models.yaml`. The in-training success rate is never quoted
+    ([why](findings/evaluation-noise.md)). Code: `reinforcement_learning/single_agent_rllib` on
+    branch `UM-lg`.
