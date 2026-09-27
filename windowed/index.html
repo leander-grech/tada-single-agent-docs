@@ -874,6 +874,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Reselection: a second clearance per step">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reselection-renders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One scenario, four agents
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1446,6 +1463,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Reselection: a second clearance per step">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reselection-renders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        One scenario, four agents
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2470,6 +2504,68 @@ that cost on 20-flight streams</strong> (3% lost, 6 losses fixed and none added,
 though not on stitched 40-flight streams (15% vs the control's 11%). A bust penalty sized to the
 training stream (<code>1_39</code>, 240 instead of 90) cost precision and helped only on long streams; it
 was not adopted. With lookahead the reselection policy is both safe and precise (table above).</p>
+<h3 id="reselection-renders">One scenario, four agents<a class="headerlink" href="#reselection-renders" title="Permanent link">&para;</a></h3>
+<p>Seed 599310825, 20 flights, each run's deterministic policy. <code>1_36</code>
+<a href="#failed-renders-1-36">loses separation at step 56</a> with 5 of 20 on time.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>on time</th>
+<th>worst / mean deviation</th>
+<th>AMAN swaps</th>
+<th>second picks</th>
+<th>clearances</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>1_37</code> control</td>
+<td>17 / 20</td>
+<td>453 s / 46 s</td>
+<td>1</td>
+<td>—</td>
+<td>100</td>
+</tr>
+<tr>
+<td><strong><code>1_38</code></strong></td>
+<td><strong>20 / 20</strong></td>
+<td><strong>30 s / 5 s</strong></td>
+<td><strong>0</strong></td>
+<td>56 of 183 decisions</td>
+<td>128</td>
+</tr>
+<tr>
+<td><code>1_39</code> (penalty 240)</td>
+<td>12 / 20</td>
+<td>398 s / 60 s</td>
+<td>1</td>
+<td>30 of 151</td>
+<td>122</td>
+</tr>
+</tbody>
+</table>
+<p><strong>`1_37`, the one-pick control:</strong> safe, but three flights land outside ±60 s, one
+7½ minutes off.</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_37_deterministic_seed599310825.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>`1_38`, reselection after 10M steps:</strong> all 20 on time, the worst 30 s off, in AMAN
+order. The second pick is used on 56 of 127 steps.</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_38_deterministic_seed599310825.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p><strong>`1_39`, the same training with the bust penalty at 240:</strong> safe, but 8 flights land
+outside ±60 s. It uses the second pick about half as often.</p>
+<video controls preload="metadata" width="100%">
+  <source src="../assets/renders/1_39_deterministic_seed599310825.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 <h2 id="failed-renders">Renders: failed seeds, best of 10 attempts<a class="headerlink" href="#failed-renders" title="Permanent link">&para;</a></h2>
 <p><code>render_policy.py --paired-attempts 9</code> replays exactly the attempts the analysis scored and
 renders the best by the objective. <code>1_33</code> final, 20-flight streams.</p>

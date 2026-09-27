@@ -1379,8 +1379,17 @@ one step.</p>
   Your browser does not support the video tag.
 </video>
 
-<p>More renders, including precision-bound and safety-bound seeds, are on the
-<a href="windowed/#failed-renders">windowed page</a>.</p>
+<p><strong>After 5M more steps</strong> (`1_38`, the best agent, same seed, deterministic): all 20
+on time, every flight within 30 s of its AMAN target and none out of order. 56 of its 183
+decisions are second picks.</p>
+<video controls preload="metadata" width="100%">
+  <source src="assets/renders/1_38_deterministic_seed599310825.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<p>The same scenario flown by the one-pick control and by the higher-penalty run is on the
+<a href="windowed/#reselection-renders">windowed page</a>, with more renders of precision-bound and
+safety-bound seeds <a href="windowed/#failed-renders">further down</a>.</p>
 <h2 id="quickstart">Quickstart<a class="headerlink" href="#quickstart" title="Permanent link">&para;</a></h2>
 <p>Training runs in the conda env <strong><code>tada</code></strong> (Python 3.12):</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">cd</span><span class="w"> </span>reinforcement_learning/single_agent_rllib
