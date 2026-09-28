@@ -1130,10 +1130,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#learning-curve" class="md-nav__link">
+  <a href="#training-lineage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Learning curve
+        Training lineage
       
     </span>
   </a>
@@ -2940,10 +2940,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#learning-curve" class="md-nav__link">
+  <a href="#training-lineage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Learning curve
+        Training lineage
       
     </span>
   </a>
@@ -3044,8 +3044,14 @@
 <p>mean landing deviation <strong>126 s</strong>.</p>
 <table class="tada-table"><thead><tr><th>outcome</th><th>seeds</th></tr></thead><tbody><tr><td><span class="tada-chip tada-chip--ok">solved</span></td><td>1</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 1 flight late</span></td><td>2</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 2–3 flights late</span></td><td>10</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 4 or more late</span></td><td>55</td></tr><tr><td><span class="tada-chip tada-chip--bad">loss of separation</span></td><td>32</td></tr></tbody></table>
 
-<h2 id="learning-curve">Learning curve<a class="headerlink" href="#learning-curve" title="Permanent link">&para;</a></h2>
-<p>No per-checkpoint scores for this run.</p>
+<h2 id="training-lineage">Training lineage<a class="headerlink" href="#training-lineage" title="Permanent link">&para;</a></h2>
+<div class="tada-legend"><span class="tada-leg"><span class="sw run-0"></span><a href="../../models/1_29/">1_29</a> 20M (10-aircraft env: a different task, so no curve here)</span><span class="tada-leg current"><span class="sw run-1"></span><a href="../../models/1_31/">1_31</a> 2M (final evaluation only)</span><span class="tada-leg"><span class="ln solid"></span>solved</span><span class="tada-leg"><span class="ln dashed"></span>separation lost</span></div>
+<div class="tada-curve-wrap"><svg class="tada-curve tada-lineage" viewBox="0 0 720 310" role="img" aria-label="Training lineage of 1_31"><line class="grid" x1="46" x2="704" y1="264.0" y2="264.0"/><text class="tick" x="40" y="267.0" text-anchor="end">0</text><line class="grid" x1="46" x2="704" y1="204.5" y2="204.5"/><text class="tick" x="40" y="207.5" text-anchor="end">10</text><line class="grid" x1="46" x2="704" y1="145.0" y2="145.0"/><text class="tick" x="40" y="148.0" text-anchor="end">20</text><line class="grid" x1="46" x2="704" y1="85.5" y2="85.5"/><text class="tick" x="40" y="88.5" text-anchor="end">30</text><line class="grid" x1="46" x2="704" y1="26.0" y2="26.0"/><text class="tick" x="40" y="29.0" text-anchor="end">40</text><text class="tick" x="46.0" y="278" text-anchor="middle">0M</text><text class="tick" x="195.5" y="278" text-anchor="middle">5M</text><text class="tick" x="345.1" y="278" text-anchor="middle">10M</text><text class="tick" x="494.6" y="278" text-anchor="middle">15M</text><text class="tick" x="644.2" y="278" text-anchor="middle">20M</text><text class="axis" x="6" y="14">seeds of 100</text><line class="branch" x1="644.2" x2="644.2" y1="26" y2="264"/><circle class="pt run-1 current" cx="704.0" cy="258.0" r="3.5"><title>1_31, 22M cumulative: solved 1</title></circle><path class="pt run-1 current" d="M704.0,69.1 L708.5,73.6 L704.0,78.1 L699.5,73.6 Z"><title>1_31, 22M cumulative: separation lost 32</title></path><rect class="band run-0 other" x="46.0" y="288" width="598.2" height="16"><title>1_29: 0k to 20M cumulative (10-aircraft env)</title></rect><text class="bandlabel" x="345.1" y="300" text-anchor="middle">1_29</text><rect class="band run-1" x="644.2" y="288" width="59.8" height="16"><title>1_31: 20M to 22M cumulative</title></rect><text class="bandlabel" x="674.1" y="300" text-anchor="middle">1_31</text></svg></div>
+
+<p>Every run this model descends from, on one axis of cumulative training steps from random initialisation. Colour says which run each stretch of training came from; a vertical rule marks each warm start, and an ancestor's curve stops where its child branched off. Deterministic, the 100 validation seeds (20-flight streams). A best-model checkpoint in the chain has no recorded step, so its run's full length is used. Runs without per-checkpoint scores show their final evaluation at the end of their stretch. Sources: <code>experiments/atc_run_1_29_pbrs_attn/progress_scored.csv</code>, <code>experiments/atc_run_1_29_pbrs_attn_d/progress_scored.csv</code>.</p>
+<details><summary>Table view</summary>
+<table class="tada-table"><thead><tr><th>run</th><th>cumulative steps</th><th>solved</th><th>separation lost</th></tr></thead><tbody><tr><td>1_31</td><td>22M</td><td>1</td><td>32</td></tr></tbody></table>
+</details>
 <h2 id="renders">Renders<a class="headerlink" href="#renders" title="Permanent link">&para;</a></h2>
 <h3 id="comparison-scenario">Comparison scenario<a class="headerlink" href="#comparison-scenario" title="Permanent link">&para;</a></h3>
 <div class="tada-placeholder">Not rendered yet: seed 599310825 — the scenario every agent is rendered on, deterministic. Not planned: abandoned run; the 20-flight score is enough to show it failed.</div>

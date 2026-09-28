@@ -1378,10 +1378,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#learning-curve" class="md-nav__link">
+  <a href="#training-lineage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Learning curve
+        Training lineage
       
     </span>
   </a>
@@ -2879,10 +2879,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#learning-curve" class="md-nav__link">
+  <a href="#training-lineage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Learning curve
+        Training lineage
       
     </span>
   </a>
@@ -2944,8 +2944,14 @@
 
 <p>Source: <code>analysis/2026-08-04_1_22_vs_1_25.csv</code> (frame unpinned: one draw).</p>
 <p>Paired against <code>1_22</code> on success, per seed: 13 gained, 7 lost (not significant, McNemar).</p>
-<h2 id="learning-curve">Learning curve<a class="headerlink" href="#learning-curve" title="Permanent link">&para;</a></h2>
-<p>No per-checkpoint scores for this run.</p>
+<h2 id="training-lineage">Training lineage<a class="headerlink" href="#training-lineage" title="Permanent link">&para;</a></h2>
+<div class="tada-legend"><span class="tada-leg current"><span class="sw run-0"></span><a href="../../models/1_25/">1_25</a> 8M (final evaluation only)</span><span class="tada-leg"><span class="ln solid"></span>success</span><span class="tada-leg"><span class="ln dashed"></span>separation lost</span></div>
+<div class="tada-curve-wrap"><svg class="tada-curve tada-lineage" viewBox="0 0 720 310" role="img" aria-label="Training lineage of 1_25"><line class="grid" x1="46" x2="704" y1="264.0" y2="264.0"/><text class="tick" x="40" y="267.0" text-anchor="end">0</text><line class="grid" x1="46" x2="704" y1="216.4" y2="216.4"/><text class="tick" x="40" y="219.4" text-anchor="end">10</text><line class="grid" x1="46" x2="704" y1="168.8" y2="168.8"/><text class="tick" x="40" y="171.8" text-anchor="end">20</text><line class="grid" x1="46" x2="704" y1="121.2" y2="121.2"/><text class="tick" x="40" y="124.2" text-anchor="end">30</text><line class="grid" x1="46" x2="704" y1="73.6" y2="73.6"/><text class="tick" x="40" y="76.6" text-anchor="end">40</text><line class="grid" x1="46" x2="704" y1="26.0" y2="26.0"/><text class="tick" x="40" y="29.0" text-anchor="end">50</text><text class="tick" x="46.0" y="278" text-anchor="middle">0M</text><text class="tick" x="128.2" y="278" text-anchor="middle">1M</text><text class="tick" x="210.5" y="278" text-anchor="middle">2M</text><text class="tick" x="292.8" y="278" text-anchor="middle">3M</text><text class="tick" x="375.0" y="278" text-anchor="middle">4M</text><text class="tick" x="457.2" y="278" text-anchor="middle">5M</text><text class="tick" x="539.5" y="278" text-anchor="middle">6M</text><text class="tick" x="621.8" y="278" text-anchor="middle">7M</text><text class="tick" x="704.0" y="278" text-anchor="middle">8M</text><text class="axis" x="6" y="14">seeds of 100</text><circle class="pt run-0 current" cx="704.0" cy="54.6" r="3.5"><title>1_25, 8M cumulative: success 44</title></circle><path class="pt run-0 current" d="M704.0,173.8 L708.5,178.3 L704.0,182.8 L699.5,178.3 Z"><title>1_25, 8M cumulative: separation lost 18</title></path><rect class="band run-0" x="46.0" y="288" width="658.0" height="16"><title>1_25: 0k to 8M cumulative</title></rect><text class="bandlabel" x="375.0" y="300" text-anchor="middle">1_25</text></svg></div>
+
+<p>Every run this model descends from, on one axis of cumulative training steps from random initialisation. Colour says which run each stretch of training came from; a vertical rule marks each warm start, and an ancestor's curve stops where its child branched off. Deterministic, the fixed 100-seed pool. Runs without per-checkpoint scores show their final evaluation at the end of their stretch.</p>
+<details><summary>Table view</summary>
+<table class="tada-table"><thead><tr><th>run</th><th>cumulative steps</th><th>success</th><th>separation lost</th></tr></thead><tbody><tr><td>1_25</td><td>8M</td><td>44</td><td>18</td></tr></tbody></table>
+</details>
 <h2 id="renders">Renders<a class="headerlink" href="#renders" title="Permanent link">&para;</a></h2>
 <p>No credited renders.</p>
 <h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>

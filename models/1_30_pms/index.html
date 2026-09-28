@@ -1210,10 +1210,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#learning-curve" class="md-nav__link">
+  <a href="#training-lineage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Learning curve
+        Training lineage
       
     </span>
   </a>
@@ -2879,10 +2879,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#learning-curve" class="md-nav__link">
+  <a href="#training-lineage" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Learning curve
+        Training lineage
       
     </span>
   </a>
@@ -2943,8 +2943,14 @@
 <table class="tada-table"><thead><tr><th></th><th>value</th><th>parent</th><th>champion <code>1_26</code></th></tr></thead><tbody><tr><td>success</td><td>0.07</td><td>—</td><td>0.70</td></tr><tr><td>separation lost</td><td>0.28</td><td>—</td><td>0.07</td></tr><tr><td>clean-subset success</td><td>0.097</td><td>—</td><td>0.753</td></tr><tr><td>mean tier</td><td>1.64</td><td>—</td><td>4.38</td></tr><tr><td>worst-aircraft deviation, mean</td><td>310.1 s</td><td>—</td><td>43.4 s</td></tr></tbody></table>
 
 <p>Source: <code>analysis/2026-09-27_scratch/backfill/eval/1_30_pms_d100.csv</code> (frame pinned).</p>
-<h2 id="learning-curve">Learning curve<a class="headerlink" href="#learning-curve" title="Permanent link">&para;</a></h2>
-<p>No per-checkpoint scores for this run.</p>
+<h2 id="training-lineage">Training lineage<a class="headerlink" href="#training-lineage" title="Permanent link">&para;</a></h2>
+<div class="tada-legend"><span class="tada-leg current"><span class="sw run-0"></span><a href="../../models/1_30_pms/">1_30_pms</a> 10M (final evaluation only)</span><span class="tada-leg"><span class="ln solid"></span>success</span><span class="tada-leg"><span class="ln dashed"></span>separation lost</span></div>
+<div class="tada-curve-wrap"><svg class="tada-curve tada-lineage" viewBox="0 0 720 310" role="img" aria-label="Training lineage of 1_30_pms"><line class="grid" x1="46" x2="704" y1="264.0" y2="264.0"/><text class="tick" x="40" y="267.0" text-anchor="end">0</text><line class="grid" x1="46" x2="704" y1="184.7" y2="184.7"/><text class="tick" x="40" y="187.7" text-anchor="end">10</text><line class="grid" x1="46" x2="704" y1="105.3" y2="105.3"/><text class="tick" x="40" y="108.3" text-anchor="end">20</text><line class="grid" x1="46" x2="704" y1="26.0" y2="26.0"/><text class="tick" x="40" y="29.0" text-anchor="end">30</text><text class="tick" x="46.0" y="278" text-anchor="middle">0M</text><text class="tick" x="111.8" y="278" text-anchor="middle">1M</text><text class="tick" x="177.6" y="278" text-anchor="middle">2M</text><text class="tick" x="243.4" y="278" text-anchor="middle">3M</text><text class="tick" x="309.2" y="278" text-anchor="middle">4M</text><text class="tick" x="375.0" y="278" text-anchor="middle">5M</text><text class="tick" x="440.8" y="278" text-anchor="middle">6M</text><text class="tick" x="506.6" y="278" text-anchor="middle">7M</text><text class="tick" x="572.4" y="278" text-anchor="middle">8M</text><text class="tick" x="638.2" y="278" text-anchor="middle">9M</text><text class="tick" x="704.0" y="278" text-anchor="middle">10M</text><text class="axis" x="6" y="14">seeds of 100</text><circle class="pt run-0 current" cx="704.0" cy="208.5" r="3.5"><title>1_30_pms, 10M cumulative: success 7</title></circle><path class="pt run-0 current" d="M704.0,37.4 L708.5,41.9 L704.0,46.4 L699.5,41.9 Z"><title>1_30_pms, 10M cumulative: separation lost 28</title></path><rect class="band run-0" x="46.0" y="288" width="658.0" height="16"><title>1_30_pms: 0k to 10M cumulative</title></rect><text class="bandlabel" x="375.0" y="300" text-anchor="middle">1_30_pms</text></svg></div>
+
+<p>Every run this model descends from, on one axis of cumulative training steps from random initialisation. Colour says which run each stretch of training came from; a vertical rule marks each warm start, and an ancestor's curve stops where its child branched off. Deterministic, the fixed 100-seed pool. Runs without per-checkpoint scores show their final evaluation at the end of their stretch.</p>
+<details><summary>Table view</summary>
+<table class="tada-table"><thead><tr><th>run</th><th>cumulative steps</th><th>success</th><th>separation lost</th></tr></thead><tbody><tr><td>1_30_pms</td><td>10M</td><td>7</td><td>28</td></tr></tbody></table>
+</details>
 <h2 id="renders">Renders<a class="headerlink" href="#renders" title="Permanent link">&para;</a></h2>
 <p>No credited renders.</p>
 <h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>

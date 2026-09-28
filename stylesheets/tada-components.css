@@ -283,3 +283,56 @@ svg.tada-curve .dlabel {
 .md-typeset table.tada-compare th:not(:first-child) { text-align: right; }
 .md-typeset figure.tada-render figcaption { font-style: normal; }
 .md-typeset table.tada-bands tr.tada-band-first td { border-top: 2px solid var(--tada-rule); }
+
+/* ---- Training-lineage chart: one colour per run in a model's ancestry ----- */
+/* Okabe–Ito order (colour-blind safe), lightened for the dark scheme. */
+:root, [data-md-color-scheme="default"] {
+  --tada-run-0: #0072b2; --tada-run-1: #d55e00; --tada-run-2: #009e73; --tada-run-3: #cc79a7;
+  --tada-run-4: #e69f00; --tada-run-5: #56b4e9; --tada-run-6: #8a7a00; --tada-run-7: #6b6b6b;
+}
+[data-md-color-scheme="slate"] {
+  --tada-run-0: #5aa9ff; --tada-run-1: #ff7a45; --tada-run-2: #2bc48a; --tada-run-3: #e08ccf;
+  --tada-run-4: #f5b53a; --tada-run-5: #7fd0ff; --tada-run-6: #e8dc5a; --tada-run-7: #b0b8c4;
+}
+svg.tada-lineage .run-0 { --run: var(--tada-run-0); }
+svg.tada-lineage .run-1 { --run: var(--tada-run-1); }
+svg.tada-lineage .run-2 { --run: var(--tada-run-2); }
+svg.tada-lineage .run-3 { --run: var(--tada-run-3); }
+svg.tada-lineage .run-4 { --run: var(--tada-run-4); }
+svg.tada-lineage .run-5 { --run: var(--tada-run-5); }
+svg.tada-lineage .run-6 { --run: var(--tada-run-6); }
+svg.tada-lineage .run-7 { --run: var(--tada-run-7); }
+svg.tada-lineage .line { stroke: var(--run); stroke-width: 1.8; }
+svg.tada-lineage .line.current { stroke-width: 2.8; }
+svg.tada-lineage .pt { fill: var(--run); }
+svg.tada-lineage .branch { stroke: var(--md-default-fg-color--lighter); stroke-width: 1; stroke-dasharray: 2 3; }
+svg.tada-lineage .band { fill: var(--run); opacity: 0.85; }
+svg.tada-lineage .band.other { opacity: 0.35; }
+svg.tada-lineage .bandlabel {
+  fill: var(--md-default-bg-color);
+  font-family: var(--tada-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+}
+.md-typeset .tada-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+  margin: 0.6em 0 0;
+  font-family: var(--tada-font-head);
+  font-size: 0.68rem;
+  color: var(--md-default-fg-color--light);
+}
+.tada-leg { display: inline-flex; align-items: center; gap: 0.35em; }
+.tada-leg.current { color: var(--md-default-fg-color); font-weight: 600; }
+.tada-leg .sw { width: 0.9em; height: 0.9em; border-radius: 2px; display: inline-block; }
+.tada-leg .sw.run-0 { background: var(--tada-run-0); }
+.tada-leg .sw.run-1 { background: var(--tada-run-1); }
+.tada-leg .sw.run-2 { background: var(--tada-run-2); }
+.tada-leg .sw.run-3 { background: var(--tada-run-3); }
+.tada-leg .sw.run-4 { background: var(--tada-run-4); }
+.tada-leg .sw.run-5 { background: var(--tada-run-5); }
+.tada-leg .sw.run-6 { background: var(--tada-run-6); }
+.tada-leg .sw.run-7 { background: var(--tada-run-7); }
+.tada-leg .ln { width: 1.8em; height: 0; border-top: 2px solid var(--md-default-fg-color--light); display: inline-block; }
+.tada-leg .ln.dashed { border-top-style: dashed; }
