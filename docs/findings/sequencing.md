@@ -5,8 +5,10 @@
     the agent has to reorder it. Flights that must overtake or be overtaken are on time less often.
     Among landed flights, a swapped pair is on time far less often than a kept one. Showing the
     agent the AMAN sequence (`1_33`) did not help by itself, because nothing paid for keeping it.
-    What fixed it was bandwidth: with [reselection](reselection.md) AMAN swaps almost vanished.
-    Forcing the order at inference does not work either ([Order first?](order-first.md)).
+    Bandwidth made it possible: with [reselection](reselection.md), `1_36` almost never swaps two
+    flights. It is not automatic, though: most later reselection agents swap about half as often
+    as the one-pick control or not less at all. Forcing the order at inference does not work
+    either ([Order first?](order-first.md)).
 
 ## The geometry of a miss
 
@@ -65,15 +67,20 @@ their AMAN position stayed flat at ~0.855 for all 5M steps. The agent could see 
 reward did not pay it to keep it. That motivated the [lexicographic objective](../how/objective.md)
 of `1_34`, whose shaping includes predicted AMAN swaps.
 
-## What did fix it: a second clearance per step
+## What made it possible: a second clearance per step
 
 With one clearance per 45 s the policy could not act on two flights that both needed it. With
 reselection, AMAN swaps per stream fell by an order of magnitude (`1_37` control vs `1_36`, same
 start, same steps). Another 5M steps (`1_38`) traded some of that back for safety, and it still
-swaps about half as often as the control:
+swaps about half as often as the control.
 
-<!-- gen:compare models=1_37,1_36,1_38 batteries=f20 -->
-<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../../models/1_37/">1_37</a></th><th><a href="../../models/1_36/">1_36</a></th><th><a href="../../models/1_38/">1_38</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>34</td><td>65</td><td>63</td></tr><tr><td>20-flight: hard-solved</td><td>1</td><td>29</td><td>24</td></tr><tr><td>20-flight: separation lost</td><td>4</td><td>9</td><td>3</td></tr><tr><td>20-flight: flights on time</td><td>0.832</td><td>0.916</td><td>0.927</td></tr><tr><td>20-flight: clearances / stream</td><td>80.6</td><td>128.3</td><td>121.9</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>1.02</td><td>0.07</td><td>0.54</td></tr></tbody></table>
+Reselection makes keeping the order *possible*, not certain. Across every reselection agent so
+far (table below, newest runs included), only `1_36` keeps the sequence almost perfectly. `1_38`,
+`1_39`, `1_41`, `1_42` and `1_46` swap about half as often as the control, and `1_40`, `1_43` and
+`1_44`, trained from scratch, swap as often as the control does. All of them solve fewer streams than `1_36` and `1_38`:
+
+<!-- gen:compare models=1_37,reselection batteries=f20 -->
+<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../../models/1_37/">1_37</a></th><th><a href="../../models/1_36/">1_36</a></th><th><a href="../../models/1_38/">1_38</a></th><th><a href="../../models/1_39/">1_39</a></th><th><a href="../../models/1_40/">1_40</a></th><th><a href="../../models/1_41/">1_41</a></th><th><a href="../../models/1_42/">1_42</a></th><th><a href="../../models/1_43/">1_43</a></th><th><a href="../../models/1_44/">1_44</a></th><th><a href="../../models/1_46/">1_46</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>34</td><td>65</td><td>63</td><td>40</td><td>22</td><td>14</td><td>16</td><td>22</td><td>37</td><td>44</td></tr><tr><td>20-flight: hard-solved</td><td>1</td><td>29</td><td>24</td><td>5</td><td>2</td><td>2</td><td>1</td><td>6</td><td>13</td><td>13</td></tr><tr><td>20-flight: separation lost</td><td>4</td><td>9</td><td>3</td><td>5</td><td>9</td><td>9</td><td>7</td><td>6</td><td>6</td><td>7</td></tr><tr><td>20-flight: flights on time</td><td>0.832</td><td>0.916</td><td>0.927</td><td>0.858</td><td>0.779</td><td>0.793</td><td>0.790</td><td>0.801</td><td>0.817</td><td>0.852</td></tr><tr><td>20-flight: clearances / stream</td><td>80.6</td><td>128.3</td><td>121.9</td><td>125.2</td><td>161.9</td><td>158.1</td><td>155.8</td><td>140.6</td><td>153.7</td><td>158.7</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>1.02</td><td>0.07</td><td>0.54</td><td>0.66</td><td>0.98</td><td>0.60</td><td>0.62</td><td>1.05</td><td>1.07</td><td>0.56</td></tr></tbody></table>
 
 <!-- /gen -->
 

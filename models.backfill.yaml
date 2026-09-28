@@ -37,6 +37,8 @@ models:
     - file: 1_34_failure_seed137869475.mp4
       meta: analysis/2026-09-27_scratch/backfill/renders/1_34_failure_seed137869475_solutions.json
   '1_35':
+    evals:
+      phase0: analysis/2026-09-27_phase0_order_first/atc_run_1_35_windowed_jax.jsonl
     renders:
     - file: 1_35_best_seed186618211.mp4
       meta: analysis/2026-09-27_scratch/backfill/renders/1_35_best_seed186618211_solutions.json
@@ -45,18 +47,36 @@ models:
     - file: 1_35_failure_seed107420369.mp4
       meta: analysis/2026-09-27_scratch/backfill/renders/1_35_failure_seed107420369_solutions.json
   '1_36':
+    evals:
+      ls_k3_all: analysis/2026-09-27_scratch/longstreams/eval/1_36_k3_all.csv
+      ls_k3_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_36_k3_feasible.csv
+      ls_k5_all: analysis/2026-09-27_scratch/longstreams/eval/1_36_k5_all.csv
+      ls_k5_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_36_k5_feasible.csv
     renders:
     - file: 1_36_best_seed298737106.mp4
       meta: analysis/2026-09-27_scratch/backfill/renders/1_36_best_seed298737106_solutions.json
     - file: 1_36_failure_seed373399426.mp4
       meta: analysis/2026-09-27_scratch/backfill/renders/1_36_failure_seed373399426_solutions.json
   '1_37':
+    evals:
+      ls_k3_all: analysis/2026-09-27_scratch/longstreams/eval/1_37_k3_all.csv
+      ls_k3_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_37_k3_feasible.csv
+      ls_k5_all: analysis/2026-09-27_scratch/longstreams/eval/1_37_k5_all.csv
+      ls_k5_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_37_k5_feasible.csv
+      phase0: analysis/2026-09-27_phase0_order_first/atc_run_1_37_windowed_control.jsonl
     renders:
     - file: 1_37_best_seed41.mp4
       meta: analysis/2026-09-27_scratch/backfill/renders/1_37_best_seed41_solutions.json
     - file: 1_37_failure_seed478163327.mp4
       meta: analysis/2026-09-27_scratch/backfill/renders/1_37_failure_seed478163327_solutions.json
   '1_38':
+    evals:
+      ls_k3_all: analysis/2026-09-27_scratch/longstreams/eval/1_38_k3_all.csv
+      ls_k3_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_38_k3_feasible.csv
+      ls_k5_all: analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_all.csv
+      ls_k5_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_feasible.csv
+      ls_k5_feasible_la4: analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_feasible_la4.csv
+      phase0: analysis/2026-09-27_phase0_order_first/atc_run_1_38_windowed_cont.jsonl
     renders:
     - file: 1_38_best_seed338444264.mp4
       meta: analysis/2026-09-27_scratch/backfill/renders/1_38_best_seed338444264_solutions.json
@@ -108,6 +128,10 @@ models:
     evals:
       att10: analysis/2026-09-27_scratch/backfill/eval/1_43_att10.csv
       la4: analysis/2026-09-27_scratch/backfill/eval/1_43_la4.csv
+      ls_k3_all: analysis/2026-09-27_scratch/longstreams/eval/1_43_k3_all.csv
+      ls_k3_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_43_k3_feasible.csv
+      ls_k5_all: analysis/2026-09-27_scratch/longstreams/eval/1_43_k5_all.csv
+      ls_k5_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_43_k5_feasible.csv
       s2x20: analysis/2026-09-27_scratch/backfill/eval/1_43_s2x20.csv
     renders:
     - file: 1_43_best_seed983753977.mp4
@@ -120,6 +144,10 @@ models:
     evals:
       att10: analysis/2026-09-27_scratch/backfill/eval/1_44_att10.csv
       la4: analysis/2026-09-27_scratch/backfill/eval/1_44_la4.csv
+      ls_k3_all: analysis/2026-09-27_scratch/longstreams/eval/1_44_k3_all.csv
+      ls_k3_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_44_k3_feasible.csv
+      ls_k5_all: analysis/2026-09-27_scratch/longstreams/eval/1_44_k5_all.csv
+      ls_k5_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_44_k5_feasible.csv
       s2x20: analysis/2026-09-27_scratch/backfill/eval/1_44_s2x20.csv
     renders:
     - file: 1_44_best_seed2144181937.mp4
@@ -132,6 +160,10 @@ models:
     evals:
       att10: analysis/2026-09-27_scratch/backfill/eval/1_46_att10.csv
       la4: analysis/2026-09-27_scratch/backfill/eval/1_46_la4.csv
+      ls_k3_all: analysis/2026-09-27_scratch/longstreams/eval/1_46_k3_all.csv
+      ls_k3_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_46_k3_feasible.csv
+      ls_k5_all: analysis/2026-09-27_scratch/longstreams/eval/1_46_k5_all.csv
+      ls_k5_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_46_k5_feasible.csv
       s2x20: analysis/2026-09-27_scratch/backfill/eval/1_46_s2x20.csv
     renders:
     - file: 1_46_best_seed2144181937.mp4

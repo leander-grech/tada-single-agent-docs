@@ -397,3 +397,5 @@ svg.tada-dg .arrowhead { fill: var(--md-default-fg-color--light); }
 svg.tada-dg .arrowhead.acc { fill: var(--dg-head); }
 svg.tada-dg .clock { stroke: var(--dg-env); stroke-width: 3; }
 .md-typeset figure.tada-fig-wrap { display: block; width: 100%; box-sizing: border-box; }
+.md-typeset table.tada-coverage td.cov-ok { color: var(--tada-ok); text-align: center; }
+.md-typeset table.tada-coverage td.cov-miss { color: var(--md-default-fg-color--lighter); text-align: center; }

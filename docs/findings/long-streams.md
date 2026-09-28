@@ -36,36 +36,16 @@ The 100-flight feasible set is only 12 streams: a small sample, so read its rate
 
 ## Results
 
-Counts are streams; "on time" is the share of flights within ±60 s of their AMAN target
-(`longstreams/report.md`, rescored with every stream run to its own horizon).
+Counts are streams; "on time" is the share of flights within ±60 s of their AMAN target. The table
+is generated from the evaluation files (`longstreams/eval/`, every stream run to its own horizon)
+and lists every agent flown on long streams so far; agents not yet flown are named below it.
 
-| stream | n | model | no loss of separation | solved (±60 s) | hard-solved (±30 s) | on time, all flights | on time, landed flights | mean \|dev\|, landed | clearances / flight |
-|---|---|---|---|---|---|---|---|---|---|
-| 60, feasible | 27 | `1_38` | **27** | 11 | 1 | 0.986 | 0.986 | 9 s | 5.7 |
-| | 27 | `1_36` | **27** | 9 | 1 | 0.985 | 0.985 | 9 s | 6.5 |
-| | 27 | `1_37` | **27** | 4 | 0 | 0.976 | 0.976 | 16 s | 3.6 |
-| | 27 | `1_43` (from scratch) | **27** | 1 | 0 | 0.952 | 0.952 | 15 s | 6.9 |
-| | 27 | `1_44` (from scratch, arm D) | 26 | 8 | 0 | 0.949 | 0.973 | 12 s | 7.5 |
-| | 27 | `1_46` (`1_43` + 10M) | 26 | 5 | 0 | 0.947 | 0.974 | 10 s | 8.4 |
-| 60, unfiltered | 40 | `1_38` | 34 | 7 | 0 | 0.836 | 0.914 | 39 s | 5.8 |
-| | 40 | `1_36` | 31 | 6 | 0 | 0.798 | 0.930 | 28 s | 6.1 |
-| | 40 | `1_37` | 34 | 1 | 0 | 0.748 | 0.819 | 73 s | 3.7 |
-| | 40 | `1_43` (from scratch) | 35 | 0 | 0 | 0.755 | 0.793 | 95 s | 6.6 |
-| | 40 | `1_44` (from scratch, arm D) | 31 | 0 | 0 | 0.693 | 0.792 | 85 s | 6.4 |
-| | 40 | `1_46` (`1_43` + 10M) | 36 | 1 | 0 | 0.781 | 0.833 | 69 s | 7.4 |
-| 100, feasible | 12 | `1_38` | **12** | 0 | 0 | 0.976 | 0.976 | 10 s | 5.6 |
-| | 12 | `1_38` + lookahead | **12** | 2 | 0 | 0.965 | 0.965 | 15 s | 6.0 |
-| | 12 | `1_36` | **12** | 1 | 0 | 0.983 | 0.983 | 9 s | 6.4 |
-| | 12 | `1_37` | **12** | 0 | 0 | 0.967 | 0.967 | 16 s | 3.6 |
-| | 12 | `1_43` (from scratch) | **12** | 0 | 0 | 0.954 | 0.954 | 14 s | 6.7 |
-| | 12 | `1_44` (from scratch, arm D) | 11 | 0 | 0 | 0.939 | 0.967 | 13 s | 8.3 |
-| | 12 | `1_46` (`1_43` + 10M) | **12** | 0 | 0 | 0.968 | 0.968 | 12 s | 8.7 |
-| 100, unfiltered | 40 | `1_38` | 30 | 1 | 0 | 0.812 | 0.915 | 43 s | 5.8 |
-| | 40 | `1_36` | 25 | 2 | 0 | 0.730 | 0.936 | 26 s | 5.7 |
-| | 40 | `1_37` | 24 | 0 | 0 | 0.662 | 0.791 | 81 s | 3.5 |
-| | 40 | `1_43` (from scratch) | 28 | 0 | 0 | 0.659 | 0.767 | 103 s | 5.9 |
-| | 40 | `1_44` (from scratch, arm D) | 22 | 0 | 0 | 0.582 | 0.794 | 88 s | 5.3 |
-| | 40 | `1_46` (`1_43` + 10M) | 29 | 0 | 0 | 0.741 | 0.811 | 77 s | 7.0 |
+<!-- gen:longstreams models=all -->
+<div class="tada-table-wrap"><table class="tada-table tada-bands"><thead><tr><th>stream</th><th>n</th><th>model</th><th>no loss of separation</th><th>solved (±60 s)</th><th>hard-solved (±30 s)</th><th>on time, all flights</th><th>on time, landed</th><th>mean |dev|, landed</th><th>clearances / flight</th></tr></thead><tbody><tr class="tada-band-first"><td>60 flights, feasible</td><td>27</td><td><a href="../../models/1_36/">1_36</a></td><td><strong>27</strong></td><td>9</td><td>1</td><td>0.985</td><td>0.985</td><td>9 s</td><td>6.5</td></tr><tr><td></td><td></td><td><a href="../../models/1_37/">1_37</a></td><td><strong>27</strong></td><td>4</td><td>0</td><td>0.976</td><td>0.976</td><td>16 s</td><td>3.6</td></tr><tr><td></td><td></td><td><a href="../../models/1_38/">1_38</a></td><td><strong>27</strong></td><td>11</td><td>1</td><td>0.986</td><td>0.986</td><td>9 s</td><td>5.7</td></tr><tr><td></td><td></td><td><a href="../../models/1_43/">1_43</a></td><td><strong>27</strong></td><td>1</td><td>0</td><td>0.952</td><td>0.952</td><td>15 s</td><td>6.9</td></tr><tr><td></td><td></td><td><a href="../../models/1_44/">1_44</a></td><td>26</td><td>8</td><td>0</td><td>0.949</td><td>0.973</td><td>12 s</td><td>7.5</td></tr><tr><td></td><td></td><td><a href="../../models/1_46/">1_46</a></td><td>26</td><td>5</td><td>0</td><td>0.947</td><td>0.974</td><td>10 s</td><td>8.4</td></tr><tr class="tada-band-first"><td>60 flights, unfiltered</td><td>40</td><td><a href="../../models/1_36/">1_36</a></td><td>31</td><td>6</td><td>0</td><td>0.798</td><td>0.930</td><td>28 s</td><td>6.1</td></tr><tr><td></td><td></td><td><a href="../../models/1_37/">1_37</a></td><td>34</td><td>1</td><td>0</td><td>0.748</td><td>0.819</td><td>73 s</td><td>3.7</td></tr><tr><td></td><td></td><td><a href="../../models/1_38/">1_38</a></td><td>34</td><td>7</td><td>0</td><td>0.836</td><td>0.914</td><td>39 s</td><td>5.8</td></tr><tr><td></td><td></td><td><a href="../../models/1_43/">1_43</a></td><td>35</td><td>0</td><td>0</td><td>0.755</td><td>0.793</td><td>95 s</td><td>6.6</td></tr><tr><td></td><td></td><td><a href="../../models/1_44/">1_44</a></td><td>31</td><td>0</td><td>0</td><td>0.693</td><td>0.792</td><td>85 s</td><td>6.4</td></tr><tr><td></td><td></td><td><a href="../../models/1_46/">1_46</a></td><td>36</td><td>1</td><td>0</td><td>0.781</td><td>0.833</td><td>69 s</td><td>7.4</td></tr><tr class="tada-band-first"><td>100 flights, feasible</td><td>12</td><td><a href="../../models/1_36/">1_36</a></td><td><strong>12</strong></td><td>1</td><td>0</td><td>0.983</td><td>0.983</td><td>9 s</td><td>6.4</td></tr><tr><td></td><td></td><td><a href="../../models/1_37/">1_37</a></td><td><strong>12</strong></td><td>0</td><td>0</td><td>0.967</td><td>0.967</td><td>16 s</td><td>3.6</td></tr><tr><td></td><td></td><td><a href="../../models/1_38/">1_38</a></td><td><strong>12</strong></td><td>0</td><td>0</td><td>0.976</td><td>0.976</td><td>10 s</td><td>5.6</td></tr><tr><td></td><td></td><td><a href="../../models/1_38/">1_38</a> + lookahead</td><td><strong>12</strong></td><td>2</td><td>0</td><td>0.965</td><td>0.965</td><td>15 s</td><td>6.0</td></tr><tr><td></td><td></td><td><a href="../../models/1_43/">1_43</a></td><td><strong>12</strong></td><td>0</td><td>0</td><td>0.954</td><td>0.954</td><td>14 s</td><td>6.7</td></tr><tr><td></td><td></td><td><a href="../../models/1_44/">1_44</a></td><td>11</td><td>0</td><td>0</td><td>0.939</td><td>0.967</td><td>13 s</td><td>8.3</td></tr><tr><td></td><td></td><td><a href="../../models/1_46/">1_46</a></td><td><strong>12</strong></td><td>0</td><td>0</td><td>0.967</td><td>0.968</td><td>12 s</td><td>8.7</td></tr><tr class="tada-band-first"><td>100 flights, unfiltered</td><td>40</td><td><a href="../../models/1_36/">1_36</a></td><td>25</td><td>2</td><td>0</td><td>0.730</td><td>0.936</td><td>26 s</td><td>5.7</td></tr><tr><td></td><td></td><td><a href="../../models/1_37/">1_37</a></td><td>24</td><td>0</td><td>0</td><td>0.662</td><td>0.791</td><td>81 s</td><td>3.5</td></tr><tr><td></td><td></td><td><a href="../../models/1_38/">1_38</a></td><td>30</td><td>1</td><td>0</td><td>0.812</td><td>0.915</td><td>43 s</td><td>5.8</td></tr><tr><td></td><td></td><td><a href="../../models/1_43/">1_43</a></td><td>28</td><td>0</td><td>0</td><td>0.659</td><td>0.767</td><td>103 s</td><td>5.9</td></tr><tr><td></td><td></td><td><a href="../../models/1_44/">1_44</a></td><td>22</td><td>0</td><td>0</td><td>0.582</td><td>0.794</td><td>88 s</td><td>5.3</td></tr><tr><td></td><td></td><td><a href="../../models/1_46/">1_46</a></td><td>29</td><td>0</td><td>0</td><td>0.741</td><td>0.811</td><td>77 s</td><td>7.0</td></tr></tbody></table></div>
+
+Not yet flown on long streams: `1_31`, `1_32`, `1_33`, `1_34`, `1_35`, `1_39`, `1_40`, `1_41`, `1_42` ([backfill](../backfill.md)).
+
+<!-- /gen -->
 
 - **Feasible streams are flown safely by every model trained on stitched streams to the end.** `1_38`,
   `1_36`, `1_37` and `1_43` fly all of them without a loss, and every flight lands. The reselection
@@ -96,15 +76,23 @@ On time among landed flights, by 20-flight wave:
 
 ![On-time rate by 20-flight segment, feasible and unfiltered 100-flight streams](../assets/findings/long_streams_on_time_by_segment.png)
 
-| 100 flights | wave 1 | 2 | 3 | 4 | 5 |
-|---|---|---|---|---|---|
-| `1_38`, feasible | 0.958 | 0.975 | 0.979 | 0.983 | 0.983 |
-| `1_38`, unfiltered | 0.929 | 0.868 | 0.939 | 0.951 | 0.884 |
-| `1_37`, unfiltered | 0.872 | 0.734 | 0.848 | 0.764 | 0.714 |
-| `1_43`, feasible | 0.946 | 0.950 | 0.967 | 0.963 | 0.946 |
-| `1_43`, unfiltered | 0.815 | 0.714 | 0.821 | 0.798 | 0.673 |
-| `1_44`, feasible | 0.942 | 0.975 | 0.979 | 0.964 | 0.977 |
-| `1_46`, feasible | 0.954 | 0.967 | 0.971 | 0.979 | 0.967 |
+**Feasible 100-flight streams:**
+
+<!-- gen:longstream-waves models=all stream=ls_k5_feasible -->
+<table class="tada-table"><thead><tr><th>model</th><th>wave 1</th><th>wave 2</th><th>wave 3</th><th>wave 4</th><th>wave 5</th></tr></thead><tbody><tr><td><a href="../../models/1_36/">1_36</a></td><td>0.971</td><td>0.979</td><td>0.988</td><td>0.988</td><td>0.992</td></tr><tr><td><a href="../../models/1_37/">1_37</a></td><td>0.954</td><td>0.975</td><td>0.971</td><td>0.975</td><td>0.958</td></tr><tr><td><a href="../../models/1_38/">1_38</a></td><td>0.958</td><td>0.975</td><td>0.979</td><td>0.983</td><td>0.983</td></tr><tr><td><a href="../../models/1_43/">1_43</a></td><td>0.946</td><td>0.950</td><td>0.967</td><td>0.963</td><td>0.946</td></tr><tr><td><a href="../../models/1_44/">1_44</a></td><td>0.942</td><td>0.975</td><td>0.979</td><td>0.964</td><td>0.977</td></tr><tr><td><a href="../../models/1_46/">1_46</a></td><td>0.954</td><td>0.967</td><td>0.971</td><td>0.979</td><td>0.967</td></tr></tbody></table>
+
+On time among landed flights, by 20-flight wave (100 flights, feasible).
+
+<!-- /gen -->
+
+**Unfiltered 100-flight streams:**
+
+<!-- gen:longstream-waves models=all stream=ls_k5_all -->
+<table class="tada-table"><thead><tr><th>model</th><th>wave 1</th><th>wave 2</th><th>wave 3</th><th>wave 4</th><th>wave 5</th></tr></thead><tbody><tr><td><a href="../../models/1_36/">1_36</a></td><td>0.960</td><td>0.911</td><td>0.955</td><td>0.960</td><td>0.888</td></tr><tr><td><a href="../../models/1_37/">1_37</a></td><td>0.872</td><td>0.734</td><td>0.848</td><td>0.764</td><td>0.714</td></tr><tr><td><a href="../../models/1_38/">1_38</a></td><td>0.929</td><td>0.868</td><td>0.939</td><td>0.951</td><td>0.884</td></tr><tr><td><a href="../../models/1_43/">1_43</a></td><td>0.815</td><td>0.714</td><td>0.821</td><td>0.798</td><td>0.673</td></tr><tr><td><a href="../../models/1_44/">1_44</a></td><td>0.844</td><td>0.746</td><td>0.811</td><td>0.813</td><td>0.741</td></tr><tr><td><a href="../../models/1_46/">1_46</a></td><td>0.864</td><td>0.757</td><td>0.849</td><td>0.861</td><td>0.713</td></tr></tbody></table>
+
+On time among landed flights, by 20-flight wave (100 flights, unfiltered).
+
+<!-- /gen -->
 
 On feasible streams precision does not decay; if anything it rises after the first wave. On
 unfiltered streams it dips in the waves that carry over-capacity traffic and recovers after

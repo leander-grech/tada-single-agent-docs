@@ -48,6 +48,11 @@ WINDOWED_BATTERIES = {
     "la4": "critic-guided lookahead (4 candidates)",
 }
 EXTRA_BATTERIES = {"f40": "40-flight streams, generated in one sequence"}
+
+LONG_STREAMS = {
+    "ls_k3_feasible": "60 flights, feasible", "ls_k3_all": "60 flights, unfiltered",
+    "ls_k5_feasible": "100 flights, feasible", "ls_k5_all": "100 flights, unfiltered",
+}
 STATUS_LABEL = {
     "complete": ("complete", "muted"),
     "stopped": ("stopped early", "warn"),
@@ -212,6 +217,9 @@ class Build:
                 self.errors.append(f"{m.id}: {meta_p} missing")
             m.steps = self.steps_of(m)
             for bat, rel in (m.raw.get("evals") or {}).items():
+                if not rel.endswith(".csv"):
+                    m.eval_paths[bat] = rel
+                    continue
                 try:
                     df = self.rows_for(rel, m.model_path)
                 except (FileNotFoundError, ValueError) as e:
@@ -645,6 +653,179 @@ class Build:
                  + "".join(f"<th>{esc(n)}</th>" for _, n, *_ in series) + f"</tr></thead><tbody>{rows}</tbody></table>\n</details>\n")
         return '<div class="tada-curve-wrap">' + "".join(out) + "</div>\n\n" + table
 
+    # ------------------------------------------------------------------ model selectors
+    def select(self, spec: str, batteries: list) -> list:
+        """Comma list of ids and rules. Rules pick every windowed model (newest last) that has at
+        least one of `batteries`, so a table written with a rule includes every future run:
+          all          every windowed model
+          reselection  windowed models with max_picks > 1
+          one-pick     windowed models without reselection
+          scratch      windowed models whose lineage starts from random weights
+        """
+        def has(m):
+            return any(b in m.summary for b in batteries)
+        wm = sorted((m for m in self.models.values() if m.track == "windowed"), key=lambda m: m.id)
+        out = []
+        for tok in [t.strip() for t in spec.split(",") if t.strip()]:
+            if tok in self.models:
+                pick = [self.models[tok]]
+            elif tok == "all":
+                pick = [m for m in wm if has(m)]
+            elif tok == "reselection":
+                pick = [m for m in wm if has(m) and (m.meta.get("max_picks") or 1) > 1]
+            elif tok == "one-pick":
+                pick = [m for m in wm if has(m) and (m.meta.get("max_picks") or 1) <= 1]
+            elif tok == "scratch":
+                pick = [m for m in wm if has(m) and self.lineage(m)[0].track == "windowed"
+                        and self.lineage(m)[0].parent is None]
+            else:
+                self.errors.append(f"unknown model or selector '{tok}'")
+                continue
+            out += [m.id for m in pick if m.id not in out]
+        return out
+
+    # ------------------------------------------------------------------ long streams
+    def _ls_flights(self, m: Model, key: str):
+        rel = m.eval_paths.get(key, "").replace(".csv", "_flights.csv")
+        p = self.src(rel) if rel else None
+        return pd.read_csv(p) if p is not None and p.exists() else None
+
+    def longstreams_table(self, ids: list) -> str:
+        rows = []
+        for key, label in LONG_STREAMS.items():
+            first = True
+            entries = []
+            for mid in ids:
+                if key in self.models[mid].summary:
+                    entries.append((mid, key, ""))
+                if key + "_la4" in self.models[mid].summary:
+                    entries.append((mid, key + "_la4", " + lookahead"))
+            for mid, k2, suffix in entries:
+                m = self.models[mid]
+                s = m.summary[k2]
+                ps = s["perseed"]
+                n = s["n"]
+                fl = self._ls_flights(m, k2)
+                on_landed = mean_dev = "—"
+                if fl is not None:
+                    landed = fl[b(fl["landed"])]
+                    on_landed = f"{b(landed['on_time']).mean():.3f}"
+                    mean_dev = f"{landed['abs_dev'].mean():.0f} s"
+                cpf = f"{ps['clearances'].sum() / ps['n_flights'].sum():.1f}" if "clearances" in ps else "—"
+                safe = n - s["separation_lost"]
+                safe_s = f"<strong>{safe}</strong>" if safe == n else str(safe)
+                cls = ' class="tada-band-first"' if first else ""
+                rows.append(f"<tr{cls}><td>{label if first else ''}</td><td>{n if first else ''}</td>"
+                            f'<td><a href="{self._site_prefix}models/{mid}/">{mid}</a>{suffix}</td><td>{safe_s}</td>'
+                            f"<td>{s['solved']}</td><td>{s['hard_solved']}</td><td>{s['on_time']:.3f}</td>"
+                            f"<td>{on_landed}</td><td>{mean_dev}</td><td>{cpf}</td></tr>")
+                first = False
+        head = ("<tr><th>stream</th><th>n</th><th>model</th><th>no loss of separation</th><th>solved (±60 s)</th>"
+                "<th>hard-solved (±30 s)</th><th>on time, all flights</th><th>on time, landed</th>"
+                "<th>mean |dev|, landed</th><th>clearances / flight</th></tr>")
+        missing = [i for i in self.select("all", ["f20"]) if i not in ids and self.models[i].status != "in_progress"]
+        note = (f"Not yet flown on long streams: {', '.join(f'`{i}`' for i in missing)} "
+                f"([backfill](../backfill.md)).\n\n" if missing else "")
+        return (f'<div class="tada-table-wrap"><table class="tada-table tada-bands"><thead>{head}</thead>'
+                f'<tbody>{"".join(rows)}</tbody></table></div>\n\n{note}')
+
+    def longstream_waves(self, ids: list, key: str) -> str:
+        rows, nwave = [], 0
+        for mid in ids:
+            m = self.models[mid]
+            fl = self._ls_flights(m, key)
+            if fl is None:
+                continue
+            fl = fl[b(fl["landed"])].copy()
+            fl["wave"] = fl["queue_pos"] // 20
+            waves = fl.groupby("wave")["on_time"].apply(lambda x: b(x).mean())
+            nwave = max(nwave, len(waves))
+            rows.append(f'<tr><td><a href="{self._site_prefix}models/{mid}/">{mid}</a></td>'
+                        + "".join(f"<td>{v:.3f}</td>" for v in waves.values) + "</tr>")
+        head = "<tr><th>model</th>" + "".join(f"<th>wave {i + 1}</th>" for i in range(nwave)) + "</tr>"
+        return (f'<table class="tada-table"><thead>{head}</thead><tbody>{"".join(rows)}</tbody></table>\n\n'
+                f"On time among landed flights, by 20-flight wave ({LONG_STREAMS[key]}).\n\n")
+
+    # ------------------------------------------------------------------ coverage
+    TESTS_W = [("f20", "20-flight"), ("s2x20", "2×20"), ("att10", "10 attempts"), ("la4", "lookahead"),
+               ("curve", "training curve"), ("renders", "3 renders"),
+               ("ls_k3_feasible", "60 feasible"), ("ls_k3_all", "60 unfiltered"),
+               ("ls_k5_feasible", "100 feasible"), ("ls_k5_all", "100 unfiltered"), ("phase0", "order first")]
+
+    def coverage_cell(self, m: Model, test: str) -> str:
+        if test == "curve":
+            return "✓" if len(m.curve) > 1 else "—"
+        if test == "renders":
+            if m.track != "windowed":
+                return "n/a"
+            filled = sum(1 for s in self.render_slots(m) if s["render"] is not None)
+            return "✓" if filled == 3 else f"{filled}/3"
+        return "✓" if test in m.summary or test in m.eval_paths else "—"
+
+    def unregistered_runs(self) -> list:
+        runs = {Path(m.run).name for m in self.models.values()}
+        runs |= {"atc_run_1_29_pbrs_attn"}  # folded into the 1_29 card
+        out = []
+        for d in sorted((self.code / "experiments").glob("atc_run_1_*")):
+            n = re.match(r"atc_run_1_(\d+)", d.name)
+            if not n or int(n.group(1)) < 16 or d.name in runs:
+                continue
+            out.append((d.name, (d / "ABORTED.txt").exists()))
+        return out
+
+    def coverage_page(self) -> str:
+        o = [GEN_NOTE, "# Coverage\n\n",
+             "Which test has been run on which agent. Every gap is queued in [BACKFILL](backfill.md); "
+             "results tables that list models by rule (`all`, `reselection`, `scratch`) pick up new runs "
+             "and new tests automatically. Rebuilt by `tools/build_model_docs.py`; "
+             "`--coverage` prints the same check.\n\n", "## Windowed agents\n\n"]
+        head = "<tr><th>model</th><th>status</th>" + "".join(f"<th>{t}</th>" for _, t in self.TESTS_W) + "</tr>"
+        rows = []
+        for m in sorted((m for m in self.models.values() if m.track == "windowed"), key=lambda m: m.id, reverse=True):
+            cells = "".join(f'<td class="{"cov-ok" if c == "✓" else "cov-miss"}">{c}</td>'
+                            for c in (self.coverage_cell(m, t) for t, _ in self.TESTS_W))
+            rows.append(f'<tr><td><a href="{m.id}/">{m.id}</a></td><td>{STATUS_LABEL[m.status][0]}</td>{cells}</tr>'
+                        .replace(f'href="{m.id}/"', f'href="../models/{m.id}/"'))
+        o.append(f'<div class="tada-table-wrap"><table class="tada-table tada-coverage"><thead>{head}</thead>'
+                 f'<tbody>{"".join(rows)}</tbody></table></div>\n\n')
+        o.append("## 10-aircraft agents\n\n")
+        head = "<tr><th>model</th><th>100-seed score</th><th>attempts to solve</th><th>training curve</th><th>note</th></tr>"
+        rows = []
+        for m in sorted((m for m in self.models.values() if m.track == "ten_aircraft"), key=lambda m: m.id, reverse=True):
+            note = ("not replayable" if m.id < "1_26" else (m.raw.get("no_backfill") or ""))
+            sc = "✓" if self.ten_head(m) else "—"
+            at = "✓" if m.attempts else "—"
+            cv = "✓" if len(m.curve) > 1 else "—"
+            rows.append(f'<tr><td><a href="../models/{m.id}/">{m.id}</a></td><td>{sc}</td><td>{at}</td><td>{cv}</td><td>{esc(note)}</td></tr>')
+        o.append(f'<div class="tada-table-wrap"><table class="tada-table tada-coverage"><thead>{head}</thead>'
+                 f'<tbody>{"".join(rows)}</tbody></table></div>\n\n')
+        un = self.unregistered_runs()
+        o.append("## Runs in the code repo that the docs do not cover\n\n")
+        if un:
+            o.append("".join(f"- `{n}`" + (" (aborted at start)" if ab else " — **add it to `models.yaml`**") + "\n"
+                             for n, ab in un) + "\n")
+        else:
+            o.append("None.\n\n")
+        return "".join(o)
+
+    def coverage_report(self) -> list:
+        lines = []
+        log = (DOCS / "log.md").read_text()
+        for m in self.models.values():
+            anchor = "run-" + m.id.replace("_", "-")
+            if f"#{anchor}" not in log and f'id="{anchor}"' not in log:
+                lines.append(f"NO LOG ENTRY: {m.id} (add #{anchor} to docs/log.md)")
+        for n, ab in self.unregistered_runs():
+            if not ab:
+                lines.append(f"UNREGISTERED RUN: {n}")
+        for m in sorted(self.models.values(), key=lambda m: m.id):
+            if m.track != "windowed" or m.raw.get("no_backfill"):
+                continue
+            miss = [t for t, _ in self.TESTS_W if self.coverage_cell(m, t) not in ("✓", "n/a")]
+            if miss:
+                lines.append(f"{m.id} ({m.status}): missing {', '.join(miss)}")
+        return lines
+
     # ------------------------------------------------------------------ lineage chart
     def branch_step(self, m: Model) -> int:
         """Step, in the parent run's own count, at which m started from its parent."""
@@ -1043,6 +1224,17 @@ class Build:
                 tbl.append(f"<tr><td>separation lost / flights on time</td><td>{s['separation_lost']} / {s['on_time']:.3f}</td><td>—</td><td>—</td></tr>")
         tbl.append("</tbody></table>\n\n")
         o.append("".join(tbl))
+        ls_rows = []
+        for key, label in LONG_STREAMS.items():
+            if key in m.summary:
+                s = m.summary[key]
+                ls_rows.append(f"<tr><td>{label}</td><td>{s['n']}</td><td>{s['n'] - s['separation_lost']}</td>"
+                               f"<td>{s['solved']}</td><td>{s['on_time']:.3f}</td></tr>")
+        if ls_rows:
+            o.append("### Long streams\n\n60- and 100-flight stitched streams (3 or 5 waves, 600–900 s gaps), deterministic; "
+                     "see [Long streams](../findings/long-streams.md).\n\n"
+                     '<table class="tada-table"><thead><tr><th>streams</th><th>n</th><th>no loss of separation</th>'
+                     f'<th>solved</th><th>on time</th></tr></thead><tbody>{"".join(ls_rows)}</tbody></table>\n\n')
         missing = [WINDOWED_BATTERIES[k] for k in WINDOWED_BATTERIES if k not in m.summary]
         if missing:
             o.append(f"Not yet evaluated: {', '.join(missing)} ([backfill list](../backfill.md)).\n\n")
@@ -1415,6 +1607,12 @@ class Build:
                     if bat not in m.summary and m.status != "in_progress" and not skip:
                         items.append(f"**{bat}**: {label}, `{m.model_path}`")
                 if m.status != "in_progress" and not skip:
+                    for key, label in LONG_STREAMS.items():
+                        if key not in m.summary:
+                            items.append(f"**{key[3:]}**: long streams, {label} (`longstreams/seeds/`, the same seed files)")
+                    if "phase0" not in m.eval_paths:
+                        items.append("**phase0**: order-first test (`analysis/order_first.py`, 100 seeds, 9 attempts, "
+                                     "`--order-first-far 600 0`)")
                     for s in self.render_slots(m):
                         if s["render"] is None and s["seed"] is not None:
                             items.append(f"render **{s['slot'].lower()}**: seed {s['seed']}, deterministic ({s['why']})")
@@ -1454,7 +1652,7 @@ class Build:
             if kind == "best-box":
                 body = self.best_box(champs["windowed"], rel)
             elif kind == "compare":
-                ids = args["models"].split(",")
+                ids = self.select(args["models"], args.get("batteries", "f20").split(","))
                 bats = args.get("batteries", "f20").split(",")
                 body = self.compare_table(ids, bats)
             elif kind == "figure":
@@ -1466,7 +1664,12 @@ class Build:
             elif kind == "never-solved":
                 body = self.never_solved_table()
             elif kind == "capacity-bands":
-                body = self.capacity_bands(args["models"].split(","))
+                body = self.capacity_bands(self.select(args["models"], ["att10"]))
+            elif kind == "longstreams":
+                body = self.longstreams_table(self.select(args.get("models", "all"), list(LONG_STREAMS)))
+            elif kind == "longstream-waves":
+                body = self.longstream_waves(self.select(args.get("models", "all"), [args.get("stream", "ls_k5_feasible")]),
+                                             args.get("stream", "ls_k5_feasible"))
             elif kind == "hardest-seeds":
                 body = self.hardest_seeds(args["model"], float(args.get("min_lead", 900)))
             elif kind == "render":
@@ -1636,6 +1839,8 @@ class Build:
         out[DOCS / "renders.md"] = self.gallery()
         out[ROOT / "BACKFILL.md"] = self.backfill_md()
         out[DOCS / "backfill.md"] = GEN_NOTE + self.backfill_md()
+        self._site_prefix = url_prefix("coverage.md")
+        out[DOCS / "coverage.md"] = self.coverage_page()
         generated = set(out)
         for p in sorted(DOCS.rglob("*.md")):
             if p in generated or p.name == "theme-preview.md":
@@ -1658,12 +1863,17 @@ def main():
     ap.add_argument("--code-repo", default=os.environ.get("TADA_CODE_REPO"))
     ap.add_argument("--check", action="store_true", help="fail if any output would change")
     ap.add_argument("--skip-page-check", action="store_true", help=argparse.SUPPRESS)
+    ap.add_argument("--coverage", action="store_true", help="print unregistered runs and missing tests, then exit")
     args = ap.parse_args()
     reg = yaml.safe_load(open(ROOT / "models.yaml"))
     code = Path(args.code_repo or reg["code_repo"])
     bld = Build(code)
     bld.skip_page_check = args.skip_page_check
     champs = bld.run()
+    if args.coverage:
+        rep = bld.coverage_report()
+        print("\n".join(rep) if rep else "coverage: complete")
+        sys.exit(0)
     if bld.errors:
         print("build refused:", file=sys.stderr)
         for e in bld.errors:

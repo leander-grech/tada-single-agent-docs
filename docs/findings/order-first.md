@@ -14,6 +14,11 @@ Data: `analysis/2026-09-27_phase0_order_first/` (`order_first.py`, `order_first_
 [`1_35`](../models/1_35.md); 100 validation seeds, the deterministic policy plus 9 sampled attempts
 each (1000 episodes per model), plus the override runs.
 
+!!! note "Coverage"
+    Phase 0 has been run on three agents so far. The others, the newest included, are queued in
+    [BACKFILL](../backfill.md); the [coverage page](../coverage.md) tracks which agent has had
+    which test.
+
 ## The tests
 
 | test | question |

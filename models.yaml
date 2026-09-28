@@ -42,9 +42,32 @@ champion:
 # predicted losses of separation at t = 0 (analysis/validation_seed_capacity.py).
 seed_capacity: analysis/2026-09-27_scratch/validation_seed_capacity.csv
 
+# Where the importer finds tests beyond the standard battery (relative to the code repo).
+test_sources:
+  longstreams: [analysis/2026-09-27_scratch/longstreams/eval]
+  phase0: [analysis/2026-09-27_phase0_order_first]
+
 models:
 
   # ---------------------------------------------------------------- windowed, from scratch
+  - id: "1_48"
+    track: windowed
+    run: experiments/atc_run_1_48_hard_1_46
+    checkpoint: final_model.zip
+    parent: "1_46"
+    status: in_progress
+    whats_new: "1_46 fine-tuned for the hard-solved target: a ±30 s bracket worth 4 added above the ±60 s one (3), bust penalty 100, stitched 2×20 streams, LR 1e-4 to 1e-5."
+    curve: [{file: experiments/atc_run_1_48_hard_1_46/track.csv, kind: track}]
+
+  - id: "1_47"
+    track: windowed
+    run: experiments/atc_run_1_47_hard_1_44
+    checkpoint: final_model.zip
+    parent: "1_44"
+    status: in_progress
+    whats_new: "1_44 fine-tuned for the hard-solved target: a ±30 s bracket worth 4 added above the ±60 s one (3), bust penalty 100, stitched 2×20 streams, LR 1e-4 to 1e-5."
+    curve: [{file: experiments/atc_run_1_47_hard_1_44/track.csv, kind: track}]
+
   - id: "1_46"
     track: windowed
     run: experiments/atc_run_1_46_cont_1_43
