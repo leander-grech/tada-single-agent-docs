@@ -2,7 +2,8 @@
 
 !!! abstract "Summary"
     Point merge at Bergamo (`VALIDATION_USE_CASE_2`) was the alternative scenario to the MXP
-    trombone. The single-agent runs on it (`1_24_pms`, `1_30_pms`) stayed near the do-nothing floor.
+    trombone. The first single-agent run on it (`1_24_pms`) stayed near the do-nothing floor; the later
+    `1_30_pms` does better but remains far below MXP.
     Its known blocker was observation saturation, the same problem log scaling later fixed for
     MXP. Point merge was also solved by stitching two 10-aircraft agents; the windowed agent is the
     version of that idea that needs no hand-off rule. Every current run is on MXP.
@@ -13,7 +14,10 @@
   scenario, a sixth success tier and an analysis harness. The best checkpoint stayed near the
   do-nothing floor: 0 of 100 seeds solved. Its renders are on its card.
 - **`1_30_pms`** ([card](../models/1_30_pms.md)): launched 24 Aug; not documented beyond its run
-  name and never scored on the fixed seeds.
+  name. Scored on 28 Sep on the point-merge scenario it trained on, it is the best point-merge
+  agent so far (the July runs solved 0–1 of 100), but still far below MXP, and it loses
+  separation in over a quarter of episodes. Its tier does not compare with the July runs': the
+  ladder changed between them.
 - On 24 Sep the code's default difficulty was switched to point merge (commit `bfd1355`). The
   windowed env sets MXP explicitly in its own config, so no windowed run is affected.
 

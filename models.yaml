@@ -26,6 +26,9 @@
 code_repo: /home/leander/code/tada/monorepo/reinforcement_learning/single_agent_rllib
 comparison_seed: 599310825
 
+# Shown on every 10-aircraft card and under the 10-aircraft leaderboard table.
+ten_aircraft_note: "Scored on flight_simulator 0.1.52, the simulator these runs trained on. The windowed track uses 0.2.8x, on which the same seeds generate different scenarios, so the two tracks' numbers do not compare."
+
 champion:
   windowed:
     battery: f20
@@ -262,9 +265,8 @@ models:
     checkpoint: final_model.zip
     parent: null
     status: complete
-    pending: "A 100-seed score of this checkpoint is scheduled on the rented host (10-aircraft env with its own settings)."
-    whats_new: "BGY point-merge scenario. Not described in the docs or commit messages beyond its run name."
-    backfill_note: "100-seed deterministic score on its own scenario (BGY point merge), `score_checkpoints.py`"
+    scenario: BGY point merge
+    whats_new: "BGY point-merge scenario. Not described in the docs or commit messages beyond its run name. The best point-merge agent so far."
 
   - id: "1_29"
     track: ten_aircraft
@@ -272,10 +274,9 @@ models:
     checkpoint: best/best_model.zip
     parent: null
     status: complete
-    pending: "A 100-seed score of this checkpoint is scheduled on the rented host (10-aircraft env with its own settings)."
     steps: 20000000       # 1_29_pbrs_attn to 10M, resumed in 1_29_pbrs_attn_d to 20M
     whats_new: "Continuous PBRS coverage (the tier potential no longer a staircase) and one masked self-attention block over the aircraft slots (commit f6e0bcc). Its best checkpoint seeds the windowed track."
-    headline: {file: experiments/atc_run_1_29_pbrs_attn_d/progress_scored.csv, steps: 20000000}
+    note: "Reproduction check: the 20M checkpoint re-scored today on simulator 0.1.52 with the frame pinned gives success 0.61, separation 0.08, tier 4.10 (analysis/2026-09-27_scratch/backfill/eval/1_29_20M_d100.csv), against 0.59 / 0.08 / 4.06 on its recorded curve: the 10-aircraft numbers reproduce within frame noise."
     curve:
       - {file: experiments/atc_run_1_29_pbrs_attn/progress_scored.csv, kind: progress}
       - {file: experiments/atc_run_1_29_pbrs_attn_d/progress_scored.csv, kind: progress}
@@ -287,10 +288,11 @@ models:
   - id: "1_28"
     track: ten_aircraft
     run: experiments/atc_run_1_28_lr_decays_more_and_smaller_warmup
-    checkpoint: final_model.zip
+    checkpoint: latest_model.zip
     parent: null
-    status: complete
-    pending: "A 100-seed score of this checkpoint is scheduled on the rented host (10-aircraft env with its own settings)."
+    status: stopped
+    steps: 20480          # stopped 6 minutes in; no checkpoints, no final model (TensorBoard ends at 20 480)
+    no_backfill: "stopped at 20 480 steps, 6 minutes into the run; a score would measure an untrained network"
     whats_new: "Learning-rate schedule only, per its run_meta.json: warm-up 1% of training (1_26: 8%) and a floor of 3e-6 (1_26: 3e-5)."
 
   - id: "1_27a"
@@ -359,6 +361,7 @@ models:
     checkpoint: best/best_model.zip
     parent: null
     status: complete
+    scenario: BGY point merge
     whats_new: "BGY point-merge campaign with a sixth success tier (commit f9ecc24)."
     renders:
       - {file: atc_run_1_24_pms_best_model_det_noshield_ep3.mp4, attribution: filename, checkpoint: best/best_model.zip, reel: 3, mode: deterministic}

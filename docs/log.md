@@ -77,7 +77,8 @@ nothing. <a id="run-1-27a"></a> [Archive → 22 clearances vs 15](archive/cleara
 
 ### `1_28` — a learning-rate schedule (17 Aug) { #run-1-28 }
 
-1% warm-up and a 3e-6 floor. Never scored on the fixed seeds. [Card](models/1_28.md).
+Meant to test a 1% warm-up and a 3e-6 floor, but stopped after 20 480 steps, 6 minutes in:
+never trained, so there is nothing to score. [Card](models/1_28.md).
 
 ### `1_29` — continuous shaping and attention (19–20 Aug) { #run-1-29 }
 
@@ -88,7 +89,8 @@ masked self-attention block over the aircraft slots. Trained to 10M, then contin
 
 ### `1_30_pms` — point merge again (24 Aug) { #run-1-30-pms }
 
-Not documented beyond its run name. [Card](models/1_30_pms.md).
+Not documented beyond its run name. Scored in September on its own scenario: the best point-merge
+agent so far, still far below MXP and losing separation often. [Card](models/1_30_pms.md).
 
 ## Windowed track
 

@@ -397,6 +397,11 @@ class Build:
         cands.sort(key=key)
         return cands[0] if cands else None
 
+    @staticmethod
+    def frame_label(source: str) -> str:
+        """10-aircraft scores: the 2026-09-27 rescoring pins the observation frame; earlier ones do not."""
+        return " (frame pinned)" if "2026-09-27_scratch" in source else " (frame unpinned: one draw)"
+
     def ten_head(self, m: Model) -> dict | None:
         if m.headline:
             h = m.headline
@@ -927,12 +932,15 @@ class Build:
         h = self.ten_head(m)
         zs = m.raw.get("_zs")
         if h is None and m.raw.get("_shield") is None and not zs and not m.raw.get("pending"):
-            o.append("No evaluation on the fixed 100-seed pool exists for this run. "
-                     + ("Runs up to 1_25 cannot be replayed on today's code, so none can be made."
-                        if m.id < "1_26" else "It is on the [backfill list](../backfill.md).")
-                     + "\n\n")
+            why = ("Runs up to 1_25 cannot be replayed on today's code, so none can be made." if m.id < "1_26"
+                   else f"None is planned: {esc(m.raw['no_backfill'])}." if m.raw.get("no_backfill")
+                   else "It is on the [backfill list](../backfill.md).")
+            o.append("No evaluation on the fixed 100-seed pool exists for this run. " + why + "\n\n")
+        if self.reg.get("ten_aircraft_note") and (h is not None or m.raw.get("_shield") is not None):
+            o.append(f'!!! note "Simulator"\n    {self.reg["ten_aircraft_note"]}\n\n')
         if h is not None:
-            o.append("10-aircraft MXP trombone, the fixed 100-seed pool, deterministic. **Success** = tier 5: every "
+            scen = m.raw.get("scenario", "MXP trombone")
+            o.append(f"10-aircraft {scen}, the fixed 100-seed pool, deterministic. **Success** = tier 5: every "
                      "aircraft landed within ±60 s of its AMAN target, no loss of separation. Clean-subset success = "
                      "success among episodes without a loss of separation.\n\n")
             refh = self.ten_head(ref) if ref else None
@@ -947,7 +955,7 @@ class Build:
                            f"<td>{f.format(ch[k]) if ch else '—'}</td></tr>")
             tbl.append("</tbody></table>\n\n")
             o.append("".join(tbl))
-            o.append(f"Source: {h['source']}.")
+            o.append(f"Source: {h['source']}{self.frame_label(h['source'])}.")
             if m.headline and "d100" in m.summary:
                 s = m.summary["d100"]
                 o.append(f" A separate per-seed scoring of the same checkpoint (`{m.eval_paths['d100']}`) gives success "
@@ -958,6 +966,8 @@ class Build:
                 t = self.paired(m.summary["d100"]["perseed"], ref.summary["d100"]["perseed"], "success")
                 sig = "significant" if t["p"] < 0.05 else "not significant"
                 o.append(f"Paired against `{ref.id}` on success, per seed: {t['up']} gained, {t['down']} lost ({sig}, McNemar).\n\n")
+        if m.raw.get("note"):
+            o.append(f"{esc(m.raw['note'])}\n\n")
         if m.attempts:
             a = m.attempts
             ks = [k for k in ["pass@1", "pass@5", "pass@10", "pass@20"] if k in a]
@@ -1085,21 +1095,24 @@ class Build:
         o.append("The earlier track: one scenario of up to 10 aircraft, seen whole. Its seeds generate different "
                  "scenarios from the windowed track's (simulator 0.1.52 against 0.2.80+), so the two tables are not "
                  "comparable. Ranked by success, then separation.\n\n")
-        head = ["model", "success", "sep. lost", "clean-subset", "mean tier", "worst dev (s)", "what changed"]
+        head = ["model", "scenario", "success", "sep. lost", "clean-subset", "mean tier", "worst dev (s)", "what changed"]
         rows = []
         tm = [m for m in self.models.values() if m.track == "ten_aircraft"]
         for m in sorted(tm, key=lambda m: m.id, reverse=True):
             h = self.ten_head(m)
             cls = ' class="is-champion"' if m.id in champ_ids else ""
             if h:
-                cells = [f'<a href="{m.id}/">{m.id}</a>', f"{h['success']:.2f}", f"{h['separation']:.2f}",
+                cells = [f'<a href="{m.id}/">{m.id}</a>', esc(m.raw.get("scenario", "MXP")), f"{h['success']:.2f}", f"{h['separation']:.2f}",
                          f"{h['clean']:.3f}", f"{h['tier']:.2f}", f"{h['max_dev']:.1f}", self.short(m.whats_new)]
             else:
-                cells = [f'<a href="{m.id}/">{m.id}</a>'] + ["—"] * 5 + [self.short(m.whats_new)]
+                cells = [f'<a href="{m.id}/">{m.id}</a>', esc(m.raw.get("scenario", "MXP"))] + ["—"] * 5 + [self.short(m.whats_new)]
             rows.append(f"<tr{cls}>" + "".join(f"<td>{c}</td>" for c in cells) + "</tr>")
         o.append('<div class="tada-table-wrap"><table class="tada-table tada-sortable"><thead><tr>'
                  + "".join(f"<th>{h}</th>" for h in head) + "</tr></thead><tbody>" + "".join(rows)
                  + "</tbody></table></div>\n\n")
+        if self.reg.get("ten_aircraft_note"):
+            o.append(self.reg["ten_aircraft_note"] + " Point-merge (BGY) rows are a different scenario "
+                     "again, and their tier ladder changed between campaigns.\n\n")
         return "".join(o)
 
     # ------------------------------------------------------------------ best model + home box
@@ -1258,10 +1271,12 @@ class Build:
                 if not replayable:
                     unreplayable.append(m.id)
                     continue
-                if self.ten_head(m) is None:
+                if m.raw.get("no_backfill"):
+                    items.append(f"nothing queued: {m.raw['no_backfill']}")
+                if self.ten_head(m) is None and not m.raw.get("no_backfill"):
                     items.append((m.raw.get("backfill_note") or "100-seed deterministic score (`score_checkpoints.py`)")
                                  + (" — **scheduled**" if m.raw.get("pending") else ""))
-                if m.id == "1_29":
+                if m.id == "1_29" and "d100" not in m.summary:
                     items.append("10-aircraft 100-seed score of `best/best_model.zip` itself (the windowed parent); "
                                  "the card headlines the 20M step checkpoint" + (" — **scheduled**" if m.raw.get("pending") else ""))
             items += list(m.raw.get("backfill_extra") or [])
