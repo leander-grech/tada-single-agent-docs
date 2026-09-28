@@ -58,10 +58,10 @@ models:
     run: experiments/atc_run_1_50_scratch_d_release_s1
     checkpoint: final_model.zip
     parent: null
-    status: in_progress
+    status: complete
     whats_new: "From scratch in the release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential, feasible-only training by redraw at reset (≤ 650 s early), ±30 s bracket worth 4. Recipe arm D (10 flights to 2.5M, then 20 to 10M), LR 3e-4 to 3e-5, seed 1."
     curve: [{file: experiments/atc_run_1_50_scratch_d_release_s1/track.csv, kind: track}]
-    pending: "Training on a rented host (10M steps); results due about 17:30–18:00 on 28 Sep."
+    evals: {f20: experiments/atc_run_1_50_scratch_d_release_s1/track_scores/final_model.csv}   # track_windowed.py's score of the final model
 
   - id: "1_51"
     track: windowed

@@ -8,7 +8,9 @@
     (arm D, `1_44`) is the best from-scratch agent on the 20-flight validation seeds, while one that
     ends on stitched streams (arm C, `1_43`) is safer on long streams. Stitched training alone is
     not enough, though: arms A and B trained on stitched streams throughout and still lose a
-    feasible long stream or two. All of this rests on one training seed per arm, with noisy curves. Continuing `1_43` for 10M more steps (`1_46`, not from
+    feasible long stream or two. All of this rests on one training seed per arm, with noisy curves.
+    Arm D trained in the release MDP (`1_50`) solves significantly more than `1_44` and hard-solves
+    as many as the champion, but loses separation on 20 seeds of 100. Continuing `1_43` for 10M more steps (`1_46`, not from
     scratch) adds precision. The warm-started champion `1_38` is still clearly better than all of
     them.
 
@@ -31,7 +33,7 @@ seeds by `analysis/track_windowed.py`.
 ## At 10M steps
 
 <!-- gen:compare models=scratch,1_38 batteries=f20,s2x20,att10,la4 -->
-<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../../models/1_40/">1_40</a></th><th><a href="../../models/1_41/">1_41</a></th><th><a href="../../models/1_42/">1_42</a></th><th><a href="../../models/1_43/">1_43</a></th><th><a href="../../models/1_44/">1_44</a></th><th><a href="../../models/1_46/">1_46</a></th><th><a href="../../models/1_47/">1_47</a></th><th><a href="../../models/1_48/">1_48</a></th><th><a href="../../models/1_38/">1_38</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>22</td><td>14</td><td>16</td><td>22</td><td>37</td><td>44</td><td>36</td><td>48</td><td>63</td></tr><tr><td>20-flight: hard-solved</td><td>2</td><td>2</td><td>1</td><td>6</td><td>13</td><td>13</td><td>9</td><td>21</td><td>24</td></tr><tr><td>20-flight: separation lost</td><td>9</td><td>9</td><td>7</td><td>6</td><td>6</td><td>7</td><td>8</td><td>4</td><td>3</td></tr><tr><td>20-flight: flights on time</td><td>0.779</td><td>0.793</td><td>0.790</td><td>0.801</td><td>0.817</td><td>0.852</td><td>0.849</td><td>0.863</td><td>0.927</td></tr><tr><td>20-flight: clearances / stream</td><td>161.9</td><td>158.1</td><td>155.8</td><td>140.6</td><td>153.7</td><td>158.7</td><td>180.5</td><td>158.2</td><td>121.9</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>0.98</td><td>0.60</td><td>0.62</td><td>1.05</td><td>1.07</td><td>0.56</td><td>0.86</td><td>0.60</td><td>0.54</td></tr><tr><td>stitched 2×20: solved</td><td>1</td><td>3</td><td>1</td><td>8</td><td>10</td><td>17</td><td>13</td><td>16</td><td>34</td></tr><tr><td>stitched 2×20: hard-solved</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>3</td><td>1</td><td>0</td><td>9</td></tr><tr><td>stitched 2×20: separation lost</td><td>13</td><td>21</td><td>21</td><td>11</td><td>17</td><td>8</td><td>8</td><td>6</td><td>15</td></tr><tr><td>stitched 2×20: flights on time</td><td>0.730</td><td>0.725</td><td>0.704</td><td>0.745</td><td>0.738</td><td>0.818</td><td>0.818</td><td>0.827</td><td>0.865</td></tr><tr><td>pass@10 (seeds)</td><td>38</td><td>34</td><td>37</td><td>34</td><td>51</td><td>56</td><td>57</td><td>62</td><td>76</td></tr><tr><td>separation lost, best of 10</td><td>0</td><td>2</td><td>1</td><td>1</td><td>2</td><td>1</td><td>0</td><td>1</td><td>2</td></tr><tr><td>with lookahead: solved</td><td>19</td><td>22</td><td>29</td><td>24</td><td>31</td><td>37</td><td>37</td><td>25</td><td>30</td></tr><tr><td>with lookahead: hard-solved</td><td>0</td><td>1</td><td>1</td><td>4</td><td>7</td><td>19</td><td>17</td><td>17</td><td>8</td></tr><tr><td>with lookahead: separation lost</td><td>7</td><td>2</td><td>5</td><td>1</td><td>4</td><td>4</td><td>1</td><td>2</td><td>1</td></tr><tr><td>with lookahead: flights on time</td><td>0.802</td><td>0.835</td><td>0.817</td><td>0.788</td><td>0.825</td><td>0.849</td><td>0.865</td><td>0.818</td><td>0.893</td></tr></tbody></table>
+<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../../models/1_40/">1_40</a></th><th><a href="../../models/1_41/">1_41</a></th><th><a href="../../models/1_42/">1_42</a></th><th><a href="../../models/1_43/">1_43</a></th><th><a href="../../models/1_44/">1_44</a></th><th><a href="../../models/1_46/">1_46</a></th><th><a href="../../models/1_47/">1_47</a></th><th><a href="../../models/1_48/">1_48</a></th><th><a href="../../models/1_50/">1_50</a><br><span class="tada-chip tada-chip--muted" title="Trained and scored in the release MDP: locked flights leave the window">release MDP</span></th><th><a href="../../models/1_38/">1_38</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>22</td><td>14</td><td>16</td><td>22</td><td>37</td><td>44</td><td>36</td><td>48</td><td>51</td><td>63</td></tr><tr><td>20-flight: hard-solved</td><td>2</td><td>2</td><td>1</td><td>6</td><td>13</td><td>13</td><td>9</td><td>21</td><td>26</td><td>24</td></tr><tr><td>20-flight: separation lost</td><td>9</td><td>9</td><td>7</td><td>6</td><td>6</td><td>7</td><td>8</td><td>4</td><td>20</td><td>3</td></tr><tr><td>20-flight: flights on time</td><td>0.779</td><td>0.793</td><td>0.790</td><td>0.801</td><td>0.817</td><td>0.852</td><td>0.849</td><td>0.863</td><td>0.844</td><td>0.927</td></tr><tr><td>20-flight: clearances / stream</td><td>161.9</td><td>158.1</td><td>155.8</td><td>140.6</td><td>153.7</td><td>158.7</td><td>180.5</td><td>158.2</td><td>136.9</td><td>121.9</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>0.98</td><td>0.60</td><td>0.62</td><td>1.05</td><td>1.07</td><td>0.56</td><td>0.86</td><td>0.60</td><td>0.01</td><td>0.54</td></tr><tr><td>stitched 2×20: solved</td><td>1</td><td>3</td><td>1</td><td>8</td><td>10</td><td>17</td><td>13</td><td>16</td><td>—</td><td>34</td></tr><tr><td>stitched 2×20: hard-solved</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>3</td><td>1</td><td>0</td><td>—</td><td>9</td></tr><tr><td>stitched 2×20: separation lost</td><td>13</td><td>21</td><td>21</td><td>11</td><td>17</td><td>8</td><td>8</td><td>6</td><td>—</td><td>15</td></tr><tr><td>stitched 2×20: flights on time</td><td>0.730</td><td>0.725</td><td>0.704</td><td>0.745</td><td>0.738</td><td>0.818</td><td>0.818</td><td>0.827</td><td>—</td><td>0.865</td></tr><tr><td>pass@10 (seeds)</td><td>38</td><td>34</td><td>37</td><td>34</td><td>51</td><td>56</td><td>57</td><td>62</td><td>—</td><td>76</td></tr><tr><td>separation lost, best of 10</td><td>0</td><td>2</td><td>1</td><td>1</td><td>2</td><td>1</td><td>0</td><td>1</td><td>—</td><td>2</td></tr><tr><td>with lookahead: solved</td><td>19</td><td>22</td><td>29</td><td>24</td><td>31</td><td>37</td><td>37</td><td>25</td><td>—</td><td>30</td></tr><tr><td>with lookahead: hard-solved</td><td>0</td><td>1</td><td>1</td><td>4</td><td>7</td><td>19</td><td>17</td><td>17</td><td>—</td><td>8</td></tr><tr><td>with lookahead: separation lost</td><td>7</td><td>2</td><td>5</td><td>1</td><td>4</td><td>4</td><td>1</td><td>2</td><td>—</td><td>1</td></tr><tr><td>with lookahead: flights on time</td><td>0.802</td><td>0.835</td><td>0.817</td><td>0.788</td><td>0.825</td><td>0.849</td><td>0.865</td><td>0.818</td><td>—</td><td>0.893</td></tr></tbody></table>
 
 <!-- /gen -->
 
@@ -42,12 +44,12 @@ and `1_44` (30 gained, 4 lost, p < 0.001).
 
 - **The recipe works but is not yet competitive.** From random weights, 10M steps give a policy
   that solves some streams and loses separation on under a tenth of seeds, far from the fine-tuned
-  lineage.
+  lineage (in the standard MDP; for the release MDP see below).
 - **Seed variance is as large as the design change.** Arm A's two seeds differ by about as much as
   arm A differs from arm B, so a single-seed comparison of arms cannot separate them. More seeds
   per arm are needed before calling one better.
 - **Flat potentials (arm B) did not help.**
-- **Arm D is the best from-scratch agent on 20-flight streams.** It solves more than arm A seed 1
+- **Arm D is the best from-scratch agent on 20-flight streams in the standard MDP.** It solves more than arm A seed 1
   (37 vs 22; 21 gained, 6 lost, p = 0.006) and more than arm C, which shares its first 5.5M steps
   (next section).
 - **10M steps is not converged.** On both arm A seeds the solved count is still climbing steeply
@@ -100,3 +102,24 @@ where their parents lost one or two ([Long streams](long-streams.md)).
 <table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../../models/1_44/">1_44</a></th><th><a href="../../models/1_47/">1_47</a></th><th><a href="../../models/1_46/">1_46</a></th><th><a href="../../models/1_48/">1_48</a></th><th><a href="../../models/1_38/">1_38</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>37</td><td>36</td><td>44</td><td>48</td><td>63</td></tr><tr><td>20-flight: hard-solved</td><td>13</td><td>9</td><td>13</td><td>21</td><td>24</td></tr><tr><td>20-flight: separation lost</td><td>6</td><td>8</td><td>7</td><td>4</td><td>3</td></tr><tr><td>20-flight: flights on time</td><td>0.817</td><td>0.849</td><td>0.852</td><td>0.863</td><td>0.927</td></tr><tr><td>20-flight: clearances / stream</td><td>153.7</td><td>180.5</td><td>158.7</td><td>158.2</td><td>121.9</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>1.07</td><td>0.86</td><td>0.56</td><td>0.60</td><td>0.54</td></tr><tr><td>stitched 2×20: solved</td><td>10</td><td>13</td><td>17</td><td>16</td><td>34</td></tr><tr><td>stitched 2×20: hard-solved</td><td>0</td><td>1</td><td>3</td><td>0</td><td>9</td></tr><tr><td>stitched 2×20: separation lost</td><td>17</td><td>8</td><td>8</td><td>6</td><td>15</td></tr><tr><td>stitched 2×20: flights on time</td><td>0.738</td><td>0.818</td><td>0.818</td><td>0.827</td><td>0.865</td></tr><tr><td>with lookahead: solved</td><td>31</td><td>37</td><td>37</td><td>25</td><td>30</td></tr><tr><td>with lookahead: hard-solved</td><td>7</td><td>17</td><td>19</td><td>17</td><td>8</td></tr><tr><td>with lookahead: separation lost</td><td>4</td><td>1</td><td>4</td><td>2</td><td>1</td></tr><tr><td>with lookahead: flights on time</td><td>0.825</td><td>0.865</td><td>0.849</td><td>0.818</td><td>0.893</td></tr></tbody></table>
 
 <!-- /gen -->
+
+## Arm D in the release MDP: `1_50`
+
+`1_50` is arm D (seed 1, the same curriculum as `1_44`) trained in the release MDP: after each
+step a locked flight at the front of the queue leaves the window and can no longer be cleared,
+its bracket is paid at release, the deviation potential is flat, and training scenarios are
+redrawn at reset until feasible. It is scored in that environment, on the same 100 seeds.
+
+- **More precise:** 51 solved against `1_44`'s 37 (20 gained, 6 lost, p = 0.009) and 26
+  hard-solved against 13 (p = 0.024). Its hard-solved count is level with the champion's (26 vs 24,
+  p = 0.86).
+- **Much less safe:** separation lost on 20 seeds against `1_44`'s 6 (15 new, 1 fixed, p < 0.001)
+  and `1_38`'s 3. That is far outside the champion gate (at most 5).
+- **Still climbing at the end:** 35 solved at 4M, 47 at 7M, 51 at 10M, with separation losses
+  between 18 and 31 from 4M on ([curve on its card](../models/1_50.md)).
+- Its stitched, feasible-set, lookahead and long-stream scores are not yet committed; this section
+  will be revised when they are.
+
+One seed, one run, and a different MDP: the gain in precision and the loss of safety move
+together, and which of the release switches causes which is not separated yet.
+

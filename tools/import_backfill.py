@@ -41,7 +41,16 @@ def main():
     reg = yaml.safe_load(open(ROOT / "models.yaml"))
     code = Path(args.code_repo or reg["code_repo"])
     # every backfill folder (each with eval/ and renders/): --dir plus models.yaml test_sources.backfill_dirs
-    bases = [code / args.dir] + [code / d for d in reg.get("test_sources", {}).get("backfill_dirs", [])]
+    # test_sources.backfill_dirs are job folders a watcher syncs from rented hosts: only their committed
+    # files count, so nothing is published before the training session has reviewed and committed it.
+    import subprocess
+    gated = [code / d for d in reg.get("test_sources", {}).get("backfill_dirs", [])]
+    bases = [code / args.dir] + gated
+    committed = set()
+    for g in gated:
+        committed |= {str(code / f) for f in subprocess.run(["git", "-C", str(code), "ls-files", str(g.relative_to(code))],
+                                                             capture_output=True, text=True).stdout.split()}
+    ok = lambda p: not any(g in p.parents for g in gated) or str(p) in committed
     ids = {str(m["id"]) for m in reg["models"]}
     existing = {str(m["id"]): set((m.get("evals") or {}).keys()) for m in reg["models"]}
     out: dict[str, dict] = {}
@@ -49,6 +58,9 @@ def main():
 
     for base in bases:
         for csv in sorted((base / "eval").glob("*.csv")) if (base / "eval").exists() else []:
+            if not ok(csv):
+                skipped.append(f"{csv.name} (not committed yet)")
+                continue
             mt = re.fullmatch(r"(.+)_(f20|s2x20|att10|la4|d100)\.csv", csv.name)
             if not mt or mt.group(1) not in ids:
                 skipped.append(csv.name)
@@ -62,6 +74,9 @@ def main():
         for mp4 in sorted((base / "renders").glob("*.mp4")) if (base / "renders").exists() else []:
             mt = re.fullmatch(r"(.+?)_(comparison|best|failure|feas40_best)_seed(\d+)\.mp4", mp4.name)
             meta = mp4.with_name(mp4.stem + "_solutions.json")
+            if not ok(meta):   # videos are gitignored in the code repo; their committed metadata stands for them
+                skipped.append(f"{mp4.name} (not committed yet)")
+                continue
             if not mt or mt.group(1) not in ids or not meta.exists():
                 skipped.append(mp4.name + ("" if meta.exists() else " (no _solutions.json)"))
                 continue

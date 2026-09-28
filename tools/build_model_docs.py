@@ -1727,7 +1727,9 @@ class Build:
             if bat == "f20":
                 add(f"{lab}: clearances / stream", lambda m: fmt(m.summary["f20"].get("clearances"), 1))
                 add(f"{lab}: AMAN swaps / stream", lambda m: fmt(m.summary["f20"].get("swaps"), 2))
-        head = "".join(f'<th><a href="{self._href(m.id)}">{m.id}</a></th>' for m in ms)
+        rel_tag = ('<br><span class="tada-chip tada-chip--muted" title="Trained and scored in the release MDP: '
+                   'locked flights leave the window">release MDP</span>')
+        head = "".join(f'<th><a href="{self._href(m.id)}">{m.id}</a>{rel_tag if self.release_mdp(m) else ""}</th>' for m in ms)
         return (f'<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th>{head}</tr></thead>'
                 f"<tbody>{''.join(rows)}</tbody></table>\n\n")
 
