@@ -2812,6 +2812,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../findings/point-merge/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Point merge, zero-shot
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../findings/curriculum/" class="md-nav__link">
         
   
@@ -3353,9 +3381,9 @@
 
 <h3 id="long-and-feasible-streams">Long and feasible streams<a class="headerlink" href="#long-and-feasible-streams" title="Permanent link">&para;</a></h3>
 <p>60- and 100-flight stitched streams (3 or 5 waves, 600–900 s gaps) and the feasible 40-flight sets feas40 and test51, deterministic; see <a href="../../findings/long-streams/">Long streams</a>.</p>
-<table class="tada-table"><thead><tr><th>streams</th><th>n</th><th>no loss of separation</th><th>solved</th><th>on time</th></tr></thead><tbody><tr><td>60 flights, feasible</td><td>27</td><td>27</td><td>11</td><td>0.986</td></tr><tr><td>60 flights, unfiltered</td><td>40</td><td>34</td><td>7</td><td>0.836</td></tr><tr><td>100 flights, feasible</td><td>12</td><td>12</td><td>0</td><td>0.976</td></tr><tr><td>100 flights, unfiltered</td><td>40</td><td>30</td><td>1</td><td>0.812</td></tr><tr><td>feas40: 40 feasible 2×20 streams</td><td>40</td><td>40</td><td>22</td><td>0.984</td></tr><tr><td>test51: 51 held-out feasible 2×20 streams</td><td>51</td><td>51</td><td>25</td><td>0.982</td></tr></tbody></table>
+<table class="tada-table"><thead><tr><th>streams</th><th>n</th><th>no loss of separation</th><th>solved</th><th>on time</th></tr></thead><tbody><tr><td>60 flights, feasible</td><td>27</td><td>27</td><td>11</td><td>0.986</td></tr><tr><td>60 flights, unfiltered</td><td>40</td><td>34</td><td>7</td><td>0.836</td></tr><tr><td>100 flights, feasible</td><td>12</td><td>12</td><td>0</td><td>0.976</td></tr><tr><td>100 flights, unfiltered</td><td>40</td><td>30</td><td>1</td><td>0.812</td></tr><tr><td><a href="../../findings/point-merge/">point merge (BGY), zero-shot</a></td><td>100</td><td>66</td><td>7</td><td>0.642</td></tr><tr><td>feas40: 40 feasible 2×20 streams</td><td>40</td><td>40</td><td>22</td><td>0.984</td></tr><tr><td>test51: 51 held-out feasible 2×20 streams</td><td>51</td><td>51</td><td>25</td><td>0.982</td></tr></tbody></table>
 
-<p>Sources: f20 <code>analysis/2026-09-26_1_36_multipick/eval_cont/f20.csv</code>, s2x20 <code>analysis/2026-09-26_1_36_multipick/eval_cont/s2x20.csv</code>, att10 <code>analysis/2026-09-26_1_36_multipick/eval_cont/att10.csv</code>, la4 <code>analysis/2026-09-26_1_36_multipick/eval_cont/la4.csv</code>, fx_feas40 <code>analysis/2026-09-28_hard/eval/1_38_feas40.csv</code>, fx_feas40_la4 <code>analysis/2026-09-28_hard/eval/1_38_feas40_la4.csv</code>, fx_test51 <code>analysis/2026-09-28_hard/eval_test/1_38_test51.csv</code>, ls_k3_all <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k3_all.csv</code>, ls_k3_feasible <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k3_feasible.csv</code>, ls_k5_all <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_all.csv</code>, ls_k5_feasible <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_feasible.csv</code>, ls_k5_feasible_la4 <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_feasible_la4.csv</code>, phase0 <code>analysis/2026-09-27_phase0_order_first/atc_run_1_38_windowed_cont.jsonl</code>.</p>
+<p>Sources: f20 <code>analysis/2026-09-26_1_36_multipick/eval_cont/f20.csv</code>, s2x20 <code>analysis/2026-09-26_1_36_multipick/eval_cont/s2x20.csv</code>, att10 <code>analysis/2026-09-26_1_36_multipick/eval_cont/att10.csv</code>, la4 <code>analysis/2026-09-26_1_36_multipick/eval_cont/la4.csv</code>, fx_feas40 <code>analysis/2026-09-28_hard/eval/1_38_feas40.csv</code>, fx_feas40_la4 <code>analysis/2026-09-28_hard/eval/1_38_feas40_la4.csv</code>, fx_test51 <code>analysis/2026-09-28_hard/eval_test/1_38_test51.csv</code>, ls_k3_all <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k3_all.csv</code>, ls_k3_feasible <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k3_feasible.csv</code>, ls_k5_all <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_all.csv</code>, ls_k5_feasible <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_feasible.csv</code>, ls_k5_feasible_la4 <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_feasible_la4.csv</code>, phase0 <code>analysis/2026-09-27_phase0_order_first/atc_run_1_38_windowed_cont.jsonl</code>, zs_pms_f20 <code>analysis/2026-09-28_release/zeroshot/1_38_pms_f20.csv</code>.</p>
 <h2 id="behaviour-and-failures-20-flight-deterministic">Behaviour and failures (20-flight, deterministic)<a class="headerlink" href="#behaviour-and-failures-20-flight-deterministic" title="Permanent link">&para;</a></h2>
 <p><strong>121.9</strong> clearances per stream; <strong>0.54</strong> AMAN-order swaps per stream; mean landing deviation <strong>30 s</strong>.</p>
 <table class="tada-table"><thead><tr><th>outcome</th><th>seeds</th></tr></thead><tbody><tr><td><span class="tada-chip tada-chip--ok">solved</span></td><td>63</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 1 flight late</span></td><td>17</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 2–3 flights late</span></td><td>12</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 4 or more late</span></td><td>5</td></tr><tr><td><span class="tada-chip tada-chip--bad">loss of separation</span></td><td>3</td></tr></tbody></table>
