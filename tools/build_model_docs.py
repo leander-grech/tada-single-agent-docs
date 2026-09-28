@@ -1063,13 +1063,33 @@ class Build:
             return f"`{mid}`"
         return f'<a href="{self._site_prefix}models/{mid}/"><code>{mid}</code></a>'
 
+    @staticmethod
+    def env_switches(wc: dict) -> list[str]:
+        """Command-line switches recorded in windowed_config: the ±30 s ladder and the release MDP."""
+        out = []
+        if any(b[0] == 30.0 for b in wc.get("landing_brackets") or []):
+            out.append("--hard-bracket")
+        if wc.get("release_locked"):
+            out.append("--release-locked" + (f" --release-dev-s {wc['release_dev_s']:g}"
+                                             if wc.get("release_dev_s", 30.0) != 30.0 else ""))
+        if wc.get("pay_at_release"):
+            out.append("--pay-at-release")
+        if wc.get("pbrs_flat_deviation"):
+            out.append("--flat-deviation")
+        if wc.get("train_max_early_s") is not None:
+            out.append(f"--train-max-early-s {wc['train_max_early_s']:g}")
+        return out
+
     def reproduce(self, m: Model) -> str:
         mt = m.meta
         lines = []
         if m.track == "windowed":
             if mt.get("init_weights") is None and "scratch" in m.run:
-                arm = re.search(r"scratch_([abcd])_s(\d+)", m.run)
-                lines.append(f"recipes/windowed_from_scratch.sh {arm.group(2)} {arm.group(1).upper()}")
+                arm = re.search(r"scratch_([abcd])_(?:\w+_)?s(\d+)", m.run)
+                sw = self.env_switches(mt.get("windowed_config") or {})
+                suffix = f" --run-suffix {m.run.split('atc_run_' + m.id + '_', 1)[-1]}" if sw else ""
+                lines.append(f"recipes/windowed_from_scratch.sh {arm.group(2)} {arm.group(1).upper()}"
+                             + "".join(" " + f for f in sw) + suffix)
             else:
                 env = []
                 if mt.get("sequence_obs"):
@@ -1084,6 +1104,7 @@ class Build:
                 if wc.get("stitch_segments", 1) > 1:
                     g = wc.get("stitch_gap_s", [])
                     flags.append(f"--stitch-segments {wc['stitch_segments']} --stitch-gap {g[0]:g} {g[1]:g}")
+                flags += self.env_switches(wc)
                 if mt.get("init_weights"):
                     flags.append(f"--init-weights {mt['init_weights']}")
                 if mt.get("n_envs"):
@@ -1132,7 +1153,7 @@ class Build:
         champ_ids = {c.id for c in champs.values() if c}
         o = [GEN_NOTE, f"# {m.id}\n\n", self.status_chip(m, champ_ids) + "\n\n", f"**What changed:** {m.whats_new}\n\n"]
         if self.release_mdp(m):
-            o.append('!!! note "Release MDP"\n    This model trained in a different MDP from 1_38 and the models before it: '
+            o.append('!!! note "Release MDP"\n    This model trained in a different MDP from every earlier model, the champion included: '
                      "after each step the front of the landing queue is released once a flight is locked (predicted "
                      "within 30 s of its target and in no predicted conflict). A released flight leaves the window "
                      "and can no longer be cleared. It is scored in the same environment, on the same seeds and "
@@ -1225,6 +1246,8 @@ class Build:
             elif ref.raw.get("_zs"):
                 ref_sum = self._zs_model(ref)
         if not m.summary:
+            if m.raw.get("pending"):
+                o.append(f'<span class="tada-chip tada-chip--warn">pending</span> {esc(m.raw["pending"])}\n\n')
             o.append("No evaluation files yet. See [BACKFILL.md](../backfill.md) for what is queued.\n\n")
             return "".join(o)
         o.append("100 validation seeds (never trained on), paired seed by seed. **Solved**: no loss of separation "

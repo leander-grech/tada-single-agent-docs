@@ -162,6 +162,14 @@ on stitched 2×20 streams, on a rented host. Neither gained hard-solved streams 
 its parent. `1_48` ties the champion on hard-solved streams and on the feasible 40-flight set
 (feas40), but solves fewer 20-flight streams at ±60 s; `1_38` stays champion. <a id="run-1-48"></a> [`1_47`](models/1_47.md) · [`1_48`](models/1_48.md).
 
+### `1_49`, `1_50` — the release MDP (28 Sep, training) { #run-1-49 }
+
+A changed MDP: after each step a flight at the front of the landing queue that is locked (predicted
+within 30 s of its target, in no predicted conflict) is released from the window and can no longer
+be cleared; its bracket is paid at release, the deviation potential is flat, and training streams are
+feasible only. `1_49` fine-tunes `1_48` in it; `1_50` trains recipe arm D from scratch in it. Both
+are scored in their own environment. <a id="run-1-50"></a> [`1_49`](models/1_49.md) · [`1_50`](models/1_50.md).
+
 ### Long streams (27–28 Sep) { #long-streams }
 
 Not a training run: 60- and 100-flight streams, split into feasible and over-capacity, on the

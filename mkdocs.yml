@@ -74,6 +74,8 @@ nav:
       - Leaderboard: models/index.md
       # BEGIN generated model nav (tools/build_model_docs.py)
       - Windowed:
+          - "1_50": models/1_50.md
+          - "1_49": models/1_49.md
           - "1_48": models/1_48.md
           - "1_47": models/1_47.md
           - "1_46": models/1_46.md

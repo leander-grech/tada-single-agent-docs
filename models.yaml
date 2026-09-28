@@ -52,6 +52,25 @@ test_sources:
 models:
 
   # ---------------------------------------------------------------- windowed, from scratch
+  - id: "1_50"
+    track: windowed
+    run: experiments/atc_run_1_50_scratch_d_release_s1
+    checkpoint: final_model.zip
+    parent: null
+    status: in_progress
+    whats_new: "From scratch in the release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential, feasible-only training streams (≤ 650 s early), ±30 s bracket worth 4. Recipe arm D (10 flights to 2.5M, then 20 to 10M), LR 3e-4 to 3e-5, seed 1."
+    curve: [{file: experiments/atc_run_1_50_scratch_d_release_s1/track.csv, kind: track}]
+    pending: "Training on a rented host (10M steps); results due about 17:30–18:00 on 28 Sep."
+
+  - id: "1_49"
+    track: windowed
+    run: experiments/atc_run_1_49_release_1_48
+    checkpoint: final_model.zip
+    parent: "1_48"
+    status: in_progress
+    whats_new: "1_48 fine-tuned in the release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential, feasible-only training streams (≤ 650 s early). Stitched 2×20 streams, LR 3e-5 to 1e-5, 300k critic warm-up, seed 49."
+    pending: "Training on a rented host (10M steps); results due about 17:30–18:00 on 28 Sep."
+
   - id: "1_48"
     track: windowed
     run: experiments/atc_run_1_48_hard_1_46
