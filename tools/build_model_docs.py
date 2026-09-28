@@ -222,7 +222,7 @@ class Build:
                     m.eval_paths[bat] = rel
                     continue
                 try:
-                    df = self.rows_for(rel, m.model_path)
+                    df = self.rows_for(rel, m.raw.get("scored_as") or m.model_path)
                 except (FileNotFoundError, ValueError) as e:
                     self.errors.append(f"{m.id} {bat}: {e}")
                     continue
@@ -233,7 +233,7 @@ class Build:
             zs = m.raw.get("windowed_zero_shot") or {}
             m.raw["_zs"] = {}
             for bat, rel in zs.items():
-                df = self.rows_for(rel, m.model_path)
+                df = self.rows_for(rel, m.raw.get("scored_as") or m.model_path)
                 m.raw["_zs"][bat] = (rel, df, self.windowed_summary(bat, df))
             if m.raw.get("headline"):
                 h = m.raw["headline"]
@@ -663,13 +663,14 @@ class Build:
           one-pick     windowed models without reselection
           scratch      windowed models whose lineage starts from random weights
         """
-        def has(m):
-            return any(b in m.summary for b in batteries)
+        def has(m):  # rules skip models kept out of findings tables (models.yaml: in_findings: false)
+            return any(b in m.summary for b in batteries) and m.raw.get("in_findings", True)
         wm = sorted((m for m in self.models.values() if m.track == "windowed"), key=lambda m: m.id)
         out = []
         for tok in [t.strip() for t in spec.split(",") if t.strip()]:
             if tok in self.models:
                 pick = [self.models[tok]]
+
             elif tok == "all":
                 pick = [m for m in wm if has(m)]
             elif tok == "reselection":
@@ -838,13 +839,19 @@ class Build:
 
     def unregistered_runs(self) -> list:
         runs = {Path(m.run).name for m in self.models.values()}
+        runs |= {Path(c).name for m in self.models.values() for c in (m.raw.get("run_copies") or [])}
         runs |= {"atc_run_1_29_pbrs_attn"}  # folded into the 1_29 card
         out = []
         for d in sorted((self.code / "experiments").glob("atc_run_1_*")):
             n = re.match(r"atc_run_1_(\d+)", d.name)
             if not n or int(n.group(1)) < 16 or d.name in runs:
                 continue
-            out.append((d.name, (d / "ABORTED.txt").exists()))
+            if (d / "ABORTED.txt").exists():
+                out.append((d.name, "aborted at start"))
+            elif d.name.endswith("_aborted") and d.name[:-len("_aborted")] in runs:
+                out.append((d.name, f"aborted and restarted as `{d.name[:-len('_aborted')]}`"))
+            else:
+                out.append((d.name, None))
         return out
 
     def coverage_page(self) -> str:
@@ -876,7 +883,7 @@ class Build:
         un = self.unregistered_runs()
         o.append("## Runs in the code repo that the docs do not cover\n\n")
         if un:
-            o.append("".join(f"- `{n}`" + (" (aborted at start)" if ab else " — **add it to `models.yaml`**") + "\n"
+            o.append("".join(f"- `{n}`" + (f" ({ab})" if ab else " — **add it to `models.yaml`**") + "\n"
                              for n, ab in un) + "\n")
         else:
             o.append("None.\n\n")
@@ -1128,6 +1135,8 @@ class Build:
             out.append("--flat-deviation")
         if wc.get("train_max_early_s") is not None:
             out.append(f"--train-max-early-s {wc['train_max_early_s']:g}")
+        if wc.get("train_seed_pool"):
+            out.append(f"--train-seed-pool {wc['train_seed_pool']}")
         return out
 
     def reproduce(self, m: Model) -> str:
@@ -1236,7 +1245,9 @@ class Build:
         if wc.get("pbrs_flat_deviation"):
             rec.append("flat deviation potential")
         if wc.get("train_max_early_s") is not None:
-            rec.append(f"feasible-only training streams (≤ {wc['train_max_early_s']:g} s early)")
+            rec.append(f"feasible-only training by redraw at reset (≤ {wc['train_max_early_s']:g} s early)")
+        if wc.get("train_seed_pool"):
+            rec.append(f"feasible-only training from a pre-screened pool (<code>{esc(wc['train_seed_pool'])}</code>)")
         if mt.get("sequence_obs"):
             rec.append("sequence observations")
         if mt.get("max_picks"):
@@ -1818,7 +1829,7 @@ class Build:
         """Validation seeds no windowed model solved in any f20 / att10 / la4 episode."""
         frames = []
         for m in self.models.values():
-            if m.track != "windowed":
+            if m.track != "windowed" or not m.raw.get("in_findings", True):
                 continue
             for bat in ("f20", "att10", "la4"):
                 if bat in m.evals:

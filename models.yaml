@@ -58,18 +58,33 @@ models:
     checkpoint: final_model.zip
     parent: null
     status: in_progress
-    whats_new: "From scratch in the release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential, feasible-only training streams (≤ 650 s early), ±30 s bracket worth 4. Recipe arm D (10 flights to 2.5M, then 20 to 10M), LR 3e-4 to 3e-5, seed 1."
+    whats_new: "From scratch in the release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential, feasible-only training by redraw at reset (≤ 650 s early), ±30 s bracket worth 4. Recipe arm D (10 flights to 2.5M, then 20 to 10M), LR 3e-4 to 3e-5, seed 1."
     curve: [{file: experiments/atc_run_1_50_scratch_d_release_s1/track.csv, kind: track}]
     pending: "Training on a rented host (10M steps); results due about 17:30–18:00 on 28 Sep."
 
-  - id: "1_49"
+  - id: "1_51"
     track: windowed
-    run: experiments/atc_run_1_49_release_1_48
+    run: experiments/atc_run_1_51_release_1_48
     checkpoint: final_model.zip
     parent: "1_48"
     status: in_progress
-    whats_new: "1_48 fine-tuned in the release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential, feasible-only training streams (≤ 650 s early). Stitched 2×20 streams, LR 3e-5 to 1e-5, 300k critic warm-up, seed 49."
-    pending: "Training on a rented host (10M steps); results due about 17:30–18:00 on 28 Sep."
+    whats_new: "1_49 again, with feasible-only training from a pre-screened pool: feasible stitched 2×20 streams screened up front (validation and held-out streams removed) instead of redrawn at reset. Release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential. 1_48 fine-tuned, LR 3e-5 to 1e-5, 300k critic warm-up, seed 49."
+    pending: "Training on a rented host (10M steps), started 15:15 on 28 Sep."
+
+  - id: "1_49"
+    track: windowed
+    run: experiments/atc_run_1_49_release_1_48_aborted    # renamed when stopped (ABORTED.txt)
+    scored_as: experiments/atc_run_1_49_release_1_48/checkpoints/ppo_tada_1003520_steps.zip   # the path its score file names
+    checkpoint: checkpoints/ppo_tada_1003520_steps.zip
+    parent: "1_48"
+    status: stopped
+    steps: 1302528        # last checkpoint in the *_aborted copy
+    whats_new: "1_48 fine-tuned in the release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential, feasible-only training by redraw at reset (≤ 650 s early). Stitched 2×20 streams, LR 3e-5 to 1e-5, 300k critic warm-up, seed 49."
+    note: "Stopped at 1.3M steps: redrawing infeasible training streams at reset stalled the vectorised batch (about 300 steps/s instead of 780, code commit 5c22b38). Restarted as 1_51 with a pre-screened pool of training streams. The card shows the 1M checkpoint, the only one scored."
+    no_backfill: "stopped at 1.3M steps and superseded by 1_51"
+    in_findings: false    # a 1M checkpoint of a stopped run: kept out of the findings tables that list agents by rule
+    curve: [{file: experiments/atc_run_1_49_release_1_48_aborted/track.csv, kind: track}]
+    evals: {f20: experiments/atc_run_1_49_release_1_48_aborted/track_scores/ppo_tada_1003520_steps.csv}
 
   - id: "1_48"
     track: windowed
