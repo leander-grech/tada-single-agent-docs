@@ -753,6 +753,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Scorecard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#long-and-feasible-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Long and feasible streams
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -816,6 +833,17 @@
     <span class="md-ellipsis">
       
         Most typical failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#other-renders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other renders
       
     </span>
   </a>
@@ -3211,6 +3239,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Scorecard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#long-and-feasible-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Long and feasible streams
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -3280,6 +3325,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#other-renders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other renders
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3321,14 +3377,22 @@
 <p class="admonition-title">Release MDP</p>
 <p>This model trained in a different MDP from every earlier model, the champion included: after each step the front of the landing queue is released once a flight is locked (predicted within 30 s of its target and in no predicted conflict). A released flight leaves the window and can no longer be cleared. It is scored in the same environment, on the same seeds and with the same metrics, so its numbers measure landings in the same scenarios, but under that extra constraint on the agent.</p>
 </div>
+<div class="admonition info">
+<p class="admonition-title">About this run</p>
+<p>19 of its 20 losses of separation are on the 49 validation seeds with a flight more than 650 s early (validation_seed_capacity.csv). On the 51 feasible seeds it solves 33 and hard-solves 21 with 1 loss, against 1_38&#x27;s 34, 15 and 0 (hard-solved 12 gained, 6 lost, p = 0.24). On the held-out feasible 40-flight streams (test51) it solves fewer than 1_38 (16 vs 25; 3 gained, 12 lost, p = 0.035), hard-solves as many (5 each), and loses 2. Trained with a reward flaw since fixed (code commit 618a073): with pay at release, a flight&#x27;s bracket paid at release was kept even when the episode then ended in a loss of separation, so a bust cost less than the objective says. Runs after that commit take the release payments of flights still airborne back on a bust. This is a plausible contributor to its losses on over-capacity seeds, not a proven one.</p>
+</div>
 <table class="tada-table tada-facts"><tbody><tr><th>Lineage</th><td><strong><code>1_50</code></strong> (random initialisation)</td></tr><tr><th>Steps</th><td>10M in this run; 10M along the lineage</td></tr><tr><th>Checkpoint</th><td><code>experiments/atc_run_1_50_scratch_d_release_s1/final_model.zip</code></td></tr><tr><th>Recipe</th><td>trainer jax; env windowed; reward outcome_pbrs; stitched 2×20, gap 120–900 s; release locked flights (±30 s); pay at release; flat deviation potential; feasible-only training by redraw at reset (≤ 650 s early); sequence observations; picks per step ≤ 2; curriculum 10×1 to 2.5M, 20×1 to 10M; LR 0.0003 → 3e-05 (warmup_cosine, warm-up 8%); entropy 0.01; 32 workers; seed 1</td></tr><tr><th>Run log</th><td><a href="../../log/#run-1-50">experiment log</a></td></tr></tbody></table>
 
 <h2 id="scorecard">Scorecard<a class="headerlink" href="#scorecard" title="Permanent link">&para;</a></h2>
 <p>100 validation seeds (never trained on), paired seed by seed. <strong>Solved</strong>: no loss of separation and every flight within ±60 s of its AMAN target; <strong>hard-solved</strong>: the same within ±30 s. A delta is <strong>bold</strong> only when the paired test says so (McNemar on per-seed outcomes, or a paired SE on the on-time rate, 95%).</p>
-<table class="tada-table"><thead><tr><th></th><th>value</th><th>vs parent</th><th>vs champion <code>1_38</code></th></tr></thead><tbody><tr class="tada-group"><th colspan="4">20-flight streams</th></tr><tr><td>solved</td><td>51</td><td>—</td><td><strong>−12 (9 gained, 21 lost; z −2.19)</strong></td></tr><tr><td>hard-solved</td><td>26</td><td>—</td><td>+2 (17 gained, 15 lost, n.s.)</td></tr><tr><td>separation lost</td><td>20</td><td>—</td><td><strong>+17 (0 fixed, 17 new; z +4.12)</strong></td></tr><tr><td>flights on time</td><td>0.844</td><td>—</td><td><strong>−0.083 (SE 0.021)</strong></td></tr><tr><td>clearances / stream</td><td>136.9</td><td>—</td><td>—</td></tr></tbody></table>
+<table class="tada-table"><thead><tr><th></th><th>value</th><th>vs parent</th><th>vs champion <code>1_38</code></th></tr></thead><tbody><tr class="tada-group"><th colspan="4">20-flight streams</th></tr><tr><td>solved</td><td>51</td><td>—</td><td><strong>−12 (9 gained, 21 lost; z −2.19)</strong></td></tr><tr><td>hard-solved</td><td>26</td><td>—</td><td>+2 (17 gained, 15 lost, n.s.)</td></tr><tr><td>separation lost</td><td>20</td><td>—</td><td><strong>+17 (0 fixed, 17 new; z +4.12)</strong></td></tr><tr><td>flights on time</td><td>0.844</td><td>—</td><td><strong>−0.083 (SE 0.021)</strong></td></tr><tr><td>clearances / stream</td><td>136.9</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">stitched 2×20 streams</th></tr><tr><td>solved</td><td>22</td><td>—</td><td><strong>−12 (9 gained, 21 lost; z −2.19)</strong></td></tr><tr><td>hard-solved</td><td>4</td><td>—</td><td>−5 (3 gained, 8 lost, n.s.)</td></tr><tr><td>separation lost</td><td>32</td><td>—</td><td><strong>+17 (2 fixed, 19 new; z +3.71)</strong></td></tr><tr><td>flights on time</td><td>0.780</td><td>—</td><td><strong>−0.085 (SE 0.023)</strong></td></tr><tr><td>clearances / stream</td><td>259.1</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">critic-guided lookahead (4 candidates)</th></tr><tr><td>solved</td><td>24</td><td>—</td><td>−6 (11 gained, 17 lost, n.s.)</td></tr><tr><td>hard-solved</td><td>10</td><td>—</td><td>+2 (10 gained, 8 lost, n.s.)</td></tr><tr><td>separation lost</td><td>15</td><td>—</td><td><strong>+14 (0 fixed, 14 new; z +3.74)</strong></td></tr><tr><td>flights on time</td><td>0.824</td><td>—</td><td><strong>−0.068 (SE 0.018)</strong></td></tr><tr><td>clearances / stream</td><td>146.6</td><td>—</td><td>—</td></tr></tbody></table>
 
-<p>Not yet evaluated: stitched 2×20 streams, 10 attempts (deterministic + 9 sampled), critic-guided lookahead (4 candidates) (<a href="../../backfill/">backfill list</a>).</p>
-<p>Sources: f20 <code>experiments/atc_run_1_50_scratch_d_release_s1/track_scores/final_model.csv</code>.</p>
+<h3 id="long-and-feasible-streams">Long and feasible streams<a class="headerlink" href="#long-and-feasible-streams" title="Permanent link">&para;</a></h3>
+<p>60- and 100-flight stitched streams (3 or 5 waves, 600–900 s gaps) and the feasible 40-flight sets feas40 and test51, deterministic; see <a href="../../findings/long-streams/">Long streams</a>.</p>
+<table class="tada-table"><thead><tr><th>streams</th><th>n</th><th>no loss of separation</th><th>solved</th><th>on time</th></tr></thead><tbody><tr><td>feas40: 40 feasible 2×20 streams</td><td>40</td><td>39</td><td>14</td><td>0.965</td></tr><tr><td>test51: 51 held-out feasible 2×20 streams</td><td>51</td><td>49</td><td>16</td><td>0.940</td></tr></tbody></table>
+
+<p>Not yet evaluated: 10 attempts (deterministic + 9 sampled) (<a href="../../backfill/">backfill list</a>).</p>
+<p>Sources: f20 <code>experiments/atc_run_1_50_scratch_d_release_s1/track_scores/final_model.csv</code>, fx_feas40 <code>analysis/2026-09-28_release/eval/1_50_feas40.csv</code>, fx_feas40_la4 <code>analysis/2026-09-28_release/eval/1_50_feas40_la4.csv</code>, fx_test51 <code>analysis/2026-09-28_release/eval/1_50_test51.csv</code>, la4 <code>analysis/2026-09-28_release/eval/1_50_la4.csv</code>, s2x20 <code>analysis/2026-09-28_release/eval/1_50_s2x20.csv</code>.</p>
 <h2 id="behaviour-and-failures-20-flight-deterministic">Behaviour and failures (20-flight, deterministic)<a class="headerlink" href="#behaviour-and-failures-20-flight-deterministic" title="Permanent link">&para;</a></h2>
 <p><strong>136.9</strong> clearances per stream; <strong>0.01</strong> AMAN-order swaps per stream; mean landing deviation <strong>15 s</strong>.</p>
 <table class="tada-table"><thead><tr><th>outcome</th><th>seeds</th></tr></thead><tbody><tr><td><span class="tada-chip tada-chip--ok">solved</span></td><td>51</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 1 flight late</span></td><td>19</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 2–3 flights late</span></td><td>8</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 4 or more late</span></td><td>2</td></tr><tr><td><span class="tada-chip tada-chip--bad">loss of separation</span></td><td>20</td></tr></tbody></table>
@@ -3343,13 +3407,28 @@
 </details>
 <h2 id="renders">Renders<a class="headerlink" href="#renders" title="Permanent link">&para;</a></h2>
 <h3 id="comparison-scenario">Comparison scenario<a class="headerlink" href="#comparison-scenario" title="Permanent link">&para;</a></h3>
-<div class="tada-placeholder">Not rendered yet: seed 599310825 — the scenario every agent is rendered on, deterministic. <a href="../../backfill/#1_50">Queued for backfill</a>.</div>
+<figure class="tada-render" title="metadata: analysis/2026-09-28_release/renders/1_50_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../../assets/renders/1_50_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_50</span> (final_model.zip) · seed 599310825 · deterministic · 19 of 20 on time, worst 62 s, 163 clearances</figcaption>
+</figure>
 
 <h3 id="best-solved-seed">Best solved seed<a class="headerlink" href="#best-solved-seed" title="Permanent link">&para;</a></h3>
-<div class="tada-placeholder">Not rendered yet: seed 1973214822 — deterministic solve with the smallest worst-flight deviation. <a href="../../backfill/#1_50">Queued for backfill</a>.</div>
+<figure class="tada-render" title="metadata: analysis/2026-09-28_release/renders/1_50_best_seed1973214822_solutions.json · file verified identical">
+<video controls preload="metadata" src="../../assets/renders/1_50_best_seed1973214822.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_50</span> (final_model.zip) · seed 1973214822 · deterministic · 20 of 20 on time, worst 21 s, 170 clearances</figcaption>
+</figure>
 
 <h3 id="most-typical-failure">Most typical failure<a class="headerlink" href="#most-typical-failure" title="Permanent link">&para;</a></h3>
-<div class="tada-placeholder">Not rendered yet: seed 137869475 — most common failure class: precision (safe, not all on time); seed nearest that class&#x27;s median on-time rate. <a href="../../backfill/#1_50">Queued for backfill</a>.</div>
+<figure class="tada-render" title="metadata: analysis/2026-09-28_release/renders/1_50_failure_seed137869475_solutions.json · file verified identical">
+<video controls preload="metadata" src="../../assets/renders/1_50_failure_seed137869475.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_50</span> (final_model.zip) · seed 137869475 · deterministic · 19 of 20 on time, worst 68 s, 180 clearances</figcaption>
+</figure>
+
+<h3 id="other-renders">Other renders<a class="headerlink" href="#other-renders" title="Permanent link">&para;</a></h3>
+<figure class="tada-render" title="metadata: analysis/2026-09-28_release/renders/1_50_feas40_best_seed2098065313_solutions.json · file verified identical">
+<video controls preload="metadata" src="../../assets/renders/1_50_feas40_best_seed2098065313.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_50</span> (final_model.zip) · seed 2098065313 · the best feas40 stream (40 flights, feasible stitched 2×20) · deterministic · 40 of 40 on time, worst 21 s, 177 clearances</figcaption>
+</figure>
 
 <h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>recipes/windowed_from_scratch.sh<span class="w"> </span><span class="m">1</span><span class="w"> </span>D<span class="w"> </span>--hard-bracket<span class="w"> </span>--release-locked<span class="w"> </span>--pay-at-release<span class="w"> </span>--flat-deviation<span class="w"> </span>--train-max-early-s<span class="w"> </span><span class="m">650</span><span class="w"> </span>--run-suffix<span class="w"> </span>scratch_d_release_s1

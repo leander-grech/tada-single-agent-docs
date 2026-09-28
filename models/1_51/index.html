@@ -3299,6 +3299,10 @@
 <p class="admonition-title">Release MDP</p>
 <p>This model trained in a different MDP from every earlier model, the champion included: after each step the front of the landing queue is released once a flight is locked (predicted within 30 s of its target and in no predicted conflict). A released flight leaves the window and can no longer be cleared. It is scored in the same environment, on the same seeds and with the same metrics, so its numbers measure landings in the same scenarios, but under that extra constraint on the agent.</p>
 </div>
+<div class="admonition info">
+<p class="admonition-title">About this run</p>
+<p>Trained with a reward flaw since fixed (code commit 618a073): with pay at release, a flight&#x27;s bracket paid at release was kept even when the episode then ended in a loss of separation, so a bust cost less than the objective says. Runs after that commit take the release payments of flights still airborne back on a bust. This is a plausible contributor to any excess of losses, not a proven one.</p>
+</div>
 <table class="tada-table tada-facts"><tbody><tr><th>Lineage</th><td><a href="../../models/1_43/"><code>1_43</code></a> → <a href="../../models/1_46/"><code>1_46</code></a> → <a href="../../models/1_48/"><code>1_48</code></a> → <strong><code>1_51</code></strong> (random initialisation)</td></tr><tr><th>Steps</th><td>9M in this run; 39M along the lineage</td></tr><tr><th>Checkpoint</th><td><code>experiments/atc_run_1_51_release_1_48/final_model.zip</code></td></tr><tr><th>Recipe</th><td>trainer jax; env windowed; reward outcome_pbrs; stitched 2×20, gap 120–900 s; release locked flights (±30 s); pay at release; flat deviation potential; feasible-only training from a pre-screened pool (<code>analysis/2026-09-28_release/pool/train_k2_feasible.txt</code>); sequence observations; picks per step ≤ 2; LR 3e-05 → 1e-05 (warmup_cosine, warm-up 2%); entropy 0.01; critic warm-up 300k; 32 workers; seed 49</td></tr><tr><th>Run log</th><td><a href="../../log/#run-1-51">experiment log</a></td></tr></tbody></table>
 
 <h2 id="scorecard">Scorecard<a class="headerlink" href="#scorecard" title="Permanent link">&para;</a></h2>
