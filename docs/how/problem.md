@@ -49,6 +49,9 @@ The [environments page](environments.md) explains both. The windowed agent start
 
 ## Where to go next
 
+- What the agent sees, what it can do, and the network that decides: [Observations](observations.md),
+  [Actions & reselection](actions.md), [Policy network](policy.md).
+- What it is rewarded for, with sweeps of every term: [Objective & reward](objective.md).
 - The current best agent and its numbers: [Best model](../models/best.md).
 - How agents are scored: [Evaluation protocol](../evaluation.md).
 - What the experiments taught us: [Findings](../findings/index.md).

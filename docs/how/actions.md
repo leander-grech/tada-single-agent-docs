@@ -45,20 +45,140 @@ In the windowed env, not-yet-spawned flights are visible but only `DO_NOTHING` i
 and the aircraft head may pick them only when no flight is under control. Without that rule the
 policy wasted steps on pending flights ([Environments](environments.md#windowed)).
 
+An action is sampled in three stages, each masked to what is legal at that point:
+
+<!-- gen:figure file=diagrams/action.svg -->
+<figure class="tada-fig-wrap"><svg class="tada-dg" viewBox="0 0 760 300" role="img" aria-label="Sampling one action: aircraft, then clearance conditioned on it, then the again flag">
+<defs>
+  <marker id="aa" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0,0 L8,4 L0,8 z"/></marker>
+</defs>
+<!-- stage 1 -->
+<text class="h" x="16" y="22">1 · which aircraft</text>
+<rect class="box head" x="10" y="32" width="230" height="182" rx="5"/>
+<g>
+  <!-- ten slot logits as bars; masked ones hollow -->
+  <rect class="slot" x="24" y="120" width="16" height="40"/><rect class="slot" x="44" y="95" width="16" height="65"/>
+  <rect class="slot off" x="64" y="150" width="16" height="10"/><rect class="slot" x="84" y="70" width="16" height="90"/>
+  <rect class="slot" x="104" y="130" width="16" height="30"/><rect class="slot off" x="124" y="150" width="16" height="10"/>
+  <rect class="slot off" x="144" y="150" width="16" height="10"/><rect class="slot" x="164" y="110" width="16" height="50"/>
+  <rect class="slot off" x="184" y="150" width="16" height="10"/><rect class="slot off" x="204" y="150" width="16" height="10"/>
+</g>
+<text class="s" x="24" y="176">slots 0 … 9 (AMAN order)</text>
+<text class="s" x="24" y="192">hollow = masked: pending / cleared</text>
+<text class="t b c-head" x="84" y="62">a</text>
+
+<!-- stage 2 -->
+<text class="h" x="276" y="22">2 · which clearance, given a</text>
+<rect class="box head" x="270" y="32" width="230" height="182" rx="5"/>
+<g>
+  <rect class="slot" x="282" y="100" width="11" height="60"/><rect class="slot" x="296" y="120" width="11" height="40"/>
+  <rect class="slot" x="310" y="135" width="11" height="25"/><rect class="slot off" x="324" y="152" width="11" height="8"/>
+  <rect class="slot" x="338" y="140" width="11" height="20"/><rect class="slot off" x="352" y="152" width="11" height="8"/>
+  <rect class="slot" x="366" y="145" width="11" height="15"/><rect class="slot" x="380" y="148" width="11" height="12"/>
+  <rect class="slot" x="394" y="70" width="11" height="90"/><rect class="slot off" x="408" y="152" width="11" height="8"/>
+  <rect class="slot" x="422" y="138" width="11" height="22"/><rect class="slot off" x="436" y="152" width="11" height="8"/>
+  <rect class="slot off" x="450" y="152" width="11" height="8"/><rect class="slot off" x="464" y="152" width="11" height="8"/>
+  <rect class="slot" x="478" y="146" width="11" height="14"/>
+</g>
+<text class="s" x="282" y="176">15 clearances · row a of the head</text>
+<text class="s" x="282" y="192">hollow = illegal for this aircraft</text>
+<text class="t b c-head" x="390" y="62">c</text>
+<text class="s" x="282" y="92">DO_NOTHING</text>
+
+<!-- stage 3 -->
+<text class="h" x="536" y="22">3 · ask again? (reselection)</text>
+<rect class="box head" x="530" y="32" width="220" height="182" rx="5"/>
+<rect class="slot" x="560" y="90" width="50" height="70"/><rect class="slot off" x="640" y="130" width="50" height="30"/>
+<text class="s" x="560" y="176">again = 1 · again = 0</text>
+<text class="s" x="544" y="192">Bernoulli at (a, c); 0 if no budget</text>
+<text class="s" x="544" y="206">left or c = DO_NOTHING</text>
+
+<path class="e" d="M240,117 H268" marker-end="url(#aa)"/>
+<path class="e" d="M500,117 H528" marker-end="url(#aa)"/>
+
+<!-- to env -->
+<rect class="box env fill-env" x="10" y="232" width="740" height="52" rx="5"/>
+<text class="t b" x="24" y="253">to the environment: (a, c, again)</text>
+<text class="s" x="24" y="272">log π = log p(a) + log p(c | a) + log p(again | a, c) · entropy: exact, over the whole tree</text>
+<path class="e" d="M640,214 V230" marker-end="url(#aa)"/>
+</svg>
+</figure>
+<!-- /gen -->
+
 ## The policy network
 
-A shared encoder turns each aircraft (scalars, flight plan through a 1-D CNN, action history
-through a GRU) into a 128-d embedding. One masked self-attention block over the slots (from `1_29`)
-mixes the embeddings, and a pooled context plus the global features gives the state vector. The
-**aircraft head** scores each slot; the **clearance head** is conditioned on the chosen aircraft's
-embedding. With reselection a third head, the **again flag**, decides whether to ask for another
-pick. The value head reads the same encoder. Slot order is inert: across 8 orderings on 25
-scenarios the first action and the outcome were byte-identical.
+A shared encoder turns each aircraft slot into an embedding, one self-attention block lets the
+slots read each other, and four heads (aircraft, clearance, again, value) read the result. It has
+196 384 parameters; the [policy page](policy.md) walks through every layer. Slot order is inert:
+across 8 orderings on 25 scenarios the first action and the outcome were byte-identical.
 
 ## Reselection { #reselection }
 
 With one clearance per 45 s, the agent cannot act on two flights that both need it now. In a
 crowded stretch that is exactly the situation the failed seeds show.
+
+<!-- gen:figure file=diagrams/reselection.svg -->
+<figure class="tada-fig-wrap"><svg class="tada-dg" viewBox="0 0 760 330" role="img" aria-label="Reselection: two picks within one 45-second step">
+<defs>
+  <marker id="ra" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0,0 L8,4 L0,8 z"/></marker>
+</defs>
+<!-- time axis -->
+<line class="clock" x1="40" y1="290" x2="720" y2="290"/>
+<text class="s" x="660" y="276">simulated time →</text>
+<line class="e" x1="120" y1="282" x2="120" y2="298"/><text class="t b" x="108" y="318">t</text>
+<line class="e" x1="640" y1="282" x2="640" y2="298"/><text class="t b" x="616" y="318">t + 45 s</text>
+<text class="s" x="250" y="276">the clock does not move between pick 1 and pick 2</text>
+
+<!-- pick 1 -->
+<rect class="box head fill-head" x="30" y="30" width="200" height="96" rx="5"/>
+<text class="h" x="42" y="48">pick 1 · observation o₁</text>
+<text class="t" x="42" y="68">flight 4: SLOW_DOWN_MEDIUM</text>
+<text class="t b c-head" x="42" y="88">again = 1</text>
+<text class="s" x="42" y="106">clearance is queued, not flown</text>
+<text class="s" x="42" y="119">reward −0.006 + Φ(o₂) − Φ(o₁)</text>
+
+<!-- re-predict -->
+<rect class="box enc" x="270" y="30" width="200" height="96" rx="5"/>
+<text class="h" x="282" y="48">re-predict</text>
+<text class="t" x="282" y="68">do-nothing rollout</text>
+<text class="t" x="282" y="86">with the queued clearance</text>
+<text class="s" x="282" y="106">o₂: flight 4 now flagged</text>
+<text class="s" x="282" y="119">"cleared at this step"</text>
+
+<!-- pick 2 -->
+<rect class="box head fill-head" x="510" y="30" width="220" height="96" rx="5"/>
+<text class="h" x="522" y="48">pick 2 · observation o₂</text>
+<text class="t" x="522" y="68">flight 6: LENGTHEN_TROMBONE</text>
+<text class="t b c-head" x="522" y="88">again = 0 (budget spent)</text>
+<text class="s" x="522" y="106">flight 4 is masked: it can only</text>
+<text class="s" x="522" y="119">be left alone until the clock moves</text>
+
+<path class="e" d="M230,78 H268" marker-end="url(#ra)"/>
+<path class="e" d="M470,78 H508" marker-end="url(#ra)"/>
+
+<!-- apply -->
+<rect class="box env fill-env" x="270" y="166" width="460" height="74" rx="5"/>
+<text class="h" x="282" y="184">apply and advance</text>
+<text class="t" x="282" y="204">both clearances fly together; the simulator advances 45 s</text>
+<text class="s" x="282" y="222">reward −0.006 + landings this step − 90 · [loss of separation] + γΦ(o′) − Φ(o₂)</text>
+<path class="e" d="M620,126 V164" marker-end="url(#ra)"/>
+<path class="e dash" d="M640,240 V280" marker-end="url(#ra)"/>
+
+<!-- discounting note -->
+<rect class="box muted" x="30" y="166" width="220" height="74" rx="5"/>
+<text class="h" x="42" y="184">discounting</text>
+<text class="s" x="42" y="202">pick 1 → pick 2: discount 1</text>
+<text class="s" x="42" y="216">(no simulated time passes)</text>
+<text class="s" x="42" y="232">pick 2 → next step: discount γ</text>
+<path class="e dash" d="M120,126 V282" marker-end="url(#ra)"/>
+</svg>
+</figure>
+<!-- /gen -->
+
+In the example, flights 4 and 6 both need a clearance now. The first pick asks for another: its
+clearance is queued and the do-nothing prediction re-run with it, so the second pick already sees
+flight 4 slowed. The second pick spends the budget, both clearances fly together, and the clock
+moves on. The flight numbers and clearances are illustrative.
 
 - **Action:** (aircraft, clearance, **again**). With again = 1 the clearance is queued, the clock
   does not move, and the next observation's prediction includes every queued clearance. With

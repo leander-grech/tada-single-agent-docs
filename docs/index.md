@@ -22,7 +22,7 @@ clearances as it can. The current agent flies a stream of 20 flights through a w
 
 -   **[How it works](how/problem.md)**
 
-    The problem, the environments, what the agent sees and can do, the objective, the separation rules.
+    The problem, the environments, what the agent sees and can do, the policy network, the objective, the separation rules, with diagrams.
 
 -   **[Findings](findings/index.md)**
 

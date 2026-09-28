@@ -1,0 +1,21 @@
+<svg class="tada-dg" viewBox="0 0 760 250" role="img" aria-label="The lexicographic objective's scales, on a logarithmic axis">
+<!-- log axis 0.001 .. 100 : x = 60 + (log10(v)+3) * 128 -->
+<text class="h" x="14" y="20">reward magnitudes · logarithmic scale · blue economy · green precision · magenta safety</text>
+<line class="e" x1="60" y1="206" x2="700" y2="206"/>
+<g>
+  <line class="e" x1="60" y1="202" x2="60" y2="210"/><text class="s" x="48" y="224">0.001</text>
+  <line class="e" x1="188" y1="202" x2="188" y2="210"/><text class="s" x="180" y="224">0.01</text>
+  <line class="e" x1="316" y1="202" x2="316" y2="210"/><text class="s" x="310" y="224">0.1</text>
+  <line class="e" x1="444" y1="202" x2="444" y2="210"/><text class="s" x="441" y="224">1</text>
+  <line class="e" x1="572" y1="202" x2="572" y2="210"/><text class="s" x="566" y="224">10</text>
+  <line class="e" x1="700" y1="202" x2="700" y2="210"/><text class="s" x="690" y="224">100</text>
+</g>
+<!-- bars: economy (dg-in), precision (dg-enc), safety (dg-head) -->
+<rect class="box in fill-in" x="60" y="40" width="96" height="18" rx="2"/><text class="t" x="164" y="54">one real clearance: 0.006</text>
+<rect class="box in fill-in" x="60" y="66" width="382" height="18" rx="2"/><text class="t" x="450" y="80">a clearance on every step of a 20-flight stream: 0.96</text>
+<rect class="box enc fill-enc" x="60" y="100" width="384" height="18" rx="2"/><text class="t" x="452" y="114">smallest gap between two brackets: 1.0</text>
+<rect class="box enc fill-enc" x="60" y="126" width="484" height="18" rx="2"/><text class="t" x="552" y="140">one flight, best bracket to worst: 6</text>
+<rect class="box head fill-head" x="60" y="160" width="634" height="18" rx="2"/><text class="t b" x="60" y="194">a loss of separation: 90 = 30 + a whole window of 10 flights × 6 (60)</text>
+<line class="e dash" x1="444" y1="32" x2="444" y2="186"/>
+
+</svg>

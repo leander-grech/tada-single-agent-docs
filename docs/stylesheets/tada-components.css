@@ -336,3 +336,64 @@ svg.tada-lineage .bandlabel {
 .tada-leg .sw.run-7 { background: var(--tada-run-7); }
 .tada-leg .ln { width: 1.8em; height: 0; border-top: 2px solid var(--md-default-fg-color--light); display: inline-block; }
 .tada-leg .ln.dashed { border-top-style: dashed; }
+
+/* ---- Figures: reward sweeps (tools/build_reward_figures.py) and diagrams --- */
+:root, [data-md-color-scheme="default"] {
+  --tada-heat-seq: #c2189a; --tada-heat-pos: #0072b2; --tada-heat-neg: #d55e00;
+  --dg-in: #0072a3; --dg-enc: #11834a; --dg-head: #c2189a; --dg-env: #a86400;
+}
+[data-md-color-scheme="slate"] {
+  --tada-heat-seq: #ff4fd8; --tada-heat-pos: #5aa9ff; --tada-heat-neg: #ff8a45;
+  --dg-in: #3fd0ff; --dg-enc: #3ee07a; --dg-head: #ff4fd8; --dg-env: #ffb627;
+}
+.md-typeset figure.tada-fig-wrap {
+  margin: 1.2em 0 0.4em;
+  padding: 0.6rem 0.5rem 0.3rem;
+  max-width: 100%;
+  border: 1px solid var(--tada-rule);
+  border-radius: var(--tada-radius, 0.2rem);
+  background: var(--tada-surface);
+}
+svg.tada-fig { display: block; width: 100%; height: auto; overflow: visible; }
+svg.tada-fig .tick, svg.tada-fig .glabel { fill: var(--md-default-fg-color--light); font-family: var(--tada-font-mono); font-size: 10px; }
+svg.tada-fig .axis { fill: var(--md-default-fg-color--light); font-family: var(--tada-font-head); font-size: 11px; letter-spacing: 0.03em; }
+svg.tada-fig .frame { fill: none; stroke: var(--tada-rule); }
+svg.tada-fig .grid { stroke: var(--tada-rule); }
+svg.tada-fig .guide { stroke: var(--md-default-fg-color--lighter); stroke-dasharray: 3 3; stroke-width: 1; }
+svg.tada-fig .cell.seq { fill: var(--tada-heat-seq); }
+svg.tada-fig .cell.pos { fill: var(--tada-heat-pos); }
+svg.tada-fig .cell.neg { fill: var(--tada-heat-neg); }
+svg.tada-fig .line { fill: none; stroke-width: 2.2; }
+svg.tada-fig .line.s-obj { stroke: var(--tada-heat-pos); }
+svg.tada-fig .line.s-pot { stroke: var(--tada-heat-seq); }
+svg.tada-fig .dlabel { font-family: var(--tada-font-head); font-size: 11px; fill: var(--md-default-fg-color); }
+
+/* Diagrams (hand-drawn SVG in docs/assets/diagrams/) */
+svg.tada-dg { display: block; width: 100%; height: auto; font-family: var(--tada-font-head); }
+svg.tada-dg .box { fill: var(--md-default-bg-color); stroke: var(--tada-rule); stroke-width: 1.2; }
+svg.tada-dg .box.in { stroke: var(--dg-in); }
+svg.tada-dg .box.enc { stroke: var(--dg-enc); }
+svg.tada-dg .box.head { stroke: var(--dg-head); }
+svg.tada-dg .box.env { stroke: var(--dg-env); }
+svg.tada-dg .box.fill-in { fill: var(--dg-in); fill-opacity: 0.12; }
+svg.tada-dg .box.fill-enc { fill: var(--dg-enc); fill-opacity: 0.12; }
+svg.tada-dg .box.fill-head { fill: var(--dg-head); fill-opacity: 0.12; }
+svg.tada-dg .box.fill-env { fill: var(--dg-env); fill-opacity: 0.12; }
+svg.tada-dg .box.muted { stroke-dasharray: 3 3; }
+svg.tada-dg .slot { fill: var(--dg-in); fill-opacity: 0.18; stroke: var(--dg-in); stroke-width: 0.8; }
+svg.tada-dg .slot.off { fill-opacity: 0.04; stroke-dasharray: 2 2; }
+svg.tada-dg .t { fill: var(--md-default-fg-color); font-size: 12px; }
+svg.tada-dg .t.b { font-weight: 600; }
+svg.tada-dg .s { fill: var(--md-default-fg-color--light); font-size: 10px; font-family: var(--tada-font-mono); }
+svg.tada-dg .h { fill: var(--md-default-fg-color--light); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+svg.tada-dg .c-in { fill: var(--dg-in); }
+svg.tada-dg .c-enc { fill: var(--dg-enc); }
+svg.tada-dg .c-head { fill: var(--dg-head); }
+svg.tada-dg .c-env { fill: var(--dg-env); }
+svg.tada-dg .e { fill: none; stroke: var(--md-default-fg-color--light); stroke-width: 1.2; }
+svg.tada-dg .e.dash { stroke-dasharray: 4 3; }
+svg.tada-dg .e.acc { stroke: var(--dg-head); stroke-width: 1.6; }
+svg.tada-dg .arrowhead { fill: var(--md-default-fg-color--light); }
+svg.tada-dg .arrowhead.acc { fill: var(--dg-head); }
+svg.tada-dg .clock { stroke: var(--dg-env); stroke-width: 3; }
+.md-typeset figure.tada-fig-wrap { display: block; width: 100%; box-sizing: border-box; }

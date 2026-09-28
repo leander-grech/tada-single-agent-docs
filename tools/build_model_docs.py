@@ -1457,6 +1457,12 @@ class Build:
                 ids = args["models"].split(",")
                 bats = args.get("batteries", "f20").split(",")
                 body = self.compare_table(ids, bats)
+            elif kind == "figure":
+                fp = DOCS / "assets" / args["file"]
+                if not fp.exists():
+                    self.errors.append(f"{page}: gen:figure names missing {fp}")
+                    return mt.group(0)
+                body = f'<figure class="tada-fig-wrap">{fp.read_text()}</figure>\n'
             elif kind == "never-solved":
                 body = self.never_solved_table()
             elif kind == "capacity-bands":

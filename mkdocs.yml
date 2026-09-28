@@ -116,6 +116,7 @@ nav:
       - Environments: how/environments.md
       - Observations: how/observations.md
       - Actions & reselection: how/actions.md
+      - Policy network: how/policy.md
       - Objective & reward: how/objective.md
       - Loss-of-separation rules: how/separation.md
   - Training:
