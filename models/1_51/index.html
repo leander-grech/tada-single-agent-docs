@@ -11,7 +11,7 @@
       
       
       
-        <link rel="prev" href="../">
+        <link rel="prev" href="../1_52/">
       
       
         <link rel="next" href="../1_50/">
@@ -649,6 +649,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1_53/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_53
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1_52/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_52
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -3375,7 +3431,7 @@
 <p><strong>What changed:</strong> 1_49 again, with feasible-only training from a pre-screened pool: feasible stitched 2×20 streams screened up front (validation and held-out streams removed) instead of redrawn at reset. Release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential. 1_48 fine-tuned, LR 3e-5 to 1e-5, 300k critic warm-up, seed 49.</p>
 <div class="admonition note">
 <p class="admonition-title">Release MDP</p>
-<p>This model trained in a different MDP from every earlier model, the champion included: after each step the front of the landing queue is released once a flight is locked (predicted within 30 s of its target and in no predicted conflict). A released flight leaves the window and can no longer be cleared. It is scored in the same environment, on the same seeds and with the same metrics, so its numbers measure landings in the same scenarios, but under that extra constraint on the agent.</p>
+<p>This model trained in the release MDP, unlike the champion and every model before <code>1_49</code>: after each step the front of the landing queue is released once a flight is locked (predicted within 30 s of its target and in no predicted conflict). A released flight leaves the window and can no longer be cleared. It is scored in the same environment, on the same seeds and with the same metrics, so its numbers measure landings in the same scenarios, but under that extra constraint on the agent.</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">About this run</p>
@@ -3474,7 +3530,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Leaderboard">
+          <a href="../1_52/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 1_52">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3484,7 +3540,7 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Leaderboard
+                1_52
               </div>
             </div>
           </a>

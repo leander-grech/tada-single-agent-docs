@@ -11,10 +11,10 @@
       
       
       
-        <link rel="prev" href="../1_33/">
+        <link rel="prev" href="../">
       
       
-        <link rel="next" href="../1_31/">
+        <link rel="next" href="../1_52/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>1_32 - TADA · single-agent RL</title>
+        <title>1_53 - TADA · single-agent RL</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#1_32" class="md-skip">
+        <a href="#1_53" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              1_32
+              1_53
             
           </span>
         </div>
@@ -654,10 +654,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../1_53/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_53
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -673,6 +700,109 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scorecard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scorecard
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#training-lineage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Training lineage
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#renders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Renders
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Renders">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#comparison-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparison scenario
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-solved-seed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best solved seed
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#most-typical-failure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Most typical failure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reproduce" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproduce
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1214,37 +1344,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    1_32
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../1_32/" class="md-nav__link">
         
   
   
@@ -1260,148 +1363,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#scorecard" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Scorecard
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Scorecard">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#long-and-feasible-streams" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Long and feasible streams
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#behaviour-and-failures-20-flight-deterministic" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Behaviour and failures (20-flight, deterministic)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#training-lineage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Training lineage
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#renders" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Renders
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Renders">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#comparison-scenario" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Comparison scenario
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#best-solved-seed" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Best solved seed
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#most-typical-failure" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Most typical failure
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#other-renders" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Other renders
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#reproduce" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reproduce
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -3295,34 +3256,6 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Scorecard">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#long-and-feasible-streams" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Long and feasible streams
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#behaviour-and-failures-20-flight-deterministic" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Behaviour and failures (20-flight, deterministic)
-      
-    </span>
-  </a>
-  
 </li>
       
         <li class="md-nav__item">
@@ -3381,17 +3314,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#other-renders" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Other renders
-      
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -3426,79 +3348,51 @@
 
 
 <!-- Generated by tools/build_model_docs.py from models.yaml. Do not edit by hand. -->
-<h1 id="1_32">1_32<a class="headerlink" href="#1_32" title="Permanent link">&para;</a></h1>
-<p><span class="tada-chip tada-chip--muted">complete</span></p>
-<p><strong>What changed:</strong> 1_31 redone as a fine-tune: 300k-step critic warm-up, then peak LR 3e-5 and entropy coefficient 0.003.</p>
-<table class="tada-table tada-facts"><tbody><tr><th>Lineage</th><td><a href="../../models/1_29/"><code>1_29</code></a> → <strong><code>1_32</code></strong> (random initialisation)</td></tr><tr><th>Steps</th><td>5M in this run; 25M along the lineage (upper bound: a best-model checkpoint's step is not recorded)</td></tr><tr><th>Checkpoint</th><td><code>experiments/atc_run_1_32_windowed_ft/final_model.zip</code></td></tr><tr><th>Recipe</th><td>env windowed; LR 3e-05 → 3e-06 (warmup_cosine, warm-up 8%); entropy 0.003; critic warm-up 300k; 8 workers</td></tr><tr><th>Commit</th><td><code>995cb51737</code></td></tr><tr><th>Run log</th><td><a href="../../log/#run-1-32">experiment log</a></td></tr></tbody></table>
+<h1 id="1_53">1_53<a class="headerlink" href="#1_53" title="Permanent link">&para;</a></h1>
+<p><span class="tada-chip tada-chip--warn">in progress</span> <span class="tada-chip tada-chip--muted" title="Locked flights are released from the window; trained and scored in that environment">release MDP</span> <span class="tada-chip tada-chip--warn" title="Trained and scored on the BGY point merge (use case 2), not the MXP trombone">point merge</span></p>
+<p><strong>What changed:</strong> From scratch on the BGY point merge (use case 2), release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential, feasible-only training from a pre-screened pool of point-merge streams, ±30 s bracket worth 4. Recipe arm D (10 flights to 2.5M, then 20 to 10M), LR 3e-4 to 3e-5, seed 1.</p>
+<div class="admonition note">
+<p class="admonition-title">Release MDP</p>
+<p>This model trained in the release MDP, unlike the champion and every model before <code>1_49</code>: after each step the front of the landing queue is released once a flight is locked (predicted within 30 s of its target and in no predicted conflict). A released flight leaves the window and can no longer be cleared. It is scored in the same environment, on the same seeds and with the same metrics, so its numbers measure landings in the same scenarios, but under that extra constraint on the agent.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Point merge</p>
+<p>Trained and scored on the BGY point merge (<code>VALIDATION_USE_CASE_2</code>), not the MXP trombone: every score on this card is a point-merge score, on the same 100 validation seeds. It is compared only with point-merge scores: its parent's and the MXP champion's zero-shot scores (<a href="../../findings/point-merge/">Point merge</a>), or a point-merge parent's own.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">About this run</p>
+<p>Trained after the bust clawback (code commit 618a073): a loss of separation takes back the release payments of flights still airborne. Its training pool excludes the validation candidates.</p>
+</div>
+<table class="tada-table tada-facts"><tbody><tr><th>Lineage</th><td><strong><code>1_53</code></strong> (random initialisation)</td></tr><tr><th>Steps</th><td>5M in this run; 5M along the lineage</td></tr><tr><th>Checkpoint</th><td><code>experiments/atc_run_1_53_scratch_d_release_pms_s1/final_model.zip</code></td></tr><tr><th>Recipe</th><td>trainer jax; env windowed; reward outcome_pbrs; stitched 2×20, gap 120–900 s; release locked flights (±30 s); pay at release; flat deviation potential; feasible-only training from a pre-screened pool (<code>analysis/2026-09-28_pms/pool/train_k1_pms.txt</code>); sequence observations; picks per step ≤ 2; curriculum 10×1 to 2.5M, 20×1 to 10M; LR 0.0003 → 3e-05 (warmup_cosine, warm-up 8%); entropy 0.01; 32 workers; seed 1</td></tr><tr><th>Run log</th><td><a href="../../log/#run-1-53">experiment log</a></td></tr></tbody></table>
 
 <h2 id="scorecard">Scorecard<a class="headerlink" href="#scorecard" title="Permanent link">&para;</a></h2>
-<p>100 validation seeds (never trained on), paired seed by seed. <strong>Solved</strong>: no loss of separation and every flight within ±60 s of its AMAN target; <strong>hard-solved</strong>: the same within ±30 s. A delta is <strong>bold</strong> only when the paired test says so (McNemar on per-seed outcomes, or a paired SE on the on-time rate, 95%).</p>
-<table class="tada-table"><thead><tr><th></th><th>value</th><th>vs parent <code>1_29</code></th><th>vs champion <code>1_38</code></th></tr></thead><tbody><tr class="tada-group"><th colspan="4">20-flight streams</th></tr><tr><td>solved</td><td>29</td><td><strong>+21 (21 gained, 0 lost; z +4.58)</strong></td><td><strong>−34 (3 gained, 37 lost; z −5.38)</strong></td></tr><tr><td>hard-solved</td><td>4</td><td>+3 (4 gained, 1 lost, n.s.)</td><td><strong>−20 (2 gained, 22 lost; z −4.08)</strong></td></tr><tr><td>separation lost</td><td>21</td><td>+0 (11 fixed, 11 new, n.s.)</td><td><strong>+18 (0 fixed, 18 new; z +4.24)</strong></td></tr><tr><td>flights on time</td><td>0.731</td><td>+0.004 (SE 0.026), n.s.</td><td><strong>−0.196 (SE 0.027)</strong></td></tr><tr><td>clearances / stream</td><td>—</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">stitched 2×20 streams</th></tr><tr><td>solved</td><td>1</td><td>+1 (1 gained, 0 lost, n.s.)</td><td><strong>−33 (0 gained, 33 lost; z −5.74)</strong></td></tr><tr><td>hard-solved</td><td>0</td><td>+0 (0 gained, 0 lost, n.s.)</td><td><strong>−9 (0 gained, 9 lost; z −3.00)</strong></td></tr><tr><td>separation lost</td><td>41</td><td>−1 (17 fixed, 16 new, n.s.)</td><td><strong>+26 (2 fixed, 28 new; z +4.75)</strong></td></tr><tr><td>flights on time</td><td>0.654</td><td>+0.035 (SE 0.027), n.s.</td><td><strong>−0.211 (SE 0.025)</strong></td></tr><tr><td>clearances / stream</td><td>177.2</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">critic-guided lookahead (4 candidates)</th></tr><tr><td>solved</td><td>7</td><td>—</td><td><strong>−23 (4 gained, 27 lost; z −4.13)</strong></td></tr><tr><td>hard-solved</td><td>1</td><td>—</td><td><strong>−7 (1 gained, 8 lost; z −2.33)</strong></td></tr><tr><td>separation lost</td><td>10</td><td>—</td><td><strong>+9 (0 fixed, 9 new; z +3.00)</strong></td></tr><tr><td>flights on time</td><td>0.687</td><td>—</td><td><strong>−0.206 (SE 0.024)</strong></td></tr><tr><td>clearances / stream</td><td>97.3</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">10 attempts (deterministic + 9 sampled)</th></tr><tr><td>solved in at least one of 10 (pass@10)</td><td>41</td><td>—</td><td><strong>−35 (1 gained, 36 lost; z −5.75)</strong></td></tr><tr><td>solved by one sampled attempt (pass@1)</td><td>0.20</td><td>—</td><td>—</td></tr><tr><td>separation lost, best attempt</td><td>6</td><td>—</td><td>+4 (0 fixed, 4 new, n.s.)</td></tr><tr><td>flights on time, best attempt</td><td>0.819</td><td>—</td><td>—</td></tr><tr><td>never solved: safety-bound / precision-bound</td><td>6 / 53</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">40-flight streams, generated in one sequence</th></tr><tr><td>separation lost / flights on time</td><td>53 / 0.517</td><td>—</td><td>—</td></tr></tbody></table>
-
-<h3 id="long-and-feasible-streams">Long and feasible streams<a class="headerlink" href="#long-and-feasible-streams" title="Permanent link">&para;</a></h3>
-<p>60- and 100-flight stitched streams (3 or 5 waves, 600–900 s gaps) and the feasible 40-flight sets feas40 and test51, deterministic; see <a href="../../findings/long-streams/">Long streams</a>.</p>
-<table class="tada-table"><thead><tr><th>streams</th><th>n</th><th>no loss of separation</th><th>solved</th><th>on time</th></tr></thead><tbody><tr><td>60 flights, feasible</td><td>27</td><td>23</td><td>3</td><td>0.872</td></tr><tr><td>60 flights, unfiltered</td><td>40</td><td>13</td><td>0</td><td>0.538</td></tr><tr><td>100 flights, feasible</td><td>12</td><td>10</td><td>0</td><td>0.867</td></tr><tr><td>100 flights, unfiltered</td><td>40</td><td>8</td><td>0</td><td>0.436</td></tr><tr><td>feas40: 40 feasible 2×20 streams</td><td>40</td><td>36</td><td>12</td><td>0.904</td></tr><tr><td>test51: 51 held-out feasible 2×20 streams</td><td>51</td><td>46</td><td>10</td><td>0.906</td></tr></tbody></table>
-
-<p>Sources: f20 <code>analysis/2026-09-25_windowed_evals/f20.csv</code>, s2x20 <code>analysis/2026-09-25_windowed_evals/s2x20.csv</code>, att10 <code>analysis/2026-09-26_attempts/1_32_final_att10.csv</code>, f40 <code>analysis/2026-09-25_windowed_evals/f40.csv</code>, fx_feas40 <code>analysis/2026-09-28_hard/eval/1_32_feas40.csv</code>, fx_test51 <code>analysis/2026-09-28_hard/eval_test/1_32_test51.csv</code>, la4 <code>analysis/2026-09-27_scratch/backfill/eval/1_32_la4.csv</code>, ls_k3_all <code>analysis/2026-09-27_scratch/longstreams/eval/1_32_k3_all.csv</code>, ls_k3_feasible <code>analysis/2026-09-27_scratch/longstreams/eval/1_32_k3_feasible.csv</code>, ls_k5_all <code>analysis/2026-09-27_scratch/longstreams/eval/1_32_k5_all.csv</code>, ls_k5_feasible <code>analysis/2026-09-27_scratch/longstreams/eval/1_32_k5_feasible.csv</code>, phase0 <code>analysis/2026-09-27_phase0_order_first/atc_run_1_32_windowed_ft.jsonl</code>.</p>
-<h2 id="behaviour-and-failures-20-flight-deterministic">Behaviour and failures (20-flight, deterministic)<a class="headerlink" href="#behaviour-and-failures-20-flight-deterministic" title="Permanent link">&para;</a></h2>
-<p>mean landing deviation <strong>55 s</strong>.</p>
-<table class="tada-table"><thead><tr><th>outcome</th><th>seeds</th></tr></thead><tbody><tr><td><span class="tada-chip tada-chip--ok">solved</span></td><td>29</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 1 flight late</span></td><td>13</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 2–3 flights late</span></td><td>16</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 4 or more late</span></td><td>21</td></tr><tr><td><span class="tada-chip tada-chip--bad">loss of separation</span></td><td>21</td></tr></tbody></table>
-
+<p><span class="tada-chip tada-chip--warn">pending</span> Training on a rented host (vast.ai, 10M steps), started 19:16 on 28 Sep; due about 23:00.</p>
+<p>No evaluation files yet. See <a href="../../backfill/">BACKFILL.md</a> for what is queued.</p>
 <h2 id="training-lineage">Training lineage<a class="headerlink" href="#training-lineage" title="Permanent link">&para;</a></h2>
-<div class="tada-legend"><span class="tada-leg"><span class="sw run-0"></span><a href="../../models/1_29/">1_29</a> 20M (10-aircraft env: a different task, so no curve here)</span><span class="tada-leg current"><span class="sw run-1"></span><a href="../../models/1_32/">1_32</a> 5M</span><span class="tada-leg"><span class="ln solid"></span>solved</span><span class="tada-leg"><span class="ln dashed"></span>separation lost</span></div>
-<div class="tada-curve-wrap"><svg class="tada-curve tada-lineage" viewBox="0 0 720 310" role="img" aria-label="Training lineage of 1_32"><line class="grid" x1="46" x2="704" y1="264.0" y2="264.0"/><text class="tick" x="40" y="267.0" text-anchor="end">0</text><line class="grid" x1="46" x2="704" y1="184.7" y2="184.7"/><text class="tick" x="40" y="187.7" text-anchor="end">10</text><line class="grid" x1="46" x2="704" y1="105.3" y2="105.3"/><text class="tick" x="40" y="108.3" text-anchor="end">20</text><line class="grid" x1="46" x2="704" y1="26.0" y2="26.0"/><text class="tick" x="40" y="29.0" text-anchor="end">30</text><text class="tick" x="46.0" y="278" text-anchor="middle">0M</text><text class="tick" x="177.6" y="278" text-anchor="middle">5M</text><text class="tick" x="309.2" y="278" text-anchor="middle">10M</text><text class="tick" x="440.8" y="278" text-anchor="middle">15M</text><text class="tick" x="572.4" y="278" text-anchor="middle">20M</text><text class="tick" x="704.0" y="278" text-anchor="middle">25M</text><text class="axis" x="6" y="14">seeds of 100</text><line class="branch" x1="572.4" x2="572.4" y1="26" y2="264"/><path class="line run-1 current" d="M598.7,184.7 L625.0,105.3 L651.4,129.1 L677.7,73.6 L704.0,33.9" stroke-dasharray=""/><circle class="pt run-1 current" cx="598.7" cy="184.7" r="3.5"><title>1_32, 21M cumulative: solved 10</title></circle><circle class="pt run-1 current" cx="625.0" cy="105.3" r="3.5"><title>1_32, 22M cumulative: solved 20</title></circle><circle class="pt run-1 current" cx="651.4" cy="129.1" r="3.5"><title>1_32, 23M cumulative: solved 17</title></circle><circle class="pt run-1 current" cx="677.7" cy="73.6" r="3.5"><title>1_32, 24M cumulative: solved 24</title></circle><circle class="pt run-1 current" cx="704.0" cy="33.9" r="3.5"><title>1_32, 25M cumulative: solved 29</title></circle><path class="line run-1 current" d="M598.7,57.7 L625.0,57.7 L651.4,49.8 L677.7,97.4 L704.0,97.4" stroke-dasharray="5 4"/><path class="pt run-1 current" d="M598.7,53.2 L603.2,57.7 L598.7,62.2 L594.2,57.7 Z"><title>1_32, 21M cumulative: separation lost 26</title></path><path class="pt run-1 current" d="M625.0,53.2 L629.5,57.7 L625.0,62.2 L620.5,57.7 Z"><title>1_32, 22M cumulative: separation lost 26</title></path><path class="pt run-1 current" d="M651.4,45.3 L655.9,49.8 L651.4,54.3 L646.9,49.8 Z"><title>1_32, 23M cumulative: separation lost 27</title></path><path class="pt run-1 current" d="M677.7,92.9 L682.2,97.4 L677.7,101.9 L673.2,97.4 Z"><title>1_32, 24M cumulative: separation lost 21</title></path><path class="pt run-1 current" d="M704.0,92.9 L708.5,97.4 L704.0,101.9 L699.5,97.4 Z"><title>1_32, 25M cumulative: separation lost 21</title></path><rect class="band run-0 other" x="46.0" y="288" width="526.4" height="16"><title>1_29: 0k to 20M cumulative (10-aircraft env)</title></rect><text class="bandlabel" x="309.2" y="300" text-anchor="middle">1_29</text><rect class="band run-1" x="572.4" y="288" width="131.6" height="16"><title>1_32: 20M to 25M cumulative</title></rect><text class="bandlabel" x="638.2" y="300" text-anchor="middle">1_32</text></svg></div>
+<div class="tada-legend"><span class="tada-leg current"><span class="sw run-0"></span><a href="../../models/1_53/">1_53</a> 5M</span><span class="tada-leg"><span class="ln solid"></span>solved</span><span class="tada-leg"><span class="ln dashed"></span>separation lost</span></div>
+<div class="tada-curve-wrap"><svg class="tada-curve tada-lineage" viewBox="0 0 720 310" role="img" aria-label="Training lineage of 1_53"><line class="grid" x1="46" x2="704" y1="264.0" y2="264.0"/><text class="tick" x="40" y="267.0" text-anchor="end">0</text><line class="grid" x1="46" x2="704" y1="204.5" y2="204.5"/><text class="tick" x="40" y="207.5" text-anchor="end">10</text><line class="grid" x1="46" x2="704" y1="145.0" y2="145.0"/><text class="tick" x="40" y="148.0" text-anchor="end">20</text><line class="grid" x1="46" x2="704" y1="85.5" y2="85.5"/><text class="tick" x="40" y="88.5" text-anchor="end">30</text><line class="grid" x1="46" x2="704" y1="26.0" y2="26.0"/><text class="tick" x="40" y="29.0" text-anchor="end">40</text><text class="tick" x="46.0" y="278" text-anchor="middle">0M</text><text class="tick" x="177.6" y="278" text-anchor="middle">1M</text><text class="tick" x="309.1" y="278" text-anchor="middle">2M</text><text class="tick" x="440.7" y="278" text-anchor="middle">3M</text><text class="tick" x="572.3" y="278" text-anchor="middle">4M</text><text class="tick" x="703.8" y="278" text-anchor="middle">5M</text><text class="axis" x="6" y="14">seeds of 100</text><path class="line run-0 current" d="M178.0,264.0 L309.5,258.0 L441.0,264.0 L572.5,252.1 L704.0,228.3" stroke-dasharray=""/><circle class="pt run-0 current" cx="178.0" cy="264.0" r="3.5"><title>1_53, 1M cumulative: solved 0</title></circle><circle class="pt run-0 current" cx="309.5" cy="258.0" r="3.5"><title>1_53, 2M cumulative: solved 1</title></circle><circle class="pt run-0 current" cx="441.0" cy="264.0" r="3.5"><title>1_53, 3M cumulative: solved 0</title></circle><circle class="pt run-0 current" cx="572.5" cy="252.1" r="3.5"><title>1_53, 4M cumulative: solved 2</title></circle><circle class="pt run-0 current" cx="704.0" cy="228.3" r="3.5"><title>1_53, 5M cumulative: solved 6</title></circle><path class="line run-0 current" d="M178.0,168.8 L309.5,192.6 L441.0,145.0 L572.5,61.7 L704.0,79.5" stroke-dasharray="5 4"/><path class="pt run-0 current" d="M178.0,164.3 L182.5,168.8 L178.0,173.3 L173.5,168.8 Z"><title>1_53, 1M cumulative: separation lost 16</title></path><path class="pt run-0 current" d="M309.5,188.1 L314.0,192.6 L309.5,197.1 L305.0,192.6 Z"><title>1_53, 2M cumulative: separation lost 12</title></path><path class="pt run-0 current" d="M441.0,140.5 L445.5,145.0 L441.0,149.5 L436.5,145.0 Z"><title>1_53, 3M cumulative: separation lost 20</title></path><path class="pt run-0 current" d="M572.5,57.2 L577.0,61.7 L572.5,66.2 L568.0,61.7 Z"><title>1_53, 4M cumulative: separation lost 34</title></path><path class="pt run-0 current" d="M704.0,75.0 L708.5,79.5 L704.0,84.0 L699.5,79.5 Z"><title>1_53, 5M cumulative: separation lost 31</title></path><rect class="band run-0" x="46.0" y="288" width="658.0" height="16"><title>1_53: 0k to 5M cumulative</title></rect><text class="bandlabel" x="375.0" y="300" text-anchor="middle">1_53</text></svg></div>
 
-<p>Every run this model descends from, on one axis of cumulative training steps from random initialisation. Colour says which run each stretch of training came from; a vertical rule marks each warm start, and an ancestor's curve stops where its child branched off. Deterministic, the 100 validation seeds (20-flight streams). A best-model checkpoint in the chain has no recorded step, so its run's full length is used. Runs without per-checkpoint scores show their final evaluation at the end of their stretch. Sources: <code>analysis/2026-09-25_windowed_scores.csv</code>, <code>experiments/atc_run_1_29_pbrs_attn/progress_scored.csv</code>, <code>experiments/atc_run_1_29_pbrs_attn_d/progress_scored.csv</code>.</p>
+<p>Every run this model descends from, on one axis of cumulative training steps from random initialisation. Colour says which run each stretch of training came from; a vertical rule marks each warm start, and an ancestor's curve stops where its child branched off. Deterministic, the 100 validation seeds (20-flight streams). Runs without per-checkpoint scores show their final evaluation at the end of their stretch. Sources: <code>experiments/atc_run_1_53_scratch_d_release_pms_s1/track.csv</code>.</p>
 <details><summary>Table view</summary>
-<table class="tada-table"><thead><tr><th>run</th><th>cumulative steps</th><th>solved</th><th>separation lost</th></tr></thead><tbody><tr><td>1_32</td><td>21M</td><td>10</td><td>26</td></tr><tr><td>1_32</td><td>22M</td><td>20</td><td>26</td></tr><tr><td>1_32</td><td>23M</td><td>17</td><td>27</td></tr><tr><td>1_32</td><td>24M</td><td>24</td><td>21</td></tr><tr><td>1_32</td><td>25M</td><td>29</td><td>21</td></tr></tbody></table>
+<table class="tada-table"><thead><tr><th>run</th><th>cumulative steps</th><th>solved</th><th>separation lost</th></tr></thead><tbody><tr><td>1_53</td><td>1M</td><td>0</td><td>16</td></tr><tr><td>1_53</td><td>2M</td><td>1</td><td>12</td></tr><tr><td>1_53</td><td>3M</td><td>0</td><td>20</td></tr><tr><td>1_53</td><td>4M</td><td>2</td><td>34</td></tr><tr><td>1_53</td><td>5M</td><td>6</td><td>31</td></tr></tbody></table>
 </details>
 <h2 id="renders">Renders<a class="headerlink" href="#renders" title="Permanent link">&para;</a></h2>
 <h3 id="comparison-scenario">Comparison scenario<a class="headerlink" href="#comparison-scenario" title="Permanent link">&para;</a></h3>
-<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_32_comparison_seed599310825_solutions.json · file verified identical">
-<video controls preload="metadata" src="../../assets/renders/1_32_comparison_seed599310825.mp4"></video>
-<figcaption><span class="tada-render__by">Rendered by 1_32</span> (final_model.zip) · seed 599310825 · deterministic · 8 of 20 on time, worst 728 s, 60 clearances</figcaption>
-</figure>
+<div class="tada-placeholder">Not rendered yet: seed 599310825 — the scenario every agent is rendered on, deterministic. <a href="../../backfill/#1_53">Queued for backfill</a>.</div>
 
 <h3 id="best-solved-seed">Best solved seed<a class="headerlink" href="#best-solved-seed" title="Permanent link">&para;</a></h3>
-<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_32_best_seed983753977_solutions.json · file verified identical">
-<video controls preload="metadata" src="../../assets/renders/1_32_best_seed983753977.mp4"></video>
-<figcaption><span class="tada-render__by">Rendered by 1_32</span> (final_model.zip) · seed 983753977 · deterministic · 20 of 20 on time, worst 22 s, 132 clearances</figcaption>
-</figure>
+<div class="tada-placeholder">Not rendered yet: no seed — needs a 20-flight evaluation. <a href="../../backfill/#1_53">Queued for backfill</a>.</div>
 
 <h3 id="most-typical-failure">Most typical failure<a class="headerlink" href="#most-typical-failure" title="Permanent link">&para;</a></h3>
-<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_32_failure_seed196814233_solutions.json · file verified identical">
-<video controls preload="metadata" src="../../assets/renders/1_32_failure_seed196814233.mp4"></video>
-<figcaption><span class="tada-render__by">Rendered by 1_32</span> (final_model.zip) · seed 196814233 · deterministic · 17 of 20 on time, worst 91 s, 117 clearances</figcaption>
-</figure>
-
-<h3 id="other-renders">Other renders<a class="headerlink" href="#other-renders" title="Permanent link">&para;</a></h3>
-<figure class="tada-render" title="metadata: analysis/2026-09-25_renders_1_32/1_32_solved_seed1001495968_solutions.json · file verified identical">
-<video controls preload="metadata" src="../../assets/renders/1_32_solved_seed1001495968.mp4"></video>
-<figcaption><span class="tada-render__by">Rendered by 1_32</span> (final_model.zip) · seed 1001495968 · deterministic · 20 of 20 on time, worst 41 s, 121 clearances</figcaption>
-</figure>
-
-<figure class="tada-render" title="metadata: analysis/2026-09-25_renders_1_32/1_32_solved_seed921959045_solutions.json · file verified identical">
-<video controls preload="metadata" src="../../assets/renders/1_32_solved_seed921959045.mp4"></video>
-<figcaption><span class="tada-render__by">Rendered by 1_32</span> (final_model.zip) · seed 921959045 · deterministic · 20 of 20 on time, worst 38 s, 128 clearances</figcaption>
-</figure>
-
-<figure class="tada-render" title="metadata: analysis/2026-09-25_renders_1_32/1_32_typical_seed1181241943_solutions.json · file verified identical">
-<video controls preload="metadata" src="../../assets/renders/1_32_typical_seed1181241943.mp4"></video>
-<figcaption><span class="tada-render__by">Rendered by 1_32</span> (final_model.zip) · seed 1181241943 · deterministic · 17 of 20 on time, worst 294 s, 119 clearances</figcaption>
-</figure>
-
-<figure class="tada-render" title="metadata: analysis/2026-09-25_renders_1_32/1_32_bust_seed27911967_solutions.json · file verified identical">
-<video controls preload="metadata" src="../../assets/renders/1_32_bust_seed27911967.mp4"></video>
-<figcaption><span class="tada-render__by">Rendered by 1_32</span> (final_model.zip) · seed 27911967 · deterministic · 8 of 20 on time, loss of separation at step 72, 66 clearances</figcaption>
-</figure>
+<div class="tada-placeholder">Not rendered yet: no seed — needs a 20-flight evaluation. <a href="../../backfill/#1_53">Queued for backfill</a>.</div>
 
 <h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>python<span class="w"> </span>-u<span class="w"> </span>main.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span>--init-weights<span class="w"> </span>experiments/atc_run_1_29_pbrs_attn_d/best/best_model.zip<span class="w"> </span>--n-envs<span class="w"> </span><span class="m">8</span><span class="w"> </span>--critic-warmup-steps<span class="w"> </span><span class="m">300000</span><span class="w"> </span>--lr-max<span class="w"> </span>3e-05<span class="w"> </span>--final-lr<span class="w"> </span>3e-06<span class="w"> </span>--ent-coef<span class="w"> </span><span class="m">0</span>.003<span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">5000000</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>recipes/windowed_from_scratch.sh<span class="w"> </span><span class="m">1</span><span class="w"> </span>D<span class="w"> </span>--hard-bracket<span class="w"> </span>--release-locked<span class="w"> </span>--pay-at-release<span class="w"> </span>--flat-deviation<span class="w"> </span>--train-seed-pool<span class="w"> </span>analysis/2026-09-28_pms/pool/train_k1_pms.txt<span class="w"> </span>--run-suffix<span class="w"> </span>scratch_d_release_pms_s1
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># score: 20-flight and stitched 2x20, 10 attempts, lookahead (100 validation seeds)</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>experiments/atc_run_1_32_windowed_ft/final_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--attempts<span class="w"> </span><span class="m">9</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>experiments/atc_run_1_32_windowed_ft/final_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--segments<span class="w"> </span><span class="m">2</span><span class="w"> </span>--gap<span class="w"> </span><span class="m">120</span><span class="w"> </span><span class="m">900</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>experiments/atc_run_1_32_windowed_ft/final_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--lookahead<span class="w"> </span><span class="m">4</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nv">TADA_SEQUENCE_OBS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">TADA_MAX_PICKS</span><span class="o">=</span><span class="m">2</span><span class="w"> </span>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>experiments/atc_run_1_53_scratch_d_release_pms_s1/final_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--attempts<span class="w"> </span><span class="m">9</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nv">TADA_SEQUENCE_OBS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">TADA_MAX_PICKS</span><span class="o">=</span><span class="m">2</span><span class="w"> </span>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>experiments/atc_run_1_53_scratch_d_release_pms_s1/final_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--segments<span class="w"> </span><span class="m">2</span><span class="w"> </span>--gap<span class="w"> </span><span class="m">120</span><span class="w"> </span><span class="m">900</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nv">TADA_SEQUENCE_OBS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">TADA_MAX_PICKS</span><span class="o">=</span><span class="m">2</span><span class="w"> </span>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>experiments/atc_run_1_53_scratch_d_release_pms_s1/final_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--lookahead<span class="w"> </span><span class="m">4</span>
 </code></pre></div>
 <p>Reconstructed from <code>run_meta.json</code>; flags not recorded there are listed in <code>models.yaml</code> (<code>extra_flags</code>). The run's exact source is in its <code>snapshot/</code> directory.</p>
 
@@ -3536,7 +3430,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../1_33/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 1_33">
+          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Leaderboard">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3546,20 +3440,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                1_33
+                Leaderboard
               </div>
             </div>
           </a>
         
         
           
-          <a href="../1_31/" class="md-footer__link md-footer__link--next" aria-label="Next: 1_31">
+          <a href="../1_52/" class="md-footer__link md-footer__link--next" aria-label="Next: 1_52">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                1_31
+                1_52
               </div>
             </div>
             <div class="md-footer__button md-icon">

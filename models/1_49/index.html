@@ -657,6 +657,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../1_53/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_53
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1_52/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_52
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../1_51/" class="md-nav__link">
         
   
@@ -3319,7 +3375,7 @@
 <p><strong>What changed:</strong> 1_48 fine-tuned in the release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential, feasible-only training by redraw at reset (≤ 650 s early). Stitched 2×20 streams, LR 3e-5 to 1e-5, 300k critic warm-up, seed 49.</p>
 <div class="admonition note">
 <p class="admonition-title">Release MDP</p>
-<p>This model trained in a different MDP from every earlier model, the champion included: after each step the front of the landing queue is released once a flight is locked (predicted within 30 s of its target and in no predicted conflict). A released flight leaves the window and can no longer be cleared. It is scored in the same environment, on the same seeds and with the same metrics, so its numbers measure landings in the same scenarios, but under that extra constraint on the agent.</p>
+<p>This model trained in the release MDP, unlike the champion and every model before <code>1_49</code>: after each step the front of the landing queue is released once a flight is locked (predicted within 30 s of its target and in no predicted conflict). A released flight leaves the window and can no longer be cleared. It is scored in the same environment, on the same seeds and with the same metrics, so its numbers measure landings in the same scenarios, but under that extra constraint on the agent.</p>
 </div>
 <div class="admonition info">
 <p class="admonition-title">About this run</p>
