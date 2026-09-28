@@ -120,11 +120,13 @@ redrawn at reset until feasible. It is scored in that environment, on the same 1
 - **Its losses sit on over-capacity seeds.** 19 of the 20 are on the 49 validation seeds where a
   flight would arrive more than 650 s early. On the 51 feasible seeds it solves 33 and hard-solves
   21 with one loss, against `1_38`'s 34, 15 and none (hard-solved 12 gained, 6 lost, p = 0.24).
-- **On held-out feasible streams it does not match the champion.** On test51 (51 feasible
+- **Behind on feasible 40-flight streams it never trained on.** On test51 (51 feasible stitched
   40-flight streams) it solves 16 against `1_38`'s 25 (3 gained, 12 lost, p = 0.035), hard-solves
-  as many (5 each) and loses separation on 2 against none.
-- **On stitched 2×20 streams** it loses separation on 32 of 100, the most of any agent trained
-  from scratch ([table above](#at-10m-steps)). Lookahead halves its solved streams (51 to 24) for fewer losses
+  as many (5 each) and loses separation on 2 against none. Like `1_44`, arm D trains on 10- and
+  20-flight streams only, while `1_38` trained on stitched 2×20 streams to the end: the same "you
+  get what you train on" pattern as C vs D.
+- **On stitched 2×20 streams** it loses separation on 32 of 100 (`1_38` 15, `1_44` 17), the most of
+  any agent trained from scratch ([table above](#at-10m-steps)); the same caveat applies. Lookahead halves its solved streams (51 to 24) for fewer losses
   (20 to 15).
 - **A reward flaw, fixed since.** With pay at release, a flight's bracket paid at release was kept
   even when the episode then ended in a loss of separation, so a bust cost less than the objective
