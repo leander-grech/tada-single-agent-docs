@@ -1,0 +1,61 @@
+Scoring 5 model(s) on 100 fixed seeds, 20-flight streams, deterministic, frame pinned per seed, 6 workers.
+
+=== [0] experiments/atc_run_1_38_windowed_cont/checkpoints/ppo_tada_1003520_steps.zip
+  on_time       0.901  (SE 0.020)
+  separation    0.050  (95% CI 0.022-0.112)
+  all on time   0.420  (95% CI 0.328-0.518)
+  solved        42 / 100 (+/-60 s, no LoS)   hard-solved 6 / 100 (+/-30 s, no LoS)
+  on time by queue position   1-4: 0.93   5-8: 0.92   9-12: 0.89   13-16: 0.87   17-20: 0.91
+  sequence      landed in AMAN position 0.980, swaps 0.33 / stream, clean 10-flight stretches 0.850
+  clearances    120.8 / stream (75% of steps)
+  landed        19.4 / 20   landing |dev| mean 28 s, worst-flight mean 129 s
+
+=== [1] experiments/atc_run_1_38_windowed_cont/checkpoints/ppo_tada_2002944_steps.zip
+  on_time       0.902  (SE 0.020)
+  separation    0.070  (95% CI 0.034-0.137)
+  all on time   0.450  (95% CI 0.356-0.548)
+  solved        45 / 100 (+/-60 s, no LoS)   hard-solved 6 / 100 (+/-30 s, no LoS)
+  on time by queue position   1-4: 0.91   5-8: 0.93   9-12: 0.91   13-16: 0.87   17-20: 0.89
+  sequence      landed in AMAN position 0.982, swaps 0.20 / stream, clean 10-flight stretches 0.850
+  clearances    129.0 / stream (68% of steps)
+  landed        19.2 / 20   landing |dev| mean 27 s, worst-flight mean 128 s
+  vs [0], paired: on_time +0.001 (SE 0.008) -> inside the noise band; better on 30 seeds, worse on 25
+  vs [0], separation: fixed on 1 seeds, newly lost on 3 (McNemar z -1.00)
+
+=== [2] experiments/atc_run_1_38_windowed_cont/checkpoints/ppo_tada_3002368_steps.zip
+  on_time       0.901  (SE 0.022)
+  separation    0.070  (95% CI 0.034-0.137)
+  all on time   0.570  (95% CI 0.472-0.663)
+  solved        57 / 100 (+/-60 s, no LoS)   hard-solved 10 / 100 (+/-30 s, no LoS)
+  on time by queue position   1-4: 0.93   5-8: 0.90   9-12: 0.90   13-16: 0.88   17-20: 0.90
+  sequence      landed in AMAN position 0.967, swaps 0.28 / stream, clean 10-flight stretches 0.845
+  clearances    137.3 / stream (74% of steps)
+  landed        19.1 / 20   landing |dev| mean 32 s, worst-flight mean 143 s
+  vs [0], paired: on_time +0.000 (SE 0.014) -> inside the noise band; better on 37 seeds, worse on 18
+  vs [0], separation: fixed on 0 seeds, newly lost on 2 (McNemar z -1.41)
+
+=== [3] experiments/atc_run_1_38_windowed_cont/checkpoints/ppo_tada_4001792_steps.zip
+  on_time       0.914  (SE 0.021)
+  separation    0.050  (95% CI 0.022-0.112)
+  all on time   0.600  (95% CI 0.502-0.691)
+  solved        60 / 100 (+/-60 s, no LoS)   hard-solved 12 / 100 (+/-30 s, no LoS)
+  on time by queue position   1-4: 0.95   5-8: 0.91   9-12: 0.91   13-16: 0.90   17-20: 0.91
+  sequence      landed in AMAN position 0.958, swaps 0.54 / stream, clean 10-flight stretches 0.875
+  clearances    156.4 / stream (81% of steps)
+  landed        19.2 / 20   landing |dev| mean 30 s, worst-flight mean 159 s
+  vs [0], paired: on_time +0.013 (SE 0.008) -> inside the noise band; better on 40 seeds, worse on 13
+  vs [0], separation: fixed on 2 seeds, newly lost on 2 (McNemar z +0.00)
+
+=== [4] experiments/atc_run_1_38_windowed_cont/final_model.zip
+  on_time       0.927  (SE 0.018)
+  separation    0.030  (95% CI 0.010-0.085)
+  all on time   0.630  (95% CI 0.532-0.718)
+  solved        63 / 100 (+/-60 s, no LoS)   hard-solved 24 / 100 (+/-30 s, no LoS)
+  on time by queue position   1-4: 0.94   5-8: 0.95   9-12: 0.92   13-16: 0.90   17-20: 0.92
+  sequence      landed in AMAN position 0.968, swaps 0.54 / stream, clean 10-flight stretches 0.880
+  clearances    121.9 / stream (65% of steps)
+  landed        19.6 / 20   landing |dev| mean 30 s, worst-flight mean 159 s
+  vs [0], paired: on_time +0.026 (SE 0.007) -> significant at 95%; better on 40 seeds, worse on 13
+  vs [0], separation: fixed on 2 seeds, newly lost on 0 (McNemar z +1.41)
+
+per-episode rows -> /home/leander/code/tada/tada-single-agent-docs/eval-local/2026-09-28_checkpoint_curves/1_38_ckpts.csv

@@ -112,6 +112,9 @@ models:
     checkpoint: final_model.zip
     parent: "1_36"
     status: not_adopted
+    curve:
+      - {file: eval-local/2026-09-28_checkpoint_curves/1_39_ckpts.csv, kind: ckpts}   # scored on the laptop, 2026-09-28
+      - {file: analysis/2026-09-26_1_36_multipick/eval_safety/f20.csv, kind: ckpts}
     extra_flags: "--violation-penalty 240"   # not recorded in run_meta.json; from the experiment log
     whats_new: "As 1_38, with the loss-of-separation penalty raised from 90 to 240 (sized to a stitched 40-flight training stream)."
     evals:
@@ -128,6 +131,8 @@ models:
     checkpoint: final_model.zip
     parent: "1_36"
     status: complete
+    curve:
+      - {file: eval-local/2026-09-28_checkpoint_curves/1_38_ckpts.csv, kind: ckpts}   # scored on the laptop, 2026-09-28
     whats_new: "1_36 continued for another 5M steps on the same settings (reselection, budget 2)."
 
     evals:
@@ -151,6 +156,9 @@ models:
     checkpoint: final_model.zip
     parent: "1_35"
     status: complete
+    curve:
+      - {file: eval-local/2026-09-28_checkpoint_curves/1_37_ckpts.csv, kind: ckpts}   # scored on the laptop, 2026-09-28
+      - {file: analysis/2026-09-26_1_36_multipick/eval_control/f20.csv, kind: ckpts}
     whats_new: "Control for 1_36: 1_35 trained another 5M steps on 1_36's settings, one clearance per step."
     evals:
       f20: analysis/2026-09-26_1_36_multipick/eval_control/f20.csv
@@ -166,6 +174,9 @@ models:
     checkpoint: final_model.zip
     parent: "1_35"
     status: complete
+    curve:
+      - {file: eval-local/2026-09-28_checkpoint_curves/1_36_ckpts.csv, kind: ckpts}   # scored on the laptop, 2026-09-28
+      - {file: analysis/2026-09-26_1_36_multipick/eval/f20.csv, kind: ckpts}
     whats_new: "Reselection: the policy may ask for a second clearance within the same 45 s step (budget 2)."
     evals:
       f20: analysis/2026-09-26_1_36_multipick/eval/f20.csv
@@ -184,6 +195,9 @@ models:
     checkpoint: final_model.zip
     parent: "1_34"
     status: stopped
+    curve:
+      - {file: eval-local/2026-09-28_checkpoint_curves/1_35_ckpts.csv, kind: ckpts}   # scored on the laptop, 2026-09-28
+      - {file: analysis/2026-09-26_1_35_final/f20.csv, kind: ckpts}
     steps: 4648960        # stopped at 93% (experiment log, run 1_35)
     whats_new: "1_34's design trained with the JAX learner on the faster simulator, on stitched 2x20 streams with a random 120-900 s cooling gap."
     evals:
@@ -253,6 +267,9 @@ models:
     checkpoint: checkpoints/ppo_tada_2000000_steps.zip
     parent: "1_29"
     status: stopped
+    curve:
+      - {file: eval-local/2026-09-28_checkpoint_curves/1_31_ckpts.csv, kind: ckpts}   # scored on the laptop, 2026-09-28
+      - {file: analysis/2026-09-25_windowed_scores.csv, kind: ckpts}
     no_backfill: "abandoned run; the 20-flight score is enough to show it failed"
     whats_new: "First windowed run: 1_29's weights on the 20-flight stream with a fresh-run learning-rate schedule. Made the policy worse; stopped at 2M."
     evals:

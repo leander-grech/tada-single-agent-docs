@@ -183,9 +183,13 @@ class Build:
         self.skip_page_check = False
 
     # ------------------------------------------------------------------ loading
+    def src(self, rel: str) -> Path:
+        """Evaluation files live in the code repo, or in this repo's eval-local/ for scoring done here."""
+        return ROOT / rel if rel.startswith("eval-local/") else self.code / rel
+
     def csv(self, rel: str) -> pd.DataFrame:
         if rel not in self._csv_cache:
-            p = self.code / rel
+            p = self.src(rel)
             if not p.exists():
                 raise FileNotFoundError(p)
             self._csv_cache[rel] = pd.read_csv(p)
@@ -335,7 +339,7 @@ class Build:
         pts = []
         for c in m.raw.get("curve") or []:
             rel, kind = c["file"], c["kind"]
-            p = self.code / rel
+            p = self.src(rel)
             if not p.exists():
                 self.errors.append(f"{m.id}: curve file {rel} missing")
                 continue

@@ -1,0 +1,13 @@
+Scoring 1 model(s) on 100 fixed seeds, 20-flight streams, deterministic, frame pinned per seed, 6 workers.
+
+=== [0] experiments/atc_run_1_31_windowed/checkpoints/ppo_tada_1000000_steps.zip
+  on_time       0.470  (SE 0.029)
+  separation    0.370  (95% CI 0.282-0.468)
+  all on time   0.000  (95% CI 0.000-0.037)
+  solved        0 / 100 (+/-60 s, no LoS)   hard-solved 0 / 100 (+/-30 s, no LoS)
+  on time by queue position   1-4: 0.67   5-8: 0.47   9-12: 0.43   13-16: 0.37   17-20: 0.41
+  sequence      landed in AMAN position 0.817, swaps 1.71 / stream, clean 10-flight stretches 0.190
+  clearances    76.0 / stream (88% of steps)
+  landed        15.3 / 20   landing |dev| mean 112 s, worst-flight mean 398 s
+
+per-episode rows -> /home/leander/code/tada/tada-single-agent-docs/eval-local/2026-09-28_checkpoint_curves/1_31_ckpts.csv
