@@ -646,6 +646,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../../models/1_46/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_46
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../models/1_44/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_44
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../models/1_43/" class="md-nav__link">
         
   
@@ -2347,7 +2403,35 @@
   <span class="md-ellipsis">
     
   
-    Over-capacity & long streams
+    Over-capacity scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../findings/long-streams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Long streams
   
 
     
@@ -2931,7 +3015,7 @@ clearance, and the shaping still telescopes: over random episodes with frequent 
 <p>90 was sized to one window's bracket range (10 flights × 6). Training streams hold 40 flights, so
 a policy precise enough could rationally accept some extra risk. <code>1_39</code> tested a penalty sized to
 the training stream (240 = 40 × 6). The policy became more cautious everywhere, not only where
-separation was at stake: precision fell and only long streams got safer. The default stayed at 90
+separation was at stake: precision fell, and the only safety gain, on stitched streams, was not significant. The default stayed at 90
 (<a href="../../models/1_39/"><code>1_39</code></a>, <a href="../../findings/reselection/">Findings → reselection</a>).</p>
 <h2 id="earlier-rewards">Earlier rewards<a class="headerlink" href="#earlier-rewards" title="Permanent link">&para;</a></h2>
 <p>The 10-aircraft env used a very different reward: dense deviation, conflict and action terms, a

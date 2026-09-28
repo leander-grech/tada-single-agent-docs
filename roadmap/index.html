@@ -646,6 +646,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../models/1_46/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_46
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_44/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_44
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../models/1_43/" class="md-nav__link">
         
   
@@ -2240,7 +2296,35 @@
   <span class="md-ellipsis">
     
   
-    Over-capacity & long streams
+    Over-capacity scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../findings/long-streams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Long streams
   
 
     
@@ -2834,8 +2918,7 @@
 <h1 id="roadmap">Roadmap<a class="headerlink" href="#roadmap" title="Permanent link">&para;</a></h1>
 <div class="admonition abstract">
 <p class="admonition-title">Summary</p>
-<p><strong>In progress:</strong> the traffic-curriculum run <code>1_43</code>, and the evaluation backfill (the standard
-battery and renders for every model that lacks them). <strong>Next questions:</strong> can the
+<p><strong>In progress:</strong> the last items of the evaluation backfill (three 10-aircraft scores). <strong>Next questions:</strong> can the
 reselection policy's safety on long, stitched streams catch up with its safety on 20-flight
 streams? Does the from-scratch recipe close the gap to the fine-tuned lineage with more steps
 or a curriculum? Should separation be reported split by scenario capacity, and should the
@@ -2845,9 +2928,6 @@ refusal shields.</p>
 </div>
 <h2 id="in-progress">In progress<a class="headerlink" href="#in-progress" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong><code>1_43</code>, from scratch with a traffic curriculum</strong> (arm C). Its <a href="../models/1_43/">card</a> updates as
-  checkpoints are scored. Verdict at 10M, against arm A's two seeds
-  (<a href="../findings/curriculum/">Training from scratch</a>).</li>
 <li><strong>Backfill.</strong> Every missing evaluation and render is listed per model in <a href="../backfill/">BACKFILL</a>,
   with the exact seeds for the standard render slots. The training session runs them on a rented
   host; the generator picks them up from <code>models.yaml</code> without hand-editing any page.</li>
@@ -2864,8 +2944,8 @@ refusal shields.</p>
 <tbody>
 <tr>
 <td>Long-stream safety with reselection</td>
-<td><code>1_38</code> fixed <code>1_36</code>'s extra losses on 20-flight streams but is still riskier than the one-pick control on stitched 2×20</td>
-<td><a href="../findings/reselection/">Reselection</a></td>
+<td>on feasible 60- and 100-flight streams the champion never loses separation (the newest from-scratch models lose one stream each); on unfiltered ones the losses are in over-capacity waves, and <code>1_38</code> loses fewer than the one-pick control at 100 flights. What remains is behaviour inside over-capacity waves</td>
+<td><a href="../findings/long-streams/">Long streams</a></td>
 </tr>
 <tr>
 <td>How far does from-scratch training go?</td>
@@ -2874,12 +2954,17 @@ refusal shields.</p>
 </tr>
 <tr>
 <td>More seeds per arm</td>
-<td>one seed per arm cannot separate arms that differ by less than the seed spread</td>
+<td>one seed per arm cannot separate arms that differ by less than the seed spread; arm D's second seed (<code>1_45</code>) was aborted for budget</td>
 <td>same</td>
 </tr>
 <tr>
+<td>Train on both</td>
+<td>arm D is best on 20-flight streams, arm C safer on long ones; a curriculum or mixture that keeps both is untested</td>
+<td><a href="../findings/curriculum/">Training from scratch</a></td>
+</tr>
+<tr>
 <td>Report separation by feasibility</td>
-<td>most losses are in seeds needing more delay than the airspace absorbs</td>
+<td>most losses are in seeds needing more delay than the airspace absorbs; the long-stream evaluation already splits feasible from unfiltered</td>
 <td><a href="../findings/capacity/">Over-capacity scenarios</a></td>
 </tr>
 <tr>
@@ -2945,7 +3030,7 @@ refusal shields.</p>
 </tr>
 <tr>
 <td>A larger separation penalty</td>
-<td><code>1_39</code>: cautious everywhere, precision lost, safer only on long streams</td>
+<td><code>1_39</code>: cautious everywhere, precision lost; fewer losses only on stitched streams, not significantly</td>
 </tr>
 <tr>
 <td>A 22 s action interval</td>

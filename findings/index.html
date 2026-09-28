@@ -646,6 +646,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../models/1_46/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_46
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_44/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_44
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../models/1_43/" class="md-nav__link">
         
   
@@ -2255,7 +2311,35 @@
   <span class="md-ellipsis">
     
   
-    Over-capacity & long streams
+    Over-capacity scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="long-streams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Long streams
   
 
     
@@ -2727,8 +2811,12 @@
 <td>Establishing the AMAN order early does not predict success, and forcing it makes every model tested worse.</td>
 </tr>
 <tr>
-<td><a href="capacity/">Over-capacity scenarios and long streams</a></td>
-<td>Most losses of separation are in scenarios needing more delay than the airspace can absorb; the agent is stable along a stream.</td>
+<td><a href="capacity/">Over-capacity scenarios</a></td>
+<td>Most losses of separation are in scenarios needing more delay than the airspace can absorb; 17 validation seeds have never been solved by anything.</td>
+</tr>
+<tr>
+<td><a href="long-streams/">Long streams</a></td>
+<td>On feasible 60- and 100-flight streams the champion and every model trained on stitched streams to the end never lose separation, and precision does not drift; losses come from over-capacity waves, the norm in generated traffic.</td>
 </tr>
 <tr>
 <td><a href="lookahead/">Search at inference</a></td>
@@ -2736,7 +2824,7 @@
 </tr>
 <tr>
 <td><a href="curriculum/">Training from scratch</a></td>
-<td>The full design learns from random weights but is far from the fine-tuned lineage at 10M; seed variance is as large as the arms' differences.</td>
+<td>The full design learns from random weights; you get what you train on (a curriculum ending on 20-flight streams is best there, one ending on stitched streams safer on long ones); none reaches the fine-tuned champion.</td>
 </tr>
 <tr>
 <td><a href="evaluation-noise/">Evaluation noise</a></td>

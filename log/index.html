@@ -646,6 +646,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../models/1_46/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_46
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_44/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_44
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../models/1_43/" class="md-nav__link">
         
   
@@ -2240,7 +2296,35 @@
   <span class="md-ellipsis">
     
   
-    Over-capacity & long streams
+    Over-capacity scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../findings/long-streams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Long streams
   
 
     
@@ -2675,7 +2759,18 @@
   <a href="#run-1-40" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1_40–1_43 — from scratch (27 Sep–)
+        1_40–1_44, 1_46 — from scratch, and a continuation (27–28 Sep)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#long-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Long streams (27–28 Sep)
       
     </span>
   </a>
@@ -3277,7 +3372,18 @@
   <a href="#run-1-40" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1_40–1_43 — from scratch (27 Sep–)
+        1_40–1_44, 1_46 — from scratch, and a continuation (27–28 Sep)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#long-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Long streams (27–28 Sep)
       
     </span>
   </a>
@@ -3412,17 +3518,24 @@ rented GPU host. <a id="run-1-37"></a> <a href="../findings/reselection/">Resele
 <a href="../models/1_37/"><code>1_37</code></a>.</p>
 <h3 id="run-1-38"><code>1_38</code>, <code>1_39</code> — reselection continued; a bigger penalty (26 Sep)<a class="headerlink" href="#run-1-38" title="Permanent link">&para;</a></h3>
 <p><code>1_38</code> continued <code>1_36</code> for 5M steps and removed its safety cost on 20-flight streams: the current
-champion. <code>1_39</code> did the same with the separation penalty at 240 and lost precision everywhere for
-safety on long streams only; not adopted. <a id="run-1-39"></a> <a href="../models/1_38/"><code>1_38</code></a> ·
+champion. <code>1_39</code> did the same with the separation penalty at 240 and lost precision everywhere, with
+fewer losses only on stitched streams (not significant); not adopted. <a id="run-1-39"></a> <a href="../models/1_38/"><code>1_38</code></a> ·
 <a href="../models/1_39/"><code>1_39</code></a>.</p>
 <h3 id="phase-0">Phase 0 — order first? (27 Sep)<a class="headerlink" href="#phase-0" title="Permanent link">&para;</a></h3>
 <p>Not a training run: a test of whether establishing the AMAN order early is a route to solving
 streams, on <code>1_35</code>, <code>1_37</code> and <code>1_38</code>. It is not. <a href="../findings/order-first/">Order first?</a>.</p>
-<h3 id="run-1-40"><code>1_40</code>–<code>1_43</code> — from scratch (27 Sep–)<a class="headerlink" href="#run-1-40" title="Permanent link">&para;</a></h3>
+<h3 id="run-1-40"><code>1_40</code>–<code>1_44</code>, <code>1_46</code> — from scratch, and a continuation (27–28 Sep)<a class="headerlink" href="#run-1-40" title="Permanent link">&para;</a></h3>
 <p>The whole design from random weights in 10M steps (<code>recipes/windowed_from_scratch.sh</code>): arm A twice
-(<code>1_40</code>, <code>1_42</code>), arm B with flat potentials (<code>1_41</code>), arm C with a traffic curriculum (<code>1_43</code>, in
-progress). It learns, but at 10M it is far from the fine-tuned lineage, and seeds vary as much as
-arms. <a id="run-1-41"></a> <a id="run-1-42"></a> <a id="run-1-43"></a> <a href="../findings/curriculum/">Training from scratch</a>.</p>
+(<code>1_40</code>, <code>1_42</code>), arm B with flat potentials (<code>1_41</code>), arm C with a curriculum ending on stitched
+streams (<code>1_43</code>), arm D with one ending on 20-flight streams (<code>1_44</code>). D is the best from-scratch
+20-flight agent and became the recipe default; C is safer on long streams. <code>1_46</code> continued <code>1_43</code>
+for 10M more steps on 20-flight streams. None reaches the champion <code>1_38</code>. <a id="run-1-41"></a>
+<a id="run-1-42"></a> <a id="run-1-43"></a> <a id="run-1-44"></a> <a id="run-1-46"></a>
+<a href="../findings/curriculum/">Training from scratch</a>.</p>
+<h3 id="long-streams">Long streams (27–28 Sep)<a class="headerlink" href="#long-streams" title="Permanent link">&para;</a></h3>
+<p>Not a training run: 60- and 100-flight streams, split into feasible and over-capacity, on the
+champion and the from-scratch models. A scorer bug that cut long streams short was found and fixed
+along the way. <a href="../findings/long-streams/">Long streams</a>.</p>
 <h2 id="changes-outside-the-mdp">Changes outside the MDP<a class="headerlink" href="#changes-outside-the-mdp" title="Permanent link">&para;</a></h2>
 <p>Tooling and infrastructure bugs that changed what could be seen or trusted:</p>
 <table>

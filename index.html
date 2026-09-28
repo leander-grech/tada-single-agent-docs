@@ -702,6 +702,62 @@
   
   
     <li class="md-nav__item">
+      <a href="models/1_46/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_46
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/1_44/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_44
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="models/1_43/" class="md-nav__link">
         
   
@@ -2296,7 +2352,35 @@
   <span class="md-ellipsis">
     
   
-    Over-capacity & long streams
+    Over-capacity scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="findings/long-streams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Long streams
   
 
     
@@ -2809,10 +2893,13 @@ clearances as it can. The current agent flies a stream of 20 flights through a w
 <ul>
 <li><strong>Reselection</strong> (a second clearance within the 45 s step) was the largest single gain: precision
   had been limited by bandwidth (<a href="findings/reselection/">Findings</a>).</li>
+<li><strong>Long streams:</strong> on feasible 60- and 100-flight streams the champion never loses separation, and
+  precision does not drift (<a href="findings/long-streams/">Long streams</a>).</li>
 <li><strong>Order first?</strong> Forcing the AMAN order early makes every model tested worse
   (<a href="findings/order-first/">Phase 0</a>).</li>
-<li><strong>From scratch:</strong> the full design learns from random weights; a traffic-curriculum run is in
-  progress (<a href="findings/curriculum/">Training from scratch</a>).</li>
+<li><strong>From scratch:</strong> the full design learns from random weights. You get what you train on: a
+  curriculum ending on 20-flight streams (the new recipe default) is best there, one ending on
+  stitched streams is safer on long ones (<a href="findings/curriculum/">Training from scratch</a>).</li>
 </ul>
 <p>Full history: <a href="log/">experiment log</a>. What's next: <a href="roadmap/">roadmap</a>. Terms: <a href="glossary/">glossary</a>.</p>
 <div class="admonition info">

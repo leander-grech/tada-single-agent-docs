@@ -656,6 +656,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../1_46/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_46
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1_44/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_44
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../1_43/" class="md-nav__link">
         
   
@@ -2394,7 +2450,35 @@
   <span class="md-ellipsis">
     
   
-    Over-capacity & long streams
+    Over-capacity scenarios
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../findings/long-streams/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Long streams
   
 
     
@@ -2952,7 +3036,7 @@
 
 <h2 id="scorecard">Scorecard<a class="headerlink" href="#scorecard" title="Permanent link">&para;</a></h2>
 <p>100 validation seeds (never trained on), paired seed by seed. <strong>Solved</strong>: no loss of separation and every flight within ±60 s of its AMAN target; <strong>hard-solved</strong>: the same within ±30 s. A delta is <strong>bold</strong> only when the paired test says so (McNemar on per-seed outcomes, or a paired SE on the on-time rate, 95%).</p>
-<table class="tada-table"><thead><tr><th></th><th>value</th><th>vs parent</th><th>vs champion <code>1_38</code></th></tr></thead><tbody><tr class="tada-group"><th colspan="4">20-flight streams</th></tr><tr><td>solved</td><td>14</td><td>—</td><td><strong>−49 (3 gained, 52 lost; z −6.61)</strong></td></tr><tr><td>hard-solved</td><td>2</td><td>—</td><td><strong>−22 (1 gained, 23 lost; z −4.49)</strong></td></tr><tr><td>separation lost</td><td>9</td><td>—</td><td>+6 (1 fixed, 7 new, n.s.)</td></tr><tr><td>flights on time</td><td>0.793</td><td>—</td><td><strong>−0.134 (SE 0.015)</strong></td></tr><tr><td>clearances / stream</td><td>158.1</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">stitched 2×20 streams</th></tr><tr><td>solved</td><td>3</td><td>—</td><td><strong>−29 (1 gained, 30 lost; z −5.21)</strong></td></tr><tr><td>hard-solved</td><td>0</td><td>—</td><td><strong>−9 (0 gained, 9 lost; z −3.00)</strong></td></tr><tr><td>separation lost</td><td>20</td><td>—</td><td>+5 (6 fixed, 11 new, n.s.)</td></tr><tr><td>flights on time</td><td>0.723</td><td>—</td><td><strong>−0.138 (SE 0.021)</strong></td></tr><tr><td>clearances / stream</td><td>282.0</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">critic-guided lookahead (4 candidates)</th></tr><tr><td>solved</td><td>22</td><td>—</td><td>−8 (12 gained, 20 lost, n.s.)</td></tr><tr><td>hard-solved</td><td>1</td><td>—</td><td><strong>−7 (1 gained, 8 lost; z −2.33)</strong></td></tr><tr><td>separation lost</td><td>2</td><td>—</td><td>+1 (0 fixed, 1 new, n.s.)</td></tr><tr><td>flights on time</td><td>0.835</td><td>—</td><td><strong>−0.058 (SE 0.012)</strong></td></tr><tr><td>clearances / stream</td><td>159.3</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">10 attempts (deterministic + 9 sampled)</th></tr><tr><td>solved in at least one of 10 (pass@10)</td><td>34</td><td>—</td><td><strong>−42 (1 gained, 43 lost; z −6.33)</strong></td></tr><tr><td>solved by one sampled attempt (pass@1)</td><td>0.05</td><td>—</td><td>—</td></tr><tr><td>separation lost, best attempt</td><td>2</td><td>—</td><td>+0 (1 fixed, 1 new, n.s.)</td></tr><tr><td>flights on time, best attempt</td><td>0.862</td><td>—</td><td>—</td></tr><tr><td>never solved: safety-bound / precision-bound</td><td>2 / 64</td><td>—</td><td>—</td></tr></tbody></table>
+<table class="tada-table"><thead><tr><th></th><th>value</th><th>vs parent</th><th>vs champion <code>1_38</code></th></tr></thead><tbody><tr class="tada-group"><th colspan="4">20-flight streams</th></tr><tr><td>solved</td><td>14</td><td>—</td><td><strong>−49 (3 gained, 52 lost; z −6.61)</strong></td></tr><tr><td>hard-solved</td><td>2</td><td>—</td><td><strong>−22 (1 gained, 23 lost; z −4.49)</strong></td></tr><tr><td>separation lost</td><td>9</td><td>—</td><td>+6 (1 fixed, 7 new, n.s.)</td></tr><tr><td>flights on time</td><td>0.793</td><td>—</td><td><strong>−0.134 (SE 0.015)</strong></td></tr><tr><td>clearances / stream</td><td>158.1</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">stitched 2×20 streams</th></tr><tr><td>solved</td><td>3</td><td>—</td><td><strong>−31 (1 gained, 32 lost; z −5.40)</strong></td></tr><tr><td>hard-solved</td><td>0</td><td>—</td><td><strong>−9 (0 gained, 9 lost; z −3.00)</strong></td></tr><tr><td>separation lost</td><td>21</td><td>—</td><td>+6 (6 fixed, 12 new, n.s.)</td></tr><tr><td>flights on time</td><td>0.725</td><td>—</td><td><strong>−0.140 (SE 0.021)</strong></td></tr><tr><td>clearances / stream</td><td>282.8</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">critic-guided lookahead (4 candidates)</th></tr><tr><td>solved</td><td>22</td><td>—</td><td>−8 (12 gained, 20 lost, n.s.)</td></tr><tr><td>hard-solved</td><td>1</td><td>—</td><td><strong>−7 (1 gained, 8 lost; z −2.33)</strong></td></tr><tr><td>separation lost</td><td>2</td><td>—</td><td>+1 (0 fixed, 1 new, n.s.)</td></tr><tr><td>flights on time</td><td>0.835</td><td>—</td><td><strong>−0.058 (SE 0.012)</strong></td></tr><tr><td>clearances / stream</td><td>159.3</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">10 attempts (deterministic + 9 sampled)</th></tr><tr><td>solved in at least one of 10 (pass@10)</td><td>34</td><td>—</td><td><strong>−42 (1 gained, 43 lost; z −6.33)</strong></td></tr><tr><td>solved by one sampled attempt (pass@1)</td><td>0.05</td><td>—</td><td>—</td></tr><tr><td>separation lost, best attempt</td><td>2</td><td>—</td><td>+0 (1 fixed, 1 new, n.s.)</td></tr><tr><td>flights on time, best attempt</td><td>0.862</td><td>—</td><td>—</td></tr><tr><td>never solved: safety-bound / precision-bound</td><td>2 / 64</td><td>—</td><td>—</td></tr></tbody></table>
 
 <p>Sources: f20 <code>experiments/atc_run_1_41_scratch_b_s1/track_scores/final_model.csv</code>, att10 <code>analysis/2026-09-27_scratch/backfill/eval/1_41_att10.csv</code>, la4 <code>analysis/2026-09-27_scratch/backfill/eval/1_41_la4.csv</code>, s2x20 <code>analysis/2026-09-27_scratch/backfill/eval/1_41_s2x20.csv</code>.</p>
 <h2 id="behaviour-and-failures-20-flight-deterministic">Behaviour and failures (20-flight, deterministic)<a class="headerlink" href="#behaviour-and-failures-20-flight-deterministic" title="Permanent link">&para;</a></h2>
