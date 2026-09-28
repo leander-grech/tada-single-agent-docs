@@ -183,6 +183,7 @@ models:
     evals:
       fx_feas40: analysis/2026-09-28_hard/eval/1_47_feas40.csv
       fx_feas40_la4: analysis/2026-09-28_hard/eval/1_47_feas40_la4.csv
+      fx_test51: analysis/2026-09-28_hard/eval_test/1_47_test51.csv
       la4: analysis/2026-09-28_hard/eval/1_47_la4.csv
       s2x20: analysis/2026-09-28_hard/eval/1_47_s2x20.csv
     renders:
@@ -199,6 +200,7 @@ models:
     evals:
       fx_feas40: analysis/2026-09-28_hard/eval/1_48_feas40.csv
       fx_feas40_la4: analysis/2026-09-28_hard/eval/1_48_feas40_la4.csv
+      fx_test51: analysis/2026-09-28_hard/eval_test/1_48_test51.csv
       la4: analysis/2026-09-28_hard/eval/1_48_la4.csv
       s2x20: analysis/2026-09-28_hard/eval/1_48_s2x20.csv
     renders:
