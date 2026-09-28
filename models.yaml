@@ -47,8 +47,9 @@ test_sources:
   longstreams: [analysis/2026-09-27_scratch/longstreams/eval]
   phase0: [analysis/2026-09-27_phase0_order_first]
   feasible_2x20: [analysis/2026-09-28_hard/eval, analysis/2026-09-28_hard/eval_test, analysis/2026-09-28_release/eval, analysis/2026-09-28_pms/eval]   # imported only once committed
-  backfill_dirs: [analysis/2026-09-28_hard, analysis/2026-09-28_release, analysis/2026-09-28_pms]
-  zeroshot_pms: [analysis/2026-09-28_release/zeroshot]   # MXP agents scored unchanged on point merge; imported only once committed   # eval/ and renders/, as in the backfill folder
+  backfill_dirs: [analysis/2026-09-28_hard, analysis/2026-09-28_release, analysis/2026-09-28_pms]   # eval/ and renders/; committed files only
+  zeroshot_pms: [analysis/2026-09-28_release/zeroshot, analysis/2026-09-28_pms/eval]   # MXP agents scored unchanged on point merge; committed files only
+  pms_capacity: analysis/2026-09-28_pms/eval/pms_validation_capacity.csv   # point-merge capacity of the 100 validation seeds
 
 models:
 
@@ -69,10 +70,10 @@ models:
     run: experiments/atc_run_1_53_scratch_d_release_pms_s1
     checkpoint: final_model.zip
     parent: null
-    status: in_progress
+    status: complete
     whats_new: "From scratch on the BGY point merge (use case 2), release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential, feasible-only training from a pre-screened pool of point-merge streams, ±30 s bracket worth 4. Recipe arm D (10 flights to 2.5M, then 20 to 10M), LR 3e-4 to 3e-5, seed 1."
     curve: [{file: experiments/atc_run_1_53_scratch_d_release_pms_s1/track.csv, kind: track}]
-    pending: "Training on a rented host (vast.ai, 10M steps), started 19:16 on 28 Sep; due about 23:00."
+    evals: {f20: experiments/atc_run_1_53_scratch_d_release_pms_s1/track_scores/final_model.csv}   # track_windowed.py's score of the final model (point merge)
     note: "Trained after the bust clawback (code commit 618a073): a loss of separation takes back the release payments of flights still airborne. Its training pool excludes the validation candidates."
 
   - id: "1_52"
@@ -80,10 +81,10 @@ models:
     run: experiments/atc_run_1_52_pms_1_50
     checkpoint: final_model.zip
     parent: "1_50"
-    status: in_progress
+    status: complete
     whats_new: "1_50 fine-tuned on the BGY point merge (use case 2), release MDP as 1_50, stitched 2×20 point-merge streams from a pre-screened pool of feasible ones. LR 1e-4 to 1e-5, 100k critic warm-up, seed 52."
     curve: [{file: experiments/atc_run_1_52_pms_1_50/track.csv, kind: track}]
-    pending: "Training on a rented host (vast.ai, 10M steps), started 19:16 on 28 Sep; due about 23:00."
+    evals: {f20: experiments/atc_run_1_52_pms_1_50/track_scores/final_model.csv}   # track_windowed.py's score of the final model (point merge)
     note: "Trained after the bust clawback (code commit 618a073): a loss of separation takes back the release payments of flights still airborne. Its training pool excludes the validation candidates."
 
   - id: "1_51"

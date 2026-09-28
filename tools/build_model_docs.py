@@ -746,14 +746,23 @@ class Build:
 
     def zeroshot_table(self, ids: list) -> str:
         """Point merge zero-shot against each agent's own MXP score, with the do-nothing floor on both."""
+        capf = self.reg.get("test_sources", {}).get("pms_capacity")
+        feas = None
+        if capf:
+            cap = self.csv(capf)
+            feas = set(cap.loc[~cap["over_650s"].astype(str).str.lower().eq("true"), "seed"])
         def stats(df):
             ps = self.windowed_perseed(df)
             aman = float(df["aman_order"].mean()) if "aman_order" in df else float("nan")
+            f = ps.loc[[x for x in ps.index if x in feas]] if feas is not None else None
             return (int(ps.solved.sum()), int(ps.hard.sum()), int(ps.sep.sum()), float(ps.on_time.mean()),
-                    float(df["landed"].mean()), aman, len(ps))
+                    float(df["landed"].mean()), aman, len(ps),
+                    (int(f.solved.sum()), int(f.sep.sum()), float(f.on_time.mean())) if f is not None else None)
         def cells(label, zs, mxp):
-            sv, hd, sp, ot, ld, am, n = zs
+            sv, hd, sp, ot, ld, am, n, fz = zs
             row = [label, str(sv), str(hd), str(sp), f"{ot:.3f}", f"{ld:.1f}", f"{am:.3f}"]
+            if feas is not None:
+                row += [str(fz[0]), str(fz[1]), f"{fz[2]:.3f}"]
             row += ([str(mxp[0]), str(mxp[2])] if mxp else ["—", "—"])
             return row
         rows = []
@@ -774,7 +783,10 @@ class Build:
         if not rows:
             return "No agent has been scored on point merge yet.\n\n"
         head = ["agent", "solved", "hard-solved", "separation lost", "flights on time", "landed of 20",
-                "landed in AMAN position", "MXP: solved", "MXP: separation lost"]
+                "landed in AMAN position"]
+        if feas is not None:
+            head += [f"feasible seeds ({len(feas)}): solved", "feasible: separation lost", "feasible: on time"]
+        head += ["MXP: solved", "MXP: separation lost"]
         return ('<div class="tada-table-wrap"><table class="tada-table tada-sortable"><thead><tr>'
                 + "".join(f"<th>{h}</th>" for h in head) + "</tr></thead><tbody>"
                 + "".join("<tr>" + "".join(f"<td>{c}</td>" for c in row) + "</tr>" for row in rows)

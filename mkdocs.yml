@@ -142,7 +142,7 @@ nav:
       - Over-capacity scenarios: findings/capacity.md
       - Long streams: findings/long-streams.md
       - Search at inference: findings/lookahead.md
-      - Point merge, zero-shot: findings/point-merge.md
+      - Point merge: findings/point-merge.md
       - Training from scratch: findings/curriculum.md
       - Evaluation noise: findings/evaluation-noise.md
   - Log: log.md

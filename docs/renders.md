@@ -135,7 +135,65 @@ Seed 599310825, 20 flights, each model's deterministic policy.
 <figcaption><span class="tada-render__by">Rendered by 1_51</span> (final_model.zip) · seed 599310825 · deterministic · 20 of 20 on time, worst 55 s, 110 clearances</figcaption>
 </figure>
 
+### 1_52
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_pms/renders/1_52_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_52_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_52</span> (final_model.zip) · seed 599310825 · deterministic · 6 of 20 on time, loss of separation at step 56, 84 clearances · point merge (BGY)</figcaption>
+</figure>
+
+### 1_53
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_pms/renders/1_53_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_53_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_53</span> (final_model.zip) · seed 599310825 · deterministic · 7 of 20 on time, loss of separation at step 58, 90 clearances · point merge (BGY)</figcaption>
+</figure>
+
 ## By model
+
+### [1_53](models/1_53.md)
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_pms/renders/1_53_best_seed1137651678_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_53_best_seed1137651678.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_53</span> (final_model.zip) · seed 1137651678 · deterministic · 20 of 20 on time, worst 26 s, 149 clearances · point merge (BGY)</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_pms/renders/1_53_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_53_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_53</span> (final_model.zip) · seed 599310825 · deterministic · 7 of 20 on time, loss of separation at step 58, 90 clearances · point merge (BGY)</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_pms/renders/1_53_failure_seed41_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_53_failure_seed41.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_53</span> (final_model.zip) · seed 41 · deterministic · 18 of 20 on time, worst 124 s, 122 clearances · point merge (BGY)</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_pms/renders/1_53_feas40_best_seed1594762635_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_53_feas40_best_seed1594762635.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_53</span> (final_model.zip) · seed 1594762635 · the best feas40 stream (40 flights, feasible stitched 2×20) · deterministic · 40 of 40 on time, worst 37 s, 287 clearances · point merge (BGY)</figcaption>
+</figure>
+
+### [1_52](models/1_52.md)
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_pms/renders/1_52_best_seed958682846_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_52_best_seed958682846.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_52</span> (final_model.zip) · seed 958682846 · deterministic · 20 of 20 on time, worst 28 s, 124 clearances · point merge (BGY)</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_pms/renders/1_52_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_52_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_52</span> (final_model.zip) · seed 599310825 · deterministic · 6 of 20 on time, loss of separation at step 56, 84 clearances · point merge (BGY)</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_pms/renders/1_52_failure_seed306671447_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_52_failure_seed306671447.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_52</span> (final_model.zip) · seed 306671447 · deterministic · 18 of 20 on time, worst 146 s, 156 clearances · point merge (BGY)</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_pms/renders/1_52_feas40_best_seed1168315735_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_52_feas40_best_seed1168315735.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_52</span> (final_model.zip) · seed 1168315735 · the best feas40 stream (40 flights, feasible stitched 2×20) · deterministic · 40 of 40 on time, worst 52 s, 268 clearances · point merge (BGY)</figcaption>
+</figure>
 
 ### [1_51](models/1_51.md)
 
