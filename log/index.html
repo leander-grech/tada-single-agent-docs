@@ -2693,7 +2693,7 @@
   <span class="md-ellipsis">
     
   
-    Point merge, zero-shot
+    Point merge
   
 
     
@@ -3133,7 +3133,7 @@
   <a href="#run-1-52" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1_52, 1_53 — training on point merge (28 Sep, training)
+        1_52, 1_53 — training on point merge (28 Sep)
       
     </span>
   </a>
@@ -3779,7 +3779,7 @@
   <a href="#run-1-52" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1_52, 1_53 — training on point merge (28 Sep, training)
+        1_52, 1_53 — training on point merge (28 Sep)
       
     </span>
   </a>
@@ -3958,12 +3958,14 @@ hard-solved, level with the champion on hard-solved but with 20 losses of separa
 (fine-tuned) fell from <code>1_48</code>'s 48 solved to 27. Both trained before a reward fix: a bust now takes
 back the release payments of flights still airborne. <a href="../findings/curriculum/#arm-d-in-the-release-mdp-1_50">Training from scratch</a>. <a id="run-1-50"></a> <a id="run-1-51"></a>
 <a href="../models/1_49/"><code>1_49</code></a> · <a href="../models/1_50/"><code>1_50</code></a> · <a href="../models/1_51/"><code>1_51</code></a>.</p>
-<h3 id="run-1-52"><code>1_52</code>, <code>1_53</code> — training on point merge (28 Sep, training)<a class="headerlink" href="#run-1-52" title="Permanent link">&para;</a></h3>
+<h3 id="run-1-52"><code>1_52</code>, <code>1_53</code> — training on point merge (28 Sep)<a class="headerlink" href="#run-1-52" title="Permanent link">&para;</a></h3>
 <p>The MXP agents lose separation on a quarter to a third of point-merge streams zero-shot
 (<a href="../findings/point-merge/">Point merge</a>), so these two train on the BGY point merge itself, in the
 release MDP with the bust clawback, from pre-screened pools of feasible point-merge streams.
 <code>1_52</code> fine-tunes <code>1_50</code>; <code>1_53</code> runs recipe arm D from scratch. Their scores are point-merge
-scores. <a id="run-1-53"></a> <a href="../models/1_52/"><code>1_52</code></a> · <a href="../models/1_53/"><code>1_53</code></a>.</p>
+scores. Both lose separation almost only on over-capacity point-merge seeds (52 of the 100):
+on the 48 feasible seeds <code>1_53</code> loses none, <code>1_52</code> one. Few streams are solved (12 and 8), and on
+stitched point-merge streams both lose most. <a id="run-1-53"></a> <a href="../models/1_52/"><code>1_52</code></a> · <a href="../models/1_53/"><code>1_53</code></a>.</p>
 <h3 id="long-streams">Long streams (27–28 Sep)<a class="headerlink" href="#long-streams" title="Permanent link">&para;</a></h3>
 <p>Not a training run: 60- and 100-flight streams, split into feasible and over-capacity, on the
 champion and the from-scratch models. A scorer bug that cut long streams short was found and fixed

@@ -25,7 +25,7 @@
     
     
       
-        <title>Point merge, zero-shot - TADA · single-agent RL</title>
+        <title>Point merge - TADA · single-agent RL</title>
       
     
     
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#point-merge-zero-shot" class="md-skip">
+        <a href="#point-merge" class="md-skip">
           Skip to content
         </a>
       
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Point merge, zero-shot
+              Point merge
             
           </span>
         </div>
@@ -2707,7 +2707,7 @@
   <span class="md-ellipsis">
     
   
-    Point merge, zero-shot
+    Point merge
   
 
     
@@ -2725,7 +2725,7 @@
   <span class="md-ellipsis">
     
   
-    Point merge, zero-shot
+    Point merge
   
 
     
@@ -2758,6 +2758,56 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#point-merge-has-less-spare-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Point merge has less spare capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zero-shot-sequencing-transfers-separation-does-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zero-shot: sequencing transfers, separation does not
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trained-on-point-merge-1_52-and-1_53" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trained on point merge: 1_52 and 1_53
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -3176,6 +3226,56 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Results">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#point-merge-has-less-spare-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Point merge has less spare capacity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#zero-shot-sequencing-transfers-separation-does-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Zero-shot: sequencing transfers, separation does not
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#trained-on-point-merge-1_52-and-1_53" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Trained on point merge: 1_52 and 1_53
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -3195,45 +3295,85 @@
 
 
 
-<h1 id="point-merge-zero-shot">Point merge, zero-shot<a class="headerlink" href="#point-merge-zero-shot" title="Permanent link">&para;</a></h1>
+<h1 id="point-merge">Point merge<a class="headerlink" href="#point-merge" title="Permanent link">&para;</a></h1>
 <div class="admonition abstract">
 <p class="admonition-title">Summary</p>
-<p>Can an agent trained only on the MXP trombone fly the BGY point merge (<code>VALIDATION_USE_CASE_2</code>)
-unchanged? <strong>Not safely.</strong> The four MXP agents scored so far keep their sequencing (about 93% of
-landed flights in AMAN position) but lose separation on 24–34 of 100 point-merge streams, against
-3–7 on MXP, and solve at most 7. Doing nothing is equally hopeless on both scenarios (98 and 99
-losses of 100), so the gap is the agents', not the scenario's baseline. Point merge needs its
-own training, which is next.</p>
+<p><strong>Zero-shot, the MXP agents are not safe on the BGY point merge</strong> (<code>VALIDATION_USE_CASE_2</code>):
+they keep their sequencing but lose separation on 24–47 of 100 point-merge streams, against
+3–20 on MXP. <strong>Trained on point merge, the agents are safe where the traffic allows it.</strong> More
+than half of the point-merge validation seeds (52 of 100) are over capacity, and nearly every
+loss of separation of the two point-merge agents is on one of them. On the 48 feasible seeds,
+<code>1_53</code> (from scratch) loses none and lands 93% of flights on time, against 5 losses and 87% for
+the champion <code>1_38</code> zero-shot. Few streams are <em>solved</em> even so, because every one of 20 flights
+has to land within ±60 s. On stitched 2×20 point-merge streams both trained agents lose separation
+on most streams.</p>
 </div>
-<p>Data: <code>analysis/2026-09-28_release/zeroshot/</code> in the code repo (<code>&lt;model&gt;_pms_f20.csv</code> and <code>.txt</code>,
-<code>donothing_pms_f20.*</code>, <code>donothing_mxp_f20.*</code>). Each agent is scored exactly as trained, with
+<p>Data, in the code repo: zero-shot scores in <code>analysis/2026-09-28_release/zeroshot/</code> and
+<code>analysis/2026-09-28_pms/eval/</code> (<code>&lt;model&gt;_pms_f20.*</code>); the point-merge runs' own evaluations in
+<code>analysis/2026-09-28_pms/eval/</code>; the point-merge capacity of the 100 validation seeds in
+<code>analysis/2026-09-28_pms/eval/pms_validation_capacity.csv</code>. Every agent is scored with
 <code>analysis/score_windowed.py --use-case 2</code>: 100 validation seeds, 20-flight streams, deterministic.
 The do-nothing rows issue no clearances on the same seeds and streams (<code>--models do-nothing</code>).</p>
 <h2 id="results">Results<a class="headerlink" href="#results" title="Permanent link">&para;</a></h2>
-<p>The table is generated from the evaluation files and lists every agent scored on point merge so far;
-the <a href="../../coverage/">coverage page</a> shows which are still to do. The MXP columns are the same
-agent's own 20-flight score, on the same 100 seeds.</p>
+<p>The table is generated from the evaluation files and lists every agent scored on point merge so
+far, zero-shot and trained; the <a href="../../coverage/">coverage page</a> shows which are still to do.
+<em>Feasible seeds</em> are the validation seeds on which, flown do-nothing, no flight on point merge would
+arrive more than 650 s early. The MXP columns are the same agent's own 20-flight MXP score, on the
+same 100 seeds.</p>
 <!-- gen:zeroshot-pms -->
-<div class="tada-table-wrap"><table class="tada-table tada-sortable"><thead><tr><th>agent</th><th>solved</th><th>hard-solved</th><th>separation lost</th><th>flights on time</th><th>landed of 20</th><th>landed in AMAN position</th><th>MXP: solved</th><th>MXP: separation lost</th></tr></thead><tbody><tr><td><a href="../../models/1_38/"><code>1_38</code></a></td><td>7</td><td>1</td><td>34</td><td>0.642</td><td>15.8</td><td>0.926</td><td>63</td><td>3</td></tr><tr><td><a href="../../models/1_44/"><code>1_44</code></a></td><td>4</td><td>1</td><td>32</td><td>0.569</td><td>16.5</td><td>0.937</td><td>37</td><td>6</td></tr><tr><td><a href="../../models/1_46/"><code>1_46</code></a></td><td>5</td><td>2</td><td>31</td><td>0.602</td><td>16.6</td><td>0.943</td><td>44</td><td>7</td></tr><tr><td><a href="../../models/1_48/"><code>1_48</code></a></td><td>5</td><td>0</td><td>24</td><td>0.599</td><td>17.0</td><td>0.932</td><td>48</td><td>4</td></tr><tr><td>do nothing (no clearances)</td><td>0</td><td>0</td><td>98</td><td>0.123</td><td>4.0</td><td>0.750</td><td>0</td><td>99</td></tr></tbody></table></div>
+<div class="tada-table-wrap"><table class="tada-table tada-sortable"><thead><tr><th>agent</th><th>solved</th><th>hard-solved</th><th>separation lost</th><th>flights on time</th><th>landed of 20</th><th>landed in AMAN position</th><th>feasible seeds (48): solved</th><th>feasible: separation lost</th><th>feasible: on time</th><th>MXP: solved</th><th>MXP: separation lost</th></tr></thead><tbody><tr><td><a href="../../models/1_38/"><code>1_38</code></a></td><td>7</td><td>1</td><td>34</td><td>0.642</td><td>15.8</td><td>0.926</td><td>7</td><td>5</td><td>0.868</td><td>63</td><td>3</td></tr><tr><td><a href="../../models/1_44/"><code>1_44</code></a></td><td>4</td><td>1</td><td>32</td><td>0.569</td><td>16.5</td><td>0.937</td><td>4</td><td>4</td><td>0.817</td><td>37</td><td>6</td></tr><tr><td><a href="../../models/1_46/"><code>1_46</code></a></td><td>5</td><td>2</td><td>31</td><td>0.602</td><td>16.6</td><td>0.943</td><td>5</td><td>4</td><td>0.846</td><td>44</td><td>7</td></tr><tr><td><a href="../../models/1_48/"><code>1_48</code></a></td><td>5</td><td>0</td><td>24</td><td>0.599</td><td>17.0</td><td>0.932</td><td>5</td><td>3</td><td>0.826</td><td>48</td><td>4</td></tr><tr><td><a href="../../models/1_50/"><code>1_50</code></a></td><td>3</td><td>0</td><td>47</td><td>0.589</td><td>14.2</td><td>0.952</td><td>3</td><td>8</td><td>0.796</td><td>51</td><td>20</td></tr><tr><td><a href="../../models/1_51/"><code>1_51</code></a></td><td>1</td><td>0</td><td>25</td><td>0.565</td><td>16.8</td><td>0.907</td><td>1</td><td>6</td><td>0.759</td><td>27</td><td>11</td></tr><tr><td><a href="../../models/1_52/"><code>1_52</code></a> (trained on point merge)</td><td>8</td><td>2</td><td>34</td><td>0.682</td><td>15.9</td><td>0.972</td><td>7</td><td>1</td><td>0.923</td><td>—</td><td>—</td></tr><tr><td><a href="../../models/1_53/"><code>1_53</code></a> (trained on point merge)</td><td>12</td><td>2</td><td>28</td><td>0.705</td><td>16.8</td><td>0.979</td><td>11</td><td>0</td><td>0.932</td><td>—</td><td>—</td></tr><tr><td>do nothing (no clearances)</td><td>0</td><td>0</td><td>98</td><td>0.123</td><td>4.0</td><td>0.750</td><td>0</td><td>46</td><td>0.152</td><td>0</td><td>99</td></tr></tbody></table></div>
 
 <!-- /gen -->
 
-<p>Counts are streams of 100. <em>Landed in AMAN position</em>: mean share of landed flights per stream that
-land in their AMAN sequence position.</p>
+<p>Counts are streams of 100 (of 48 in the feasible columns). <em>Landed in AMAN position</em>: mean share of
+landed flights per stream that land in their AMAN sequence position.</p>
+<h3 id="point-merge-has-less-spare-capacity">Point merge has less spare capacity<a class="headerlink" href="#point-merge-has-less-spare-capacity" title="Permanent link">&para;</a></h3>
+<p>52 of the 100 validation seeds are over capacity on point merge, against 49 on MXP; 29 are feasible
+on both. Of freshly generated candidates, 36.5% of 20-flight point-merge streams are feasible, and
+12.8–13.4% of stitched 2×20 ones (the job's screens, <code>analysis/2026-09-28_pms/pool/</code> and <code>seeds/</code>).</p>
+<h3 id="zero-shot-sequencing-transfers-separation-does-not">Zero-shot: sequencing transfers, separation does not<a class="headerlink" href="#zero-shot-sequencing-transfers-separation-does-not" title="Permanent link">&para;</a></h3>
 <ul>
-<li><strong>Sequencing transfers, separation does not.</strong> Every agent lands 93–94% of its flights in AMAN
-  position on point merge, but loses separation 4 to 11 times as often as on MXP.</li>
-<li><strong>The champion is not the safest here.</strong> <code>1_38</code> solves the most point-merge streams (7) but has
-  the most losses (34); <code>1_48</code> has the fewest (24).</li>
-<li><strong>Doing nothing gives no floor to speak of</strong> on either scenario, so none of the agents' safety on
-  MXP came from easy traffic.</li>
-<li>One point-merge stream, seed 438989805, outlasts the episode cap that training uses (200 steps
-  per 20-flight segment), and the scorer flags it in every file. It changes no score: every agent
-  lands all 20 flights on it, and do-nothing loses separation at step 55, before the cap. Scoring
-  now runs every stream to its own horizon (code commit <code>cbead99</code>); MXP streams never reach the cap.</li>
+<li>Every MXP agent lands 91–95% of its landed flights in AMAN position on point merge, but loses
+  separation 2 to 11 times as often as on MXP.</li>
+<li>The champion is not the safest here: <code>1_38</code> loses separation on 34 streams, <code>1_48</code> on 24, and the
+  release-MDP <code>1_50</code> on 47. On the feasible seeds the MXP agents still lose 3–8.</li>
+<li>Doing nothing loses separation on 98 point-merge and 99 MXP streams, so none of the agents'
+  safety on MXP came from easy traffic.</li>
 </ul>
-<p>The earlier point-merge agents, <code>1_24_pms</code> and <code>1_30_pms</code> (<a href="../../archive/point-merge/">archive</a>),
-were 10-aircraft agents on an older simulator and are not comparable with these numbers.</p>
+<h3 id="trained-on-point-merge-1_52-and-1_53">Trained on point merge: <code>1_52</code> and <code>1_53</code><a class="headerlink" href="#trained-on-point-merge-1_52-and-1_53" title="Permanent link">&para;</a></h3>
+<p>Both train in the release MDP with the bust clawback, from pools of feasible point-merge streams
+with the validation candidates removed: <code>1_52</code> fine-tunes <code>1_50</code> on stitched 2×20 streams, <code>1_53</code>
+runs recipe arm D (10- then 20-flight streams) from scratch (<a href="../../log/#run-1-52">log</a>).</p>
+<ul>
+<li><strong>Their losses sit on over-capacity seeds.</strong> All 28 of <code>1_53</code>'s losses of separation and 33 of
+  <code>1_52</code>'s 34 are on the 52 over-capacity seeds.</li>
+<li><strong>Where the traffic allows it, they are safe and more precise.</strong> On the 48 feasible seeds <code>1_53</code>
+  loses none and lands 0.932 of flights on time; <code>1_38</code> zero-shot loses 5 there, at 0.868. The
+  on-time gain is significant (+0.065, paired SE 0.026); the 5 losses it avoids (5 fixed, none new)
+  fall just short (p = 0.06). <code>1_52</code> loses 1 there, against 8 for its parent <code>1_50</code> zero-shot (8
+  fixed, 1 new, p = 0.04).</li>
+<li><strong>Few streams are solved.</strong> <code>1_53</code> solves 11 of the 48 feasible seeds. At 93% of flights on time, if
+  flights missed independently, all 20 within ±60 s would happen on about a quarter of streams
+  (0.93²⁰ ≈ 0.23).</li>
+<li><strong>Over all 100 seeds they are not significantly better than <code>1_38</code> zero-shot:</strong> <code>1_53</code> solves 12
+  against 7 (p = 0.18) and loses 28 against 34 (p = 0.36); <code>1_52</code> 8 and 34. Against its parent's
+  zero-shot, <code>1_52</code> loses fewer (34 against 47, p = 0.01).</li>
+<li><strong>Stitched point-merge streams are still unsolved.</strong> On stitched 2×20 streams <code>1_52</code> loses
+  separation on 71 of 100 and <code>1_53</code> on 63, and each solves 1. On the feasible stitched sets
+  feas40 and test51 they lose 1–4 streams and solve at most 4; the cards have the figures.</li>
+<li><strong>Lookahead buys safety, not precision:</strong> with the 4-candidate lookahead both lose separation on
+  18 streams instead of 28 and 34, and solve 3 and 6.</li>
+</ul>
+<h3 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h3>
+<ul>
+<li>One point-merge stream, seed 438989805, outlasts the episode cap that training uses (200 steps
+  per 20-flight segment), and the scorer flags it in each of the first zero-shot files (<code>analysis/2026-09-28_release/zeroshot/</code>). It changes no score: every
+  agent lands all 20 flights on it, and do-nothing loses separation at step 55, before the cap.
+  Scoring now runs every stream to its own horizon (code commit <code>cbead99</code>); MXP streams never reach
+  the cap.</li>
+<li>The earlier point-merge agents, <code>1_24_pms</code> and <code>1_30_pms</code> (<a href="../../archive/point-merge/">archive</a>),
+  were 10-aircraft agents on an older simulator and are not comparable with these numbers.</li>
+</ul>
 
 
 

@@ -2875,7 +2875,7 @@
   <span class="md-ellipsis">
     
   
-    Point merge, zero-shot
+    Point merge
   
 
     
@@ -3445,10 +3445,10 @@
 
 <h3 id="long-and-feasible-streams">Long and feasible streams<a class="headerlink" href="#long-and-feasible-streams" title="Permanent link">&para;</a></h3>
 <p>60- and 100-flight stitched streams (3 or 5 waves, 600–900 s gaps) and the feasible 40-flight sets feas40 and test51, deterministic; see <a href="../../findings/long-streams/">Long streams</a>.</p>
-<table class="tada-table"><thead><tr><th>streams</th><th>n</th><th>no loss of separation</th><th>solved</th><th>on time</th></tr></thead><tbody><tr><td>feas40: 40 feasible 2×20 streams</td><td>40</td><td>40</td><td>7</td><td>0.956</td></tr><tr><td>test51: 51 held-out feasible 2×20 streams</td><td>51</td><td>51</td><td>9</td><td>0.947</td></tr></tbody></table>
+<table class="tada-table"><thead><tr><th>streams</th><th>n</th><th>no loss of separation</th><th>solved</th><th>on time</th></tr></thead><tbody><tr><td><a href="../../findings/point-merge/">point merge (BGY), zero-shot</a></td><td>100</td><td>75</td><td>1</td><td>0.565</td></tr><tr><td>feas40: 40 feasible 2×20 streams</td><td>40</td><td>40</td><td>7</td><td>0.956</td></tr><tr><td>test51: 51 held-out feasible 2×20 streams</td><td>51</td><td>51</td><td>9</td><td>0.947</td></tr></tbody></table>
 
 <p>Not yet evaluated: 10 attempts (deterministic + 9 sampled) (<a href="../../backfill/">backfill list</a>).</p>
-<p>Sources: f20 <code>experiments/atc_run_1_51_release_1_48/track_scores/final_model.csv</code>, fx_feas40 <code>analysis/2026-09-28_release/eval/1_51_feas40.csv</code>, fx_feas40_la4 <code>analysis/2026-09-28_release/eval/1_51_feas40_la4.csv</code>, fx_test51 <code>analysis/2026-09-28_release/eval/1_51_test51.csv</code>, la4 <code>analysis/2026-09-28_release/eval/1_51_la4.csv</code>, s2x20 <code>analysis/2026-09-28_release/eval/1_51_s2x20.csv</code>.</p>
+<p>Sources: f20 <code>experiments/atc_run_1_51_release_1_48/track_scores/final_model.csv</code>, fx_feas40 <code>analysis/2026-09-28_release/eval/1_51_feas40.csv</code>, fx_feas40_la4 <code>analysis/2026-09-28_release/eval/1_51_feas40_la4.csv</code>, fx_test51 <code>analysis/2026-09-28_release/eval/1_51_test51.csv</code>, la4 <code>analysis/2026-09-28_release/eval/1_51_la4.csv</code>, s2x20 <code>analysis/2026-09-28_release/eval/1_51_s2x20.csv</code>, zs_pms_f20 <code>analysis/2026-09-28_pms/eval/1_51_pms_f20.csv</code>.</p>
 <h2 id="behaviour-and-failures-20-flight-deterministic">Behaviour and failures (20-flight, deterministic)<a class="headerlink" href="#behaviour-and-failures-20-flight-deterministic" title="Permanent link">&para;</a></h2>
 <p><strong>94.3</strong> clearances per stream; <strong>0.97</strong> AMAN-order swaps per stream; mean landing deviation <strong>72 s</strong>.</p>
 <table class="tada-table"><thead><tr><th>outcome</th><th>seeds</th></tr></thead><tbody><tr><td><span class="tada-chip tada-chip--ok">solved</span></td><td>27</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 1 flight late</span></td><td>17</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 2–3 flights late</span></td><td>14</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 4 or more late</span></td><td>31</td></tr><tr><td><span class="tada-chip tada-chip--bad">loss of separation</span></td><td>11</td></tr></tbody></table>
