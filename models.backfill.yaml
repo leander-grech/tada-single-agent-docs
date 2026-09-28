@@ -71,6 +71,9 @@ models:
       meta: analysis/2026-09-27_scratch/backfill/renders/1_37_failure_seed478163327_solutions.json
   '1_38':
     evals:
+      fx_feas40: analysis/2026-09-28_hard/eval/1_38_feas40.csv
+      fx_feas40_la4: analysis/2026-09-28_hard/eval/1_38_feas40_la4.csv
+      fx_test51: analysis/2026-09-28_hard/eval_test/1_38_test51.csv
       ls_k3_all: analysis/2026-09-27_scratch/longstreams/eval/1_38_k3_all.csv
       ls_k3_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_38_k3_feasible.csv
       ls_k5_all: analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_all.csv
@@ -143,6 +146,8 @@ models:
   '1_44':
     evals:
       att10: analysis/2026-09-27_scratch/backfill/eval/1_44_att10.csv
+      fx_feas40: analysis/2026-09-28_hard/eval/1_44_feas40.csv
+      fx_test51: analysis/2026-09-28_hard/eval_test/1_44_test51.csv
       la4: analysis/2026-09-27_scratch/backfill/eval/1_44_la4.csv
       ls_k3_all: analysis/2026-09-27_scratch/longstreams/eval/1_44_k3_all.csv
       ls_k3_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_44_k3_feasible.csv
@@ -159,6 +164,8 @@ models:
   '1_46':
     evals:
       att10: analysis/2026-09-27_scratch/backfill/eval/1_46_att10.csv
+      fx_feas40: analysis/2026-09-28_hard/eval/1_46_feas40.csv
+      fx_test51: analysis/2026-09-28_hard/eval_test/1_46_test51.csv
       la4: analysis/2026-09-27_scratch/backfill/eval/1_46_la4.csv
       ls_k3_all: analysis/2026-09-27_scratch/longstreams/eval/1_46_k3_all.csv
       ls_k3_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_46_k3_feasible.csv
@@ -172,4 +179,36 @@ models:
       meta: analysis/2026-09-27_scratch/backfill/renders/1_46_comparison_seed599310825_solutions.json
     - file: 1_46_failure_seed373399426.mp4
       meta: analysis/2026-09-27_scratch/backfill/renders/1_46_failure_seed373399426_solutions.json
+  '1_47':
+    evals:
+      fx_feas40: analysis/2026-09-28_hard/eval/1_47_feas40.csv
+      fx_feas40_la4: analysis/2026-09-28_hard/eval/1_47_feas40_la4.csv
+      la4: analysis/2026-09-28_hard/eval/1_47_la4.csv
+      s2x20: analysis/2026-09-28_hard/eval/1_47_s2x20.csv
+    renders:
+    - file: 1_47_best_seed613628803.mp4
+      meta: analysis/2026-09-28_hard/renders/1_47_best_seed613628803_solutions.json
+    - file: 1_47_comparison_seed599310825.mp4
+      meta: analysis/2026-09-28_hard/renders/1_47_comparison_seed599310825_solutions.json
+    - file: 1_47_failure_seed137869475.mp4
+      meta: analysis/2026-09-28_hard/renders/1_47_failure_seed137869475_solutions.json
+    - file: 1_47_feas40_best_seed1303459020.mp4
+      meta: analysis/2026-09-28_hard/renders/1_47_feas40_best_seed1303459020_solutions.json
+      stream: "the best feas40 stream (40 flights, feasible stitched 2\xD720)"
+  '1_48':
+    evals:
+      fx_feas40: analysis/2026-09-28_hard/eval/1_48_feas40.csv
+      fx_feas40_la4: analysis/2026-09-28_hard/eval/1_48_feas40_la4.csv
+      la4: analysis/2026-09-28_hard/eval/1_48_la4.csv
+      s2x20: analysis/2026-09-28_hard/eval/1_48_s2x20.csv
+    renders:
+    - file: 1_48_best_seed2144181937.mp4
+      meta: analysis/2026-09-28_hard/renders/1_48_best_seed2144181937_solutions.json
+    - file: 1_48_comparison_seed599310825.mp4
+      meta: analysis/2026-09-28_hard/renders/1_48_comparison_seed599310825_solutions.json
+    - file: 1_48_failure_seed186618211.mp4
+      meta: analysis/2026-09-28_hard/renders/1_48_failure_seed186618211_solutions.json
+    - file: 1_48_feas40_best_seed1569968983.mp4
+      meta: analysis/2026-09-28_hard/renders/1_48_feas40_best_seed1569968983_solutions.json
+      stream: "the best feas40 stream (40 flights, feasible stitched 2\xD720)"
 source: analysis/2026-09-27_scratch/backfill

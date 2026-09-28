@@ -155,11 +155,12 @@ for 10M more steps on 20-flight streams. None reaches the champion `1_38`. <a id
 <a id="run-1-42"></a> <a id="run-1-43"></a> <a id="run-1-44"></a> <a id="run-1-46"></a>
 [Training from scratch](findings/curriculum.md).
 
-### `1_47`, `1_48` — fine-tuning for the hard-solved target (28 Sep–) { #run-1-47 }
+### `1_47`, `1_48` — fine-tuning for the hard-solved target (28 Sep) { #run-1-47 }
 
 `1_44` and `1_46` continued for 10M steps with a ±30 s bracket worth 4 added above the ±60 s one,
-on stitched 2×20 streams, on a rented host. **In progress.** Their trackers also score a second
-stream set. <a id="run-1-48"></a> [`1_47`](models/1_47.md) · [`1_48`](models/1_48.md).
+on stitched 2×20 streams, on a rented host. Neither gained hard-solved streams significantly over
+its parent. `1_48` ties the champion on hard-solved streams and on the feasible 40-flight set
+(feas40), but solves fewer 20-flight streams at ±60 s; `1_38` stays champion. <a id="run-1-48"></a> [`1_47`](models/1_47.md) · [`1_48`](models/1_48.md).
 
 ### Long streams (27–28 Sep) { #long-streams }
 

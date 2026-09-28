@@ -40,34 +40,38 @@ def main():
     args = ap.parse_args()
     reg = yaml.safe_load(open(ROOT / "models.yaml"))
     code = Path(args.code_repo or reg["code_repo"])
-    base = code / args.dir
+    # every backfill folder (each with eval/ and renders/): --dir plus models.yaml test_sources.backfill_dirs
+    bases = [code / args.dir] + [code / d for d in reg.get("test_sources", {}).get("backfill_dirs", [])]
     ids = {str(m["id"]) for m in reg["models"]}
     existing = {str(m["id"]): set((m.get("evals") or {}).keys()) for m in reg["models"]}
     out: dict[str, dict] = {}
     skipped = []
 
-    for csv in sorted((base / "eval").glob("*.csv")) if (base / "eval").exists() else []:
-        mt = re.fullmatch(r"(.+)_(f20|s2x20|att10|la4|d100)\.csv", csv.name)
-        if not mt or mt.group(1) not in ids:
-            skipped.append(csv.name)
-            continue
-        mid, item = mt.groups()
-        if item in existing[mid]:
-            skipped.append(f"{csv.name} (models.yaml already has {item})")
-            continue
-        out.setdefault(mid, {}).setdefault("evals", {})[item] = str(csv.relative_to(code))
+    for base in bases:
+        for csv in sorted((base / "eval").glob("*.csv")) if (base / "eval").exists() else []:
+            mt = re.fullmatch(r"(.+)_(f20|s2x20|att10|la4|d100)\.csv", csv.name)
+            if not mt or mt.group(1) not in ids:
+                skipped.append(csv.name)
+                continue
+            mid, item = mt.groups()
+            if item in existing[mid]:
+                skipped.append(f"{csv.name} (models.yaml already has {item})")
+                continue
+            out.setdefault(mid, {}).setdefault("evals", {})[item] = str(csv.relative_to(code))
 
-    for mp4 in sorted((base / "renders").glob("*.mp4")) if (base / "renders").exists() else []:
-        mt = re.fullmatch(r"(.+)_(comparison|best|failure)_seed(\d+)\.mp4", mp4.name)
-        meta = mp4.with_name(mp4.stem + "_solutions.json")
-        if not mt or mt.group(1) not in ids or not meta.exists():
-            skipped.append(mp4.name + ("" if meta.exists() else " (no _solutions.json)"))
-            continue
-        dst = RENDERS / mp4.name
-        if not dst.exists() or md5(dst) != md5(mp4):
-            shutil.copy2(mp4, dst)
-        out.setdefault(mt.group(1), {}).setdefault("renders", []).append(
-            {"file": mp4.name, "meta": str(meta.relative_to(code))})
+        for mp4 in sorted((base / "renders").glob("*.mp4")) if (base / "renders").exists() else []:
+            mt = re.fullmatch(r"(.+?)_(comparison|best|failure|feas40_best)_seed(\d+)\.mp4", mp4.name)
+            meta = mp4.with_name(mp4.stem + "_solutions.json")
+            if not mt or mt.group(1) not in ids or not meta.exists():
+                skipped.append(mp4.name + ("" if meta.exists() else " (no _solutions.json)"))
+                continue
+            dst = RENDERS / mp4.name
+            if not dst.exists() or md5(dst) != md5(mp4):
+                shutil.copy2(mp4, dst)
+            entry = {"file": mp4.name, "meta": str(meta.relative_to(code))}
+            if mt.group(2) == "feas40_best":
+                entry["stream"] = "the best feas40 stream (40 flights, feasible stitched 2×20)"
+            out.setdefault(mt.group(1), {}).setdefault("renders", []).append(entry)
 
     # Feasible stitched 2x20 stream sets (feas40, test51): taken only once committed in the code repo,
     # so results still being produced are never published early.

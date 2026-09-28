@@ -47,6 +47,7 @@ test_sources:
   longstreams: [analysis/2026-09-27_scratch/longstreams/eval]
   phase0: [analysis/2026-09-27_phase0_order_first]
   feasible_2x20: [analysis/2026-09-28_hard/eval, analysis/2026-09-28_hard/eval_test]   # imported only once committed
+  backfill_dirs: [analysis/2026-09-28_hard]   # eval/ and renders/, as in the backfill folder
 
 models:
 
@@ -56,18 +57,20 @@ models:
     run: experiments/atc_run_1_48_hard_1_46
     checkpoint: final_model.zip
     parent: "1_46"
-    status: in_progress
+    status: complete
     whats_new: "1_46 fine-tuned for the hard-solved target: a ±30 s bracket worth 4 added above the ±60 s one (3), bust penalty 100, stitched 2×20 streams, LR 1e-4 to 1e-5."
     curve: [{file: experiments/atc_run_1_48_hard_1_46/track.csv, kind: track}]
+    evals: {f20: experiments/atc_run_1_48_hard_1_46/track_scores/final_model.csv}   # track_windowed.py's score of the final model
 
   - id: "1_47"
     track: windowed
     run: experiments/atc_run_1_47_hard_1_44
     checkpoint: final_model.zip
     parent: "1_44"
-    status: in_progress
+    status: complete
     whats_new: "1_44 fine-tuned for the hard-solved target: a ±30 s bracket worth 4 added above the ±60 s one (3), bust penalty 100, stitched 2×20 streams, LR 1e-4 to 1e-5."
     curve: [{file: experiments/atc_run_1_47_hard_1_44/track.csv, kind: track}]
+    evals: {f20: experiments/atc_run_1_47_hard_1_44/track_scores/final_model.csv}   # track_windowed.py's score of the final model
 
   - id: "1_46"
     track: windowed
