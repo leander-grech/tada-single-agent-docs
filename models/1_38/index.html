@@ -302,17 +302,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../../evaluation/" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="../../evaluation/" class="md-tabs__link">
+          
+  
   
   Evaluation
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -656,6 +657,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../1_48/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_48
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1_47/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_47
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../1_46/" class="md-nav__link">
         
   
@@ -919,6 +976,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Scorecard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#long-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Long streams
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -2290,9 +2364,25 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../evaluation/" class="md-nav__link">
+    
+    
+    
+    
+      
+      
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -2306,7 +2396,79 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Protocol
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coverage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -2965,6 +3127,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Scorecard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#long-streams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Long streams
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -3088,7 +3267,11 @@
 <p>100 validation seeds (never trained on), paired seed by seed. <strong>Solved</strong>: no loss of separation and every flight within ±60 s of its AMAN target; <strong>hard-solved</strong>: the same within ±30 s. A delta is <strong>bold</strong> only when the paired test says so (McNemar on per-seed outcomes, or a paired SE on the on-time rate, 95%).</p>
 <table class="tada-table"><thead><tr><th></th><th>value</th><th>vs parent <code>1_36</code></th><th>vs champion <code>1_38</code></th></tr></thead><tbody><tr class="tada-group"><th colspan="4">20-flight streams</th></tr><tr><td>solved</td><td>63</td><td>−2 (8 gained, 10 lost, n.s.)</td><td>—</td></tr><tr><td>hard-solved</td><td>24</td><td>−5 (14 gained, 19 lost, n.s.)</td><td>—</td></tr><tr><td>separation lost</td><td>3</td><td><strong>−6 (6 fixed, 0 new; z −2.45)</strong></td><td>—</td></tr><tr><td>flights on time</td><td>0.927</td><td>+0.010 (SE 0.009), n.s.</td><td>—</td></tr><tr><td>clearances / stream</td><td>121.9</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">stitched 2×20 streams</th></tr><tr><td>solved</td><td>34</td><td>−4 (11 gained, 15 lost, n.s.)</td><td>—</td></tr><tr><td>hard-solved</td><td>9</td><td>+3 (6 gained, 3 lost, n.s.)</td><td>—</td></tr><tr><td>separation lost</td><td>15</td><td>−1 (5 fixed, 4 new, n.s.)</td><td>—</td></tr><tr><td>flights on time</td><td>0.865</td><td>−0.012 (SE 0.019), n.s.</td><td>—</td></tr><tr><td>clearances / stream</td><td>236.9</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">critic-guided lookahead (4 candidates)</th></tr><tr><td>solved</td><td>30</td><td>−9 (13 gained, 22 lost, n.s.)</td><td>—</td></tr><tr><td>hard-solved</td><td>8</td><td>−2 (7 gained, 9 lost, n.s.)</td><td>—</td></tr><tr><td>separation lost</td><td>1</td><td>−1 (1 fixed, 0 new, n.s.)</td><td>—</td></tr><tr><td>flights on time</td><td>0.893</td><td>−0.004 (SE 0.007), n.s.</td><td>—</td></tr><tr><td>clearances / stream</td><td>129.9</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">10 attempts (deterministic + 9 sampled)</th></tr><tr><td>solved in at least one of 10 (pass@10)</td><td>76</td><td>−4 (1 gained, 5 lost, n.s.)</td><td>—</td></tr><tr><td>solved by one sampled attempt (pass@1)</td><td>0.42</td><td>—</td><td>—</td></tr><tr><td>separation lost, best attempt</td><td>2</td><td>+0 (0 fixed, 0 new, n.s.)</td><td>—</td></tr><tr><td>flights on time, best attempt</td><td>0.943</td><td>—</td><td>—</td></tr><tr><td>never solved: safety-bound / precision-bound</td><td>2 / 22</td><td>—</td><td>—</td></tr></tbody></table>
 
-<p>Sources: f20 <code>analysis/2026-09-26_1_36_multipick/eval_cont/f20.csv</code>, s2x20 <code>analysis/2026-09-26_1_36_multipick/eval_cont/s2x20.csv</code>, att10 <code>analysis/2026-09-26_1_36_multipick/eval_cont/att10.csv</code>, la4 <code>analysis/2026-09-26_1_36_multipick/eval_cont/la4.csv</code>.</p>
+<h3 id="long-streams">Long streams<a class="headerlink" href="#long-streams" title="Permanent link">&para;</a></h3>
+<p>60- and 100-flight stitched streams (3 or 5 waves, 600–900 s gaps), deterministic; see <a href="../../findings/long-streams/">Long streams</a>.</p>
+<table class="tada-table"><thead><tr><th>streams</th><th>n</th><th>no loss of separation</th><th>solved</th><th>on time</th></tr></thead><tbody><tr><td>60 flights, feasible</td><td>27</td><td>27</td><td>11</td><td>0.986</td></tr><tr><td>60 flights, unfiltered</td><td>40</td><td>34</td><td>7</td><td>0.836</td></tr><tr><td>100 flights, feasible</td><td>12</td><td>12</td><td>0</td><td>0.976</td></tr><tr><td>100 flights, unfiltered</td><td>40</td><td>30</td><td>1</td><td>0.812</td></tr></tbody></table>
+
+<p>Sources: f20 <code>analysis/2026-09-26_1_36_multipick/eval_cont/f20.csv</code>, s2x20 <code>analysis/2026-09-26_1_36_multipick/eval_cont/s2x20.csv</code>, att10 <code>analysis/2026-09-26_1_36_multipick/eval_cont/att10.csv</code>, la4 <code>analysis/2026-09-26_1_36_multipick/eval_cont/la4.csv</code>, ls_k3_all <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k3_all.csv</code>, ls_k3_feasible <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k3_feasible.csv</code>, ls_k5_all <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_all.csv</code>, ls_k5_feasible <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_feasible.csv</code>, ls_k5_feasible_la4 <code>analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_feasible_la4.csv</code>, phase0 <code>analysis/2026-09-27_phase0_order_first/atc_run_1_38_windowed_cont.jsonl</code>.</p>
 <h2 id="behaviour-and-failures-20-flight-deterministic">Behaviour and failures (20-flight, deterministic)<a class="headerlink" href="#behaviour-and-failures-20-flight-deterministic" title="Permanent link">&para;</a></h2>
 <p><strong>121.9</strong> clearances per stream; <strong>0.54</strong> AMAN-order swaps per stream; mean landing deviation <strong>30 s</strong>.</p>
 <table class="tada-table"><thead><tr><th>outcome</th><th>seeds</th></tr></thead><tbody><tr><td><span class="tada-chip tada-chip--ok">solved</span></td><td>63</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 1 flight late</span></td><td>17</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 2–3 flights late</span></td><td>12</td></tr><tr><td><span class="tada-chip tada-chip--warn">safe, 4 or more late</span></td><td>5</td></tr><tr><td><span class="tada-chip tada-chip--bad">loss of separation</span></td><td>3</td></tr></tbody></table>

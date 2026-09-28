@@ -300,17 +300,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../../evaluation/" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="../../evaluation/" class="md-tabs__link">
+          
+  
   
   Evaluation
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -638,6 +639,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../models/1_48/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_48
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../models/1_47/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_47
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2125,9 +2182,25 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../evaluation/" class="md-nav__link">
+    
+    
+    
+    
+      
+      
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -2141,7 +2214,79 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Protocol
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coverage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -2359,10 +2504,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-did-fix-it-a-second-clearance-per-step" class="md-nav__link">
+  <a href="#what-made-it-possible-a-second-clearance-per-step" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What did fix it: a second clearance per step
+        What made it possible: a second clearance per step
       
     </span>
   </a>
@@ -2921,10 +3066,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#what-did-fix-it-a-second-clearance-per-step" class="md-nav__link">
+  <a href="#what-made-it-possible-a-second-clearance-per-step" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What did fix it: a second clearance per step
+        What made it possible: a second clearance per step
       
     </span>
   </a>
@@ -2955,8 +3100,10 @@
 the agent has to reorder it. Flights that must overtake or be overtaken are on time less often.
 Among landed flights, a swapped pair is on time far less often than a kept one. Showing the
 agent the AMAN sequence (<code>1_33</code>) did not help by itself, because nothing paid for keeping it.
-What fixed it was bandwidth: with <a href="../reselection/">reselection</a> AMAN swaps almost vanished.
-Forcing the order at inference does not work either (<a href="../order-first/">Order first?</a>).</p>
+Bandwidth made it possible: with <a href="../reselection/">reselection</a>, <code>1_36</code> almost never swaps two
+flights. It is not automatic, though: most later reselection agents swap about half as often
+as the one-pick control or not less at all. Forcing the order at inference does not work
+either (<a href="../order-first/">Order first?</a>).</p>
 </div>
 <h2 id="the-geometry-of-a-miss">The geometry of a miss<a class="headerlink" href="#the-geometry-of-a-miss" title="Permanent link">&para;</a></h2>
 <p>On the renders' side view, losses of separation and timing misses share one pattern: <strong>the spacing
@@ -3070,13 +3217,17 @@ significant at 95%):</p>
 their AMAN position stayed flat at ~0.855 for all 5M steps. The agent could see the sequence; the
 reward did not pay it to keep it. That motivated the <a href="../../how/objective/">lexicographic objective</a>
 of <code>1_34</code>, whose shaping includes predicted AMAN swaps.</p>
-<h2 id="what-did-fix-it-a-second-clearance-per-step">What did fix it: a second clearance per step<a class="headerlink" href="#what-did-fix-it-a-second-clearance-per-step" title="Permanent link">&para;</a></h2>
+<h2 id="what-made-it-possible-a-second-clearance-per-step">What made it possible: a second clearance per step<a class="headerlink" href="#what-made-it-possible-a-second-clearance-per-step" title="Permanent link">&para;</a></h2>
 <p>With one clearance per 45 s the policy could not act on two flights that both needed it. With
 reselection, AMAN swaps per stream fell by an order of magnitude (<code>1_37</code> control vs <code>1_36</code>, same
 start, same steps). Another 5M steps (<code>1_38</code>) traded some of that back for safety, and it still
-swaps about half as often as the control:</p>
-<!-- gen:compare models=1_37,1_36,1_38 batteries=f20 -->
-<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../../models/1_37/">1_37</a></th><th><a href="../../models/1_36/">1_36</a></th><th><a href="../../models/1_38/">1_38</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>34</td><td>65</td><td>63</td></tr><tr><td>20-flight: hard-solved</td><td>1</td><td>29</td><td>24</td></tr><tr><td>20-flight: separation lost</td><td>4</td><td>9</td><td>3</td></tr><tr><td>20-flight: flights on time</td><td>0.832</td><td>0.916</td><td>0.927</td></tr><tr><td>20-flight: clearances / stream</td><td>80.6</td><td>128.3</td><td>121.9</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>1.02</td><td>0.07</td><td>0.54</td></tr></tbody></table>
+swaps about half as often as the control.</p>
+<p>Reselection makes keeping the order <em>possible</em>, not certain. Across every reselection agent so
+far (table below, newest runs included), only <code>1_36</code> keeps the sequence almost perfectly. <code>1_38</code>,
+<code>1_39</code>, <code>1_41</code>, <code>1_42</code> and <code>1_46</code> swap about half as often as the control, and <code>1_40</code>, <code>1_43</code> and
+<code>1_44</code>, trained from scratch, swap as often as the control does. All of them solve fewer streams than <code>1_36</code> and <code>1_38</code>:</p>
+<!-- gen:compare models=1_37,reselection batteries=f20 -->
+<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../../models/1_37/">1_37</a></th><th><a href="../../models/1_36/">1_36</a></th><th><a href="../../models/1_38/">1_38</a></th><th><a href="../../models/1_39/">1_39</a></th><th><a href="../../models/1_40/">1_40</a></th><th><a href="../../models/1_41/">1_41</a></th><th><a href="../../models/1_42/">1_42</a></th><th><a href="../../models/1_43/">1_43</a></th><th><a href="../../models/1_44/">1_44</a></th><th><a href="../../models/1_46/">1_46</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>34</td><td>65</td><td>63</td><td>40</td><td>22</td><td>14</td><td>16</td><td>22</td><td>37</td><td>44</td></tr><tr><td>20-flight: hard-solved</td><td>1</td><td>29</td><td>24</td><td>5</td><td>2</td><td>2</td><td>1</td><td>6</td><td>13</td><td>13</td></tr><tr><td>20-flight: separation lost</td><td>4</td><td>9</td><td>3</td><td>5</td><td>9</td><td>9</td><td>7</td><td>6</td><td>6</td><td>7</td></tr><tr><td>20-flight: flights on time</td><td>0.832</td><td>0.916</td><td>0.927</td><td>0.858</td><td>0.779</td><td>0.793</td><td>0.790</td><td>0.801</td><td>0.817</td><td>0.852</td></tr><tr><td>20-flight: clearances / stream</td><td>80.6</td><td>128.3</td><td>121.9</td><td>125.2</td><td>161.9</td><td>158.1</td><td>155.8</td><td>140.6</td><td>153.7</td><td>158.7</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>1.02</td><td>0.07</td><td>0.54</td><td>0.66</td><td>0.98</td><td>0.60</td><td>0.62</td><td>1.05</td><td>1.07</td><td>0.56</td></tr></tbody></table>
 
 <!-- /gen -->
 

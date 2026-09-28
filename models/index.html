@@ -14,7 +14,7 @@
         <link rel="prev" href="best/">
       
       
-        <link rel="next" href="1_46/">
+        <link rel="next" href="1_48/">
       
       
         
@@ -302,17 +302,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../evaluation/" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="../evaluation/" class="md-tabs__link">
+          
+  
   
   Evaluation
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -717,6 +718,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="1_48/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_48
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="1_47/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_47
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2207,9 +2264,25 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../evaluation/" class="md-nav__link">
+    
+    
+    
+    
+      
+      
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -2223,7 +2296,79 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Protocol
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coverage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -2921,7 +3066,7 @@
 <p>Every number on this page is computed from the evaluation files listed on each model's card. Click a column to sort; the champion row is highlighted.</p>
 <p><strong>Champion rule (windowed):</strong> only models that lose separation on at most 5 of the 100 validation seeds qualify (20-flight, deterministic); among those, most seeds solved, then fewer separation losses, then more hard-solved, then fewer clearances. The rule deliberately puts safety first: a model with more solves but more losses of separation does not take the title.</p>
 <h2 id="windowed-agent-20-flight-streams">Windowed agent (20-flight streams)<a class="headerlink" href="#windowed-agent-20-flight-streams" title="Permanent link">&para;</a></h2>
-<div class="tada-table-wrap"><table class="tada-table tada-sortable"><thead><tr><th>model</th><th>status</th><th>solved</th><th>hard-solved</th><th>sep. lost</th><th>on time</th><th>clearances</th><th>2×20 solved</th><th>2×20 sep.</th><th>pass@10</th><th>lookahead sep.</th><th>what changed</th></tr></thead><tbody><tr><td><a href="1_46/">1_46</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>44</td><td>13</td><td>7</td><td>0.852</td><td>158.7</td><td>17</td><td>8</td><td>56</td><td>4</td><td><span class="tada-what" title="1_43 (arm C) continued for another 10M steps on 20-flight streams (not stitched), LR 1e-4 to 1e-5, 100k critic warm-up. 20M steps in all; not from scratch.">1_43 (arm C) continued for another 10M steps on 20-flight streams (not stitched), LR…</span></td></tr><tr><td><a href="1_44/">1_44</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>37</td><td>13</td><td>6</td><td>0.817</td><td>153.7</td><td>10</td><td>17</td><td>51</td><td>4</td><td><span class="tada-what" title="From scratch, arm D (the recipe&#x27;s default since commit 0f9bdc9): 10-flight streams to 2.5M, then 20-flight streams to 10M, no stitched stage. Seed 1.">From scratch, arm D (the recipe&#x27;s default since commit 0f9bdc9)</span></td></tr><tr><td><a href="1_43/">1_43</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>22</td><td>6</td><td>6</td><td>0.801</td><td>140.6</td><td>8</td><td>11</td><td>34</td><td>1</td><td><span class="tada-what" title="From scratch, arm C: arm A plus a traffic curriculum in one run (10-flight streams to 2.5M, 20-flight to 5.5M, stitched 2x20 to 10M). Seed 1.">From scratch, arm C</span></td></tr><tr><td><a href="1_42/">1_42</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>16</td><td>1</td><td>7</td><td>0.790</td><td>155.8</td><td>1</td><td>21</td><td>37</td><td>5</td><td><span class="tada-what" title="From scratch, arm A (the current design, no checkpoint), seed 2: the seed-to-seed spread for 1_40.">From scratch, arm A (the current design, no checkpoint), seed 2</span></td></tr><tr><td><a href="1_41/">1_41</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>14</td><td>2</td><td>9</td><td>0.793</td><td>158.1</td><td>3</td><td>21</td><td>34</td><td>2</td><td><span class="tada-what" title="From scratch, arm B: arm A with flat (un-ramped) sequence and conflict potentials. Seed 1.">From scratch, arm B</span></td></tr><tr><td><a href="1_40/">1_40</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>22</td><td>2</td><td>9</td><td>0.779</td><td>161.9</td><td>1</td><td>13</td><td>38</td><td>7</td><td><span class="tada-what" title="From scratch, arm A: the whole design (lexicographic objective, sequence observations, reselection, attention) from random weights in 10M steps. Seed 1.">From scratch, arm A</span></td></tr><tr><td><a href="1_39/">1_39</a></td><td><span class="tada-chip tada-chip--muted">not adopted</span></td><td>40</td><td>5</td><td>5</td><td>0.858</td><td>125.2</td><td>12</td><td>9</td><td>67</td><td>5</td><td><span class="tada-what" title="As 1_38, with the loss-of-separation penalty raised from 90 to 240 (sized to a stitched 40-flight training stream).">As 1_38, with the loss-of-separation penalty raised from 90 to 240 (sized to a stitched…</span></td></tr><tr class="is-champion"><td><a href="1_38/">1_38</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>63</td><td>24</td><td>3</td><td>0.927</td><td>121.9</td><td>34</td><td>15</td><td>76</td><td>1</td><td><span class="tada-what" title="1_36 continued for another 5M steps on the same settings (reselection, budget 2).">1_36 continued for another 5M steps on the same settings (reselection, budget 2)</span></td></tr><tr><td><a href="1_37/">1_37</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>34</td><td>1</td><td>4</td><td>0.832</td><td>80.6</td><td>10</td><td>11</td><td>54</td><td>7</td><td><span class="tada-what" title="Control for 1_36: 1_35 trained another 5M steps on 1_36&#x27;s settings, one clearance per step.">Control for 1_36</span></td></tr><tr><td><a href="1_36/">1_36</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>65</td><td>29</td><td>9</td><td>0.916</td><td>128.3</td><td>38</td><td>16</td><td>80</td><td>2</td><td><span class="tada-what" title="Reselection: the policy may ask for a second clearance within the same 45 s step (budget 2).">Reselection</span></td></tr><tr><td><a href="1_35/">1_35</a></td><td><span class="tada-chip tada-chip--warn">stopped early</span></td><td>24</td><td>0</td><td>8</td><td>0.826</td><td>86.8</td><td>5</td><td>10</td><td>47</td><td>5</td><td><span class="tada-what" title="1_34&#x27;s design trained with the JAX learner on the faster simulator, on stitched 2x20 streams with a random 120-900 s cooling gap.">1_34&#x27;s design trained with the JAX learner on the faster simulator, on stitched 2x20…</span></td></tr><tr><td><a href="1_34/">1_34</a></td><td><span class="tada-chip tada-chip--warn">stopped early</span></td><td>21</td><td>0</td><td>13</td><td>0.773</td><td>110.4</td><td>2</td><td>37</td><td>48</td><td>6</td><td><span class="tada-what" title="The lexicographic objective (safety, then each flight&#x27;s deviation bracket, then fewest clearances) plus potential-based shaping. Stopped at 0.8M in favour of 1_35.">The lexicographic objective (safety, then each flight&#x27;s deviation bracket, then fewest…</span></td></tr><tr><td><a href="1_33/">1_33</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>20</td><td>1</td><td>17</td><td>0.750</td><td>106.0</td><td>2</td><td>29</td><td>44</td><td>7</td><td><span class="tada-what" title="Four AMAN-sequence observation columns per aircraft (rank shift, crossings, gap errors to predecessor and successor); reward unchanged.">Four AMAN-sequence observation columns per aircraft (rank shift, crossings, gap errors…</span></td></tr><tr><td><a href="1_32/">1_32</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>29</td><td>4</td><td>21</td><td>0.731</td><td>—</td><td>1</td><td>41</td><td>41</td><td>10</td><td><span class="tada-what" title="1_31 redone as a fine-tune: 300k-step critic warm-up, then peak LR 3e-5 and entropy coefficient 0.003.">1_31 redone as a fine-tune</span></td></tr><tr><td><a href="1_31/">1_31</a></td><td><span class="tada-chip tada-chip--warn">stopped early</span></td><td>1</td><td>0</td><td>32</td><td>0.467</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tada-what" title="First windowed run: 1_29&#x27;s weights on the 20-flight stream with a fresh-run learning-rate schedule. Made the policy worse; stopped at 2M.">First windowed run</span></td></tr><tr><td><a href="1_29/">1_29</a></td><td><span class="tada-chip tada-chip--muted">reference</span></td><td>8</td><td>1</td><td>21</td><td>0.727</td><td>—</td><td>0</td><td>42</td><td>—</td><td>—</td><td>The 10-aircraft agent zero-shot on streams, no windowed training</td></tr></tbody></table></div>
+<div class="tada-table-wrap"><table class="tada-table tada-sortable"><thead><tr><th>model</th><th>status</th><th>solved</th><th>hard-solved</th><th>sep. lost</th><th>on time</th><th>clearances</th><th>2×20 solved</th><th>2×20 sep.</th><th>pass@10</th><th>lookahead sep.</th><th>what changed</th></tr></thead><tbody><tr><td><a href="1_48/">1_48</a></td><td><span class="tada-chip tada-chip--warn">in progress</span></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tada-what" title="1_46 fine-tuned for the hard-solved target: a ±30 s bracket worth 4 added above the ±60 s one (3), bust penalty 100, stitched 2×20 streams, LR 1e-4 to 1e-5.">1_46 fine-tuned for the hard-solved target</span></td></tr><tr><td><a href="1_47/">1_47</a></td><td><span class="tada-chip tada-chip--warn">in progress</span></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tada-what" title="1_44 fine-tuned for the hard-solved target: a ±30 s bracket worth 4 added above the ±60 s one (3), bust penalty 100, stitched 2×20 streams, LR 1e-4 to 1e-5.">1_44 fine-tuned for the hard-solved target</span></td></tr><tr><td><a href="1_46/">1_46</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>44</td><td>13</td><td>7</td><td>0.852</td><td>158.7</td><td>17</td><td>8</td><td>56</td><td>4</td><td><span class="tada-what" title="1_43 (arm C) continued for another 10M steps on 20-flight streams (not stitched), LR 1e-4 to 1e-5, 100k critic warm-up. 20M steps in all; not from scratch.">1_43 (arm C) continued for another 10M steps on 20-flight streams (not stitched), LR…</span></td></tr><tr><td><a href="1_44/">1_44</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>37</td><td>13</td><td>6</td><td>0.817</td><td>153.7</td><td>10</td><td>17</td><td>51</td><td>4</td><td><span class="tada-what" title="From scratch, arm D (the recipe&#x27;s default since commit 0f9bdc9): 10-flight streams to 2.5M, then 20-flight streams to 10M, no stitched stage. Seed 1.">From scratch, arm D (the recipe&#x27;s default since commit 0f9bdc9)</span></td></tr><tr><td><a href="1_43/">1_43</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>22</td><td>6</td><td>6</td><td>0.801</td><td>140.6</td><td>8</td><td>11</td><td>34</td><td>1</td><td><span class="tada-what" title="From scratch, arm C: arm A plus a traffic curriculum in one run (10-flight streams to 2.5M, 20-flight to 5.5M, stitched 2x20 to 10M). Seed 1.">From scratch, arm C</span></td></tr><tr><td><a href="1_42/">1_42</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>16</td><td>1</td><td>7</td><td>0.790</td><td>155.8</td><td>1</td><td>21</td><td>37</td><td>5</td><td><span class="tada-what" title="From scratch, arm A (the current design, no checkpoint), seed 2: the seed-to-seed spread for 1_40.">From scratch, arm A (the current design, no checkpoint), seed 2</span></td></tr><tr><td><a href="1_41/">1_41</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>14</td><td>2</td><td>9</td><td>0.793</td><td>158.1</td><td>3</td><td>21</td><td>34</td><td>2</td><td><span class="tada-what" title="From scratch, arm B: arm A with flat (un-ramped) sequence and conflict potentials. Seed 1.">From scratch, arm B</span></td></tr><tr><td><a href="1_40/">1_40</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>22</td><td>2</td><td>9</td><td>0.779</td><td>161.9</td><td>1</td><td>13</td><td>38</td><td>7</td><td><span class="tada-what" title="From scratch, arm A: the whole design (lexicographic objective, sequence observations, reselection, attention) from random weights in 10M steps. Seed 1.">From scratch, arm A</span></td></tr><tr><td><a href="1_39/">1_39</a></td><td><span class="tada-chip tada-chip--muted">not adopted</span></td><td>40</td><td>5</td><td>5</td><td>0.858</td><td>125.2</td><td>12</td><td>9</td><td>67</td><td>5</td><td><span class="tada-what" title="As 1_38, with the loss-of-separation penalty raised from 90 to 240 (sized to a stitched 40-flight training stream).">As 1_38, with the loss-of-separation penalty raised from 90 to 240 (sized to a stitched…</span></td></tr><tr class="is-champion"><td><a href="1_38/">1_38</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>63</td><td>24</td><td>3</td><td>0.927</td><td>121.9</td><td>34</td><td>15</td><td>76</td><td>1</td><td><span class="tada-what" title="1_36 continued for another 5M steps on the same settings (reselection, budget 2).">1_36 continued for another 5M steps on the same settings (reselection, budget 2)</span></td></tr><tr><td><a href="1_37/">1_37</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>34</td><td>1</td><td>4</td><td>0.832</td><td>80.6</td><td>10</td><td>11</td><td>54</td><td>7</td><td><span class="tada-what" title="Control for 1_36: 1_35 trained another 5M steps on 1_36&#x27;s settings, one clearance per step.">Control for 1_36</span></td></tr><tr><td><a href="1_36/">1_36</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>65</td><td>29</td><td>9</td><td>0.916</td><td>128.3</td><td>38</td><td>16</td><td>80</td><td>2</td><td><span class="tada-what" title="Reselection: the policy may ask for a second clearance within the same 45 s step (budget 2).">Reselection</span></td></tr><tr><td><a href="1_35/">1_35</a></td><td><span class="tada-chip tada-chip--warn">stopped early</span></td><td>24</td><td>0</td><td>8</td><td>0.826</td><td>86.8</td><td>5</td><td>10</td><td>47</td><td>5</td><td><span class="tada-what" title="1_34&#x27;s design trained with the JAX learner on the faster simulator, on stitched 2x20 streams with a random 120-900 s cooling gap.">1_34&#x27;s design trained with the JAX learner on the faster simulator, on stitched 2x20…</span></td></tr><tr><td><a href="1_34/">1_34</a></td><td><span class="tada-chip tada-chip--warn">stopped early</span></td><td>21</td><td>0</td><td>13</td><td>0.773</td><td>110.4</td><td>2</td><td>37</td><td>48</td><td>6</td><td><span class="tada-what" title="The lexicographic objective (safety, then each flight&#x27;s deviation bracket, then fewest clearances) plus potential-based shaping. Stopped at 0.8M in favour of 1_35.">The lexicographic objective (safety, then each flight&#x27;s deviation bracket, then fewest…</span></td></tr><tr><td><a href="1_33/">1_33</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>20</td><td>1</td><td>17</td><td>0.750</td><td>106.0</td><td>2</td><td>29</td><td>44</td><td>7</td><td><span class="tada-what" title="Four AMAN-sequence observation columns per aircraft (rank shift, crossings, gap errors to predecessor and successor); reward unchanged.">Four AMAN-sequence observation columns per aircraft (rank shift, crossings, gap errors…</span></td></tr><tr><td><a href="1_32/">1_32</a></td><td><span class="tada-chip tada-chip--muted">complete</span></td><td>29</td><td>4</td><td>21</td><td>0.731</td><td>—</td><td>1</td><td>41</td><td>41</td><td>10</td><td><span class="tada-what" title="1_31 redone as a fine-tune: 300k-step critic warm-up, then peak LR 3e-5 and entropy coefficient 0.003.">1_31 redone as a fine-tune</span></td></tr><tr><td><a href="1_31/">1_31</a></td><td><span class="tada-chip tada-chip--warn">stopped early</span></td><td>1</td><td>0</td><td>32</td><td>0.467</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="tada-what" title="First windowed run: 1_29&#x27;s weights on the 20-flight stream with a fresh-run learning-rate schedule. Made the policy worse; stopped at 2M.">First windowed run</span></td></tr><tr><td><a href="1_29/">1_29</a></td><td><span class="tada-chip tada-chip--muted">reference</span></td><td>8</td><td>1</td><td>21</td><td>0.727</td><td>—</td><td>0</td><td>42</td><td>—</td><td>—</td><td>The 10-aircraft agent zero-shot on streams, no windowed training</td></tr></tbody></table></div>
 
 <p>Counts are seeds out of 100. <em>On time</em> is the share of all flights landing within ±60 s. <em>pass@10</em>: seeds solved by at least one of 10 attempts. <em>Lookahead sep.</em>: losses of separation with the critic-guided 4-candidate lookahead. — means not evaluated yet (<a href="../backfill/">backfill list</a>).</p>
 <h2 id="10-aircraft-agent">10-aircraft agent<a class="headerlink" href="#10-aircraft-agent" title="Permanent link">&para;</a></h2>
@@ -2988,13 +3133,13 @@
         
         
           
-          <a href="1_46/" class="md-footer__link md-footer__link--next" aria-label="Next: 1_46">
+          <a href="1_48/" class="md-footer__link md-footer__link--next" aria-label="Next: 1_48">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                1_46
+                1_48
               </div>
             </div>
             <div class="md-footer__button md-icon">

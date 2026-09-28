@@ -11,28 +11,28 @@
       
       
       
-        <link rel="prev" href="../early-runs/">
+        <link rel="prev" href="../evaluation/">
       
       
-        <link rel="next" href="../../glossary/">
+        <link rel="next" href="../findings/">
       
       
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Point merge - TADA · single-agent RL</title>
+        <title>Coverage - TADA · single-agent RL</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -45,11 +45,11 @@
       
     
     
-      <link rel="stylesheet" href="../../stylesheets/tada-components.css">
+      <link rel="stylesheet" href="../stylesheets/tada-components.css">
     
-      <link rel="stylesheet" href="../../stylesheets/theme.css">
+      <link rel="stylesheet" href="../stylesheets/theme.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -74,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#point-merge-bgy" class="md-skip">
+        <a href="#coverage" class="md-skip">
           Skip to content
         </a>
       
@@ -90,7 +90,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="TADA · single-agent RL" class="md-header__button md-logo" aria-label="TADA · single-agent RL" data-md-component="logo">
+    <a href=".." title="TADA · single-agent RL" class="md-header__button md-logo" aria-label="TADA · single-agent RL" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.56 3.91c.59.59.59 1.54 0 2.12l-3.89 3.89 2.12 9.19-1.41 1.42-3.88-7.43L9.6 17l.36 2.47-1.07 1.06-1.76-3.18-3.19-1.77L5 14.5l2.5.37L11.37 11 3.94 7.09l1.42-1.41 9.19 2.12 3.89-3.89c.56-.58 1.56-.58 2.12 0"/></svg>
@@ -110,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Point merge
+              Coverage
             
           </span>
         </div>
@@ -203,7 +203,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href=".." class="md-tabs__link">
         
   
   
@@ -224,7 +224,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../models/best/" class="md-tabs__link">
+        <a href="../models/best/" class="md-tabs__link">
           
   
   
@@ -242,7 +242,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../renders/" class="md-tabs__link">
+      <a href="../renders/" class="md-tabs__link">
         
   
   
@@ -263,7 +263,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../how/problem/" class="md-tabs__link">
+        <a href="../how/problem/" class="md-tabs__link">
           
   
   
@@ -283,7 +283,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../training/" class="md-tabs__link">
+        <a href="../training/" class="md-tabs__link">
           
   
   
@@ -299,11 +299,13 @@
   
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../evaluation/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../evaluation/" class="md-tabs__link">
           
   
   
@@ -323,7 +325,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../findings/" class="md-tabs__link">
+        <a href="../findings/" class="md-tabs__link">
           
   
   
@@ -341,7 +343,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../log/" class="md-tabs__link">
+      <a href="../log/" class="md-tabs__link">
         
   
   
@@ -360,7 +362,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../roadmap/" class="md-tabs__link">
+      <a href="../roadmap/" class="md-tabs__link">
         
   
   
@@ -377,13 +379,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../archive/" class="md-tabs__link">
           
   
   
@@ -401,7 +401,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../glossary/" class="md-tabs__link">
+      <a href="../glossary/" class="md-tabs__link">
         
   
   
@@ -442,7 +442,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="TADA · single-agent RL" class="md-nav__button md-logo" aria-label="TADA · single-agent RL" data-md-component="logo">
+    <a href=".." title="TADA · single-agent RL" class="md-nav__button md-logo" aria-label="TADA · single-agent RL" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.56 3.91c.59.59.59 1.54 0 2.12l-3.89 3.89 2.12 9.19-1.41 1.42-3.88-7.43L9.6 17l.36 2.47-1.07 1.06-1.76-3.18-3.19-1.77L5 14.5l2.5.37L11.37 11 3.94 7.09l1.42-1.41 9.19 2.12 3.89-3.89c.56-.58 1.56-.58 2.12 0"/></svg>
@@ -460,7 +460,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -539,7 +539,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/best/" class="md-nav__link">
+      <a href="../models/best/" class="md-nav__link">
         
   
   
@@ -567,7 +567,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/" class="md-nav__link">
+      <a href="../models/" class="md-nav__link">
         
   
   
@@ -647,7 +647,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_48/" class="md-nav__link">
+      <a href="../models/1_48/" class="md-nav__link">
         
   
   
@@ -675,7 +675,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_47/" class="md-nav__link">
+      <a href="../models/1_47/" class="md-nav__link">
         
   
   
@@ -703,7 +703,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_46/" class="md-nav__link">
+      <a href="../models/1_46/" class="md-nav__link">
         
   
   
@@ -731,7 +731,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_44/" class="md-nav__link">
+      <a href="../models/1_44/" class="md-nav__link">
         
   
   
@@ -759,7 +759,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_43/" class="md-nav__link">
+      <a href="../models/1_43/" class="md-nav__link">
         
   
   
@@ -787,7 +787,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_42/" class="md-nav__link">
+      <a href="../models/1_42/" class="md-nav__link">
         
   
   
@@ -815,7 +815,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_41/" class="md-nav__link">
+      <a href="../models/1_41/" class="md-nav__link">
         
   
   
@@ -843,7 +843,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_40/" class="md-nav__link">
+      <a href="../models/1_40/" class="md-nav__link">
         
   
   
@@ -871,7 +871,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_39/" class="md-nav__link">
+      <a href="../models/1_39/" class="md-nav__link">
         
   
   
@@ -899,7 +899,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_38/" class="md-nav__link">
+      <a href="../models/1_38/" class="md-nav__link">
         
   
   
@@ -927,7 +927,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_37/" class="md-nav__link">
+      <a href="../models/1_37/" class="md-nav__link">
         
   
   
@@ -955,7 +955,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_36/" class="md-nav__link">
+      <a href="../models/1_36/" class="md-nav__link">
         
   
   
@@ -983,7 +983,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_35/" class="md-nav__link">
+      <a href="../models/1_35/" class="md-nav__link">
         
   
   
@@ -1011,7 +1011,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_34/" class="md-nav__link">
+      <a href="../models/1_34/" class="md-nav__link">
         
   
   
@@ -1039,7 +1039,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_33/" class="md-nav__link">
+      <a href="../models/1_33/" class="md-nav__link">
         
   
   
@@ -1067,7 +1067,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_32/" class="md-nav__link">
+      <a href="../models/1_32/" class="md-nav__link">
         
   
   
@@ -1095,7 +1095,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_31/" class="md-nav__link">
+      <a href="../models/1_31/" class="md-nav__link">
         
   
   
@@ -1183,7 +1183,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_30_pms/" class="md-nav__link">
+      <a href="../models/1_30_pms/" class="md-nav__link">
         
   
   
@@ -1211,7 +1211,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_29/" class="md-nav__link">
+      <a href="../models/1_29/" class="md-nav__link">
         
   
   
@@ -1239,7 +1239,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_28/" class="md-nav__link">
+      <a href="../models/1_28/" class="md-nav__link">
         
   
   
@@ -1267,7 +1267,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_27a/" class="md-nav__link">
+      <a href="../models/1_27a/" class="md-nav__link">
         
   
   
@@ -1295,7 +1295,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_27/" class="md-nav__link">
+      <a href="../models/1_27/" class="md-nav__link">
         
   
   
@@ -1323,7 +1323,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_26/" class="md-nav__link">
+      <a href="../models/1_26/" class="md-nav__link">
         
   
   
@@ -1351,7 +1351,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_25/" class="md-nav__link">
+      <a href="../models/1_25/" class="md-nav__link">
         
   
   
@@ -1379,7 +1379,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_24_pms/" class="md-nav__link">
+      <a href="../models/1_24_pms/" class="md-nav__link">
         
   
   
@@ -1407,7 +1407,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_24/" class="md-nav__link">
+      <a href="../models/1_24/" class="md-nav__link">
         
   
   
@@ -1435,7 +1435,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_23/" class="md-nav__link">
+      <a href="../models/1_23/" class="md-nav__link">
         
   
   
@@ -1463,7 +1463,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_22/" class="md-nav__link">
+      <a href="../models/1_22/" class="md-nav__link">
         
   
   
@@ -1491,7 +1491,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_21/" class="md-nav__link">
+      <a href="../models/1_21/" class="md-nav__link">
         
   
   
@@ -1519,7 +1519,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_20/" class="md-nav__link">
+      <a href="../models/1_20/" class="md-nav__link">
         
   
   
@@ -1547,7 +1547,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_19/" class="md-nav__link">
+      <a href="../models/1_19/" class="md-nav__link">
         
   
   
@@ -1575,7 +1575,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_18/" class="md-nav__link">
+      <a href="../models/1_18/" class="md-nav__link">
         
   
   
@@ -1603,7 +1603,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_17/" class="md-nav__link">
+      <a href="../models/1_17/" class="md-nav__link">
         
   
   
@@ -1631,7 +1631,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_16_b/" class="md-nav__link">
+      <a href="../models/1_16_b/" class="md-nav__link">
         
   
   
@@ -1659,7 +1659,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_16_a/" class="md-nav__link">
+      <a href="../models/1_16_a/" class="md-nav__link">
         
   
   
@@ -1687,7 +1687,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../models/1_16/" class="md-nav__link">
+      <a href="../models/1_16/" class="md-nav__link">
         
   
   
@@ -1730,7 +1730,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../renders/" class="md-nav__link">
+      <a href="../renders/" class="md-nav__link">
         
   
   
@@ -1809,7 +1809,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how/problem/" class="md-nav__link">
+      <a href="../how/problem/" class="md-nav__link">
         
   
   
@@ -1837,7 +1837,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how/environments/" class="md-nav__link">
+      <a href="../how/environments/" class="md-nav__link">
         
   
   
@@ -1865,7 +1865,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how/observations/" class="md-nav__link">
+      <a href="../how/observations/" class="md-nav__link">
         
   
   
@@ -1893,7 +1893,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how/actions/" class="md-nav__link">
+      <a href="../how/actions/" class="md-nav__link">
         
   
   
@@ -1921,7 +1921,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how/policy/" class="md-nav__link">
+      <a href="../how/policy/" class="md-nav__link">
         
   
   
@@ -1949,7 +1949,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how/objective/" class="md-nav__link">
+      <a href="../how/objective/" class="md-nav__link">
         
   
   
@@ -1977,7 +1977,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../how/separation/" class="md-nav__link">
+      <a href="../how/separation/" class="md-nav__link">
         
   
   
@@ -2064,7 +2064,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../training/" class="md-nav__link">
+      <a href="../training/" class="md-nav__link">
         
   
   
@@ -2092,7 +2092,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../training/reference/" class="md-nav__link">
+      <a href="../training/reference/" class="md-nav__link">
         
   
   
@@ -2120,7 +2120,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../training/compute/" class="md-nav__link">
+      <a href="../training/compute/" class="md-nav__link">
         
   
   
@@ -2148,7 +2148,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../training/tensorboard/" class="md-nav__link">
+      <a href="../training/tensorboard/" class="md-nav__link">
         
   
   
@@ -2180,26 +2180,31 @@
       
   
   
+    
   
   
+  
     
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -2217,7 +2222,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2235,7 +2240,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../evaluation/" class="md-nav__link">
+      <a href="../evaluation/" class="md-nav__link">
         
   
   
@@ -2260,10 +2265,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../coverage/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coverage
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -2279,6 +2311,59 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#windowed-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Windowed agents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-aircraft-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10-aircraft agents
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runs-in-the-code-repo-that-the-docs-do-not-cover" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runs in the code repo that the docs do not cover
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2350,7 +2435,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../findings/" class="md-nav__link">
+      <a href="../findings/" class="md-nav__link">
         
   
   
@@ -2378,7 +2463,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../findings/reselection/" class="md-nav__link">
+      <a href="../findings/reselection/" class="md-nav__link">
         
   
   
@@ -2406,7 +2491,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../findings/sequencing/" class="md-nav__link">
+      <a href="../findings/sequencing/" class="md-nav__link">
         
   
   
@@ -2434,7 +2519,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../findings/order-first/" class="md-nav__link">
+      <a href="../findings/order-first/" class="md-nav__link">
         
   
   
@@ -2462,7 +2547,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../findings/capacity/" class="md-nav__link">
+      <a href="../findings/capacity/" class="md-nav__link">
         
   
   
@@ -2490,7 +2575,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../findings/long-streams/" class="md-nav__link">
+      <a href="../findings/long-streams/" class="md-nav__link">
         
   
   
@@ -2518,7 +2603,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../findings/lookahead/" class="md-nav__link">
+      <a href="../findings/lookahead/" class="md-nav__link">
         
   
   
@@ -2546,7 +2631,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../findings/curriculum/" class="md-nav__link">
+      <a href="../findings/curriculum/" class="md-nav__link">
         
   
   
@@ -2574,7 +2659,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../findings/evaluation-noise/" class="md-nav__link">
+      <a href="../findings/evaluation-noise/" class="md-nav__link">
         
   
   
@@ -2609,7 +2694,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../log/" class="md-nav__link">
+      <a href="../log/" class="md-nav__link">
         
   
   
@@ -2636,7 +2721,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../roadmap/" class="md-nav__link">
+      <a href="../roadmap/" class="md-nav__link">
         
   
   
@@ -2660,31 +2745,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
         
           
-          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
             
   
   
@@ -2702,7 +2782,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_10">
             <span class="md-nav__icon md-icon"></span>
             
@@ -2720,7 +2800,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../archive/" class="md-nav__link">
         
   
   
@@ -2748,7 +2828,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../clearance-sets/" class="md-nav__link">
+      <a href="../archive/clearance-sets/" class="md-nav__link">
         
   
   
@@ -2776,7 +2856,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ten-aircraft-reward/" class="md-nav__link">
+      <a href="../archive/ten-aircraft-reward/" class="md-nav__link">
         
   
   
@@ -2804,7 +2884,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../ten-aircraft-tests/" class="md-nav__link">
+      <a href="../archive/ten-aircraft-tests/" class="md-nav__link">
         
   
   
@@ -2832,7 +2912,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../early-runs/" class="md-nav__link">
+      <a href="../archive/early-runs/" class="md-nav__link">
         
   
   
@@ -2857,37 +2937,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Point merge
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../archive/point-merge/" class="md-nav__link">
         
   
   
@@ -2903,59 +2956,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#what-was-tried" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What was tried
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#why-it-was-hard" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Why it was hard
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#stitching-two-agents" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Stitching two agents
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2975,7 +2975,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../glossary/" class="md-nav__link">
+      <a href="../glossary/" class="md-nav__link">
         
   
   
@@ -3022,10 +3022,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-was-tried" class="md-nav__link">
+  <a href="#windowed-agents" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What was tried
+        Windowed agents
       
     </span>
   </a>
@@ -3033,10 +3033,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#why-it-was-hard" class="md-nav__link">
+  <a href="#10-aircraft-agents" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why it was hard
+        10-aircraft agents
       
     </span>
   </a>
@@ -3044,10 +3044,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#stitching-two-agents" class="md-nav__link">
+  <a href="#runs-in-the-code-repo-that-the-docs-do-not-cover" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Stitching two agents
+        Runs in the code repo that the docs do not cover
       
     </span>
   </a>
@@ -3071,41 +3071,19 @@
 
 
 
-<h1 id="point-merge-bgy">Point merge (BGY)<a class="headerlink" href="#point-merge-bgy" title="Permanent link">&para;</a></h1>
-<div class="admonition abstract">
-<p class="admonition-title">Summary</p>
-<p>Point merge at Bergamo (<code>VALIDATION_USE_CASE_2</code>) was the alternative scenario to the MXP
-trombone. The first single-agent run on it (<code>1_24_pms</code>) stayed near the do-nothing floor; the later
-<code>1_30_pms</code> does better but remains far below MXP.
-Its known blocker was observation saturation, the same problem log scaling later fixed for
-MXP. Point merge was also solved by stitching two 10-aircraft agents; the windowed agent is the
-version of that idea that needs no hand-off rule. Every current run is on MXP.</p>
-</div>
-<h2 id="what-was-tried">What was tried<a class="headerlink" href="#what-was-tried" title="Permanent link">&para;</a></h2>
+<!-- Generated by tools/build_model_docs.py from models.yaml. Do not edit by hand. -->
+<h1 id="coverage">Coverage<a class="headerlink" href="#coverage" title="Permanent link">&para;</a></h1>
+<p>Which test has been run on which agent. Every gap is queued in <a href="../backfill/">BACKFILL</a>; results tables that list models by rule (<code>all</code>, <code>reselection</code>, <code>scratch</code>) pick up new runs and new tests automatically. Rebuilt by <code>tools/build_model_docs.py</code>; <code>--coverage</code> prints the same check.</p>
+<h2 id="windowed-agents">Windowed agents<a class="headerlink" href="#windowed-agents" title="Permanent link">&para;</a></h2>
+<div class="tada-table-wrap"><table class="tada-table tada-coverage"><thead><tr><th>model</th><th>status</th><th>20-flight</th><th>2×20</th><th>10 attempts</th><th>lookahead</th><th>training curve</th><th>3 renders</th><th>60 feasible</th><th>60 unfiltered</th><th>100 feasible</th><th>100 unfiltered</th><th>order first</th></tr></thead><tbody><tr><td><a href="../models/1_48/">1_48</a></td><td>in progress</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-ok">✓</td><td class="cov-miss">0/3</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_47/">1_47</a></td><td>in progress</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-ok">✓</td><td class="cov-miss">0/3</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_46/">1_46</a></td><td>complete</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_44/">1_44</a></td><td>complete</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_43/">1_43</a></td><td>complete</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_42/">1_42</a></td><td>complete</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_41/">1_41</a></td><td>complete</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_40/">1_40</a></td><td>complete</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_39/">1_39</a></td><td>not adopted</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_38/">1_38</a></td><td>complete</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td></tr><tr><td><a href="../models/1_37/">1_37</a></td><td>complete</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td></tr><tr><td><a href="../models/1_36/">1_36</a></td><td>complete</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_35/">1_35</a></td><td>stopped early</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-ok">✓</td></tr><tr><td><a href="../models/1_34/">1_34</a></td><td>stopped early</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-miss">—</td><td class="cov-ok">✓</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_33/">1_33</a></td><td>complete</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_32/">1_32</a></td><td>complete</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-ok">✓</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td></tr><tr><td><a href="../models/1_31/">1_31</a></td><td>stopped early</td><td class="cov-ok">✓</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-ok">✓</td><td class="cov-miss">0/3</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td><td class="cov-miss">—</td></tr></tbody></table></div>
+
+<h2 id="10-aircraft-agents">10-aircraft agents<a class="headerlink" href="#10-aircraft-agents" title="Permanent link">&para;</a></h2>
+<div class="tada-table-wrap"><table class="tada-table tada-coverage"><thead><tr><th>model</th><th>100-seed score</th><th>attempts to solve</th><th>training curve</th><th>note</th></tr></thead><tbody><tr><td><a href="../models/1_30_pms/">1_30_pms</a></td><td>✓</td><td>—</td><td>—</td><td></td></tr><tr><td><a href="../models/1_29/">1_29</a></td><td>✓</td><td>—</td><td>✓</td><td></td></tr><tr><td><a href="../models/1_28/">1_28</a></td><td>—</td><td>—</td><td>—</td><td>stopped at 20 480 steps, 6 minutes into the run; a score would measure an untrained network</td></tr><tr><td><a href="../models/1_27a/">1_27a</a></td><td>✓</td><td>✓</td><td>✓</td><td></td></tr><tr><td><a href="../models/1_27/">1_27</a></td><td>✓</td><td>✓</td><td>✓</td><td></td></tr><tr><td><a href="../models/1_26/">1_26</a></td><td>✓</td><td>✓</td><td>✓</td><td></td></tr><tr><td><a href="../models/1_25/">1_25</a></td><td>✓</td><td>—</td><td>—</td><td>not replayable</td></tr><tr><td><a href="../models/1_24_pms/">1_24_pms</a></td><td>—</td><td>—</td><td>—</td><td>not replayable</td></tr><tr><td><a href="../models/1_24/">1_24</a></td><td>—</td><td>—</td><td>—</td><td>not replayable</td></tr><tr><td><a href="../models/1_23/">1_23</a></td><td>—</td><td>—</td><td>—</td><td>not replayable</td></tr><tr><td><a href="../models/1_22/">1_22</a></td><td>✓</td><td>—</td><td>—</td><td>not replayable</td></tr><tr><td><a href="../models/1_21/">1_21</a></td><td>—</td><td>—</td><td>—</td><td>not replayable</td></tr><tr><td><a href="../models/1_20/">1_20</a></td><td>—</td><td>—</td><td>—</td><td>not replayable</td></tr><tr><td><a href="../models/1_19/">1_19</a></td><td>—</td><td>—</td><td>—</td><td>not replayable</td></tr><tr><td><a href="../models/1_18/">1_18</a></td><td>—</td><td>—</td><td>—</td><td>not replayable</td></tr><tr><td><a href="../models/1_17/">1_17</a></td><td>—</td><td>—</td><td>—</td><td>not replayable</td></tr><tr><td><a href="../models/1_16_b/">1_16_b</a></td><td>—</td><td>—</td><td>—</td><td>not replayable</td></tr><tr><td><a href="../models/1_16_a/">1_16_a</a></td><td>—</td><td>—</td><td>—</td><td>not replayable</td></tr><tr><td><a href="../models/1_16/">1_16</a></td><td>—</td><td>—</td><td>—</td><td>not replayable</td></tr></tbody></table></div>
+
+<h2 id="runs-in-the-code-repo-that-the-docs-do-not-cover">Runs in the code repo that the docs do not cover<a class="headerlink" href="#runs-in-the-code-repo-that-the-docs-do-not-cover" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong><code>1_24_pms</code></strong> (<a href="../../models/1_24_pms/">card</a>): the PMS campaign (commit <code>f9ecc24</code>) added the BGY
-  scenario, a sixth success tier and an analysis harness. The best checkpoint stayed near the
-  do-nothing floor: 0 of 100 seeds solved. Its renders are on its card.</li>
-<li><strong><code>1_30_pms</code></strong> (<a href="../../models/1_30_pms/">card</a>): launched 24 Aug; not documented beyond its run
-  name. Scored on 28 Sep on the point-merge scenario it trained on, it is the best point-merge
-  agent so far (the July runs solved 0–1 of 100), but still far below MXP, and it loses
-  separation in over a quarter of episodes. Its tier does not compare with the July runs': the
-  ladder changed between them.</li>
-<li>On 24 Sep the code's default difficulty was switched to point merge (commit <code>bfd1355</code>). The
-  windowed env sets MXP explicitly in its own config, so no windowed run is affected.</li>
+<li><code>atc_run_1_45_scratch_d_s2</code> (aborted at start)</li>
 </ul>
-<h2 id="why-it-was-hard">Why it was hard<a class="headerlink" href="#why-it-was-hard" title="Permanent link">&para;</a></h2>
-<p>Point merge's observations were the worst saturated: <code>time_to_target</code> was pinned at ±1 in 71.4% of
-samples. Log scaling brought that to 15.1% (<a href="../ten-aircraft-tests/">10-aircraft tests</a>). No
-point-merge run was trained after that fix and scored, so whether it was the whole blocker is
-untested.</p>
-<h2 id="stitching-two-agents">Stitching two agents<a class="headerlink" href="#stitching-two-agents" title="Permanent link">&para;</a></h2>
-<p>Point merge was solved by stitching two 10-aircraft agents, up to 99% on the validation seeds (as
-reported on the old windowed page; the underlying files are not in this repo's registry). On the
-trombone the halves overlap in time, because flight 11 spawns before flight 10 lands, so stitching
-there needs a hand-off rule. The <a href="../../how/environments/#windowed">windowed env</a> is the version that
-needs none: it has to beat roughly 0.55² ≈ 0.30 all-on-time, what two independent 10-flight halves
-would score.</p>
 
 
 
@@ -3141,7 +3119,7 @@ would score.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../early-runs/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Early runs">
+          <a href="../evaluation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Protocol">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3151,20 +3129,20 @@ would score.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Early runs
+                Protocol
               </div>
             </div>
           </a>
         
         
           
-          <a href="../../glossary/" class="md-footer__link md-footer__link--next" aria-label="Next: Glossary">
+          <a href="../findings/" class="md-footer__link md-footer__link--next" aria-label="Next: Overview">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Glossary
+                Overview
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -3201,12 +3179,12 @@ would score.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "navigation.footer", "navigation.tracking", "content.code.copy", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
       
-        <script src="../../javascripts/tada.js"></script>
+        <script src="../javascripts/tada.js"></script>
       
     
   </body>

@@ -300,17 +300,18 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../../evaluation/" class="md-tabs__link">
-        
-  
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="../../evaluation/" class="md-tabs__link">
+          
+  
   
   Evaluation
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -638,6 +639,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../models/1_48/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_48
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../models/1_47/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_47
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2125,9 +2182,25 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../evaluation/" class="md-nav__link">
+    
+    
+    
+    
+      
+      
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -2141,7 +2214,79 @@
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Evaluation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Protocol
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coverage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coverage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -3019,16 +3164,20 @@ conflict avoidance: by the objective, per seed it is better on 27 seeds and wors
 <h3 id="with-critics-that-learned-the-lexicographic-objective">With critics that learned the lexicographic objective<a class="headerlink" href="#with-critics-that-learned-the-lexicographic-objective" title="Permanent link">&para;</a></h3>
 <p>The same 4-candidate lookahead, deterministic vs lookahead, 100 seeds (numbers from the cards'
 evaluation files):</p>
-<!-- gen:compare models=1_35,1_37,1_36,1_38,1_39 batteries=f20,la4 -->
-<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../../models/1_35/">1_35</a></th><th><a href="../../models/1_37/">1_37</a></th><th><a href="../../models/1_36/">1_36</a></th><th><a href="../../models/1_38/">1_38</a></th><th><a href="../../models/1_39/">1_39</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>24</td><td>34</td><td>65</td><td>63</td><td>40</td></tr><tr><td>20-flight: hard-solved</td><td>0</td><td>1</td><td>29</td><td>24</td><td>5</td></tr><tr><td>20-flight: separation lost</td><td>8</td><td>4</td><td>9</td><td>3</td><td>5</td></tr><tr><td>20-flight: flights on time</td><td>0.826</td><td>0.832</td><td>0.916</td><td>0.927</td><td>0.858</td></tr><tr><td>20-flight: clearances / stream</td><td>86.8</td><td>80.6</td><td>128.3</td><td>121.9</td><td>125.2</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>0.85</td><td>1.02</td><td>0.07</td><td>0.54</td><td>0.66</td></tr><tr><td>with lookahead: solved</td><td>8</td><td>7</td><td>39</td><td>30</td><td>26</td></tr><tr><td>with lookahead: hard-solved</td><td>0</td><td>0</td><td>10</td><td>8</td><td>6</td></tr><tr><td>with lookahead: separation lost</td><td>5</td><td>7</td><td>2</td><td>1</td><td>5</td></tr><tr><td>with lookahead: flights on time</td><td>0.781</td><td>0.774</td><td>0.896</td><td>0.893</td><td>0.833</td></tr></tbody></table>
+<!-- gen:compare models=all batteries=f20,la4 -->
+<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../../models/1_31/">1_31</a></th><th><a href="../../models/1_32/">1_32</a></th><th><a href="../../models/1_33/">1_33</a></th><th><a href="../../models/1_34/">1_34</a></th><th><a href="../../models/1_35/">1_35</a></th><th><a href="../../models/1_36/">1_36</a></th><th><a href="../../models/1_37/">1_37</a></th><th><a href="../../models/1_38/">1_38</a></th><th><a href="../../models/1_39/">1_39</a></th><th><a href="../../models/1_40/">1_40</a></th><th><a href="../../models/1_41/">1_41</a></th><th><a href="../../models/1_42/">1_42</a></th><th><a href="../../models/1_43/">1_43</a></th><th><a href="../../models/1_44/">1_44</a></th><th><a href="../../models/1_46/">1_46</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>1</td><td>29</td><td>20</td><td>21</td><td>24</td><td>65</td><td>34</td><td>63</td><td>40</td><td>22</td><td>14</td><td>16</td><td>22</td><td>37</td><td>44</td></tr><tr><td>20-flight: hard-solved</td><td>0</td><td>4</td><td>1</td><td>0</td><td>0</td><td>29</td><td>1</td><td>24</td><td>5</td><td>2</td><td>2</td><td>1</td><td>6</td><td>13</td><td>13</td></tr><tr><td>20-flight: separation lost</td><td>32</td><td>21</td><td>17</td><td>13</td><td>8</td><td>9</td><td>4</td><td>3</td><td>5</td><td>9</td><td>9</td><td>7</td><td>6</td><td>6</td><td>7</td></tr><tr><td>20-flight: flights on time</td><td>0.467</td><td>0.731</td><td>0.750</td><td>0.773</td><td>0.826</td><td>0.916</td><td>0.832</td><td>0.927</td><td>0.858</td><td>0.779</td><td>0.793</td><td>0.790</td><td>0.801</td><td>0.817</td><td>0.852</td></tr><tr><td>20-flight: clearances / stream</td><td>—</td><td>—</td><td>106.0</td><td>110.4</td><td>86.8</td><td>128.3</td><td>80.6</td><td>121.9</td><td>125.2</td><td>161.9</td><td>158.1</td><td>155.8</td><td>140.6</td><td>153.7</td><td>158.7</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>—</td><td>—</td><td>0.95</td><td>0.81</td><td>0.85</td><td>0.07</td><td>1.02</td><td>0.54</td><td>0.66</td><td>0.98</td><td>0.60</td><td>0.62</td><td>1.05</td><td>1.07</td><td>0.56</td></tr><tr><td>with lookahead: solved</td><td>—</td><td>7</td><td>4</td><td>15</td><td>8</td><td>39</td><td>7</td><td>30</td><td>26</td><td>19</td><td>22</td><td>29</td><td>24</td><td>31</td><td>37</td></tr><tr><td>with lookahead: hard-solved</td><td>—</td><td>1</td><td>1</td><td>2</td><td>0</td><td>10</td><td>0</td><td>8</td><td>6</td><td>0</td><td>1</td><td>1</td><td>4</td><td>7</td><td>19</td></tr><tr><td>with lookahead: separation lost</td><td>—</td><td>10</td><td>7</td><td>6</td><td>5</td><td>2</td><td>7</td><td>1</td><td>5</td><td>7</td><td>2</td><td>5</td><td>1</td><td>4</td><td>4</td></tr><tr><td>with lookahead: flights on time</td><td>—</td><td>0.687</td><td>0.684</td><td>0.766</td><td>0.781</td><td>0.896</td><td>0.774</td><td>0.893</td><td>0.833</td><td>0.802</td><td>0.835</td><td>0.817</td><td>0.788</td><td>0.825</td><td>0.849</td></tr></tbody></table>
 
 <!-- /gen -->
 
 <ul>
-<li>On one-pick policies (<code>1_35</code>, <code>1_37</code>) search still buys safety with most of the precision; on the
-  control it does not even buy safety.</li>
-<li>On reselection policies it keeps most of both. The critic that learned to use a second pick
-  values the candidates well enough to steer without flattening the policy.</li>
+<li>On one-pick policies (<code>1_32</code>–<code>1_35</code>, <code>1_37</code>) search buys safety with most of the precision; on
+  the control <code>1_37</code> it does not even buy safety.</li>
+<li>On the fine-tuned reselection policies (<code>1_36</code>, <code>1_38</code>, <code>1_39</code>) it keeps most of both: fewer or
+  equal losses of separation, a smaller loss of solved streams.</li>
+<li>On the reselection agents trained from scratch (<code>1_40</code>–<code>1_44</code>, <code>1_46</code>) it often <em>adds</em> solved
+  streams while cutting losses of separation (<code>1_41</code> and <code>1_42</code> most clearly), and costs the two
+  strongest of them (<code>1_44</code>, <code>1_46</code>) a few solves for fewer losses. A weaker policy has more to gain
+  from a critic that can overrule its first choice.</li>
 </ul>
 <h2 id="the-refusal-shield">The refusal shield<a class="headerlink" href="#the-refusal-shield" title="Permanent link">&para;</a></h2>
 <p><code>render_policy.py</code>'s shield refuses a clearance that introduces a near-horizon conflict that
