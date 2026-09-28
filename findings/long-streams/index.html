@@ -2577,6 +2577,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#feasible-2x20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feasible 40-flight streams (feas40, test51)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#no-drift-along-the-stream" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3066,6 +3077,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#feasible-2x20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Feasible 40-flight streams (feas40, test51)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#no-drift-along-the-stream" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3201,6 +3223,18 @@ and lists every agent flown on long streams so far; agents not yet flown are nam
 <li><strong>Lookahead</strong> on feasible 100-flight streams solved 2 of 12 strictly, against 0 without; its
   on-time rate is slightly lower.</li>
 </ul>
+<h2 id="feasible-2x20">Feasible 40-flight streams (feas40, test51)<a class="headerlink" href="#feasible-2x20" title="Permanent link">&para;</a></h2>
+<p>The stitched 2×20 validation set can't serve as a feasible benchmark, because only 8 of its 100
+streams pass the filter. Two feasible sets of 40-flight streams (two 20-flight scenarios, a random
+120–900 s cooling gap) were drawn instead: 800 candidates, of which 91 (11.4%) pass the same
+650 s criterion. The first 40 are <strong>feas40</strong>, scored every 1M steps by the trackers of the
+hard-solved fine-tunes. The other 51 are <strong>test51</strong>, held out to confirm a checkpoint picked on
+its feas40 score, since picking on feas40 biases that score. Deterministic, frame pinned, each
+stream run to its own horizon.</p>
+<!-- gen:feasible-2x20 models=all -->
+<p>No agent has been scored on these sets yet.</p>
+<!-- /gen -->
+
 <h2 id="no-drift-along-the-stream">No drift along the stream<a class="headerlink" href="#no-drift-along-the-stream" title="Permanent link">&para;</a></h2>
 <p>On time among landed flights, by 20-flight wave:</p>
 <p><img alt="On-time rate by 20-flight segment, feasible and unfiltered 100-flight streams" src="../../assets/findings/long_streams_on_time_by_segment.png" /></p>

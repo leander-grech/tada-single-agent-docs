@@ -785,10 +785,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#long-streams" class="md-nav__link">
+  <a href="#long-and-feasible-streams" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Long streams
+        Long and feasible streams
       
     </span>
   </a>
@@ -3120,10 +3120,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#long-streams" class="md-nav__link">
+  <a href="#long-and-feasible-streams" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Long streams
+        Long and feasible streams
       
     </span>
   </a>
@@ -3245,8 +3245,8 @@
 <p>100 validation seeds (never trained on), paired seed by seed. <strong>Solved</strong>: no loss of separation and every flight within ±60 s of its AMAN target; <strong>hard-solved</strong>: the same within ±30 s. A delta is <strong>bold</strong> only when the paired test says so (McNemar on per-seed outcomes, or a paired SE on the on-time rate, 95%).</p>
 <table class="tada-table"><thead><tr><th></th><th>value</th><th>vs parent <code>1_43</code></th><th>vs champion <code>1_38</code></th></tr></thead><tbody><tr class="tada-group"><th colspan="4">20-flight streams</th></tr><tr><td>solved</td><td>44</td><td><strong>+22 (28 gained, 6 lost; z +3.77)</strong></td><td><strong>−19 (6 gained, 25 lost; z −3.41)</strong></td></tr><tr><td>hard-solved</td><td>13</td><td>+7 (13 gained, 6 lost, n.s.)</td><td><strong>−11 (5 gained, 16 lost; z −2.40)</strong></td></tr><tr><td>separation lost</td><td>7</td><td>+1 (3 fixed, 4 new, n.s.)</td><td>+4 (1 fixed, 5 new, n.s.)</td></tr><tr><td>flights on time</td><td>0.852</td><td><strong>+0.051 (SE 0.016)</strong></td><td><strong>−0.074 (SE 0.017)</strong></td></tr><tr><td>clearances / stream</td><td>158.7</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">stitched 2×20 streams</th></tr><tr><td>solved</td><td>17</td><td>+9 (14 gained, 5 lost, n.s.)</td><td><strong>−17 (4 gained, 21 lost; z −3.40)</strong></td></tr><tr><td>hard-solved</td><td>3</td><td>+3 (3 gained, 0 lost, n.s.)</td><td>−6 (3 gained, 9 lost, n.s.)</td></tr><tr><td>separation lost</td><td>8</td><td>−3 (10 fixed, 7 new, n.s.)</td><td>−7 (14 fixed, 7 new, n.s.)</td></tr><tr><td>flights on time</td><td>0.818</td><td><strong>+0.073 (SE 0.019)</strong></td><td><strong>−0.047 (SE 0.021)</strong></td></tr><tr><td>clearances / stream</td><td>300.1</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">critic-guided lookahead (4 candidates)</th></tr><tr><td>solved</td><td>37</td><td><strong>+13 (20 gained, 7 lost; z +2.50)</strong></td><td>+7 (22 gained, 15 lost, n.s.)</td></tr><tr><td>hard-solved</td><td>19</td><td><strong>+15 (17 gained, 2 lost; z +3.44)</strong></td><td><strong>+11 (16 gained, 5 lost; z +2.40)</strong></td></tr><tr><td>separation lost</td><td>4</td><td>+3 (1 fixed, 4 new, n.s.)</td><td>+3 (0 fixed, 3 new, n.s.)</td></tr><tr><td>flights on time</td><td>0.849</td><td><strong>+0.061 (SE 0.016)</strong></td><td><strong>−0.043 (SE 0.014)</strong></td></tr><tr><td>clearances / stream</td><td>146.6</td><td>—</td><td>—</td></tr><tr class="tada-group"><th colspan="4">10 attempts (deterministic + 9 sampled)</th></tr><tr><td>solved in at least one of 10 (pass@10)</td><td>56</td><td><strong>+22 (25 gained, 3 lost; z +4.16)</strong></td><td><strong>−20 (2 gained, 22 lost; z −4.08)</strong></td></tr><tr><td>solved by one sampled attempt (pass@1)</td><td>0.12</td><td>—</td><td>—</td></tr><tr><td>separation lost, best attempt</td><td>1</td><td>+0 (0 fixed, 0 new, n.s.)</td><td>−1 (1 fixed, 0 new, n.s.)</td></tr><tr><td>flights on time, best attempt</td><td>0.890</td><td>—</td><td>—</td></tr><tr><td>never solved: safety-bound / precision-bound</td><td>1 / 43</td><td>—</td><td>—</td></tr></tbody></table>
 
-<h3 id="long-streams">Long streams<a class="headerlink" href="#long-streams" title="Permanent link">&para;</a></h3>
-<p>60- and 100-flight stitched streams (3 or 5 waves, 600–900 s gaps), deterministic; see <a href="../../findings/long-streams/">Long streams</a>.</p>
+<h3 id="long-and-feasible-streams">Long and feasible streams<a class="headerlink" href="#long-and-feasible-streams" title="Permanent link">&para;</a></h3>
+<p>60- and 100-flight stitched streams (3 or 5 waves, 600–900 s gaps) and the feasible 40-flight sets feas40 and test51, deterministic; see <a href="../../findings/long-streams/">Long streams</a>.</p>
 <table class="tada-table"><thead><tr><th>streams</th><th>n</th><th>no loss of separation</th><th>solved</th><th>on time</th></tr></thead><tbody><tr><td>60 flights, feasible</td><td>27</td><td>26</td><td>5</td><td>0.947</td></tr><tr><td>60 flights, unfiltered</td><td>40</td><td>36</td><td>1</td><td>0.781</td></tr><tr><td>100 flights, feasible</td><td>12</td><td>12</td><td>0</td><td>0.967</td></tr><tr><td>100 flights, unfiltered</td><td>40</td><td>29</td><td>0</td><td>0.741</td></tr></tbody></table>
 
 <p>Sources: f20 <code>experiments/atc_run_1_46_cont_1_43/track_scores/final_model.csv</code>, att10 <code>analysis/2026-09-27_scratch/backfill/eval/1_46_att10.csv</code>, la4 <code>analysis/2026-09-27_scratch/backfill/eval/1_46_la4.csv</code>, ls_k3_all <code>analysis/2026-09-27_scratch/longstreams/eval/1_46_k3_all.csv</code>, ls_k3_feasible <code>analysis/2026-09-27_scratch/longstreams/eval/1_46_k3_feasible.csv</code>, ls_k5_all <code>analysis/2026-09-27_scratch/longstreams/eval/1_46_k5_all.csv</code>, ls_k5_feasible <code>analysis/2026-09-27_scratch/longstreams/eval/1_46_k5_feasible.csv</code>, s2x20 <code>analysis/2026-09-27_scratch/backfill/eval/1_46_s2x20.csv</code>.</p>
