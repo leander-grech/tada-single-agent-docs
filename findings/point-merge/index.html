@@ -3171,9 +3171,10 @@ land in their AMAN sequence position.</p>
   the most losses (34); <code>1_48</code> has the fewest (24).</li>
 <li><strong>Doing nothing gives no floor to speak of</strong> on either scenario, so none of the agents' safety on
   MXP came from easy traffic.</li>
-<li>For every agent and for do-nothing, one point-merge stream ends at the episode cap before its last
-  scheduled landing (the scorer's warning in each <code>.txt</code>); flights still airborne there count as not
-  landed.</li>
+<li>One point-merge stream, seed 438989805, outlasts the episode cap that training uses (200 steps
+  per 20-flight segment), and the scorer flags it in every file. It changes no score: every agent
+  lands all 20 flights on it, and do-nothing loses separation at step 55, before the cap. Scoring
+  now runs every stream to its own horizon (code commit <code>cbead99</code>); MXP streams never reach the cap.</li>
 </ul>
 <p>The earlier point-merge agents, <code>1_24_pms</code> and <code>1_30_pms</code> (<a href="../../archive/point-merge/">archive</a>),
 were 10-aircraft agents on an older simulator and are not comparable with these numbers.</p>
