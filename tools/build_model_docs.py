@@ -641,6 +641,161 @@ class Build:
                  + "".join(f"<th>{esc(n)}</th>" for _, n, *_ in series) + f"</tr></thead><tbody>{rows}</tbody></table>\n</details>\n")
         return '<div class="tada-curve-wrap">' + "".join(out) + "</div>\n\n" + table
 
+    # ------------------------------------------------------------------ lineage chart
+    def branch_step(self, m: Model) -> int:
+        """Step, in the parent run's own count, at which m started from its parent."""
+        if m.raw.get("branch_step") is not None:
+            return int(m.raw["branch_step"])
+        rf = m.meta.get("resumed_from") or {}
+        if isinstance(rf, dict) and rf.get("steps") is not None and m.parent:
+            return int(rf["steps"])
+        iw = m.meta.get("init_weights") or ""
+        mt = re.search(r"ppo_tada_(\d+)_steps", iw)
+        if mt:
+            return int(mt.group(1))
+        par = self.models.get(m.parent)
+        return int(par.steps or 0) if par else 0
+
+    def lineage_segments(self, m: Model) -> list[dict]:
+        chain = self.lineage(m)
+        segs = []
+        for i, c in enumerate(chain):
+            start = 0
+            if i > 0:
+                start = segs[-1]["start"] + self.branch_step(c)
+                segs[-1]["end"] = start  # an ancestor's stretch ends where this child branched off it
+            segs.append({"model": c, "start": start, "end": start + (c.steps or 0),
+                         "cum": c.raw.get("curve_steps") == "cumulative",
+                         "branch": self.branch_step(c) if i > 0 else 0})
+        return segs
+
+    def lineage_points(self, seg: dict, track: str, limit) -> list[tuple]:
+        """(x, solved-like count, separation count) points of one segment, in the card's metric."""
+        c = seg["model"]
+        if c.track != track:
+            return []
+        pts = []
+        for p in c.curve:
+            local = p["step"] - seg["branch"] if seg["cum"] else p["step"]
+            if limit is not None and local > limit:
+                continue
+            x = seg["start"] + local
+            if track == "windowed":
+                pts.append((x, p["solved"], p["separation_lost"]))
+            else:
+                pts.append((x, p["success"], p["separation"]))
+        # no per-checkpoint scores: plot the run's evaluated checkpoint, if its child did not branch off before it
+        if not pts and (limit is None or limit >= (c.steps or 0)):
+            if track == "windowed" and "f20" in c.summary:
+                f = c.summary["f20"]
+                pts.append((seg["start"] + (c.steps or 0), f["solved"], f["separation_lost"]))
+            elif track == "ten_aircraft":
+                h = self.ten_head(c)
+                if h:
+                    pts.append((seg["start"] + (c.steps or 0), round(100 * h["success"]), round(100 * h["separation"])))
+        return pts
+
+    def lineage_chart(self, m: Model) -> str:
+        segs = self.lineage_segments(m)
+        track = m.track
+        series = []
+        for i, sg in enumerate(segs):
+            limit = (sg["end"] - sg["start"]) if i < len(segs) - 1 else None
+            series.append(self.lineage_points(sg, track, limit))
+        if not any(series):
+            tail = (" (runs up to 1_25 cannot be replayed on today's code)."
+                    if track == "ten_aircraft" and m.id < "1_26" else ".")
+            return "No scored checkpoints anywhere in this run's lineage" + tail + "\n\n"
+        solved_name = "solved" if track == "windowed" else "success"
+        W, L, R, T = 720, 46, 16, 26
+        plot_b = 264
+        band_h = 16
+        xmax = max(sg["end"] for sg in segs) / 1e6 or 1
+        ymax = max(max(max(p[1], p[2]) for p in sr) for sr in series if sr)
+        ymax = max(10, int(math.ceil(ymax / 10.0) * 10))
+        X = lambda x: L + x / 1e6 / xmax * (W - L - R)
+        Y = lambda y: T + (1 - y / ymax) * (plot_b - T)
+        by = plot_b + 24
+        Htot = by + band_h + 6
+        o = [f'<svg class="tada-curve tada-lineage" viewBox="0 0 {W} {Htot}" role="img" '
+             f'aria-label="Training lineage of {esc(m.id)}">']
+        step_y = 10 if ymax <= 60 else 20
+        for gy in range(0, ymax + 1, step_y):
+            o.append(f'<line class="grid" x1="{L}" x2="{W - R}" y1="{Y(gy):.1f}" y2="{Y(gy):.1f}"/>'
+                     f'<text class="tick" x="{L - 6}" y="{Y(gy) + 3:.1f}" text-anchor="end">{gy}</text>')
+        tick = 1 if xmax <= 12 else (5 if xmax <= 50 else 10)
+        xt = 0
+        while xt <= xmax + 1e-9:
+            o.append(f'<text class="tick" x="{X(xt * 1e6):.1f}" y="{plot_b + 14}" text-anchor="middle">{xt:g}M</text>')
+            xt += tick
+        o.append(f'<text class="axis" x="{L - 40}" y="{T - 12}">seeds of 100</text>')
+        for sg in segs[1:]:
+            xx = X(sg["start"])
+            o.append(f'<line class="branch" x1="{xx:.1f}" x2="{xx:.1f}" y1="{T}" y2="{plot_b}"/>')
+        for i, (sg, pts) in enumerate(zip(segs, series)):
+            if not pts:
+                continue
+            cls = f"run-{i % 8}" + (" current" if sg["model"].id == m.id else "")
+            for k, dash in ((1, ""), (2, "5 4")):
+                if len(pts) > 1:
+                    path = " ".join(f"{'M' if j == 0 else 'L'}{X(p[0]):.1f},{Y(p[k]):.1f}" for j, p in enumerate(pts))
+                    o.append(f'<path class="line {cls}" d="{path}" stroke-dasharray="{dash}"/>')
+                for p in pts:
+                    cx, cy = X(p[0]), Y(p[k])
+                    name = solved_name if k == 1 else "separation lost"
+                    tip = (f"<title>{esc(sg['model'].id)}, {steps_str(p[0])} cumulative: "
+                           f"{name} {p[k]}</title>")
+                    if k == 1:
+                        o.append(f'<circle class="pt {cls}" cx="{cx:.1f}" cy="{cy:.1f}" r="3.5">{tip}</circle>')
+                    else:
+                        o.append(f'<path class="pt {cls}" d="M{cx:.1f},{cy - 4.5:.1f} L{cx + 4.5:.1f},{cy:.1f} '
+                                 f'L{cx:.1f},{cy + 4.5:.1f} L{cx - 4.5:.1f},{cy:.1f} Z">{tip}</path>')
+        for i, sg in enumerate(segs):
+            x0, x1 = X(sg["start"]), X(sg["end"])
+            other = sg["model"].track != track
+            cls = f"band run-{i % 8}" + (" other" if other else "")
+            o.append(f'<rect class="{cls}" x="{x0:.1f}" y="{by}" width="{max(1.5, x1 - x0):.1f}" height="{band_h}">'
+                     f"<title>{esc(sg['model'].id)}: {steps_str(sg['start'])} to {steps_str(sg['end'])} cumulative"
+                     f"{' (10-aircraft env)' if other else ''}</title></rect>")
+            if x1 - x0 > 34:
+                o.append(f'<text class="bandlabel" x="{(x0 + x1) / 2:.1f}" y="{by + 12}" '
+                         f'text-anchor="middle">{esc(sg["model"].id)}</text>')
+        o.append("</svg>")
+        leg = []
+        for i, sg in enumerate(segs):
+            c = sg["model"]
+            other = c.track != track
+            note = ""
+            if other:
+                note = " (10-aircraft env: a different task, so no curve here)"
+            elif not series[i]:
+                note = " (no scored checkpoints)"
+            elif not c.curve:
+                note = " (final evaluation only)"
+            cur = " current" if c.id == m.id else ""
+            leg.append(f'<span class="tada-leg{cur}"><span class="sw run-{i % 8}"></span>'
+                       f'<a href="{self._site_prefix}models/{c.id}/">{esc(c.id)}</a> '
+                       f"{steps_str(sg['end'] - sg['start'])}{note}</span>")
+        legend = ('<div class="tada-legend">' + "".join(leg)
+                  + f'<span class="tada-leg"><span class="ln solid"></span>{solved_name}</span>'
+                  + '<span class="tada-leg"><span class="ln dashed"></span>separation lost</span></div>')
+        rows = [f"<tr><td>{esc(sg['model'].id)}</td><td>{steps_str(p[0])}</td><td>{p[1]}</td><td>{p[2]}</td></tr>"
+                for sg, pts in zip(segs, series) for p in pts]
+        table = ('<details><summary>Table view</summary>\n<table class="tada-table"><thead><tr><th>run</th>'
+                 f"<th>cumulative steps</th><th>{solved_name}</th><th>separation lost</th></tr></thead>"
+                 f"<tbody>{''.join(rows)}</tbody></table>\n</details>\n")
+        srcs = sorted({c["file"] for sg in segs for c in (sg["model"].raw.get("curve") or [])})
+        cap = ("Every run this model descends from, on one axis of cumulative training steps from random "
+               "initialisation. Colour says which run each stretch of training came from; a vertical rule marks "
+               "each warm start, and an ancestor's curve stops where its child branched off. "
+               + ("Deterministic, the 100 validation seeds (20-flight streams). " if track == "windowed"
+                  else "Deterministic, the fixed 100-seed pool. ")
+               + ("A best-model checkpoint in the chain has no recorded step, so its run's full length is used. "
+                  if any("best_model" in sg["model"].checkpoint for sg in segs[:-1]) else "")
+               + "Runs without per-checkpoint scores show their final evaluation at the end of their stretch."
+               + (" Sources: " + ", ".join(f"`{x}`" for x in srcs) + "." if srcs else ""))
+        return legend + '\n<div class="tada-curve-wrap">' + "".join(o) + "</div>\n\n" + cap + "\n\n" + table
+
     # ------------------------------------------------------------------ cells
     def delta_cell(self, m: Model, ref: Model | None, bat: str, metric: str) -> str:
         """'+3 (6↑/3↓, n.s.)' style comparison for one metric of one battery."""
@@ -818,13 +973,8 @@ class Build:
         else:
             o.append(self.ten_scorecard(m, ref, champ))
         # learning curve
-        o.append("## Learning curve\n\n")
-        if m.curve:
-            src = ", ".join(f"`{c['file']}`" for c in m.raw.get("curve") or [])
-            o.append(f"Deterministic, the 100 validation seeds, per scored checkpoint. Source: {src}.\n\n")
-            o.append(self.curve_svg(m))
-        else:
-            o.append("No per-checkpoint scores for this run.\n\n")
+        o.append("## Training lineage\n\n")
+        o.append(self.lineage_chart(m))
         # renders
         o.append("## Renders\n\n")
         o.append(self.card_renders(m))

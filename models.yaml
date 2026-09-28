@@ -275,6 +275,7 @@ models:
     parent: null
     status: complete
     steps: 20000000       # 1_29_pbrs_attn to 10M, resumed in 1_29_pbrs_attn_d to 20M
+    curve_steps: cumulative
     whats_new: "Continuous PBRS coverage (the tier potential no longer a staircase) and one masked self-attention block over the aircraft slots (commit f6e0bcc). Its best checkpoint seeds the windowed track."
     note: "Reproduction check: the 20M checkpoint re-scored today on simulator 0.1.52 with the frame pinned gives success 0.61, separation 0.08, tier 4.10 (analysis/2026-09-27_scratch/backfill/eval/1_29_20M_d100.csv), against 0.59 / 0.08 / 4.06 on its recorded curve: the 10-aircraft numbers reproduce within frame noise."
     curve:
@@ -303,6 +304,7 @@ models:
     compare: "1_27"
     status: complete
     steps: 5025000        # resumed from 1_27 @ 4 975 000
+    curve_steps: cumulative   # progress_scored.csv counts steps from 1_27's start
     whats_new: "1_27 re-run from its 4.975M checkpoint on the cosine schedule it should have had: removes 1_27's learning-rate confound."
     evals: {d100: analysis/2026-08-18_1_27a_at10M_perseed.csv}
     headline: {file: experiments/atc_run_1_27_actionset_v2_a/progress_scored.csv, steps: 10000000}
