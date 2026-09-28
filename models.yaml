@@ -261,6 +261,7 @@ models:
     parent: "1_33"
     status: stopped
     whats_new: "The lexicographic objective (safety, then each flight's deviation bracket, then fewest clearances) plus potential-based shaping. Stopped at 0.8M in favour of 1_35."
+    curve: [{file: experiments/atc_run_1_34_windowed_outcome/track.csv, kind: track}]
     evals:
       f20: analysis/2026-09-26_1_35_final/f20.csv
       s2x20: analysis/2026-09-26_1_35_final/s2x20.csv

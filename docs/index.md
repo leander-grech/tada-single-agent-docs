@@ -48,7 +48,7 @@ clearances as it can. The current agent flies a stream of 20 flights through a w
   had been limited by bandwidth ([Findings](findings/reselection.md)).
 - **Long streams:** on feasible 60- and 100-flight streams the champion never loses separation, and
   precision does not drift ([Long streams](findings/long-streams.md)).
-- **Order first?** Forcing the AMAN order early makes every model tested worse
+- **Order first?** Forcing the AMAN order early lowers precision for all 16 agents tested
   ([Phase 0](findings/order-first.md)).
 - **From scratch:** the full design learns from random weights. You get what you train on: a
   curriculum ending on 20-flight streams (the new recipe default) is best there, one ending on

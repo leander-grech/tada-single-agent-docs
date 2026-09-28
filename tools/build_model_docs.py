@@ -730,6 +730,56 @@ class Build:
         return (f'<div class="tada-table-wrap"><table class="tada-table tada-bands"><thead>{head}</thead>'
                 f'<tbody>{"".join(rows)}</tbody></table></div>\n\n{note}')
 
+    def phase0_report(self) -> list:
+        """(model, parsed sections) for every model in the committed Phase-0 report.txt, oldest first."""
+        out = []
+        for d in self.reg.get("test_sources", {}).get("phase0", []):
+            t = self.src(d + "/report.txt").read_text()
+            for block in t.split("=== ")[1:]:
+                path = block.split(":", 1)[0].strip()
+                m = next((m for m in self.models.values() if m.model_path == path), None)
+                if m is None:
+                    self.errors.append(f"phase0 report: {path} is not a registered model")
+                    continue
+                g = lambda pat, b=block: re.search(pat, b)
+                out.append((m, block, g))
+        return sorted(out, key=lambda x: x[0].id)
+
+    def phase0_table(self, test: str) -> str:
+        rows = []
+        link = lambda m: f'<a href="{self._site_prefix}models/{m.id}/"><code>{m.id}</code></a>'
+        z = lambda v: (f"<strong>z {v}</strong>" if abs(float(v)) >= 1.96 else f"z {v}").replace("-", "−")
+        for m, block, g in self.phase0_report():
+            if test == "T1":
+                a = g(r"T1  solved     : (\d+) seeds with both outcomes; early order agrees with the hypothesis on \d+ \((\d+)%, sign test p = ([\d.]+)\)")
+                c = g(r"T1  within-seed correlation, early inversions vs on-time rate: r = ([+-][\d.]+)")
+                rows.append([link(m), a.group(1), f"{a.group(2)}% (p = {a.group(3)})", f"{float(c.group(1)):+.2f}".replace("-", "−")])
+            elif test == "T2":
+                pr = g(r"T2  predicted losses of separation: \d+ pair onsets; pair out of AMAN order in the preceding 20 min: (\d+)% vs base rate ([\d.]+)% \(ratio ([\d.]+)x\)")
+                nb = g(r"(\d+)% of predicted conflicts are between AMAN neighbours")
+                b = g(r"T2b actual losses of separation: (\d+) pairs; ever out of AMAN order (\d+)%, already at entry (\d+)%, so put out of order after entry (\d+)%; AMAN-adjacent \d+%; first predicted a median ([\d.]+) min before it happened \(never predicted: (\d+)\)")
+                rows.append([link(m), f"{pr.group(1)}% vs {pr.group(2)}% ({pr.group(3)}×)", f"{nb.group(1)}%",
+                             f"{b.group(2)}% of {b.group(1)}", f"{b.group(3)}% / {b.group(4)}%", b.group(5), b.group(6)])
+            else:
+                t3 = g(r"T3  order-first \(far >= 0 s\) vs plain.*?\| solved (\d+) -> (\d+) \(\+(\d+)/-(\d+), z ([+-][\d.]+)\) \| hard_solved (\d+) -> (\d+) \(\+(\d+)/-(\d+), z ([+-][\d.]+)\) \| sep (\d+) -> (\d+) \(\+(\d+)/-(\d+), z ([+-][\d.]+)\) \| on time ([+-][\d.]+) \(SE ([\d.]+)\) \| clearances \d+ -> \d+ \| overrides ([\d.]+)/episode")
+                v = t3.groups()
+                ot = float(v[15]); se = float(v[16])
+                ots = f"{ot:+.3f} (SE {se:.3f})".replace("-", "−")
+                rows.append([link(m), f"{v[0]} → {v[1]} (+{v[2]} / −{v[3]}, {z(v[4])})",
+                             f"{v[5]} → {v[6]} (+{v[7]} / −{v[8]}, {z(v[9])})",
+                             f"{v[10]} → {v[11]} (+{v[12]} / −{v[13]}, {z(v[14])})",
+                             f"<strong>{ots}</strong>" if abs(ot) >= 1.96 * se else ots, v[17]])
+        head = {"T1": ["model", "seeds with both solving and failing attempts", "solving attempt has fewer early inversions",
+                       "within-seed r, early inversions vs on time"],
+                "T2": ["model", "predicted losses: out of order before, vs base rate", "predicted losses between AMAN neighbours",
+                       "actual losses: out of order before", "actual: at entry / put out of order later",
+                       "actual: first predicted, median min before", "actual never predicted"],
+                "T3": ["model", "solved", "hard-solved", "separation lost", "flights on time", "overrides per episode"]}[test]
+        return ('<div class="tada-table-wrap"><table class="tada-table tada-sortable"><thead><tr>'
+                + "".join(f"<th>{h}</th>" for h in head) + "</tr></thead><tbody>"
+                + "".join("<tr>" + "".join(f"<td>{c}</td>" for c in row) + "</tr>" for row in rows)
+                + "</tbody></table></div>\n\n")
+
     def feasible_2x20_table(self, ids: list) -> str:
         rows = []
         for key, label in FEASIBLE_2X20.items():
@@ -1743,6 +1793,8 @@ class Build:
                 body = self.capacity_bands(self.select(args["models"], ["att10"]))
             elif kind == "feasible-2x20":
                 body = self.feasible_2x20_table(self.select(args.get("models", "all"), list(FEASIBLE_2X20)))
+            elif kind == "phase0":
+                body = self.phase0_table(args.get("test", "T3"))
             elif kind == "longstreams":
                 body = self.longstreams_table(self.select(args.get("models", "all"), list(LONG_STREAMS)))
             elif kind == "longstream-waves":
