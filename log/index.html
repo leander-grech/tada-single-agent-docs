@@ -2943,7 +2943,7 @@
   <a href="#run-1-47" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1_47, 1_48 — fine-tuning for the hard-solved target (28 Sep–)
+        1_47, 1_48 — fine-tuning for the hard-solved target (28 Sep)
       
     </span>
   </a>
@@ -3567,7 +3567,7 @@
   <a href="#run-1-47" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1_47, 1_48 — fine-tuning for the hard-solved target (28 Sep–)
+        1_47, 1_48 — fine-tuning for the hard-solved target (28 Sep)
       
     </span>
   </a>
@@ -3729,10 +3729,11 @@ streams (<code>1_43</code>), arm D with one ending on 20-flight streams (<code>1
 for 10M more steps on 20-flight streams. None reaches the champion <code>1_38</code>. <a id="run-1-41"></a>
 <a id="run-1-42"></a> <a id="run-1-43"></a> <a id="run-1-44"></a> <a id="run-1-46"></a>
 <a href="../findings/curriculum/">Training from scratch</a>.</p>
-<h3 id="run-1-47"><code>1_47</code>, <code>1_48</code> — fine-tuning for the hard-solved target (28 Sep–)<a class="headerlink" href="#run-1-47" title="Permanent link">&para;</a></h3>
+<h3 id="run-1-47"><code>1_47</code>, <code>1_48</code> — fine-tuning for the hard-solved target (28 Sep)<a class="headerlink" href="#run-1-47" title="Permanent link">&para;</a></h3>
 <p><code>1_44</code> and <code>1_46</code> continued for 10M steps with a ±30 s bracket worth 4 added above the ±60 s one,
-on stitched 2×20 streams, on a rented host. <strong>In progress.</strong> Their trackers also score a second
-stream set. <a id="run-1-48"></a> <a href="../models/1_47/"><code>1_47</code></a> · <a href="../models/1_48/"><code>1_48</code></a>.</p>
+on stitched 2×20 streams, on a rented host. Neither gained hard-solved streams significantly over
+its parent. <code>1_48</code> ties the champion on hard-solved streams and on the feasible 40-flight set
+(feas40), but solves fewer 20-flight streams at ±60 s; <code>1_38</code> stays champion. <a id="run-1-48"></a> <a href="../models/1_47/"><code>1_47</code></a> · <a href="../models/1_48/"><code>1_48</code></a>.</p>
 <h3 id="long-streams">Long streams (27–28 Sep)<a class="headerlink" href="#long-streams" title="Permanent link">&para;</a></h3>
 <p>Not a training run: 60- and 100-flight streams, split into feasible and over-capacity, on the
 champion and the from-scratch models. A scorer bug that cut long streams short was found and fixed
