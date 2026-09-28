@@ -170,7 +170,10 @@ be cleared; its bracket is paid at release, the deviation potential is flat, and
 feasible only. `1_49` fine-tunes `1_48` in it; `1_50` trains recipe arm D from scratch in it. Both
 are scored in their own environment. `1_49` was stopped at 1.3M steps because redrawing infeasible
 training streams at reset slowed training to about 300 steps/s; it restarted as `1_51`, drawing from
-a pool of feasible streams screened up front. <a id="run-1-50"></a> <a id="run-1-51"></a>
+a pool of feasible streams screened up front. `1_50` (from scratch) reached 51 solved and 26
+hard-solved, level with the champion on hard-solved but with 20 losses of separation; `1_51`
+(fine-tuned) fell from `1_48`'s 48 solved to 27. Both trained before a reward fix: a bust now takes
+back the release payments of flights still airborne. [Training from scratch](findings/curriculum.md#arm-d-in-the-release-mdp-1_50). <a id="run-1-50"></a> <a id="run-1-51"></a>
 [`1_49`](models/1_49.md) · [`1_50`](models/1_50.md) · [`1_51`](models/1_51.md).
 
 ### Long streams (27–28 Sep) { #long-streams }
