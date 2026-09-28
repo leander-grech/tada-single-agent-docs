@@ -282,3 +282,4 @@ svg.tada-curve .dlabel {
 .md-typeset table.tada-table td .tada-what { display: inline-block; min-width: 14em; }
 .md-typeset table.tada-compare th:not(:first-child) { text-align: right; }
 .md-typeset figure.tada-render figcaption { font-style: normal; }
+.md-typeset table.tada-bands tr.tada-band-first td { border-top: 2px solid var(--tada-rule); }

@@ -1263,6 +1263,7 @@ class Build:
                 if m.id == "1_29":
                     items.append("10-aircraft 100-seed score of `best/best_model.zip` itself (the windowed parent); "
                                  "the card headlines the 20M step checkpoint" + (" — **scheduled**" if m.raw.get("pending") else ""))
+            items += list(m.raw.get("backfill_extra") or [])
             if items:
                 o.append(f"## {m.id}\n\n" + "".join(f"- {i}\n" for i in items) + "\n")
         if unreplayable:
@@ -1288,6 +1289,10 @@ class Build:
                 body = self.compare_table(ids, bats)
             elif kind == "never-solved":
                 body = self.never_solved_table()
+            elif kind == "capacity-bands":
+                body = self.capacity_bands(args["models"].split(","))
+            elif kind == "hardest-seeds":
+                body = self.hardest_seeds(args["model"], float(args.get("min_lead", 900)))
             elif kind == "render":
                 m, r = self.find_render(args["file"])
                 if m is None:
@@ -1322,7 +1327,7 @@ class Build:
             e = allf[allf.seed == seed]
             if cap is not None and seed in cap.index:
                 lead = float(cap.loc[seed, "largest_early_s"])
-                lead_s, pairs = f"{lead:,.1f} s ({lead / 60:.1f} min)".replace(",", " "), int(cap.loc[seed, "predicted_los_pairs_t0"])
+                lead_s, pairs = f"{lead:,.0f} s ({lead / 60:.1f} min)".replace(",", " "), int(cap.loc[seed, "predicted_los_pairs_t0"])
             else:
                 lead, lead_s, pairs = -1.0, "—", "—"
             rows.append((lead, seed, len(e), int((~e.sep).sum()), float(e.on_time.max()), lead_s, pairs))
@@ -1334,7 +1339,7 @@ class Build:
         if cap is not None:
             solved_seeds = sorted(set(allf.seed) - set(never))
             mx = cap.loc[cap.index.intersection(solved_seeds), "largest_early_s"].max()
-            mx_s = f"{mx:,.1f}".replace(",", " ")
+            mx_s = f"{mx:,.0f}".replace(",", " ")
             extra = (f"No seed that any episode solved had a flight more than {mx_s} s ({mx / 60:.1f} min) early; "
                      f"{int(cap.over_650s.sum())} of the 100 have one more than 650 s early. "
                      f"Leads and predicted conflicts: `{self.reg['seed_capacity']}`.\n\n")
@@ -1345,6 +1350,82 @@ class Build:
                 + '<table class="tada-table tada-sortable"><thead><tr><th>seed</th><th>earliest flight at t = 0</th>'
                 "<th>predicted losses at t = 0</th><th>episodes flown</th><th>episodes without a loss</th><th>best on-time rate</th></tr></thead>"
                 f"<tbody>{body}</tbody></table>\n\n" + extra)
+
+    BANDS = [(0, 650, "≤ 650 s (within cap)"), (650, 900, "650–900 s"),
+             (900, 1200, "900–1 200 s"), (1200, 1e9, "over 1 200 s")]
+
+    def _att_frame(self, mid: str) -> pd.DataFrame:
+        d = self.models[mid].evals["att10"].copy()
+        d["sep_b"] = b(d["sep"])
+        d["solved_b"] = b(d["all_on_time"]) & ~d["sep_b"]
+        return d
+
+    def _best_attempts(self, d: pd.DataFrame) -> pd.DataFrame:
+        return (d.assign(k1=d.sep_b.astype(int), k2=-d.bracket_score, k3=d.clearances)
+                 .sort_values(["seed", "k1", "k2", "k3"]).groupby("seed").head(1).set_index("seed"))
+
+    def capacity_bands(self, ids: list[str]) -> str:
+        """Per model: outcome by how early the earliest flight is at t = 0 (validation seeds, 10 attempts)."""
+        cap = self.csv(self.reg["seed_capacity"]).set_index("seed")
+        head = ("<tr><th>model</th><th>earliest flight</th><th>seeds</th><th>solved, deterministic</th>"
+                "<th>lost, deterministic</th><th>solved in 1 of 10 attempts</th><th>lost, best attempt</th>"
+                "<th>on time, best attempt</th></tr>")
+        rows = []
+        for mid in ids:
+            d = self._att_frame(mid)
+            d["lead"] = d.seed.map(cap.largest_early_s)
+            first = True
+            for lo, hi, name in self.BANDS:
+                s = d[(d.lead > lo) & (d.lead <= hi)]
+                det = s[s.attempt == 0]
+                best = self._best_attempts(s)
+                n = s.seed.nunique()
+                cls = ' class="tada-band-first"' if first else ""
+                label = f'<a href="{self._site_prefix}models/{mid}/">{mid}</a>' if first else ""
+                first = False
+                rows.append(f"<tr{cls}><td>{label}</td><td>{name}</td><td>{n}</td><td>{int(det.solved_b.sum())}</td>"
+                            f"<td>{int(det.sep_b.sum())}</td><td>{int(s.groupby('seed').solved_b.any().sum())}</td>"
+                            f"<td>{int(best.sep_b.sum())}</td><td>{best.on_time.mean():.3f}</td></tr>")
+        srcs = ", ".join(f"`{self.models[m].eval_paths['att10']}`" for m in ids)
+        return (f'<table class="tada-table tada-bands"><thead>{head}</thead><tbody>{"".join(rows)}</tbody></table>\n\n'
+                f"100 validation seeds, grouped by how early the earliest flight would arrive with no action "
+                f"(`{self.reg['seed_capacity']}`). Deterministic policy plus 9 sampled attempts per seed; the best "
+                f"attempt is chosen by the objective. Sources: {srcs}.\n\n")
+
+    def hardest_seeds(self, mid: str, min_lead: float) -> str:
+        cap = self.csv(self.reg["seed_capacity"]).set_index("seed")
+        d = self._att_frame(mid)
+        d["on_n"] = (d.on_time * d.n_flights).round().astype(int)
+        la = self.models[mid].evals.get("la4")
+        la = la.set_index("seed") if la is not None else None
+        rows = []
+        for seed, c in cap[cap.largest_early_s > min_lead].sort_values("largest_early_s", ascending=False).iterrows():
+            s = d[d.seed == seed]
+            if s.empty:
+                continue
+            det = s[s.attempt == 0].iloc[0]
+            best = self._best_attempts(s).iloc[0]
+            out = lambda r: (f'<span class="tada-chip tada-chip--bad">lost</span> {r.on_n}/20' if r.sep_b
+                             else (f'<span class="tada-chip tada-chip--ok">solved</span>' if r.solved_b
+                                   else f"safe, {r.on_n}/20 on time"))
+            la_s = "—"
+            if la is not None and seed in la.index:
+                lr = la.loc[seed]
+                la_sep = bool(b(pd.Series([lr["sep"]])).iloc[0])
+                la_solved = (not la_sep) and bool(b(pd.Series([lr["all_on_time"]])).iloc[0])
+                la_s = ('<span class="tada-chip tada-chip--bad">lost</span>' if la_sep
+                        else '<span class="tada-chip tada-chip--ok">solved</span>' if la_solved
+                        else f"safe, {round(lr['on_time'] * lr['n_flights'])}/20 on time")
+            th = lambda x: f"{x:,.0f}".replace(",", " ")
+            rows.append(f"<tr><td>{seed}</td><td>{th(c.largest_early_s)} s</td><td>{int(c.predicted_los_pairs_t0)}</td>"
+                        f"<td>{out(det)}</td><td>{int((~s.sep_b).sum())} / {int(s.solved_b.sum())}</td>"
+                        f"<td>{out(best)}, worst flight {th(best.max_dev)} s</td><td>{la_s}</td></tr>")
+        return ('<div class="tada-table-wrap"><table class="tada-table tada-sortable"><thead><tr><th>seed</th>'
+                "<th>earliest flight</th><th>predicted losses at t = 0</th><th>deterministic</th>"
+                "<th>of 10 attempts: safe / solved</th><th>best attempt</th><th>lookahead</th></tr></thead>"
+                f'<tbody>{"".join(rows)}</tbody></table></div>\n\n'
+                f"`{mid}`, every validation seed whose earliest flight is more than {min_lead:.0f} s early. "
+                f"Sources: `{self.models[mid].eval_paths['att10']}`, `{self.models[mid].eval_paths.get('la4', '—')}`.\n\n")
 
     # ------------------------------------------------------------------ nav
     def nav_block(self) -> str:

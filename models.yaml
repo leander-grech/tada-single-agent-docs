@@ -126,6 +126,10 @@ models:
     parent: "1_36"
     status: complete
     whats_new: "1_36 continued for another 5M steps on the same settings (reselection, budget 2)."
+    backfill_extra:
+      - "render **hardest solve**: seed 1461364854 (earliest flight 1 141 s early), deterministic"
+      - "render **safe on a 28-minute seed**: seed 1123251507, best of 10 attempts (`--paired-attempts 9`)"
+      - "render **the worst seed**: seed 1159417075 (42.5 min early), best of 10 attempts (`--paired-attempts 9`)"
     evals:
       f20: analysis/2026-09-26_1_36_multipick/eval_cont/f20.csv
       s2x20: analysis/2026-09-26_1_36_multipick/eval_cont/s2x20.csv
