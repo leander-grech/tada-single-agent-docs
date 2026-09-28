@@ -2387,6 +2387,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#the-champions-solutions-rendered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The champion's solutions, rendered
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2921,6 +2932,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#the-champions-solutions-rendered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The champion's solutions, rendered
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -3048,9 +3070,35 @@ more times with sampled actions, grouped by how early the earliest flight is at 
 <li><strong>The hardest seed it solves</strong> has its earliest flight 1 141 s (19 min) early: solved
   deterministically and by 3 of its 10 attempts.</li>
 </ul>
-<p>The renders on this page are by earlier agents (<code>1_33</code>, <code>1_36</code>). The champion's own renders of
-these scenarios are queued in <a href="../../backfill/#1_38">BACKFILL</a>: its hardest solve, a 28-minute
-seed it flies safely, and the worst seed.</p>
+<h3 id="the-champions-solutions-rendered">The champion's solutions, rendered<a class="headerlink" href="#the-champions-solutions-rendered" title="Permanent link">&para;</a></h3>
+<p>Its hardest solve: the earliest flight 19 minutes early, all 20 on time.</p>
+<!-- gen:render file=1_38_overcap_solved_deterministic_seed1461364854.mp4 -->
+<figure class="tada-render" title="metadata: render-meta/2026-09-28_1_38_overcapacity/1_38_overcap_solved_deterministic_seed1461364854_solutions.json">
+<video controls preload="metadata" src="../../assets/renders/1_38_overcap_solved_deterministic_seed1461364854.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_38</span> (final_model.zip) · seed 1461364854 · earliest flight 1 141 s early · deterministic · 20 of 20 on time, worst 56 s, 157 clearances</figcaption>
+</figure>
+<!-- /gen -->
+
+<p>28 minutes early: the best of 10 attempts keeps every aircraft separated and lands all 20, but only
+8 on time. Its worst flight is off by 1 691 s against the seed's 1 690 s lead, so that flight lands
+about as early as it would have if nothing were done.</p>
+<!-- gen:render file=1_38_overcap_safe_best_seed1123251507.mp4 -->
+<figure class="tada-render" title="metadata: render-meta/2026-09-28_1_38_overcapacity/1_38_overcap_safe_best_seed1123251507_solutions.json">
+<video controls preload="metadata" src="../../assets/renders/1_38_overcap_safe_best_seed1123251507.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_38</span> (final_model.zip) · seed 1123251507 · earliest flight 1 690 s early · best of 10 attempts (attempt 9 of 10, chosen by the objective) · 8 of 20 on time, worst 1691 s, 90 clearances</figcaption>
+</figure>
+<!-- /gen -->
+
+<p>The worst seed, 42.5 minutes early with 9 losses of separation already predicted at t = 0: even the
+best of 10 attempts loses separation, with 5 flights landed.</p>
+<!-- gen:render file=1_38_overcap_worst_best_seed1159417075.mp4 -->
+<figure class="tada-render" title="metadata: render-meta/2026-09-28_1_38_overcapacity/1_38_overcap_worst_best_seed1159417075_solutions.json">
+<video controls preload="metadata" src="../../assets/renders/1_38_overcap_worst_best_seed1159417075.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_38</span> (final_model.zip) · seed 1159417075 · earliest flight 2 550 s early · best of 10 attempts (attempt 9 of 10, chosen by the objective) · 3 of 20 on time, loss of separation at step 36, 52 clearances</figcaption>
+</figure>
+<!-- /gen -->
+
+<p>The other renders on this page are by earlier agents (<code>1_33</code>, <code>1_36</code>).</p>
 <h2 id="how-early-is-the-earliest-flight">How early is the earliest flight?<a class="headerlink" href="#how-early-is-the-earliest-flight" title="Permanent link">&para;</a></h2>
 <p>For each seed: how early the most-early flight would arrive if nothing were done, grouped by
 <code>1_33</code>'s outcome over 10 attempts (<code>analysis/scenario_capacity.py</code>,
