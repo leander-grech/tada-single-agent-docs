@@ -1,0 +1,79 @@
+<svg class="tada-dg" viewBox="0 0 760 640" role="img" aria-label="Policy network: per-aircraft encoders, self-attention, pooled context, four heads">
+<defs>
+  <marker id="pa" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0,0 L8,4 L0,8 z"/></marker>
+</defs>
+<!-- regions -->
+<rect class="box muted" x="8" y="8" width="548" height="430" rx="6"/>
+<text class="h" x="18" y="26">per aircraft slot · ×10 · shared weights</text>
+<rect class="box muted" x="568" y="8" width="184" height="430" rx="6"/>
+<text class="h" x="578" y="26">per state</text>
+
+<!-- inputs -->
+<rect class="box in fill-in" x="20" y="38" width="164" height="46" rx="4"/>
+<text class="t b" x="30" y="57">scalars</text><text class="s" x="30" y="74">17 features</text>
+<rect class="box in fill-in" x="200" y="38" width="164" height="46" rx="4"/>
+<text class="t b" x="210" y="57">flight plan</text><text class="s" x="210" y="74">20 waypoints × 11</text>
+<rect class="box in fill-in" x="380" y="38" width="164" height="46" rx="4"/>
+<text class="t b" x="390" y="57">action history</text><text class="s" x="390" y="74">last 8 × (1 + 15)</text>
+<rect class="box in fill-in" x="580" y="38" width="160" height="46" rx="4"/>
+<text class="t b" x="590" y="57">global</text><text class="s" x="590" y="74">4 features</text>
+
+<!-- encoders -->
+<rect class="box enc" x="20" y="108" width="164" height="58" rx="4"/>
+<text class="t" x="30" y="127">Linear 17→128</text><text class="s" x="30" y="143">LayerNorm · ReLU</text><text class="s" x="30" y="158">2.6k params</text>
+<rect class="box enc" x="200" y="108" width="164" height="58" rx="4"/>
+<text class="t" x="210" y="127">Conv1d ×2 (64, k=3)</text><text class="s" x="210" y="143">mean over waypoints → 64</text><text class="s" x="210" y="158">18.7k params</text>
+<rect class="box enc" x="380" y="108" width="164" height="58" rx="4"/>
+<text class="t" x="390" y="127">GRU → 64</text><text class="s" x="390" y="143">last hidden state</text><text class="s" x="390" y="158">15.7k params</text>
+<rect class="box enc" x="580" y="108" width="160" height="58" rx="4"/>
+<text class="t" x="590" y="127">Linear 4→128</text><text class="s" x="590" y="143">ReLU</text><text class="s" x="590" y="158">0.6k params</text>
+<g class="e"><path class="e" d="M102,84 V106" marker-end="url(#pa)"/><path class="e" d="M282,84 V106" marker-end="url(#pa)"/><path class="e" d="M462,84 V106" marker-end="url(#pa)"/><path class="e" d="M660,84 V106" marker-end="url(#pa)"/></g>
+
+<!-- fuse -->
+<rect class="box enc" x="20" y="190" width="524" height="44" rx="4"/>
+<text class="t" x="30" y="209">concat 128 + 64 + 64 = 256 → Linear 256→128 · LayerNorm · ReLU</text>
+<text class="s" x="30" y="225">per-aircraft embedding eᵢ (128) · 33.2k params</text>
+<path class="e" d="M102,166 V188" marker-end="url(#pa)"/><path class="e" d="M282,166 V188" marker-end="url(#pa)"/><path class="e" d="M462,166 V188" marker-end="url(#pa)"/>
+
+<!-- attention -->
+<rect class="box enc fill-enc" x="20" y="258" width="524" height="56" rx="4"/>
+<text class="t b" x="30" y="277">masked self-attention over the 10 slots</text>
+<text class="s" x="30" y="293">4 heads · q, k, v 128→64 · residual + LayerNorm · empty slots masked as keys</text>
+<text class="s" x="30" y="307">output projection starts at zero: an exact no-op at step 0 · 33.2k params</text>
+<path class="e" d="M282,234 V256" marker-end="url(#pa)"/>
+
+<!-- pool and per-slot input -->
+<rect class="box enc" x="300" y="338" width="244" height="40" rx="4"/>
+<text class="t" x="310" y="356">masked mean over slots</text><text class="s" x="310" y="371">pooled fleet summary · 128</text>
+<rect class="box" x="20" y="338" width="264" height="40" rx="4"/>
+<text class="t" x="30" y="356">e′ᵢ, after attention</text><text class="s" x="30" y="371">128 per slot, pairwise-aware</text>
+<path class="e" d="M150,314 V336" marker-end="url(#pa)"/><path class="e" d="M420,314 V336" marker-end="url(#pa)"/>
+
+<!-- context -->
+<rect class="box" x="300" y="398" width="440" height="30" rx="4"/>
+<text class="t" x="310" y="418">context c = [pooled 128 ‖ global 128] = 256</text>
+<path class="e" d="M420,378 V396" marker-end="url(#pa)"/><path class="e" d="M660,166 V396" marker-end="url(#pa)"/>
+
+<rect class="box" x="20" y="398" width="264" height="30" rx="4"/>
+<text class="t" x="30" y="418">head input per slot [e′ᵢ ‖ c] = 384</text>
+<path class="e" d="M150,378 V396" marker-end="url(#pa)"/><path class="e dash" d="M300,413 H286" marker-end="url(#pa)"/>
+
+<!-- heads -->
+<rect class="box head fill-head" x="20" y="472" width="170" height="70" rx="4"/>
+<text class="t b" x="30" y="491">aircraft</text><text class="s" x="30" y="507">384→64→1 per slot</text><text class="s" x="30" y="521">softmax over slots</text><text class="s" x="30" y="535">24.7k params</text>
+<rect class="box head fill-head" x="200" y="472" width="170" height="70" rx="4"/>
+<text class="t b" x="210" y="491">clearance</text><text class="s" x="210" y="507">384→64→15 per slot</text><text class="s" x="210" y="521">row of the chosen slot</text><text class="s" x="210" y="535">25.6k params</text>
+<rect class="box head fill-head" x="380" y="472" width="170" height="70" rx="4"/>
+<text class="t b" x="390" y="491">again (reselection)</text><text class="s" x="390" y="507">384→64→15 per slot</text><text class="s" x="390" y="521">Bernoulli at (slot, clr)</text><text class="s" x="390" y="535">25.6k params</text>
+<rect class="box env fill-env" x="580" y="472" width="160" height="70" rx="4"/>
+<text class="t b" x="590" y="491">value V(s)</text><text class="s" x="590" y="507">256→64→1</text><text class="s" x="590" y="521">reads c only</text><text class="s" x="590" y="535">16.5k params</text>
+<path class="e" d="M105,428 V470" marker-end="url(#pa)"/><path class="e" d="M150,428 V448 H285 V470" marker-end="url(#pa)"/><path class="e" d="M200,428 V440 H465 V470" marker-end="url(#pa)"/><path class="e" d="M660,428 V470" marker-end="url(#pa)"/>
+
+<!-- outputs -->
+<text class="s" x="20" y="566">masked by mask_select</text>
+<text class="s" x="200" y="566">masked by mask_action_per_ac</text>
+<text class="s" x="380" y="566">masked by mask_again; never</text>
+<text class="s" x="380" y="580">after DO_NOTHING</text>
+<text class="s" x="580" y="566">critic for GAE; lookahead</text>
+<text class="t" x="20" y="616">196 384 parameters in all (checkpoint of 1_38) · every head: Linear → 64 · ReLU → out · ~6 ms per decision on one CPU core</text>
+</svg>

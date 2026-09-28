@@ -1,0 +1,54 @@
+<svg class="tada-dg" viewBox="0 0 760 300" role="img" aria-label="Sampling one action: aircraft, then clearance conditioned on it, then the again flag">
+<defs>
+  <marker id="aa" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0,0 L8,4 L0,8 z"/></marker>
+</defs>
+<!-- stage 1 -->
+<text class="h" x="16" y="22">1 · which aircraft</text>
+<rect class="box head" x="10" y="32" width="230" height="182" rx="5"/>
+<g>
+  <!-- ten slot logits as bars; masked ones hollow -->
+  <rect class="slot" x="24" y="120" width="16" height="40"/><rect class="slot" x="44" y="95" width="16" height="65"/>
+  <rect class="slot off" x="64" y="150" width="16" height="10"/><rect class="slot" x="84" y="70" width="16" height="90"/>
+  <rect class="slot" x="104" y="130" width="16" height="30"/><rect class="slot off" x="124" y="150" width="16" height="10"/>
+  <rect class="slot off" x="144" y="150" width="16" height="10"/><rect class="slot" x="164" y="110" width="16" height="50"/>
+  <rect class="slot off" x="184" y="150" width="16" height="10"/><rect class="slot off" x="204" y="150" width="16" height="10"/>
+</g>
+<text class="s" x="24" y="176">slots 0 … 9 (AMAN order)</text>
+<text class="s" x="24" y="192">hollow = masked: pending / cleared</text>
+<text class="t b c-head" x="84" y="62">a</text>
+
+<!-- stage 2 -->
+<text class="h" x="276" y="22">2 · which clearance, given a</text>
+<rect class="box head" x="270" y="32" width="230" height="182" rx="5"/>
+<g>
+  <rect class="slot" x="282" y="100" width="11" height="60"/><rect class="slot" x="296" y="120" width="11" height="40"/>
+  <rect class="slot" x="310" y="135" width="11" height="25"/><rect class="slot off" x="324" y="152" width="11" height="8"/>
+  <rect class="slot" x="338" y="140" width="11" height="20"/><rect class="slot off" x="352" y="152" width="11" height="8"/>
+  <rect class="slot" x="366" y="145" width="11" height="15"/><rect class="slot" x="380" y="148" width="11" height="12"/>
+  <rect class="slot" x="394" y="70" width="11" height="90"/><rect class="slot off" x="408" y="152" width="11" height="8"/>
+  <rect class="slot" x="422" y="138" width="11" height="22"/><rect class="slot off" x="436" y="152" width="11" height="8"/>
+  <rect class="slot off" x="450" y="152" width="11" height="8"/><rect class="slot off" x="464" y="152" width="11" height="8"/>
+  <rect class="slot" x="478" y="146" width="11" height="14"/>
+</g>
+<text class="s" x="282" y="176">15 clearances · row a of the head</text>
+<text class="s" x="282" y="192">hollow = illegal for this aircraft</text>
+<text class="t b c-head" x="390" y="62">c</text>
+<text class="s" x="282" y="92">DO_NOTHING</text>
+
+<!-- stage 3 -->
+<text class="h" x="536" y="22">3 · ask again? (reselection)</text>
+<rect class="box head" x="530" y="32" width="220" height="182" rx="5"/>
+<rect class="slot" x="560" y="90" width="50" height="70"/><rect class="slot off" x="640" y="130" width="50" height="30"/>
+<text class="s" x="560" y="176">again = 1 · again = 0</text>
+<text class="s" x="544" y="192">Bernoulli at (a, c); 0 if no budget</text>
+<text class="s" x="544" y="206">left or c = DO_NOTHING</text>
+
+<path class="e" d="M240,117 H268" marker-end="url(#aa)"/>
+<path class="e" d="M500,117 H528" marker-end="url(#aa)"/>
+
+<!-- to env -->
+<rect class="box env fill-env" x="10" y="232" width="740" height="52" rx="5"/>
+<text class="t b" x="24" y="253">to the environment: (a, c, again)</text>
+<text class="s" x="24" y="272">log π = log p(a) + log p(c | a) + log p(again | a, c) · entropy: exact, over the whole tree</text>
+<path class="e" d="M640,214 V230" marker-end="url(#aa)"/>
+</svg>
