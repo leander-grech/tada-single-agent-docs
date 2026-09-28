@@ -2935,10 +2935,14 @@
 <table class="tada-table tada-facts"><tbody><tr><th>Lineage</th><td><strong><code>1_26</code></strong> (random initialisation)</td></tr><tr><th>Steps</th><td>10M in this run; 10M along the lineage</td></tr><tr><th>Checkpoint</th><td><code>experiments/atc_run_1_26_sep3nm/checkpoints/ppo_tada_10000000_steps.zip</code></td></tr><tr><th>Recipe</th><td>LR 0.0003 → 3e-05 (warmup_cosine, warm-up 8%)</td></tr><tr><th>Commit</th><td><code>c32b7f270f</code></td></tr><tr><th>Run log</th><td><a href="../../log/#run-1-26">experiment log</a></td></tr></tbody></table>
 
 <h2 id="scorecard">Scorecard<a class="headerlink" href="#scorecard" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Simulator</p>
+<p>Scored on flight_simulator 0.1.52, the simulator these runs trained on. The windowed track uses 0.2.8x, on which the same seeds generate different scenarios, so the two tracks' numbers do not compare.</p>
+</div>
 <p>10-aircraft MXP trombone, the fixed 100-seed pool, deterministic. <strong>Success</strong> = tier 5: every aircraft landed within ±60 s of its AMAN target, no loss of separation. Clean-subset success = success among episodes without a loss of separation.</p>
 <table class="tada-table"><thead><tr><th></th><th>value</th><th><code>1_25</code></th><th>champion <code>1_26</code></th></tr></thead><tbody><tr><td>success</td><td>0.70</td><td>0.44</td><td>—</td></tr><tr><td>separation lost</td><td>0.07</td><td>0.18</td><td>—</td></tr><tr><td>clean-subset success</td><td>0.753</td><td>0.537</td><td>—</td></tr><tr><td>mean tier</td><td>4.38</td><td>3.20</td><td>—</td></tr><tr><td>worst-aircraft deviation, mean</td><td>43.4 s</td><td>192.4 s</td><td>—</td></tr></tbody></table>
 
-<p>Source: <code>experiments/atc_run_1_26_sep3nm/progress_scored.csv</code> at 10M. A separate per-seed scoring of the same checkpoint (<code>analysis/2026-08-17_1_26_at10M_perseed.csv</code>) gives success 0.69, separation 0.08, worst-aircraft deviation 41.3 s: the 10-aircraft scorer does not pin the observation frame, so repeat scorings move by a few seeds.</p>
+<p>Source: <code>experiments/atc_run_1_26_sep3nm/progress_scored.csv</code> at 10M (frame unpinned: one draw). A separate per-seed scoring of the same checkpoint (<code>analysis/2026-08-17_1_26_at10M_perseed.csv</code>) gives success 0.69, separation 0.08, worst-aircraft deviation 41.3 s: the 10-aircraft scorer does not pin the observation frame, so repeat scorings move by a few seeds.</p>
 <p>Paired against <code>1_25</code> on success, per seed: 32 gained, 7 lost (significant, McNemar).</p>
 <p><strong>Attempts to solve</strong> (stochastic retries until solved, cap 20): deterministic 0.63, pass@1 0.56, pass@5 0.75, pass@10 0.79, pass@20 0.82; never solved 18. Source: <code>analysis/2026-08-11_1_26_attempts_100seeds/attempts_per_seed.csv</code>.</p>
 <h2 id="learning-curve">Learning curve<a class="headerlink" href="#learning-curve" title="Permanent link">&para;</a></h2>

@@ -2969,11 +2969,15 @@
 <table class="tada-table tada-facts"><tbody><tr><th>Lineage</th><td><strong><code>1_29</code></strong> (random initialisation)</td></tr><tr><th>Steps</th><td>20M in this run; 20M along the lineage</td></tr><tr><th>Checkpoint</th><td><code>experiments/atc_run_1_29_pbrs_attn_d/best/best_model.zip</code></td></tr><tr><th>Recipe</th><td>LR 1e-05 → 1e-06 (resume_linear)</td></tr><tr><th>Commit</th><td><code>f6e0bcc81b</code></td></tr><tr><th>Run log</th><td><a href="../../log/#run-1-29">experiment log</a></td></tr></tbody></table>
 
 <h2 id="scorecard">Scorecard<a class="headerlink" href="#scorecard" title="Permanent link">&para;</a></h2>
-<p><span class="tada-chip tada-chip--warn">pending</span> A 100-seed score of this checkpoint is scheduled on the rented host (10-aircraft env with its own settings).</p>
+<div class="admonition note">
+<p class="admonition-title">Simulator</p>
+<p>Scored on flight_simulator 0.1.52, the simulator these runs trained on. The windowed track uses 0.2.8x, on which the same seeds generate different scenarios, so the two tracks' numbers do not compare.</p>
+</div>
 <p>10-aircraft MXP trombone, the fixed 100-seed pool, deterministic. <strong>Success</strong> = tier 5: every aircraft landed within ±60 s of its AMAN target, no loss of separation. Clean-subset success = success among episodes without a loss of separation.</p>
-<table class="tada-table"><thead><tr><th></th><th>value</th><th>parent</th><th>champion <code>1_26</code></th></tr></thead><tbody><tr><td>success</td><td>0.59</td><td>—</td><td>0.70</td></tr><tr><td>separation lost</td><td>0.08</td><td>—</td><td>0.07</td></tr><tr><td>clean-subset success</td><td>0.641</td><td>—</td><td>0.753</td></tr><tr><td>mean tier</td><td>4.06</td><td>—</td><td>4.38</td></tr><tr><td>worst-aircraft deviation, mean</td><td>63.7 s</td><td>—</td><td>43.4 s</td></tr></tbody></table>
+<table class="tada-table"><thead><tr><th></th><th>value</th><th>parent</th><th>champion <code>1_26</code></th></tr></thead><tbody><tr><td>success</td><td>0.57</td><td>—</td><td>0.70</td></tr><tr><td>separation lost</td><td>0.07</td><td>—</td><td>0.07</td></tr><tr><td>clean-subset success</td><td>0.613</td><td>—</td><td>0.753</td></tr><tr><td>mean tier</td><td>4.08</td><td>—</td><td>4.38</td></tr><tr><td>worst-aircraft deviation, mean</td><td>73.4 s</td><td>—</td><td>43.4 s</td></tr></tbody></table>
 
-<p>Source: <code>experiments/atc_run_1_29_pbrs_attn_d/progress_scored.csv</code> at 20M.</p>
+<p>Source: <code>analysis/2026-09-27_scratch/backfill/eval/1_29_d100.csv</code> (frame pinned).</p>
+<p>Reproduction check: the 20M checkpoint re-scored today on simulator 0.1.52 with the frame pinned gives success 0.61, separation 0.08, tier 4.10 (analysis/2026-09-27_scratch/backfill/eval/1_29_20M_d100.csv), against 0.59 / 0.08 / 4.06 on its recorded curve: the 10-aircraft numbers reproduce within frame noise.</p>
 <h3 id="zero-shot-on-the-windowed-env">Zero-shot on the windowed env<a class="headerlink" href="#zero-shot-on-the-windowed-env" title="Permanent link">&para;</a></h3>
 <p>This checkpoint, untrained on streams, on the windowed track's 100 validation seeds (deterministic):</p>
 <table class="tada-table"><thead><tr><th>stream</th><th>solved</th><th>hard-solved</th><th>separation lost</th><th>flights on time</th></tr></thead><tbody><tr><td>20-flight streams</td><td>8</td><td>1</td><td>21</td><td>0.727</td></tr><tr><td>stitched 2×20 streams</td><td>0</td><td>0</td><td>42</td><td>0.619</td></tr><tr><td>40-flight streams, generated in one sequence</td><td>0</td><td>0</td><td>62</td><td>0.481</td></tr></tbody></table>

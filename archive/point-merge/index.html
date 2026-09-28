@@ -2902,7 +2902,8 @@
 <div class="admonition abstract">
 <p class="admonition-title">Summary</p>
 <p>Point merge at Bergamo (<code>VALIDATION_USE_CASE_2</code>) was the alternative scenario to the MXP
-trombone. The single-agent runs on it (<code>1_24_pms</code>, <code>1_30_pms</code>) stayed near the do-nothing floor.
+trombone. The first single-agent run on it (<code>1_24_pms</code>) stayed near the do-nothing floor; the later
+<code>1_30_pms</code> does better but remains far below MXP.
 Its known blocker was observation saturation, the same problem log scaling later fixed for
 MXP. Point merge was also solved by stitching two 10-aircraft agents; the windowed agent is the
 version of that idea that needs no hand-off rule. Every current run is on MXP.</p>
@@ -2913,7 +2914,10 @@ version of that idea that needs no hand-off rule. Every current run is on MXP.</
   scenario, a sixth success tier and an analysis harness. The best checkpoint stayed near the
   do-nothing floor: 0 of 100 seeds solved. Its renders are on its card.</li>
 <li><strong><code>1_30_pms</code></strong> (<a href="../../models/1_30_pms/">card</a>): launched 24 Aug; not documented beyond its run
-  name and never scored on the fixed seeds.</li>
+  name. Scored on 28 Sep on the point-merge scenario it trained on, it is the best point-merge
+  agent so far (the July runs solved 0–1 of 100), but still far below MXP, and it loses
+  separation in over a quarter of episodes. Its tier does not compare with the July runs': the
+  ladder changed between them.</li>
 <li>On 24 Sep the code's default difficulty was switched to point merge (commit <code>bfd1355</code>). The
   windowed env sets MXP explicitly in its own config, so no windowed run is affected.</li>
 </ul>

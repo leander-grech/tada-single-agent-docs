@@ -3480,14 +3480,16 @@ the wrong learning-rate schedule; <code>1_27a</code> re-ran the second half on t
 nothing. <a id="run-1-27a"></a> <a href="../archive/clearance-sets/">Archive → 22 clearances vs 15</a> ·
 <a href="../models/1_27/"><code>1_27</code></a> · <a href="../models/1_27a/"><code>1_27a</code></a>.</p>
 <h3 id="run-1-28"><code>1_28</code> — a learning-rate schedule (17 Aug)<a class="headerlink" href="#run-1-28" title="Permanent link">&para;</a></h3>
-<p>1% warm-up and a 3e-6 floor. Never scored on the fixed seeds. <a href="../models/1_28/">Card</a>.</p>
+<p>Meant to test a 1% warm-up and a 3e-6 floor, but stopped after 20 480 steps, 6 minutes in:
+never trained, so there is nothing to score. <a href="../models/1_28/">Card</a>.</p>
 <h3 id="run-1-29"><code>1_29</code> — continuous shaping and attention (19–20 Aug)<a class="headerlink" href="#run-1-29" title="Permanent link">&para;</a></h3>
 <p>The tier potential made continuous (it had been a staircase that paid only at band crossings), and a
 masked self-attention block over the aircraft slots. Trained to 10M, then continued to 20M
 (<code>1_29_pbrs_attn_d</code>). Its best checkpoint is the starting point of the windowed track.
 <a href="../models/1_29/">Card</a>.</p>
 <h3 id="run-1-30-pms"><code>1_30_pms</code> — point merge again (24 Aug)<a class="headerlink" href="#run-1-30-pms" title="Permanent link">&para;</a></h3>
-<p>Not documented beyond its run name. <a href="../models/1_30_pms/">Card</a>.</p>
+<p>Not documented beyond its run name. Scored in September on its own scenario: the best point-merge
+agent so far, still far below MXP and losing separation often. <a href="../models/1_30_pms/">Card</a>.</p>
 <h2 id="windowed-track">Windowed track<a class="headerlink" href="#windowed-track" title="Permanent link">&para;</a></h2>
 <h3 id="run-1-31"><code>1_31</code> — the first stream run (24 Sep)<a class="headerlink" href="#run-1-31" title="Permanent link">&para;</a></h3>
 <p><code>1_29</code>'s weights on 20-flight streams with a fresh-run learning-rate schedule. The critic, trained on
