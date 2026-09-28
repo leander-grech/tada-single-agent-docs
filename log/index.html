@@ -647,6 +647,62 @@
   
   
     <li class="md-nav__item">
+      <a href="../models/1_50/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_50
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_49/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_49
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../models/1_48/" class="md-nav__link">
         
   
@@ -2951,6 +3007,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#run-1-49" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1_49, 1_50 — the release MDP (28 Sep, training)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#long-streams" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3575,6 +3642,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#run-1-49" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1_49, 1_50 — the release MDP (28 Sep, training)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#long-streams" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3734,6 +3812,12 @@ for 10M more steps on 20-flight streams. None reaches the champion <code>1_38</c
 on stitched 2×20 streams, on a rented host. Neither gained hard-solved streams significantly over
 its parent. <code>1_48</code> ties the champion on hard-solved streams and on the feasible 40-flight set
 (feas40), but solves fewer 20-flight streams at ±60 s; <code>1_38</code> stays champion. <a id="run-1-48"></a> <a href="../models/1_47/"><code>1_47</code></a> · <a href="../models/1_48/"><code>1_48</code></a>.</p>
+<h3 id="run-1-49"><code>1_49</code>, <code>1_50</code> — the release MDP (28 Sep, training)<a class="headerlink" href="#run-1-49" title="Permanent link">&para;</a></h3>
+<p>A changed MDP: after each step a flight at the front of the landing queue that is locked (predicted
+within 30 s of its target, in no predicted conflict) is released from the window and can no longer
+be cleared; its bracket is paid at release, the deviation potential is flat, and training streams are
+feasible only. <code>1_49</code> fine-tunes <code>1_48</code> in it; <code>1_50</code> trains recipe arm D from scratch in it. Both
+are scored in their own environment. <a id="run-1-50"></a> <a href="../models/1_49/"><code>1_49</code></a> · <a href="../models/1_50/"><code>1_50</code></a>.</p>
 <h3 id="long-streams">Long streams (27–28 Sep)<a class="headerlink" href="#long-streams" title="Permanent link">&para;</a></h3>
 <p>Not a training run: 60- and 100-flight streams, split into feasible and over-capacity, on the
 champion and the from-scratch models. A scorer bug that cut long streams short was found and fixed

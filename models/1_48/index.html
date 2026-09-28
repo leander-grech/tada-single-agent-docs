@@ -11,7 +11,7 @@
       
       
       
-        <link rel="prev" href="../">
+        <link rel="prev" href="../1_49/">
       
       
         <link rel="next" href="../1_47/">
@@ -649,6 +649,62 @@
 
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1_50/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_50
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1_49/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_49
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -3311,7 +3367,7 @@
 </figure>
 
 <h2 id="reproduce">Reproduce<a class="headerlink" href="#reproduce" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">TADA_SEQUENCE_OBS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">TADA_MAX_PICKS</span><span class="o">=</span><span class="m">2</span><span class="w"> </span>python<span class="w"> </span>-u<span class="w"> </span>main_jax.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span>--reward-mode<span class="w"> </span>outcome_pbrs<span class="w"> </span>--stitch-segments<span class="w"> </span><span class="m">2</span><span class="w"> </span>--stitch-gap<span class="w"> </span><span class="m">120</span><span class="w"> </span><span class="m">900</span><span class="w"> </span>--init-weights<span class="w"> </span>experiments/atc_run_1_46_cont_1_43/final_model.zip<span class="w"> </span>--n-envs<span class="w"> </span><span class="m">32</span><span class="w"> </span>--critic-warmup-steps<span class="w"> </span><span class="m">100000</span><span class="w"> </span>--lr-max<span class="w"> </span><span class="m">0</span>.0001<span class="w"> </span>--final-lr<span class="w"> </span>1e-05<span class="w"> </span>--ent-coef<span class="w"> </span><span class="m">0</span>.01<span class="w"> </span>--warmup-frac<span class="w"> </span><span class="m">0</span>.08<span class="w"> </span>--vf-coef<span class="w"> </span><span class="m">0</span>.25<span class="w"> </span>--target-kl<span class="w"> </span><span class="m">0</span>.05<span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">10000000</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nv">TADA_SEQUENCE_OBS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">TADA_MAX_PICKS</span><span class="o">=</span><span class="m">2</span><span class="w"> </span>python<span class="w"> </span>-u<span class="w"> </span>main_jax.py<span class="w"> </span>--env<span class="w"> </span>windowed<span class="w"> </span>--reward-mode<span class="w"> </span>outcome_pbrs<span class="w"> </span>--stitch-segments<span class="w"> </span><span class="m">2</span><span class="w"> </span>--stitch-gap<span class="w"> </span><span class="m">120</span><span class="w"> </span><span class="m">900</span><span class="w"> </span>--hard-bracket<span class="w"> </span>--init-weights<span class="w"> </span>experiments/atc_run_1_46_cont_1_43/final_model.zip<span class="w"> </span>--n-envs<span class="w"> </span><span class="m">32</span><span class="w"> </span>--critic-warmup-steps<span class="w"> </span><span class="m">100000</span><span class="w"> </span>--lr-max<span class="w"> </span><span class="m">0</span>.0001<span class="w"> </span>--final-lr<span class="w"> </span>1e-05<span class="w"> </span>--ent-coef<span class="w"> </span><span class="m">0</span>.01<span class="w"> </span>--warmup-frac<span class="w"> </span><span class="m">0</span>.08<span class="w"> </span>--vf-coef<span class="w"> </span><span class="m">0</span>.25<span class="w"> </span>--target-kl<span class="w"> </span><span class="m">0</span>.05<span class="w"> </span>--total-timesteps<span class="w"> </span><span class="m">10000000</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># score: 20-flight and stitched 2x20, 10 attempts, lookahead (100 validation seeds)</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nv">TADA_SEQUENCE_OBS</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="nv">TADA_MAX_PICKS</span><span class="o">=</span><span class="m">2</span><span class="w"> </span>python<span class="w"> </span>analysis/score_windowed.py<span class="w"> </span>--models<span class="w"> </span>experiments/atc_run_1_48_hard_1_46/final_model.zip<span class="w"> </span>--seeds<span class="w"> </span><span class="m">100</span><span class="w"> </span>--attempts<span class="w"> </span><span class="m">9</span>
@@ -3354,7 +3410,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Leaderboard">
+          <a href="../1_49/" class="md-footer__link md-footer__link--prev" aria-label="Previous: 1_49">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -3364,7 +3420,7 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Leaderboard
+                1_49
               </div>
             </div>
           </a>
