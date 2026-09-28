@@ -1262,6 +1262,8 @@ class Build:
                      "and can no longer be cleared. It is scored in the same environment, on the same seeds and "
                      "with the same metrics, so its numbers measure landings in the same scenarios, but under "
                      "that extra constraint on the agent.\n\n")
+        if m.track == "windowed" and m.raw.get("note"):
+            o.append(f'!!! info "About this run"\n    {esc(m.raw["note"])}\n\n')
         # header facts
         chain = self.lineage(m)
         lin = " → ".join(self.link(c.id) if c.id != m.id else f"<strong><code>{c.id}</code></strong>" for c in chain)

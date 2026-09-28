@@ -296,4 +296,21 @@ models:
     - file: 1_48_feas40_best_seed1569968983.mp4
       meta: analysis/2026-09-28_hard/renders/1_48_feas40_best_seed1569968983_solutions.json
       stream: "the best feas40 stream (40 flights, feasible stitched 2\xD720)"
+  '1_50':
+    evals:
+      fx_feas40: analysis/2026-09-28_release/eval/1_50_feas40.csv
+      fx_feas40_la4: analysis/2026-09-28_release/eval/1_50_feas40_la4.csv
+      fx_test51: analysis/2026-09-28_release/eval/1_50_test51.csv
+      la4: analysis/2026-09-28_release/eval/1_50_la4.csv
+      s2x20: analysis/2026-09-28_release/eval/1_50_s2x20.csv
+    renders:
+    - file: 1_50_best_seed1973214822.mp4
+      meta: analysis/2026-09-28_release/renders/1_50_best_seed1973214822_solutions.json
+    - file: 1_50_comparison_seed599310825.mp4
+      meta: analysis/2026-09-28_release/renders/1_50_comparison_seed599310825_solutions.json
+    - file: 1_50_failure_seed137869475.mp4
+      meta: analysis/2026-09-28_release/renders/1_50_failure_seed137869475_solutions.json
+    - file: 1_50_feas40_best_seed2098065313.mp4
+      meta: analysis/2026-09-28_release/renders/1_50_feas40_best_seed2098065313_solutions.json
+      stream: "the best feas40 stream (40 flights, feasible stitched 2\xD720)"
 source: analysis/2026-09-27_scratch/backfill

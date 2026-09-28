@@ -121,7 +121,36 @@ Seed 599310825, 20 flights, each model's deterministic policy.
 <figcaption><span class="tada-render__by">Rendered by 1_48</span> (final_model.zip) · seed 599310825 · deterministic · 20 of 20 on time, worst 53 s, 165 clearances</figcaption>
 </figure>
 
+### 1_50
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_release/renders/1_50_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_50_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_50</span> (final_model.zip) · seed 599310825 · deterministic · 19 of 20 on time, worst 62 s, 163 clearances</figcaption>
+</figure>
+
 ## By model
+
+### [1_50](models/1_50.md)
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_release/renders/1_50_best_seed1973214822_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_50_best_seed1973214822.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_50</span> (final_model.zip) · seed 1973214822 · deterministic · 20 of 20 on time, worst 21 s, 170 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_release/renders/1_50_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_50_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_50</span> (final_model.zip) · seed 599310825 · deterministic · 19 of 20 on time, worst 62 s, 163 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_release/renders/1_50_failure_seed137869475_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_50_failure_seed137869475.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_50</span> (final_model.zip) · seed 137869475 · deterministic · 19 of 20 on time, worst 68 s, 180 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-28_release/renders/1_50_feas40_best_seed2098065313_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_50_feas40_best_seed2098065313.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_50</span> (final_model.zip) · seed 2098065313 · the best feas40 stream (40 flights, feasible stitched 2×20) · deterministic · 40 of 40 on time, worst 21 s, 177 clearances</figcaption>
+</figure>
 
 ### [1_48](models/1_48.md)
 
