@@ -4,7 +4,7 @@
     python tools/import_backfill.py [--code-repo PATH] [--dir analysis/2026-09-27_scratch/backfill]
 
 Reads (never writes) the code repo:
-    <dir>/eval/<model>_<item>.csv                          item: f20 | s2x20 | att10 | la4
+    <dir>/eval/<model>_<item>.csv                          item: f20 | s2x20 | att10 | la4 | d100 (10-aircraft)
     <dir>/renders/<model>_<slot>_seed<S>.mp4 + <same>_solutions.json
 
 Copies each render into docs/assets/renders/ (skipped if an identical file is already there) and
@@ -26,7 +26,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 RENDERS = ROOT / "docs" / "assets" / "renders"
-ITEMS = {"f20", "s2x20", "att10", "la4"}
+ITEMS = {"f20", "s2x20", "att10", "la4", "d100"}
 
 
 def md5(p: Path) -> str:
@@ -47,7 +47,7 @@ def main():
     skipped = []
 
     for csv in sorted((base / "eval").glob("*.csv")) if (base / "eval").exists() else []:
-        mt = re.fullmatch(r"(.+)_(f20|s2x20|att10|la4)\.csv", csv.name)
+        mt = re.fullmatch(r"(.+)_(f20|s2x20|att10|la4|d100)\.csv", csv.name)
         if not mt or mt.group(1) not in ids:
             skipped.append(csv.name)
             continue

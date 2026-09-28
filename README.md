@@ -11,6 +11,7 @@ The public docs of the TADA single-agent RL project (mkdocs-material, Glass Cock
 | `docs/models/`, `docs/renders.md`, `docs/backfill.md`, `BACKFILL.md` | **generated**; do not edit |
 | `<!-- gen:… --><!-- /gen -->` blocks in `docs/**/*.md` | generated content inside hand-written pages (`best-box`, `compare`, `render`) |
 | everything else in `docs/` | hand-written |
+| `render-meta/<batch>/` | renders made on this machine: the script, each video's `_solutions.json` and log (the videos themselves go to `docs/assets/renders/`) |
 | `docs/stylesheets/theme.css`, `tada-components.css`, `docs/javascripts/tada.js` | theme tokens, components, sortable tables |
 
 ## Adding a model or an evaluation

@@ -421,7 +421,8 @@ class Build:
                     continue
                 rec = {"file": f, "model": m.id, "known": True, "stream": r.get("stream")}
                 if "meta" in r:
-                    mp = self.code / r["meta"]
+                    # metadata lives in the code repo, or in this repo's render-meta/ for renders made here
+                    mp = ROOT / r["meta"] if r["meta"].startswith("render-meta/") else self.code / r["meta"]
                     if not mp.exists():
                         self.errors.append(f"{f}: metadata {r['meta']} missing")
                         continue

@@ -1,0 +1,1646 @@
+{
+  "schema": "tada-single-agent-solutions/1",
+  "generated_utc": "2026-09-28T06:12:15+00:00",
+  "model": "experiments/atc_run_1_38_windowed_cont/final_model.zip",
+  "policy": "deterministic",
+  "solved_tier": 5,
+  "attempts_allowed": 1,
+  "cleanup": {
+    "applied": false,
+    "note": "raw played actions; consecutive speed changes are NOT accumulated and no-op clearances are NOT filtered out"
+  },
+  "env": {
+    "time_between_actions_s": 45.0,
+    "difficulty": "MissionDifficulty.VALIDATION_USE_CASE_2",
+    "n_clearances": 15,
+    "n_aircraft_max": 10,
+    "clearance_names": {
+      "0": "DO_NOTHING",
+      "1": "SLOW_DOWN_SMALL",
+      "2": "SLOW_DOWN_MEDIUM",
+      "3": "SLOW_DOWN_LARGE",
+      "4": "SPEED_UP_SMALL",
+      "5": "SPEED_UP_MEDIUM",
+      "6": "TURN_LEFT_AND_RETURN_TO_ROUTE",
+      "7": "TURN_RIGHT_AND_RETURN_TO_ROUTE",
+      "8": "LENGTHEN_TROMBONE",
+      "9": "SHORTEN_TROMBONE",
+      "10": "SKIP_1_WAYPOINT",
+      "11": "SKIP_2_WAYPOINTS_NOT_NEXT",
+      "12": "SKIP_3_WAYPOINTS_NOT_NEXT",
+      "13": "SKIP_4_WAYPOINTS_NOT_NEXT",
+      "14": "VECTOR_TO_ILS"
+    }
+  },
+  "solutions": [
+    {
+      "scenario_seed": 1159417075,
+      "solved": false,
+      "bonus_tier": 0,
+      "end_reason": "separation",
+      "reward": -353.2077,
+      "attempts_used": 10,
+      "chosen_attempt": 9,
+      "n_steps": 53,
+      "n_clearances": 52,
+      "metrics": {
+        "deviation_final": 259.0081787109375,
+        "deviation_abs_final": 259.0081787109375,
+        "infringement_total_final": 4.0,
+        "infringement_count_final": 4.0,
+        "infringement_reasons": {
+          "LOSS_OF_SEPARATION": 100,
+          "AIRSPACE_EXIT": 0,
+          "MISS_TIMED_LANDING": 4
+        },
+        "had_separation": true,
+        "had_airspace_exit": false,
+        "success": false,
+        "bonus_tier": 0.0,
+        "end_reason": "separation",
+        "episode_steps": 36,
+        "min_separation_nm": 2.756847381591797,
+        "horizon_used_frac": 0.2857142857142857,
+        "violation_penalty": 60.0,
+        "scenario_seed": 1159417075,
+        "success_all_landed": 0.0,
+        "success_n_aircraft": 20.0,
+        "success_tier": 0.0,
+        "success_n_under_tier1": 19.0,
+        "success_n_under_tier2": 19.0,
+        "success_n_under_tier3": 19.0,
+        "success_n_under_tier4": 18.0,
+        "success_frac_under_tier1": 0.95,
+        "success_frac_under_tier2": 0.95,
+        "success_frac_under_tier3": 0.95,
+        "success_frac_under_tier4": 0.9,
+        "success_all_under_tier5": 0.0,
+        "success_total_abs_dev": 259.0081787109375,
+        "success_max_aircraft_dev": 133.39404296875,
+        "success_no_near_conflicts": 0.0,
+        "success_no_near_conflicts_predicted": 0.0,
+        "success_ever_near_conflict": 1.0,
+        "success_steps_since_near_conflict": 0.0,
+        "window_n_flights": 20.0,
+        "window_n_landed": 5.0,
+        "window_on_time_rate": 0.15,
+        "window_on_time_rate_landed": 0.6,
+        "window_mean_abs_landing_dev": 51.8016357421875,
+        "window_max_abs_landing_dev": 133.39404296875,
+        "window_occupancy_mean": 10.0,
+        "window_occupancy_max": 10.0,
+        "window_overflow_frac": 0.4166666666666667,
+        "window_landing_bonus_total": 10.427226307508903,
+        "window_clearances": 52.0,
+        "window_bracket_score": 10.0,
+        "window_aman_order_rate": 1.0,
+        "window_sequence_swaps": 0.0,
+        "window_clean_stretch_rate": 0.0,
+        "window_stitch_gap_mean_s": 0.0,
+        "window_again_picks": 17.0,
+        "window_multi_pick_steps": 17.0
+      },
+      "per_aircraft": {
+        "TEST002": [
+          {
+            "step": 1,
+            "t_s": 45.0,
+            "slot": 1,
+            "callsign": "TEST002",
+            "clearance": 2,
+            "action": "SLOW_DOWN_MEDIUM",
+            "x_nm": 3.68,
+            "y_nm": -75.86,
+            "alt_ft": 20451.0,
+            "reward": -2.5185
+          },
+          {
+            "step": 2,
+            "t_s": 90.0,
+            "slot": 1,
+            "callsign": "TEST002",
+            "clearance": 1,
+            "action": "SLOW_DOWN_SMALL",
+            "x_nm": 2.37,
+            "y_nm": -70.36,
+            "alt_ft": 20380.0,
+            "reward": -2.7356
+          },
+          {
+            "step": 3,
+            "t_s": 135.0,
+            "slot": 1,
+            "callsign": "TEST002",
+            "clearance": 1,
+            "action": "SLOW_DOWN_SMALL",
+            "x_nm": 1.11,
+            "y_nm": -65.04,
+            "alt_ft": 20312.0,
+            "reward": -2.9572
+          },
+          {
+            "step": 7,
+            "t_s": 270.0,
+            "slot": 1,
+            "callsign": "TEST002",
+            "clearance": 10,
+            "action": "SKIP_1_WAYPOINT",
+            "x_nm": -4.55,
+            "y_nm": -50.18,
+            "alt_ft": 19064.0,
+            "reward": -3.7179
+          },
+          {
+            "step": 9,
+            "t_s": 315.0,
+            "slot": 1,
+            "callsign": "TEST002",
+            "clearance": 3,
+            "action": "SLOW_DOWN_LARGE",
+            "x_nm": -8.11,
+            "y_nm": -46.75,
+            "alt_ft": 18045.0,
+            "reward": -3.5321
+          },
+          {
+            "step": 11,
+            "t_s": 360.0,
+            "slot": 1,
+            "callsign": "TEST002",
+            "clearance": 2,
+            "action": "SLOW_DOWN_MEDIUM",
+            "x_nm": -11.32,
+            "y_nm": -43.66,
+            "alt_ft": 17127.0,
+            "reward": -3.7153
+          },
+          {
+            "step": 18,
+            "t_s": 585.0,
+            "slot": 1,
+            "callsign": "TEST002",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -23.56,
+            "y_nm": -31.88,
+            "alt_ft": 13630.0,
+            "reward": -0.053
+          },
+          {
+            "step": 20,
+            "t_s": 630.0,
+            "slot": 1,
+            "callsign": "TEST002",
+            "clearance": 1,
+            "action": "SLOW_DOWN_SMALL",
+            "x_nm": -28.54,
+            "y_nm": -25.74,
+            "alt_ft": 12360.0,
+            "reward": -4.9053
+          },
+          {
+            "step": 22,
+            "t_s": 675.0,
+            "slot": 1,
+            "callsign": "TEST002",
+            "clearance": 1,
+            "action": "SLOW_DOWN_SMALL",
+            "x_nm": -29.67,
+            "y_nm": -22.19,
+            "alt_ft": 11597.0,
+            "reward": -5.284
+          }
+        ],
+        "TEST001": [
+          {
+            "step": 4,
+            "t_s": 180.0,
+            "slot": 0,
+            "callsign": "TEST001",
+            "clearance": 10,
+            "action": "SKIP_1_WAYPOINT",
+            "x_nm": 30.03,
+            "y_nm": 12.91,
+            "alt_ft": 18663.0,
+            "reward": -3.1928
+          },
+          {
+            "step": 5,
+            "t_s": 225.0,
+            "slot": 0,
+            "callsign": "TEST001",
+            "clearance": 1,
+            "action": "SLOW_DOWN_SMALL",
+            "x_nm": 24.22,
+            "y_nm": 12.95,
+            "alt_ft": 17731.0,
+            "reward": -3.4292
+          },
+          {
+            "step": 6,
+            "t_s": 270.0,
+            "slot": 0,
+            "callsign": "TEST001",
+            "clearance": 10,
+            "action": "SKIP_1_WAYPOINT",
+            "x_nm": 24.22,
+            "y_nm": 12.95,
+            "alt_ft": 17731.0,
+            "reward": -0.05
+          },
+          {
+            "step": 12,
+            "t_s": 405.0,
+            "slot": 0,
+            "callsign": "TEST001",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": 1.79,
+            "y_nm": 13.01,
+            "alt_ft": 14137.0,
+            "reward": -4.3755
+          },
+          {
+            "step": 13,
+            "t_s": 450.0,
+            "slot": 0,
+            "callsign": "TEST001",
+            "clearance": 9,
+            "action": "SHORTEN_TROMBONE",
+            "x_nm": 1.79,
+            "y_nm": 13.01,
+            "alt_ft": 14137.0,
+            "reward": -0.047
+          },
+          {
+            "step": 19,
+            "t_s": 585.0,
+            "slot": 0,
+            "callsign": "TEST001",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -17.26,
+            "y_nm": 10.46,
+            "alt_ft": 10403.0,
+            "reward": -4.6927
+          }
+        ],
+        "TEST006": [
+          {
+            "step": 8,
+            "t_s": 315.0,
+            "slot": 5,
+            "callsign": "TEST006",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -63.3,
+            "y_nm": -95.95,
+            "alt_ft": 20195.0,
+            "reward": -0.05
+          },
+          {
+            "step": 10,
+            "t_s": 360.0,
+            "slot": 5,
+            "callsign": "TEST006",
+            "clearance": 3,
+            "action": "SLOW_DOWN_LARGE",
+            "x_nm": -59.47,
+            "y_nm": -91.15,
+            "alt_ft": 20176.0,
+            "reward": -0.044
+          },
+          {
+            "step": 14,
+            "t_s": 450.0,
+            "slot": 5,
+            "callsign": "TEST006",
+            "clearance": 3,
+            "action": "SLOW_DOWN_LARGE",
+            "x_nm": -49.13,
+            "y_nm": -78.17,
+            "alt_ft": 20127.0,
+            "reward": -4.4591
+          },
+          {
+            "step": 17,
+            "t_s": 540.0,
+            "slot": 5,
+            "callsign": "TEST006",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -42.79,
+            "y_nm": -70.22,
+            "alt_ft": 20097.0,
+            "reward": -4.5042
+          },
+          {
+            "step": 24,
+            "t_s": 720.0,
+            "slot": 5,
+            "callsign": "TEST006",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -30.13,
+            "y_nm": -54.33,
+            "alt_ft": 20037.0,
+            "reward": -7.7437
+          },
+          {
+            "step": 42,
+            "t_s": 1215.0,
+            "slot": 5,
+            "callsign": "TEST006",
+            "clearance": 3,
+            "action": "SLOW_DOWN_LARGE",
+            "x_nm": -31.77,
+            "y_nm": -12.65,
+            "alt_ft": 9561.0,
+            "reward": -9.5683
+          },
+          {
+            "step": 44,
+            "t_s": 1305.0,
+            "slot": 4,
+            "callsign": "TEST006",
+            "clearance": 4,
+            "action": "SPEED_UP_SMALL",
+            "x_nm": -30.76,
+            "y_nm": -7.39,
+            "alt_ft": 8025.0,
+            "reward": -9.2862
+          },
+          {
+            "step": 45,
+            "t_s": 1350.0,
+            "slot": 4,
+            "callsign": "TEST006",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -27.94,
+            "y_nm": -6.45,
+            "alt_ft": 6985.0,
+            "reward": -9.8031
+          }
+        ],
+        "TEST003": [
+          {
+            "step": 15,
+            "t_s": 495.0,
+            "slot": 2,
+            "callsign": "TEST003",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": 27.85,
+            "y_nm": 32.65,
+            "alt_ft": 18966.0,
+            "reward": -4.7992
+          },
+          {
+            "step": 16,
+            "t_s": 540.0,
+            "slot": 2,
+            "callsign": "TEST003",
+            "clearance": 9,
+            "action": "SHORTEN_TROMBONE",
+            "x_nm": 27.85,
+            "y_nm": 32.65,
+            "alt_ft": 18966.0,
+            "reward": -0.041
+          },
+          {
+            "step": 21,
+            "t_s": 675.0,
+            "slot": 2,
+            "callsign": "TEST003",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": 12.99,
+            "y_nm": 25.58,
+            "alt_ft": 16350.0,
+            "reward": -0.05
+          }
+        ],
+        "TEST004": [
+          {
+            "step": 23,
+            "t_s": 720.0,
+            "slot": 3,
+            "callsign": "TEST004",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -54.79,
+            "y_nm": -30.74,
+            "alt_ft": 19600.0,
+            "reward": -0.05
+          },
+          {
+            "step": 25,
+            "t_s": 765.0,
+            "slot": 3,
+            "callsign": "TEST004",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -48.89,
+            "y_nm": -30.37,
+            "alt_ft": 18100.0,
+            "reward": -0.044
+          }
+        ],
+        "TEST008": [
+          {
+            "step": 26,
+            "t_s": 765.0,
+            "slot": 7,
+            "callsign": "TEST008",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -1.63,
+            "y_nm": -53.51,
+            "alt_ft": 20273.0,
+            "reward": -5.5967
+          },
+          {
+            "step": 27,
+            "t_s": 810.0,
+            "slot": 7,
+            "callsign": "TEST008",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -1.63,
+            "y_nm": -53.51,
+            "alt_ft": 20273.0,
+            "reward": -0.044
+          },
+          {
+            "step": 30,
+            "t_s": 855.0,
+            "slot": 7,
+            "callsign": "TEST008",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -4.33,
+            "y_nm": -42.62,
+            "alt_ft": 19778.0,
+            "reward": -6.1842
+          },
+          {
+            "step": 34,
+            "t_s": 945.0,
+            "slot": 7,
+            "callsign": "TEST008",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -11.24,
+            "y_nm": -37.58,
+            "alt_ft": 17525.0,
+            "reward": -5.8202
+          },
+          {
+            "step": 41,
+            "t_s": 1170.0,
+            "slot": 7,
+            "callsign": "TEST008",
+            "clearance": 3,
+            "action": "SLOW_DOWN_LARGE",
+            "x_nm": -27.79,
+            "y_nm": -26.68,
+            "alt_ft": 12597.0,
+            "reward": -8.4836
+          },
+          {
+            "step": 43,
+            "t_s": 1260.0,
+            "slot": 7,
+            "callsign": "TEST008",
+            "clearance": 3,
+            "action": "SLOW_DOWN_LARGE",
+            "x_nm": -29.94,
+            "y_nm": -20.59,
+            "alt_ft": 11169.0,
+            "reward": -7.2857
+          },
+          {
+            "step": 52,
+            "t_s": 1863.0,
+            "slot": 3,
+            "callsign": "TEST008",
+            "clearance": 5,
+            "action": "SPEED_UP_MEDIUM",
+            "x_nm": -18.19,
+            "y_nm": -16.55,
+            "alt_ft": 4773.0,
+            "reward": -114.2447
+          }
+        ],
+        "TEST007": [
+          {
+            "step": 28,
+            "t_s": 810.0,
+            "slot": 6,
+            "callsign": "TEST007",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": 27.57,
+            "y_nm": 12.98,
+            "alt_ft": 19378.0,
+            "reward": -5.8254
+          },
+          {
+            "step": 32,
+            "t_s": 900.0,
+            "slot": 6,
+            "callsign": "TEST007",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": 16.59,
+            "y_nm": 13.09,
+            "alt_ft": 18801.0,
+            "reward": -5.6848
+          },
+          {
+            "step": 33,
+            "t_s": 945.0,
+            "slot": 6,
+            "callsign": "TEST007",
+            "clearance": 3,
+            "action": "SLOW_DOWN_LARGE",
+            "x_nm": 16.59,
+            "y_nm": 13.09,
+            "alt_ft": 18801.0,
+            "reward": -0.038
+          },
+          {
+            "step": 36,
+            "t_s": 990.0,
+            "slot": 6,
+            "callsign": "TEST007",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": 8.78,
+            "y_nm": 13.08,
+            "alt_ft": 17025.0,
+            "reward": -6.1948
+          },
+          {
+            "step": 38,
+            "t_s": 1035.0,
+            "slot": 6,
+            "callsign": "TEST007",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": 5.12,
+            "y_nm": 13.07,
+            "alt_ft": 16194.0,
+            "reward": -6.8698
+          },
+          {
+            "step": 46,
+            "t_s": 1395.0,
+            "slot": 5,
+            "callsign": "TEST007",
+            "clearance": 4,
+            "action": "SPEED_UP_SMALL",
+            "x_nm": -15.87,
+            "y_nm": 5.43,
+            "alt_ft": 8946.0,
+            "reward": -7.573
+          }
+        ],
+        "TEST005": [
+          {
+            "step": 29,
+            "t_s": 855.0,
+            "slot": 4,
+            "callsign": "TEST005",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -32.06,
+            "y_nm": 37.33,
+            "alt_ft": 20383.0,
+            "reward": -0.053
+          },
+          {
+            "step": 31,
+            "t_s": 900.0,
+            "slot": 4,
+            "callsign": "TEST005",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -29.97,
+            "y_nm": 32.0,
+            "alt_ft": 19631.0,
+            "reward": -0.047
+          }
+        ],
+        "TEST009": [
+          {
+            "step": 35,
+            "t_s": 990.0,
+            "slot": 8,
+            "callsign": "TEST009",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": 24.53,
+            "y_nm": 31.08,
+            "alt_ft": 18701.0,
+            "reward": -0.047
+          },
+          {
+            "step": 37,
+            "t_s": 1035.0,
+            "slot": 8,
+            "callsign": "TEST009",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": 19.17,
+            "y_nm": 28.55,
+            "alt_ft": 17719.0,
+            "reward": -0.041
+          },
+          {
+            "step": 39,
+            "t_s": 1080.0,
+            "slot": 8,
+            "callsign": "TEST009",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": 10.65,
+            "y_nm": 24.4,
+            "alt_ft": 16147.0,
+            "reward": -7.5492
+          },
+          {
+            "step": 40,
+            "t_s": 1125.0,
+            "slot": 8,
+            "callsign": "TEST009",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": 6.98,
+            "y_nm": 22.54,
+            "alt_ft": 15467.0,
+            "reward": -7.1429
+          }
+        ],
+        "TEST011": [
+          {
+            "step": 47,
+            "t_s": 1440.0,
+            "slot": 8,
+            "callsign": "TEST011",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -30.31,
+            "y_nm": 32.88,
+            "alt_ft": 19756.0,
+            "reward": -12.2104
+          },
+          {
+            "step": 49,
+            "t_s": 1485.0,
+            "slot": 8,
+            "callsign": "TEST011",
+            "clearance": 8,
+            "action": "LENGTHEN_TROMBONE",
+            "x_nm": -20.81,
+            "y_nm": 17.48,
+            "alt_ft": 13914.0,
+            "reward": -27.3903
+          }
+        ],
+        "TEST012": [
+          {
+            "step": 48,
+            "t_s": 1485.0,
+            "slot": 9,
+            "callsign": "TEST012",
+            "clearance": 7,
+            "action": "TURN_RIGHT_AND_RETURN_TO_ROUTE",
+            "x_nm": -24.16,
+            "y_nm": -40.89,
+            "alt_ft": 17877.0,
+            "reward": -0.2093
+          },
+          {
+            "step": 50,
+            "t_s": 1674.0,
+            "slot": 9,
+            "callsign": "TEST012",
+            "clearance": 6,
+            "action": "TURN_LEFT_AND_RETURN_TO_ROUTE",
+            "x_nm": -34.22,
+            "y_nm": -32.18,
+            "alt_ft": 12011.0,
+            "reward": -20.5127
+          },
+          {
+            "step": 51,
+            "t_s": 1863.0,
+            "slot": 7,
+            "callsign": "TEST012",
+            "clearance": 7,
+            "action": "TURN_RIGHT_AND_RETURN_TO_ROUTE",
+            "x_nm": -34.22,
+            "y_nm": -32.18,
+            "alt_ft": 12011.0,
+            "reward": -0.2093
+          }
+        ]
+      },
+      "commands": [
+        {
+          "step": 1,
+          "t_s": 45.0,
+          "slot": 1,
+          "callsign": "TEST002",
+          "clearance": 2,
+          "action": "SLOW_DOWN_MEDIUM",
+          "x_nm": 3.68,
+          "y_nm": -75.86,
+          "alt_ft": 20451.0,
+          "reward": -2.5185
+        },
+        {
+          "step": 2,
+          "t_s": 90.0,
+          "slot": 1,
+          "callsign": "TEST002",
+          "clearance": 1,
+          "action": "SLOW_DOWN_SMALL",
+          "x_nm": 2.37,
+          "y_nm": -70.36,
+          "alt_ft": 20380.0,
+          "reward": -2.7356
+        },
+        {
+          "step": 3,
+          "t_s": 135.0,
+          "slot": 1,
+          "callsign": "TEST002",
+          "clearance": 1,
+          "action": "SLOW_DOWN_SMALL",
+          "x_nm": 1.11,
+          "y_nm": -65.04,
+          "alt_ft": 20312.0,
+          "reward": -2.9572
+        },
+        {
+          "step": 4,
+          "t_s": 180.0,
+          "slot": 0,
+          "callsign": "TEST001",
+          "clearance": 10,
+          "action": "SKIP_1_WAYPOINT",
+          "x_nm": 30.03,
+          "y_nm": 12.91,
+          "alt_ft": 18663.0,
+          "reward": -3.1928
+        },
+        {
+          "step": 5,
+          "t_s": 225.0,
+          "slot": 0,
+          "callsign": "TEST001",
+          "clearance": 1,
+          "action": "SLOW_DOWN_SMALL",
+          "x_nm": 24.22,
+          "y_nm": 12.95,
+          "alt_ft": 17731.0,
+          "reward": -3.4292
+        },
+        {
+          "step": 6,
+          "t_s": 270.0,
+          "slot": 0,
+          "callsign": "TEST001",
+          "clearance": 10,
+          "action": "SKIP_1_WAYPOINT",
+          "x_nm": 24.22,
+          "y_nm": 12.95,
+          "alt_ft": 17731.0,
+          "reward": -0.05
+        },
+        {
+          "step": 7,
+          "t_s": 270.0,
+          "slot": 1,
+          "callsign": "TEST002",
+          "clearance": 10,
+          "action": "SKIP_1_WAYPOINT",
+          "x_nm": -4.55,
+          "y_nm": -50.18,
+          "alt_ft": 19064.0,
+          "reward": -3.7179
+        },
+        {
+          "step": 8,
+          "t_s": 315.0,
+          "slot": 5,
+          "callsign": "TEST006",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -63.3,
+          "y_nm": -95.95,
+          "alt_ft": 20195.0,
+          "reward": -0.05
+        },
+        {
+          "step": 9,
+          "t_s": 315.0,
+          "slot": 1,
+          "callsign": "TEST002",
+          "clearance": 3,
+          "action": "SLOW_DOWN_LARGE",
+          "x_nm": -8.11,
+          "y_nm": -46.75,
+          "alt_ft": 18045.0,
+          "reward": -3.5321
+        },
+        {
+          "step": 10,
+          "t_s": 360.0,
+          "slot": 5,
+          "callsign": "TEST006",
+          "clearance": 3,
+          "action": "SLOW_DOWN_LARGE",
+          "x_nm": -59.47,
+          "y_nm": -91.15,
+          "alt_ft": 20176.0,
+          "reward": -0.044
+        },
+        {
+          "step": 11,
+          "t_s": 360.0,
+          "slot": 1,
+          "callsign": "TEST002",
+          "clearance": 2,
+          "action": "SLOW_DOWN_MEDIUM",
+          "x_nm": -11.32,
+          "y_nm": -43.66,
+          "alt_ft": 17127.0,
+          "reward": -3.7153
+        },
+        {
+          "step": 12,
+          "t_s": 405.0,
+          "slot": 0,
+          "callsign": "TEST001",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": 1.79,
+          "y_nm": 13.01,
+          "alt_ft": 14137.0,
+          "reward": -4.3755
+        },
+        {
+          "step": 13,
+          "t_s": 450.0,
+          "slot": 0,
+          "callsign": "TEST001",
+          "clearance": 9,
+          "action": "SHORTEN_TROMBONE",
+          "x_nm": 1.79,
+          "y_nm": 13.01,
+          "alt_ft": 14137.0,
+          "reward": -0.047
+        },
+        {
+          "step": 14,
+          "t_s": 450.0,
+          "slot": 5,
+          "callsign": "TEST006",
+          "clearance": 3,
+          "action": "SLOW_DOWN_LARGE",
+          "x_nm": -49.13,
+          "y_nm": -78.17,
+          "alt_ft": 20127.0,
+          "reward": -4.4591
+        },
+        {
+          "step": 15,
+          "t_s": 495.0,
+          "slot": 2,
+          "callsign": "TEST003",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": 27.85,
+          "y_nm": 32.65,
+          "alt_ft": 18966.0,
+          "reward": -4.7992
+        },
+        {
+          "step": 16,
+          "t_s": 540.0,
+          "slot": 2,
+          "callsign": "TEST003",
+          "clearance": 9,
+          "action": "SHORTEN_TROMBONE",
+          "x_nm": 27.85,
+          "y_nm": 32.65,
+          "alt_ft": 18966.0,
+          "reward": -0.041
+        },
+        {
+          "step": 17,
+          "t_s": 540.0,
+          "slot": 5,
+          "callsign": "TEST006",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -42.79,
+          "y_nm": -70.22,
+          "alt_ft": 20097.0,
+          "reward": -4.5042
+        },
+        {
+          "step": 18,
+          "t_s": 585.0,
+          "slot": 1,
+          "callsign": "TEST002",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -23.56,
+          "y_nm": -31.88,
+          "alt_ft": 13630.0,
+          "reward": -0.053
+        },
+        {
+          "step": 19,
+          "t_s": 585.0,
+          "slot": 0,
+          "callsign": "TEST001",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -17.26,
+          "y_nm": 10.46,
+          "alt_ft": 10403.0,
+          "reward": -4.6927
+        },
+        {
+          "step": 20,
+          "t_s": 630.0,
+          "slot": 1,
+          "callsign": "TEST002",
+          "clearance": 1,
+          "action": "SLOW_DOWN_SMALL",
+          "x_nm": -28.54,
+          "y_nm": -25.74,
+          "alt_ft": 12360.0,
+          "reward": -4.9053
+        },
+        {
+          "step": 21,
+          "t_s": 675.0,
+          "slot": 2,
+          "callsign": "TEST003",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": 12.99,
+          "y_nm": 25.58,
+          "alt_ft": 16350.0,
+          "reward": -0.05
+        },
+        {
+          "step": 22,
+          "t_s": 675.0,
+          "slot": 1,
+          "callsign": "TEST002",
+          "clearance": 1,
+          "action": "SLOW_DOWN_SMALL",
+          "x_nm": -29.67,
+          "y_nm": -22.19,
+          "alt_ft": 11597.0,
+          "reward": -5.284
+        },
+        {
+          "step": 23,
+          "t_s": 720.0,
+          "slot": 3,
+          "callsign": "TEST004",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -54.79,
+          "y_nm": -30.74,
+          "alt_ft": 19600.0,
+          "reward": -0.05
+        },
+        {
+          "step": 24,
+          "t_s": 720.0,
+          "slot": 5,
+          "callsign": "TEST006",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -30.13,
+          "y_nm": -54.33,
+          "alt_ft": 20037.0,
+          "reward": -7.7437
+        },
+        {
+          "step": 25,
+          "t_s": 765.0,
+          "slot": 3,
+          "callsign": "TEST004",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -48.89,
+          "y_nm": -30.37,
+          "alt_ft": 18100.0,
+          "reward": -0.044
+        },
+        {
+          "step": 26,
+          "t_s": 765.0,
+          "slot": 7,
+          "callsign": "TEST008",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -1.63,
+          "y_nm": -53.51,
+          "alt_ft": 20273.0,
+          "reward": -5.5967
+        },
+        {
+          "step": 27,
+          "t_s": 810.0,
+          "slot": 7,
+          "callsign": "TEST008",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -1.63,
+          "y_nm": -53.51,
+          "alt_ft": 20273.0,
+          "reward": -0.044
+        },
+        {
+          "step": 28,
+          "t_s": 810.0,
+          "slot": 6,
+          "callsign": "TEST007",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": 27.57,
+          "y_nm": 12.98,
+          "alt_ft": 19378.0,
+          "reward": -5.8254
+        },
+        {
+          "step": 29,
+          "t_s": 855.0,
+          "slot": 4,
+          "callsign": "TEST005",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -32.06,
+          "y_nm": 37.33,
+          "alt_ft": 20383.0,
+          "reward": -0.053
+        },
+        {
+          "step": 30,
+          "t_s": 855.0,
+          "slot": 7,
+          "callsign": "TEST008",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -4.33,
+          "y_nm": -42.62,
+          "alt_ft": 19778.0,
+          "reward": -6.1842
+        },
+        {
+          "step": 31,
+          "t_s": 900.0,
+          "slot": 4,
+          "callsign": "TEST005",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -29.97,
+          "y_nm": 32.0,
+          "alt_ft": 19631.0,
+          "reward": -0.047
+        },
+        {
+          "step": 32,
+          "t_s": 900.0,
+          "slot": 6,
+          "callsign": "TEST007",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": 16.59,
+          "y_nm": 13.09,
+          "alt_ft": 18801.0,
+          "reward": -5.6848
+        },
+        {
+          "step": 33,
+          "t_s": 945.0,
+          "slot": 6,
+          "callsign": "TEST007",
+          "clearance": 3,
+          "action": "SLOW_DOWN_LARGE",
+          "x_nm": 16.59,
+          "y_nm": 13.09,
+          "alt_ft": 18801.0,
+          "reward": -0.038
+        },
+        {
+          "step": 34,
+          "t_s": 945.0,
+          "slot": 7,
+          "callsign": "TEST008",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -11.24,
+          "y_nm": -37.58,
+          "alt_ft": 17525.0,
+          "reward": -5.8202
+        },
+        {
+          "step": 35,
+          "t_s": 990.0,
+          "slot": 8,
+          "callsign": "TEST009",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": 24.53,
+          "y_nm": 31.08,
+          "alt_ft": 18701.0,
+          "reward": -0.047
+        },
+        {
+          "step": 36,
+          "t_s": 990.0,
+          "slot": 6,
+          "callsign": "TEST007",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": 8.78,
+          "y_nm": 13.08,
+          "alt_ft": 17025.0,
+          "reward": -6.1948
+        },
+        {
+          "step": 37,
+          "t_s": 1035.0,
+          "slot": 8,
+          "callsign": "TEST009",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": 19.17,
+          "y_nm": 28.55,
+          "alt_ft": 17719.0,
+          "reward": -0.041
+        },
+        {
+          "step": 38,
+          "t_s": 1035.0,
+          "slot": 6,
+          "callsign": "TEST007",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": 5.12,
+          "y_nm": 13.07,
+          "alt_ft": 16194.0,
+          "reward": -6.8698
+        },
+        {
+          "step": 39,
+          "t_s": 1080.0,
+          "slot": 8,
+          "callsign": "TEST009",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": 10.65,
+          "y_nm": 24.4,
+          "alt_ft": 16147.0,
+          "reward": -7.5492
+        },
+        {
+          "step": 40,
+          "t_s": 1125.0,
+          "slot": 8,
+          "callsign": "TEST009",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": 6.98,
+          "y_nm": 22.54,
+          "alt_ft": 15467.0,
+          "reward": -7.1429
+        },
+        {
+          "step": 41,
+          "t_s": 1170.0,
+          "slot": 7,
+          "callsign": "TEST008",
+          "clearance": 3,
+          "action": "SLOW_DOWN_LARGE",
+          "x_nm": -27.79,
+          "y_nm": -26.68,
+          "alt_ft": 12597.0,
+          "reward": -8.4836
+        },
+        {
+          "step": 42,
+          "t_s": 1215.0,
+          "slot": 5,
+          "callsign": "TEST006",
+          "clearance": 3,
+          "action": "SLOW_DOWN_LARGE",
+          "x_nm": -31.77,
+          "y_nm": -12.65,
+          "alt_ft": 9561.0,
+          "reward": -9.5683
+        },
+        {
+          "step": 43,
+          "t_s": 1260.0,
+          "slot": 7,
+          "callsign": "TEST008",
+          "clearance": 3,
+          "action": "SLOW_DOWN_LARGE",
+          "x_nm": -29.94,
+          "y_nm": -20.59,
+          "alt_ft": 11169.0,
+          "reward": -7.2857
+        },
+        {
+          "step": 44,
+          "t_s": 1305.0,
+          "slot": 4,
+          "callsign": "TEST006",
+          "clearance": 4,
+          "action": "SPEED_UP_SMALL",
+          "x_nm": -30.76,
+          "y_nm": -7.39,
+          "alt_ft": 8025.0,
+          "reward": -9.2862
+        },
+        {
+          "step": 45,
+          "t_s": 1350.0,
+          "slot": 4,
+          "callsign": "TEST006",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -27.94,
+          "y_nm": -6.45,
+          "alt_ft": 6985.0,
+          "reward": -9.8031
+        },
+        {
+          "step": 46,
+          "t_s": 1395.0,
+          "slot": 5,
+          "callsign": "TEST007",
+          "clearance": 4,
+          "action": "SPEED_UP_SMALL",
+          "x_nm": -15.87,
+          "y_nm": 5.43,
+          "alt_ft": 8946.0,
+          "reward": -7.573
+        },
+        {
+          "step": 47,
+          "t_s": 1440.0,
+          "slot": 8,
+          "callsign": "TEST011",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -30.31,
+          "y_nm": 32.88,
+          "alt_ft": 19756.0,
+          "reward": -12.2104
+        },
+        {
+          "step": 48,
+          "t_s": 1485.0,
+          "slot": 9,
+          "callsign": "TEST012",
+          "clearance": 7,
+          "action": "TURN_RIGHT_AND_RETURN_TO_ROUTE",
+          "x_nm": -24.16,
+          "y_nm": -40.89,
+          "alt_ft": 17877.0,
+          "reward": -0.2093
+        },
+        {
+          "step": 49,
+          "t_s": 1485.0,
+          "slot": 8,
+          "callsign": "TEST011",
+          "clearance": 8,
+          "action": "LENGTHEN_TROMBONE",
+          "x_nm": -20.81,
+          "y_nm": 17.48,
+          "alt_ft": 13914.0,
+          "reward": -27.3903
+        },
+        {
+          "step": 50,
+          "t_s": 1674.0,
+          "slot": 9,
+          "callsign": "TEST012",
+          "clearance": 6,
+          "action": "TURN_LEFT_AND_RETURN_TO_ROUTE",
+          "x_nm": -34.22,
+          "y_nm": -32.18,
+          "alt_ft": 12011.0,
+          "reward": -20.5127
+        },
+        {
+          "step": 51,
+          "t_s": 1863.0,
+          "slot": 7,
+          "callsign": "TEST012",
+          "clearance": 7,
+          "action": "TURN_RIGHT_AND_RETURN_TO_ROUTE",
+          "x_nm": -34.22,
+          "y_nm": -32.18,
+          "alt_ft": 12011.0,
+          "reward": -0.2093
+        },
+        {
+          "step": 52,
+          "t_s": 1863.0,
+          "slot": 3,
+          "callsign": "TEST008",
+          "clearance": 5,
+          "action": "SPEED_UP_MEDIUM",
+          "x_nm": -18.19,
+          "y_nm": -16.55,
+          "alt_ft": 4773.0,
+          "reward": -114.2447
+        }
+      ],
+      "raw_actions": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          2,
+          0
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          0,
+          10,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          10,
+          1
+        ],
+        [
+          1,
+          10,
+          0
+        ],
+        [
+          5,
+          8,
+          1
+        ],
+        [
+          1,
+          3,
+          0
+        ],
+        [
+          5,
+          3,
+          1
+        ],
+        [
+          1,
+          2,
+          0
+        ],
+        [
+          0,
+          8,
+          0
+        ],
+        [
+          0,
+          9,
+          1
+        ],
+        [
+          5,
+          3,
+          0
+        ],
+        [
+          2,
+          8,
+          0
+        ],
+        [
+          2,
+          9,
+          1
+        ],
+        [
+          5,
+          8,
+          0
+        ],
+        [
+          1,
+          8,
+          1
+        ],
+        [
+          0,
+          8,
+          0
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          2,
+          8,
+          1
+        ],
+        [
+          1,
+          1,
+          0
+        ],
+        [
+          3,
+          8,
+          1
+        ],
+        [
+          5,
+          8,
+          0
+        ],
+        [
+          3,
+          8,
+          1
+        ],
+        [
+          7,
+          8,
+          0
+        ],
+        [
+          7,
+          8,
+          1
+        ],
+        [
+          6,
+          8,
+          0
+        ],
+        [
+          4,
+          8,
+          1
+        ],
+        [
+          7,
+          8,
+          0
+        ],
+        [
+          4,
+          8,
+          1
+        ],
+        [
+          6,
+          8,
+          0
+        ],
+        [
+          6,
+          3,
+          1
+        ],
+        [
+          7,
+          8,
+          0
+        ],
+        [
+          8,
+          8,
+          1
+        ],
+        [
+          6,
+          8,
+          0
+        ],
+        [
+          8,
+          8,
+          1
+        ],
+        [
+          6,
+          8,
+          0
+        ],
+        [
+          8,
+          8,
+          0
+        ],
+        [
+          8,
+          8,
+          0
+        ],
+        [
+          7,
+          3,
+          0
+        ],
+        [
+          5,
+          3,
+          0
+        ],
+        [
+          7,
+          3,
+          0
+        ],
+        [
+          4,
+          4,
+          0
+        ],
+        [
+          4,
+          8,
+          0
+        ],
+        [
+          5,
+          4,
+          0
+        ],
+        [
+          8,
+          8,
+          0
+        ],
+        [
+          9,
+          7,
+          1
+        ],
+        [
+          8,
+          8,
+          0
+        ],
+        [
+          9,
+          6,
+          0
+        ],
+        [
+          7,
+          7,
+          1
+        ],
+        [
+          3,
+          5,
+          0
+        ]
+      ]
+    }
+  ]
+}

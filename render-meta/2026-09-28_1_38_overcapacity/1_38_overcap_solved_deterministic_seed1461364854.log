@@ -1,0 +1,28 @@
+[render] model=experiments/atc_run_1_38_windowed_cont/final_model.zip seeds=1 attempts=1 stochastic=False shield=False fallback=do_nothing
+
+[1/1] seed 1461364854
+    attempt 0 (deterministic): end=success on_time=1.00 bracket=60.0 clearances=157
+    best: attempt 0
+  steps=122 reward=-140.7 end=success bonus_tier=5 success=True abs_dev=245.871337890625 clearances=157 attempt=0/1 refusals=0
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (2025, 1350) to (2032, 1360) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+[rawvideo @ 0x4050a040] Stream #0: not enough frames to estimate rate; consider increasing probesize
+
+=== episodes ===
+  #       seed attempt steps    reward end_reason   tier solved  |dev| s  max dev min sep  clr
+----------------------------------------------------------------------------------------------
+  1 1461364854     0/1   122    -140.7 success         5    yes      246       56     5.2  157
+
+=== analysis ===
+episodes              : 1
+solved (tier >= 5)    : 1 / 1 (100%)
+bonus_tier histogram  : t0=0  t1=0  t2=0  t3=0  t4=0  t5=1
+mean bonus_tier       : 5.00
+final |deviation| (s) : mean 246  median 246  min 246  max 246
+worst aircraft dev (s): mean 56  median 56  min 56  max 56
+min separation (nm)   : mean 5.25  median 5.25  min 5.25  max 5.25
+clearances / episode  : mean 157.0  median 157.0  min 157.0  max 157.0
+end reasons           : {'success': 1}
+clearance mix         : LENGTHEN_TROMBONE=64, SLOW_DOWN_MEDIUM=35, SLOW_DOWN_LARGE=26, SPEED_UP_SMALL=17, SLOW_DOWN_SMALL=10, SKIP_1_WAYPOINT=3, SHORTEN_TROMBONE=1, SPEED_UP_MEDIUM=1
+
+wrote /home/leander/code/tada/tada-single-agent-docs/render-meta/2026-09-28_1_38_overcapacity/1_38_overcap_solved_deterministic_seed1461364854.mp4 (208 frames @ 2 fps)
+wrote /home/leander/code/tada/tada-single-agent-docs/render-meta/2026-09-28_1_38_overcapacity/1_38_overcap_solved_deterministic_seed1461364854_solutions.json (1 seeds, 1 solved)

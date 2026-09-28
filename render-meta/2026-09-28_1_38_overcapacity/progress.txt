@@ -1,0 +1,7 @@
+07:51:54 start 1_38_overcap_solved_deterministic_seed1461364854 cpu=97000
+07:59:45 done 1_38_overcap_solved_deterministic_seed1461364854 exit=0
+07:59:45 start 1_38_overcap_safe_best_seed1123251507 cpu=98000
+08:08:26 done 1_38_overcap_safe_best_seed1123251507 exit=0
+08:08:26 start 1_38_overcap_worst_best_seed1159417075 cpu=97000
+08:12:18 done 1_38_overcap_worst_best_seed1159417075 exit=0
+ALL_DONE

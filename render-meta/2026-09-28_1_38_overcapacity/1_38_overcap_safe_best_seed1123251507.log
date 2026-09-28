@@ -1,0 +1,38 @@
+[render] model=experiments/atc_run_1_38_windowed_cont/final_model.zip seeds=1 attempts=1 stochastic=False shield=False fallback=do_nothing
+
+[1/1] seed 1123251507
+    attempt 0 (deterministic): end=delayed on_time=0.30 bracket=5.5 clearances=109
+    attempt 1: end=separation on_time=0.30 bracket=18.0 clearances=100
+    attempt 2: end=separation on_time=0.35 bracket=17.0 clearances=107
+    attempt 3: end=separation on_time=0.25 bracket=10.5 clearances=77
+    attempt 4: end=delayed on_time=0.35 bracket=-4.5 clearances=98
+    attempt 5: end=separation on_time=0.35 bracket=19.0 clearances=87
+    attempt 6: end=separation on_time=0.40 bracket=22.0 clearances=94
+    attempt 7: end=separation on_time=0.30 bracket=2.0 clearances=102
+    attempt 8: end=separation on_time=0.25 bracket=12.0 clearances=84
+    attempt 9: end=delayed on_time=0.40 bracket=7.5 clearances=90
+    best: attempt 9
+  steps=85 reward=-406.5 end=delayed bonus_tier=1 success=False abs_dev=10162.3076171875 clearances=90 attempt=9/10 refusals=0
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (2025, 1350) to (2032, 1360) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+[rawvideo @ 0x2ab16040] Stream #0: not enough frames to estimate rate; consider increasing probesize
+
+=== episodes ===
+  #       seed attempt steps    reward end_reason   tier solved  |dev| s  max dev min sep  clr
+----------------------------------------------------------------------------------------------
+  1 1123251507    9/10    85    -406.5 delayed         1     no    10162     1691     2.8   90
+
+=== analysis ===
+episodes              : 1
+solved (tier >= 5)    : 0 / 1 (0%)
+bonus_tier histogram  : t0=0  t1=1  t2=0  t3=0  t4=0  t5=0
+mean bonus_tier       : 1.00
+final |deviation| (s) : mean 10162  median 10162  min 10162  max 10162
+worst aircraft dev (s): mean 1691  median 1691  min 1691  max 1691
+min separation (nm)   : mean 2.75  median 2.75  min 2.75  max 2.75
+clearances / episode  : mean 90.0  median 90.0  min 90.0  max 90.0
+end reasons           : {'delayed': 1}
+clearance mix         : LENGTHEN_TROMBONE=40, SLOW_DOWN_LARGE=19, SLOW_DOWN_MEDIUM=11, SPEED_UP_SMALL=9, SLOW_DOWN_SMALL=5, SHORTEN_TROMBONE=4, SKIP_1_WAYPOINT=1, SKIP_3_WAYPOINTS_NOT_NEXT=1
+unsolved seeds        : 1123251507
+
+wrote /home/leander/code/tada/tada-single-agent-docs/render-meta/2026-09-28_1_38_overcapacity/1_38_overcap_safe_best_seed1123251507.mp4 (124 frames @ 2 fps)
+wrote /home/leander/code/tada/tada-single-agent-docs/render-meta/2026-09-28_1_38_overcapacity/1_38_overcap_safe_best_seed1123251507_solutions.json (1 seeds, 0 solved)

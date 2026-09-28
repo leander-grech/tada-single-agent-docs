@@ -126,10 +126,7 @@ models:
     parent: "1_36"
     status: complete
     whats_new: "1_36 continued for another 5M steps on the same settings (reselection, budget 2)."
-    backfill_extra:
-      - "render **hardest solve**: seed 1461364854 (earliest flight 1 141 s early), deterministic"
-      - "render **safe on a 28-minute seed**: seed 1123251507, best of 10 attempts (`--paired-attempts 9`)"
-      - "render **the worst seed**: seed 1159417075 (42.5 min early), best of 10 attempts (`--paired-attempts 9`)"
+
     evals:
       f20: analysis/2026-09-26_1_36_multipick/eval_cont/f20.csv
       s2x20: analysis/2026-09-26_1_36_multipick/eval_cont/s2x20.csv
@@ -137,6 +134,9 @@ models:
       la4: analysis/2026-09-26_1_36_multipick/eval_cont/la4.csv
     renders:
       - {file: 1_38_deterministic_seed599310825.mp4, meta: analysis/2026-09-27_renders_seed599310825/1_38_deterministic_seed599310825_solutions.json}
+      - {file: 1_38_overcap_solved_deterministic_seed1461364854.mp4, meta: render-meta/2026-09-28_1_38_overcapacity/1_38_overcap_solved_deterministic_seed1461364854_solutions.json, stream: "earliest flight 1 141 s early"}
+      - {file: 1_38_overcap_safe_best_seed1123251507.mp4, meta: render-meta/2026-09-28_1_38_overcapacity/1_38_overcap_safe_best_seed1123251507_solutions.json, stream: "earliest flight 1 690 s early"}
+      - {file: 1_38_overcap_worst_best_seed1159417075.mp4, meta: render-meta/2026-09-28_1_38_overcapacity/1_38_overcap_worst_best_seed1159417075_solutions.json, stream: "earliest flight 2 550 s early"}
       - {file: 1_38_k5_best_seed868278894.mp4, meta: analysis/2026-09-27_scratch/longstreams/renders/1_38_k5_best_seed868278894_solutions.json, stream: "5×20-flight stitched stream, feasible, gaps 600–900 s"}
       - {file: 1_38_k5_typical_seed1417723440.mp4, meta: analysis/2026-09-27_scratch/longstreams/renders/1_38_k5_typical_seed1417723440_solutions.json, stream: "5×20-flight stitched stream, feasible, gaps 600–900 s"}
       - {file: 1_38_k5_typical_seed1210104633.mp4, meta: analysis/2026-09-27_scratch/longstreams/renders/1_38_k5_typical_seed1210104633_solutions.json, stream: "5×20-flight stitched stream, feasible, gaps 600–900 s"}
