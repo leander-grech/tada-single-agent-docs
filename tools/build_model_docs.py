@@ -29,6 +29,7 @@ import json
 import math
 import os
 import re
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -54,6 +55,7 @@ LONG_STREAMS = {
     "ls_k5_feasible": "100 flights, feasible", "ls_k5_all": "100 flights, unfiltered",
 }
 FEASIBLE_2X20 = {"fx_feas40": "feas40: 40 feasible 2×20 streams", "fx_test51": "test51: 51 held-out feasible 2×20 streams"}
+ZERO_SHOT = {"zs_pms_f20": "point merge (BGY), zero-shot"}
 STATUS_LABEL = {
     "complete": ("complete", "muted"),
     "stopped": ("stopped early", "warn"),
@@ -149,6 +151,12 @@ class Model:
         return f"{self.run}/{self.checkpoint}"
 
     @property
+    def score_paths(self) -> list:
+        """The checkpoint's path plus any other path evaluation files name it by (models.yaml scored_as)."""
+        extra = self.raw.get("scored_as") or []
+        return [self.model_path] + ([extra] if isinstance(extra, str) else list(extra))
+
+    @property
     def page(self) -> str:
         return f"models/{self.id}.md"
 
@@ -201,10 +209,12 @@ class Build:
             self._csv_cache[rel] = pd.read_csv(p)
         return self._csv_cache[rel]
 
-    def rows_for(self, rel: str, model_path: str) -> pd.DataFrame:
+    def rows_for(self, rel: str, model_path) -> pd.DataFrame:
+        """Rows of one model; model_path may be a list of the names the same checkpoint was scored under."""
         df = self.csv(rel)
+        paths = [model_path] if isinstance(model_path, str) else list(model_path)
         if "model" in df.columns:
-            df = df[df["model"] == model_path]
+            df = df[df["model"].isin(paths)]
         if df.empty:
             raise ValueError(f"{rel}: no rows for {model_path}")
         return df.copy()
@@ -222,7 +232,7 @@ class Build:
                     m.eval_paths[bat] = rel
                     continue
                 try:
-                    df = self.rows_for(rel, m.raw.get("scored_as") or m.model_path)
+                    df = self.rows_for(rel, m.score_paths)
                 except (FileNotFoundError, ValueError) as e:
                     self.errors.append(f"{m.id} {bat}: {e}")
                     continue
@@ -233,7 +243,7 @@ class Build:
             zs = m.raw.get("windowed_zero_shot") or {}
             m.raw["_zs"] = {}
             for bat, rel in zs.items():
-                df = self.rows_for(rel, m.raw.get("scored_as") or m.model_path)
+                df = self.rows_for(rel, m.score_paths)
                 m.raw["_zs"][bat] = (rel, df, self.windowed_summary(bat, df))
             if m.raw.get("headline"):
                 h = m.raw["headline"]
@@ -731,6 +741,39 @@ class Build:
         return (f'<div class="tada-table-wrap"><table class="tada-table tada-bands"><thead>{head}</thead>'
                 f'<tbody>{"".join(rows)}</tbody></table></div>\n\n{note}')
 
+    def zeroshot_table(self, ids: list) -> str:
+        """Point merge zero-shot against each agent's own MXP score, with the do-nothing floor on both."""
+        def stats(df):
+            ps = self.windowed_perseed(df)
+            aman = float(df["aman_order"].mean()) if "aman_order" in df else float("nan")
+            return (int(ps.solved.sum()), int(ps.hard.sum()), int(ps.sep.sum()), float(ps.on_time.mean()),
+                    float(df["landed"].mean()), aman, len(ps))
+        def cells(label, zs, mxp):
+            sv, hd, sp, ot, ld, am, n = zs
+            row = [label, str(sv), str(hd), str(sp), f"{ot:.3f}", f"{ld:.1f}", f"{am:.3f}"]
+            row += ([str(mxp[0]), str(mxp[2])] if mxp else ["—", "—"])
+            return row
+        rows = []
+        for mid in ids:
+            m = self.models[mid]
+            mxp = m.evals.get("f20")
+            rows.append(cells(f'<a href="{self._site_prefix}models/{mid}/"><code>{mid}</code></a>',
+                              stats(m.evals["zs_pms_f20"]), stats(mxp) if mxp is not None else None))
+        for d in self.reg.get("test_sources", {}).get("zeroshot_pms", []):
+            tracked = set(subprocess.run(["git", "-C", str(self.code), "ls-files", d], capture_output=True, text=True).stdout.split())
+            pms, mxp = f"{d}/donothing_pms_f20.csv", f"{d}/donothing_mxp_f20.csv"
+            if pms in tracked:
+                rows.append(cells("do nothing (no clearances)", stats(self.csv(pms)),
+                                  stats(self.csv(mxp)) if mxp in tracked else None))
+        if not rows:
+            return "No agent has been scored on point merge yet.\n\n"
+        head = ["agent", "solved", "hard-solved", "separation lost", "flights on time", "landed of 20",
+                "landed in AMAN position", "MXP: solved", "MXP: separation lost"]
+        return ('<div class="tada-table-wrap"><table class="tada-table tada-sortable"><thead><tr>'
+                + "".join(f"<th>{h}</th>" for h in head) + "</tr></thead><tbody>"
+                + "".join("<tr>" + "".join(f"<td>{c}</td>" for c in row) + "</tr>" for row in rows)
+                + "</tbody></table></div>\n\n")
+
     def phase0_report(self) -> list:
         """(model, parsed sections) for every model in the committed Phase-0 report.txt, oldest first."""
         out = []
@@ -738,7 +781,7 @@ class Build:
             t = self.src(d + "/report.txt").read_text()
             for block in t.split("=== ")[1:]:
                 path = block.split(":", 1)[0].strip()
-                m = next((m for m in self.models.values() if m.model_path == path), None)
+                m = next((m for m in self.models.values() if path in m.score_paths), None)
                 if m is None:
                     self.errors.append(f"phase0 report: {path} is not a registered model")
                     continue
@@ -825,7 +868,8 @@ class Build:
                ("curve", "training curve"), ("renders", "3 renders"),
                ("ls_k3_feasible", "60 feasible"), ("ls_k3_all", "60 unfiltered"),
                ("ls_k5_feasible", "100 feasible"), ("ls_k5_all", "100 unfiltered"),
-               ("fx_feas40", "feas40"), ("fx_test51", "test51"), ("phase0", "order first")]
+               ("fx_feas40", "feas40"), ("fx_test51", "test51"), ("phase0", "order first"),
+               ("zs_pms_f20", "point merge zero-shot")]
 
     def coverage_cell(self, m: Model, test: str) -> str:
         if test == "curve":
@@ -1361,6 +1405,11 @@ class Build:
                 s = m.summary[key]
                 ls_rows.append(f"<tr><td>{label}</td><td>{s['n']}</td><td>{s['n'] - s['separation_lost']}</td>"
                                f"<td>{s['solved']}</td><td>{s['on_time']:.3f}</td></tr>")
+        for key, label in ZERO_SHOT.items():
+            if key in m.summary:
+                s = m.summary[key]
+                ls_rows.append(f'<tr><td><a href="{self._site_prefix}findings/point-merge/">{label}</a></td><td>{s["n"]}</td>'
+                               f"<td>{s['n'] - s['separation_lost']}</td><td>{s['solved']}</td><td>{s['on_time']:.3f}</td></tr>")
         for key, label in FEASIBLE_2X20.items():
             if key in m.summary:
                 s = m.summary[key]
@@ -1747,6 +1796,9 @@ class Build:
                     for key, label in LONG_STREAMS.items():
                         if key not in m.summary:
                             items.append(f"**{key[3:]}**: long streams, {label} (`longstreams/seeds/`, the same seed files)")
+                    if "zs_pms_f20" not in m.summary and not m.raw.get("use_case_trained"):
+                        items.append("**zs_pms_f20**: zero-shot on point merge (`analysis/score_windowed.py --use-case 2`, "
+                                     "100 seeds, 20-flight, deterministic)")
                     if "phase0" not in m.eval_paths:
                         items.append("**phase0**: order-first test (`analysis/order_first.py`, 100 seeds, 9 attempts, "
                                      "`--order-first-far 600 0`)")
@@ -1804,6 +1856,8 @@ class Build:
                 body = self.capacity_bands(self.select(args["models"], ["att10"]))
             elif kind == "feasible-2x20":
                 body = self.feasible_2x20_table(self.select(args.get("models", "all"), list(FEASIBLE_2X20)))
+            elif kind == "zeroshot-pms":
+                body = self.zeroshot_table(self.select(args.get("models", "all"), list(ZERO_SHOT)))
             elif kind == "phase0":
                 body = self.phase0_table(args.get("test", "T3"))
             elif kind == "longstreams":

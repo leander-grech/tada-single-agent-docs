@@ -60,6 +60,12 @@ models:
       meta: analysis/2026-09-27_scratch/backfill/renders/1_34_failure_seed137869475_solutions.json
   '1_35':
     evals:
+      fx_feas40: analysis/2026-09-28_hard/eval/1_35_feas40.csv
+      fx_test51: analysis/2026-09-28_hard/eval_test/1_35_test51.csv
+      ls_k3_all: analysis/2026-09-27_scratch/longstreams/eval/1_35_k3_all.csv
+      ls_k3_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_35_k3_feasible.csv
+      ls_k5_all: analysis/2026-09-27_scratch/longstreams/eval/1_35_k5_all.csv
+      ls_k5_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_35_k5_feasible.csv
       phase0: analysis/2026-09-27_phase0_order_first/atc_run_1_35_windowed_jax.jsonl
     renders:
     - file: 1_35_best_seed186618211.mp4
@@ -107,6 +113,7 @@ models:
       ls_k5_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_feasible.csv
       ls_k5_feasible_la4: analysis/2026-09-27_scratch/longstreams/eval/1_38_k5_feasible_la4.csv
       phase0: analysis/2026-09-27_phase0_order_first/atc_run_1_38_windowed_cont.jsonl
+      zs_pms_f20: analysis/2026-09-28_release/zeroshot/1_38_pms_f20.csv
     renders:
     - file: 1_38_best_seed338444264.mp4
       meta: analysis/2026-09-27_scratch/backfill/renders/1_38_best_seed338444264_solutions.json
@@ -214,6 +221,7 @@ models:
       ls_k5_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_44_k5_feasible.csv
       phase0: analysis/2026-09-27_phase0_order_first/atc_run_1_44_scratch_d_s1.jsonl
       s2x20: analysis/2026-09-27_scratch/backfill/eval/1_44_s2x20.csv
+      zs_pms_f20: analysis/2026-09-28_release/zeroshot/1_44_pms_f20.csv
     renders:
     - file: 1_44_best_seed2144181937.mp4
       meta: analysis/2026-09-27_scratch/backfill/renders/1_44_best_seed2144181937_solutions.json
@@ -233,6 +241,7 @@ models:
       ls_k5_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_46_k5_feasible.csv
       phase0: analysis/2026-09-27_phase0_order_first/atc_run_1_46_cont_1_43.jsonl
       s2x20: analysis/2026-09-27_scratch/backfill/eval/1_46_s2x20.csv
+      zs_pms_f20: analysis/2026-09-28_release/zeroshot/1_46_pms_f20.csv
     renders:
     - file: 1_46_best_seed2144181937.mp4
       meta: analysis/2026-09-27_scratch/backfill/renders/1_46_best_seed2144181937_solutions.json
@@ -276,6 +285,7 @@ models:
       ls_k5_feasible: analysis/2026-09-27_scratch/longstreams/eval/1_48_k5_feasible.csv
       phase0: analysis/2026-09-27_phase0_order_first/atc_run_1_48_hard_1_46.jsonl
       s2x20: analysis/2026-09-28_hard/eval/1_48_s2x20.csv
+      zs_pms_f20: analysis/2026-09-28_release/zeroshot/1_48_pms_f20.csv
     renders:
     - file: 1_48_best_seed2144181937.mp4
       meta: analysis/2026-09-28_hard/renders/1_48_best_seed2144181937_solutions.json

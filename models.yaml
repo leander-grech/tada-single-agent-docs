@@ -47,7 +47,8 @@ test_sources:
   longstreams: [analysis/2026-09-27_scratch/longstreams/eval]
   phase0: [analysis/2026-09-27_phase0_order_first]
   feasible_2x20: [analysis/2026-09-28_hard/eval, analysis/2026-09-28_hard/eval_test, analysis/2026-09-28_release/eval]   # imported only once committed
-  backfill_dirs: [analysis/2026-09-28_hard, analysis/2026-09-28_release]   # eval/ and renders/, as in the backfill folder
+  backfill_dirs: [analysis/2026-09-28_hard, analysis/2026-09-28_release]
+  zeroshot_pms: [analysis/2026-09-28_release/zeroshot]   # MXP agents scored unchanged on point merge; imported only once committed   # eval/ and renders/, as in the backfill folder
 
 models:
 
@@ -253,7 +254,8 @@ models:
   - id: "1_35"
     track: windowed
     run: experiments/atc_run_1_35_windowed_jax
-    checkpoint: final_model.zip
+    checkpoint: latest_model.zip   # early-stopped at 4.65M; no final_model.zip
+    scored_as: experiments/atc_run_1_35_windowed_jax/final_model.zip   # the same file, renamed on the rented hosts that scored it first
     parent: "1_34"
     status: stopped
     curve:
