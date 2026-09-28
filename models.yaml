@@ -71,6 +71,7 @@ models:
     status: in_progress
     whats_new: "1_49 again, with feasible-only training from a pre-screened pool: feasible stitched 2×20 streams screened up front (validation and held-out streams removed) instead of redrawn at reset. Release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential. 1_48 fine-tuned, LR 3e-5 to 1e-5, 300k critic warm-up, seed 49."
     pending: "Training on a rented host (10M steps), started 15:15 on 28 Sep."
+    curve: [{file: experiments/atc_run_1_51_release_1_48/track.csv, kind: track}]
 
   - id: "1_49"
     track: windowed
