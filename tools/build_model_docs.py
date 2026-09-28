@@ -1153,7 +1153,8 @@ class Build:
     @staticmethod
     def point_merge(m: Model) -> bool:
         """Trained on the BGY point merge (run_meta use_case 2): its scores are point-merge scores."""
-        return m.track == "windowed" and (m.meta or {}).get("use_case") == 2
+        mt = m.meta or {}
+        return m.track == "windowed" and 2 in (mt.get("use_case"), (mt.get("windowed_config") or {}).get("use_case"))
 
     def _proxy(self, src: Model, key: str, label: str) -> Model | None:
         """A stand-in model whose f20 is src's summary[key] (e.g. a zero-shot point-merge score)."""
@@ -1293,7 +1294,7 @@ class Build:
             champ = self._proxy(champ, "zs_pms_f20", f"{champ.id} zero-shot") if champ else None
         o = [GEN_NOTE, f"# {m.id}\n\n", self.status_chip(m, champ_ids) + "\n\n", f"**What changed:** {m.whats_new}\n\n"]
         if self.release_mdp(m):
-            o.append('!!! note "Release MDP"\n    This model trained in a different MDP from every earlier model, the champion included: '
+            o.append('!!! note "Release MDP"\n    This model trained in the release MDP, unlike the champion and every model before `1_49`: '
                      "after each step the front of the landing queue is released once a flight is locked (predicted "
                      "within 30 s of its target and in no predicted conflict). A released flight leaves the window "
                      "and can no longer be cleared. It is scored in the same environment, on the same seeds and "

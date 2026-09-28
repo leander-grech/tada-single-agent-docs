@@ -176,6 +176,14 @@ hard-solved, level with the champion on hard-solved but with 20 losses of separa
 back the release payments of flights still airborne. [Training from scratch](findings/curriculum.md#arm-d-in-the-release-mdp-1_50). <a id="run-1-50"></a> <a id="run-1-51"></a>
 [`1_49`](models/1_49.md) · [`1_50`](models/1_50.md) · [`1_51`](models/1_51.md).
 
+### `1_52`, `1_53` — training on point merge (28 Sep, training) { #run-1-52 }
+
+The MXP agents lose separation on a quarter to a third of point-merge streams zero-shot
+([Point merge](findings/point-merge.md)), so these two train on the BGY point merge itself, in the
+release MDP with the bust clawback, from pre-screened pools of feasible point-merge streams.
+`1_52` fine-tunes `1_50`; `1_53` runs recipe arm D from scratch. Their scores are point-merge
+scores. <a id="run-1-53"></a> [`1_52`](models/1_52.md) · [`1_53`](models/1_53.md).
+
 ### Long streams (27–28 Sep) { #long-streams }
 
 Not a training run: 60- and 100-flight streams, split into feasible and over-capacity, on the

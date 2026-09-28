@@ -57,7 +57,8 @@ def main():
     def use_case(mid):
         m = next(m for m in reg["models"] if str(m["id"]) == mid)
         try:
-            return json.load(open(code / m["run"] / "run_meta.json")).get("use_case")
+            meta = json.load(open(code / m["run"] / "run_meta.json"))
+            return meta.get("use_case") or (meta.get("windowed_config") or {}).get("use_case")
         except (OSError, ValueError):
             return None
 

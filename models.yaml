@@ -64,6 +64,28 @@ models:
     evals: {f20: experiments/atc_run_1_50_scratch_d_release_s1/track_scores/final_model.csv}   # track_windowed.py's score of the final model
     note: "19 of its 20 losses of separation are on the 49 validation seeds with a flight more than 650 s early (validation_seed_capacity.csv). On the 51 feasible seeds it solves 33 and hard-solves 21 with 1 loss, against 1_38's 34, 15 and 0 (hard-solved 12 gained, 6 lost, p = 0.24). So it is on par with 1_38 on feasible 20-flight streams, and behind on the feasible stitched 40-flight streams it never trained on: on test51 it solves 16 against 25 (3 gained, 12 lost, p = 0.035), hard-solves as many (5 each) and loses 2. Arm D trains on 10- and 20-flight streams only; 1_38 trained on stitched 2×20 streams to the end. Trained with a reward flaw since fixed (code commit 618a073): with pay at release, a flight's bracket paid at release was kept even when the episode then ended in a loss of separation, so a bust cost less than the objective says. Runs after that commit take the release payments of flights still airborne back on a bust. This is a plausible contributor to its losses on over-capacity seeds, not a proven one."
 
+  - id: "1_53"
+    track: windowed
+    run: experiments/atc_run_1_53_scratch_d_release_pms_s1
+    checkpoint: final_model.zip
+    parent: null
+    status: in_progress
+    whats_new: "From scratch on the BGY point merge (use case 2), release MDP: locked flights released from the window (±30 s), bracket paid at release, flat deviation potential, feasible-only training from a pre-screened pool of point-merge streams, ±30 s bracket worth 4. Recipe arm D (10 flights to 2.5M, then 20 to 10M), LR 3e-4 to 3e-5, seed 1."
+    curve: [{file: experiments/atc_run_1_53_scratch_d_release_pms_s1/track.csv, kind: track}]
+    pending: "Training on a rented host (vast.ai, 10M steps), started 19:16 on 28 Sep; due about 23:00."
+    note: "Trained after the bust clawback (code commit 618a073): a loss of separation takes back the release payments of flights still airborne. Its training pool excludes the validation candidates."
+
+  - id: "1_52"
+    track: windowed
+    run: experiments/atc_run_1_52_pms_1_50
+    checkpoint: final_model.zip
+    parent: "1_50"
+    status: in_progress
+    whats_new: "1_50 fine-tuned on the BGY point merge (use case 2), release MDP as 1_50, stitched 2×20 point-merge streams from a pre-screened pool of feasible ones. LR 1e-4 to 1e-5, 100k critic warm-up, seed 52."
+    curve: [{file: experiments/atc_run_1_52_pms_1_50/track.csv, kind: track}]
+    pending: "Training on a rented host (vast.ai, 10M steps), started 19:16 on 28 Sep; due about 23:00."
+    note: "Trained after the bust clawback (code commit 618a073): a loss of separation takes back the release payments of flights still airborne. Its training pool excludes the validation candidates."
+
   - id: "1_51"
     track: windowed
     run: experiments/atc_run_1_51_release_1_48
