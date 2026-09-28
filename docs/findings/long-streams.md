@@ -70,6 +70,21 @@ Not yet flown on long streams: `1_31`, `1_32`, `1_33`, `1_34`, `1_35`, `1_39`, `
 - **Lookahead** on feasible 100-flight streams solved 2 of 12 strictly, against 0 without; its
   on-time rate is slightly lower.
 
+## Feasible 40-flight streams (feas40, test51) { #feasible-2x20 }
+
+The stitched 2×20 validation set can't serve as a feasible benchmark, because only 8 of its 100
+streams pass the filter. Two feasible sets of 40-flight streams (two 20-flight scenarios, a random
+120–900 s cooling gap) were drawn instead: 800 candidates, of which 91 (11.4%) pass the same
+650 s criterion. The first 40 are **feas40**, scored every 1M steps by the trackers of the
+hard-solved fine-tunes. The other 51 are **test51**, held out to confirm a checkpoint picked on
+its feas40 score, since picking on feas40 biases that score. Deterministic, frame pinned, each
+stream run to its own horizon.
+
+<!-- gen:feasible-2x20 models=all -->
+No agent has been scored on these sets yet.
+
+<!-- /gen -->
+
 ## No drift along the stream
 
 On time among landed flights, by 20-flight wave:

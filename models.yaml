@@ -46,6 +46,7 @@ seed_capacity: analysis/2026-09-27_scratch/validation_seed_capacity.csv
 test_sources:
   longstreams: [analysis/2026-09-27_scratch/longstreams/eval]
   phase0: [analysis/2026-09-27_phase0_order_first]
+  feasible_2x20: [analysis/2026-09-28_hard/eval, analysis/2026-09-28_hard/eval_test]   # imported only once committed
 
 models:
 

@@ -53,6 +53,7 @@ LONG_STREAMS = {
     "ls_k3_feasible": "60 flights, feasible", "ls_k3_all": "60 flights, unfiltered",
     "ls_k5_feasible": "100 flights, feasible", "ls_k5_all": "100 flights, unfiltered",
 }
+FEASIBLE_2X20 = {"fx_feas40": "feas40: 40 feasible 2×20 streams", "fx_test51": "test51: 51 held-out feasible 2×20 streams"}
 STATUS_LABEL = {
     "complete": ("complete", "muted"),
     "stopped": ("stopped early", "warn"),
@@ -729,6 +730,28 @@ class Build:
         return (f'<div class="tada-table-wrap"><table class="tada-table tada-bands"><thead>{head}</thead>'
                 f'<tbody>{"".join(rows)}</tbody></table></div>\n\n{note}')
 
+    def feasible_2x20_table(self, ids: list) -> str:
+        rows = []
+        for key, label in FEASIBLE_2X20.items():
+            first = True
+            for mid in ids:
+                m = self.models[mid]
+                for k2, suffix in ((key, ""), (key + "_la4", " + lookahead")):
+                    if k2 not in m.summary:
+                        continue
+                    s = m.summary[k2]
+                    cls = ' class="tada-band-first"' if first else ""
+                    rows.append(f"<tr{cls}><td>{label if first else ''}</td>"
+                                f'<td><a href="{self._site_prefix}models/{mid}/">{mid}</a>{suffix}</td>'
+                                f"<td>{s['solved']}</td><td>{s['hard_solved']}</td><td>{s['separation_lost']}</td>"
+                                f"<td>{s['on_time']:.3f}</td></tr>")
+                    first = False
+        if not rows:
+            return "No agent has been scored on these sets yet.\n\n"
+        head = ("<tr><th>set</th><th>model</th><th>solved (±60 s)</th><th>hard-solved (±30 s)</th>"
+                "<th>separation lost</th><th>on time</th></tr>")
+        return (f'<table class="tada-table tada-bands"><thead>{head}</thead><tbody>{"".join(rows)}</tbody></table>\n\n')
+
     def longstream_waves(self, ids: list, key: str) -> str:
         rows, nwave = [], 0
         for mid in ids:
@@ -750,7 +773,8 @@ class Build:
     TESTS_W = [("f20", "20-flight"), ("s2x20", "2×20"), ("att10", "10 attempts"), ("la4", "lookahead"),
                ("curve", "training curve"), ("renders", "3 renders"),
                ("ls_k3_feasible", "60 feasible"), ("ls_k3_all", "60 unfiltered"),
-               ("ls_k5_feasible", "100 feasible"), ("ls_k5_all", "100 unfiltered"), ("phase0", "order first")]
+               ("ls_k5_feasible", "100 feasible"), ("ls_k5_all", "100 unfiltered"),
+               ("fx_feas40", "feas40"), ("fx_test51", "test51"), ("phase0", "order first")]
 
     def coverage_cell(self, m: Model, test: str) -> str:
         if test == "curve":
@@ -1230,8 +1254,14 @@ class Build:
                 s = m.summary[key]
                 ls_rows.append(f"<tr><td>{label}</td><td>{s['n']}</td><td>{s['n'] - s['separation_lost']}</td>"
                                f"<td>{s['solved']}</td><td>{s['on_time']:.3f}</td></tr>")
+        for key, label in FEASIBLE_2X20.items():
+            if key in m.summary:
+                s = m.summary[key]
+                ls_rows.append(f"<tr><td>{label}</td><td>{s['n']}</td><td>{s['n'] - s['separation_lost']}</td>"
+                               f"<td>{s['solved']}</td><td>{s['on_time']:.3f}</td></tr>")
         if ls_rows:
-            o.append("### Long streams\n\n60- and 100-flight stitched streams (3 or 5 waves, 600–900 s gaps), deterministic; "
+            o.append("### Long and feasible streams\n\n60- and 100-flight stitched streams (3 or 5 waves, 600–900 s gaps) "
+                     "and the feasible 40-flight sets feas40 and test51, deterministic; "
                      "see [Long streams](../findings/long-streams.md).\n\n"
                      '<table class="tada-table"><thead><tr><th>streams</th><th>n</th><th>no loss of separation</th>'
                      f'<th>solved</th><th>on time</th></tr></thead><tbody>{"".join(ls_rows)}</tbody></table>\n\n')
@@ -1665,6 +1695,8 @@ class Build:
                 body = self.never_solved_table()
             elif kind == "capacity-bands":
                 body = self.capacity_bands(self.select(args["models"], ["att10"]))
+            elif kind == "feasible-2x20":
+                body = self.feasible_2x20_table(self.select(args.get("models", "all"), list(FEASIBLE_2X20)))
             elif kind == "longstreams":
                 body = self.longstreams_table(self.select(args.get("models", "all"), list(LONG_STREAMS)))
             elif kind == "longstream-waves":

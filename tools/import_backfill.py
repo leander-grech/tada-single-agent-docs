@@ -69,6 +69,17 @@ def main():
         out.setdefault(mt.group(1), {}).setdefault("renders", []).append(
             {"file": mp4.name, "meta": str(meta.relative_to(code))})
 
+    # Feasible stitched 2x20 stream sets (feas40, test51): taken only once committed in the code repo,
+    # so results still being produced are never published early.
+    import subprocess
+    for d in reg.get("test_sources", {}).get("feasible_2x20", []):
+        tracked = subprocess.run(["git", "-C", str(code), "ls-files", d], capture_output=True, text=True).stdout.split()
+        for rel in sorted(tracked):
+            mt = re.fullmatch(r".*/(.+?)_(feas40|test51)(_la4)?\.csv", rel)
+            if not mt or mt.group(1) not in ids:
+                continue
+            out.setdefault(mt.group(1), {}).setdefault("evals", {})["fx_" + mt.group(2) + (mt.group(3) or "")] = rel
+
     # Long-stream evaluations (60- and 100-flight stitched streams) and the Phase-0 order-first data.
     for d in reg.get("test_sources", {}).get("longstreams", []):
         for csv in sorted((code / d).glob("*.csv")):
