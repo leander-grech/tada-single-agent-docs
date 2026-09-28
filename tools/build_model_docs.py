@@ -1035,12 +1035,20 @@ class Build:
         return f"<strong>{s}</strong>" if sig else s
 
     # ------------------------------------------------------------------ pages
+    @staticmethod
+    def release_mdp(m: Model) -> bool:
+        """Trained (and so evaluated) with locked flights released from the window: a different MDP."""
+        return bool((m.meta.get("windowed_config") or {}).get("release_locked"))
+
     def status_chip(self, m: Model, champ_ids: set) -> str:
         chips = []
         if m.id in champ_ids:
             chips.append('<span class="tada-chip tada-chip--champ">champion</span>')
         label, kind = STATUS_LABEL[m.status]
         chips.append(f'<span class="tada-chip tada-chip--{kind}">{label}</span>')
+        if self.release_mdp(m):
+            chips.append('<span class="tada-chip tada-chip--muted" title="Locked flights are released from the '
+                         'window; trained and scored in that environment">release MDP</span>')
         return " ".join(chips)
 
     def lineage(self, m: Model) -> list[Model]:
@@ -1123,6 +1131,13 @@ class Build:
         ref = self.models.get(m.compare) if m.compare else None
         champ_ids = {c.id for c in champs.values() if c}
         o = [GEN_NOTE, f"# {m.id}\n\n", self.status_chip(m, champ_ids) + "\n\n", f"**What changed:** {m.whats_new}\n\n"]
+        if self.release_mdp(m):
+            o.append('!!! note "Release MDP"\n    This model trained in a different MDP from 1_38 and the models before it: '
+                     "after each step the front of the landing queue is released once a flight is locked (predicted "
+                     "within 30 s of its target and in no predicted conflict). A released flight leaves the window "
+                     "and can no longer be cleared. It is scored in the same environment, on the same seeds and "
+                     "with the same metrics, so its numbers measure landings in the same scenarios, but under "
+                     "that extra constraint on the agent.\n\n")
         # header facts
         chain = self.lineage(m)
         lin = " → ".join(self.link(c.id) if c.id != m.id else f"<strong><code>{c.id}</code></strong>" for c in chain)
@@ -1143,6 +1158,14 @@ class Build:
             rec.append(f"reward {wc['reward_mode']}")
         if wc.get("stitch_segments", 1) > 1:
             rec.append(f"stitched {wc['stitch_segments']}×20, gap {wc['stitch_gap_s'][0]:g}–{wc['stitch_gap_s'][1]:g} s")
+        if wc.get("release_locked"):
+            rec.append(f"release locked flights (±{wc.get('release_dev_s', 30):g} s)")
+        if wc.get("pay_at_release"):
+            rec.append("pay at release")
+        if wc.get("pbrs_flat_deviation"):
+            rec.append("flat deviation potential")
+        if wc.get("train_max_early_s") is not None:
+            rec.append(f"feasible-only training streams (≤ {wc['train_max_early_s']:g} s early)")
         if mt.get("sequence_obs"):
             rec.append("sequence observations")
         if mt.get("max_picks"):
