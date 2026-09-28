@@ -412,7 +412,7 @@ class Build:
                  and (rule["battery"] in m.summary or (track == "ten_aircraft" and m.headline))]
         if track == "windowed":
             gate = rule["gate_max_separation_lost"]
-            cands = [m for m in cands if m.summary["f20"]["separation_lost"] <= gate]
+            cands = [m for m in cands if m.summary["f20"]["separation_lost"] <= gate and not self.point_merge(m)]
             key = lambda m: (-m.summary["f20"]["solved"], m.summary["f20"]["separation_lost"],
                              -m.summary["f20"]["hard_solved"], m.summary["f20"].get("clearances") or 1e9)
         else:
@@ -544,6 +544,8 @@ class Build:
         s += f" · {esc(mode)}"
         if r.get("outcome"):
             s += f" · {esc(r['outcome'])}"
+        if self.point_merge(m):
+            s += " · point merge (BGY)"
         return s
 
     def figure(self, m: Model, r: dict, rel_prefix: str) -> str:
@@ -674,7 +676,8 @@ class Build:
           scratch      windowed models whose lineage starts from random weights
         """
         def has(m):  # rules skip models kept out of findings tables (models.yaml: in_findings: false)
-            return any(b in m.summary for b in batteries) and m.raw.get("in_findings", True)
+            return (any(b in m.summary for b in batteries) and m.raw.get("in_findings", True)
+                    and not self.point_merge(m))  # point-merge scores never share a table with MXP ones
         wm = sorted((m for m in self.models.values() if m.track == "windowed"), key=lambda m: m.id)
         out = []
         for tok in [t.strip() for t in spec.split(",") if t.strip()]:
@@ -759,6 +762,9 @@ class Build:
             mxp = m.evals.get("f20")
             rows.append(cells(f'<a href="{self._site_prefix}models/{mid}/"><code>{mid}</code></a>',
                               stats(m.evals["zs_pms_f20"]), stats(mxp) if mxp is not None else None))
+        for m in sorted((m for m in self.models.values() if self.point_merge(m) and "f20" in m.evals), key=lambda m: m.id):
+            rows.append(cells(f'<a href="{self._site_prefix}models/{m.id}/"><code>{m.id}</code></a> (trained on point merge)',
+                              stats(m.evals["f20"]), None))
         for d in self.reg.get("test_sources", {}).get("zeroshot_pms", []):
             tracked = set(subprocess.run(["git", "-C", str(self.code), "ls-files", d], capture_output=True, text=True).stdout.split())
             pms, mxp = f"{d}/donothing_pms_f20.csv", f"{d}/donothing_mxp_f20.csv"
@@ -879,6 +885,8 @@ class Build:
                 return "n/a"
             filled = sum(1 for s in self.render_slots(m) if s["render"] is not None)
             return "✓" if filled == 3 else f"{filled}/3"
+        if test == "zs_pms_f20" and self.point_merge(m):
+            return "n/a"
         return "✓" if test in m.summary or test in m.eval_paths else "—"
 
     def unregistered_runs(self) -> list:
@@ -1103,6 +1111,12 @@ class Build:
                + ("A best-model checkpoint in the chain has no recorded step, so its run's full length is used. "
                   if any("best_model" in sg["model"].checkpoint for sg in segs[:-1]) else "")
                + "Runs without per-checkpoint scores show their final evaluation at the end of their stretch."
+               + ((" Scenarios differ along this lineage: the stretches of "
+                   + ", ".join(f"`{sg['model'].id}`" for sg in segs if self.point_merge(sg["model"]))
+                   + " are scored on the BGY point merge, the rest on MXP, so the curve's level is not "
+                   "comparable across that boundary.")
+                  if any(self.point_merge(sg["model"]) for sg in segs) and not all(self.point_merge(sg["model"]) for sg in segs)
+                  else "")
                + (" Sources: " + ", ".join(f"`{x}`" for x in srcs) + "." if srcs else ""))
         return legend + '\n<div class="tada-curve-wrap">' + "".join(o) + "</div>\n\n" + cap + "\n\n" + table
 
@@ -1137,6 +1151,20 @@ class Build:
 
     # ------------------------------------------------------------------ pages
     @staticmethod
+    def point_merge(m: Model) -> bool:
+        """Trained on the BGY point merge (run_meta use_case 2): its scores are point-merge scores."""
+        return m.track == "windowed" and (m.meta or {}).get("use_case") == 2
+
+    def _proxy(self, src: Model, key: str, label: str) -> Model | None:
+        """A stand-in model whose f20 is src's summary[key] (e.g. a zero-shot point-merge score)."""
+        if key not in src.summary:
+            return None
+        z = Model(raw={}, id=label, track="windowed", run=src.run, checkpoint=src.checkpoint,
+                  parent=None, compare=None, status=src.status, whats_new="")
+        z.summary["f20"] = src.summary[key]
+        return z
+
+    @staticmethod
     def release_mdp(m: Model) -> bool:
         """Trained (and so evaluated) with locked flights released from the window: a different MDP."""
         return bool((m.meta.get("windowed_config") or {}).get("release_locked"))
@@ -1150,6 +1178,9 @@ class Build:
         if self.release_mdp(m):
             chips.append('<span class="tada-chip tada-chip--muted" title="Locked flights are released from the '
                          'window; trained and scored in that environment">release MDP</span>')
+        if self.point_merge(m):
+            chips.append('<span class="tada-chip tada-chip--warn" title="Trained and scored on the BGY point merge '
+                         '(use case 2), not the MXP trombone">point merge</span>')
         return " ".join(chips)
 
     def lineage(self, m: Model) -> list[Model]:
@@ -1254,6 +1285,12 @@ class Build:
         champ = champs.get(m.track)
         ref = self.models.get(m.compare) if m.compare else None
         champ_ids = {c.id for c in champs.values() if c}
+        if self.point_merge(m):
+            # never pair point-merge scores with MXP ones: the parent and the MXP champion enter as their
+            # zero-shot point-merge scores, a point-merge parent as itself
+            if ref is not None and not self.point_merge(ref):
+                ref = self._proxy(ref, "zs_pms_f20", f"{ref.id} zero-shot")
+            champ = self._proxy(champ, "zs_pms_f20", f"{champ.id} zero-shot") if champ else None
         o = [GEN_NOTE, f"# {m.id}\n\n", self.status_chip(m, champ_ids) + "\n\n", f"**What changed:** {m.whats_new}\n\n"]
         if self.release_mdp(m):
             o.append('!!! note "Release MDP"\n    This model trained in a different MDP from every earlier model, the champion included: '
@@ -1262,6 +1299,12 @@ class Build:
                      "and can no longer be cleared. It is scored in the same environment, on the same seeds and "
                      "with the same metrics, so its numbers measure landings in the same scenarios, but under "
                      "that extra constraint on the agent.\n\n")
+        if self.point_merge(m):
+            o.append('!!! warning "Point merge"\n    Trained and scored on the BGY point merge (`VALIDATION_USE_CASE_2`), '
+                     "not the MXP trombone: every score on this card is a point-merge score, on the same 100 "
+                     "validation seeds. It is compared only with point-merge scores: its parent's and the MXP "
+                     "champion's zero-shot scores ([Point merge](../findings/point-merge.md)), or a point-merge "
+                     "parent's own.\n\n")
         if m.track == "windowed" and m.raw.get("note"):
             o.append(f'!!! info "About this run"\n    {esc(m.raw["note"])}\n\n')
         # header facts
@@ -1593,7 +1636,7 @@ class Build:
         head = ["model", "status", "solved", "hard-solved", "sep. lost", "on time", "clearances",
                 "2×20 solved", "2×20 sep.", "pass@10", "lookahead sep.", "what changed"]
         rows = []
-        wm = [m for m in self.models.values() if m.track == "windowed"]
+        wm = [m for m in self.models.values() if m.track == "windowed" and not self.point_merge(m)]
         for m in sorted(wm, key=lambda m: m.id, reverse=True):
             f = m.summary.get("f20")
             s2 = m.summary.get("s2x20")
@@ -1625,6 +1668,29 @@ class Build:
                  "*pass@10*: seeds solved by at least one of 10 attempts. *Lookahead sep.*: losses of separation "
                  "with the critic-guided 4-candidate lookahead. — means not evaluated yet "
                  "([backfill list](../backfill.md)).\n\n")
+        pm = sorted((m for m in self.models.values() if self.point_merge(m)), key=lambda m: m.id, reverse=True)
+        if pm:
+            o.append("## Windowed agent on point merge (BGY)\n\n")
+            o.append("Agents trained on the BGY point merge, scored there on the same 100 validation seeds. Not "
+                     "comparable with the MXP table above; the MXP agents' own zero-shot point-merge scores are on "
+                     "[Point merge](../findings/point-merge.md). Not eligible for the MXP champion rule.\n\n")
+            head = ["model", "status", "solved", "hard-solved", "sep. lost", "on time", "clearances",
+                    "2×20 solved", "2×20 sep.", "feas40 solved", "test51 solved", "what changed"]
+            rows = []
+            for m in pm:
+                f, s2 = m.summary.get("f20"), m.summary.get("s2x20")
+                fa, ft = m.summary.get("fx_feas40"), m.summary.get("fx_test51")
+                cells = [f'<a href="{m.id}/">{m.id}</a>', self.status_chip(m, set()),
+                         str(f["solved"]) if f else "—", str(f["hard_solved"]) if f else "—",
+                         str(f["separation_lost"]) if f else "—", f"{f['on_time']:.3f}" if f else "—",
+                         fmt(f.get("clearances"), 1) if f else "—",
+                         str(s2["solved"]) if s2 else "—", str(s2["separation_lost"]) if s2 else "—",
+                         f"{fa['solved']}/{fa['n']}" if fa else "—", f"{ft['solved']}/{ft['n']}" if ft else "—",
+                         self.short(m.whats_new)]
+                rows.append("<tr>" + "".join(f"<td>{c}</td>" for c in cells) + "</tr>")
+            o.append('<div class="tada-table-wrap"><table class="tada-table tada-sortable"><thead><tr>'
+                     + "".join(f"<th>{h}</th>" for h in head) + "</tr></thead><tbody>" + "".join(rows)
+                     + "</tbody></table></div>\n\n")
         o.append("## 10-aircraft agent\n\n")
         o.append("The earlier track: one scenario of up to 10 aircraft, seen whole. Its seeds generate different "
                  "scenarios from the windowed track's (simulator 0.1.52 against 0.2.80+), so the two tables are not "
@@ -1800,7 +1866,7 @@ class Build:
                     for key, label in LONG_STREAMS.items():
                         if key not in m.summary:
                             items.append(f"**{key[3:]}**: long streams, {label} (`longstreams/seeds/`, the same seed files)")
-                    if "zs_pms_f20" not in m.summary and not m.raw.get("use_case_trained"):
+                    if "zs_pms_f20" not in m.summary and not self.point_merge(m):
                         items.append("**zs_pms_f20**: zero-shot on point merge (`analysis/score_windowed.py --use-case 2`, "
                                      "100 seeds, 20-flight, deterministic)")
                     if "phase0" not in m.eval_paths:
@@ -1887,7 +1953,7 @@ class Build:
         """Validation seeds no windowed model solved in any f20 / att10 / la4 episode."""
         frames = []
         for m in self.models.values():
-            if m.track != "windowed" or not m.raw.get("in_findings", True):
+            if m.track != "windowed" or not m.raw.get("in_findings", True) or self.point_merge(m):
                 continue
             for bat in ("f20", "att10", "la4"):
                 if bat in m.evals:

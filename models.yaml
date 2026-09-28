@@ -46,8 +46,8 @@ seed_capacity: analysis/2026-09-27_scratch/validation_seed_capacity.csv
 test_sources:
   longstreams: [analysis/2026-09-27_scratch/longstreams/eval]
   phase0: [analysis/2026-09-27_phase0_order_first]
-  feasible_2x20: [analysis/2026-09-28_hard/eval, analysis/2026-09-28_hard/eval_test, analysis/2026-09-28_release/eval]   # imported only once committed
-  backfill_dirs: [analysis/2026-09-28_hard, analysis/2026-09-28_release]
+  feasible_2x20: [analysis/2026-09-28_hard/eval, analysis/2026-09-28_hard/eval_test, analysis/2026-09-28_release/eval, analysis/2026-09-28_pms/eval]   # imported only once committed
+  backfill_dirs: [analysis/2026-09-28_hard, analysis/2026-09-28_release, analysis/2026-09-28_pms]
   zeroshot_pms: [analysis/2026-09-28_release/zeroshot]   # MXP agents scored unchanged on point merge; imported only once committed   # eval/ and renders/, as in the backfill folder
 
 models:

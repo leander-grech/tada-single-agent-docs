@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import os
 import re
 import shutil
@@ -52,6 +53,25 @@ def main():
                                                              capture_output=True, text=True).stdout.split()}
     ok = lambda p: not any(g in p.parents for g in gated) or str(p) in committed
     ids = {str(m["id"]) for m in reg["models"]}
+
+    def use_case(mid):
+        m = next(m for m in reg["models"] if str(m["id"]) == mid)
+        try:
+            return json.load(open(code / m["run"] / "run_meta.json")).get("use_case")
+        except (OSError, ValueError):
+            return None
+
+    def key_for(mid, pms, bat):
+        """Evaluation key for a file named <mid>[_pms]_<bat>: a point-merge-trained run's _pms files are its
+        own scores; an MXP agent's _pms_f20 is a zero-shot score; anything else would mix scenarios."""
+        trained_pms = use_case(mid) == 2
+        if pms and trained_pms:
+            return bat
+        if pms and bat == "f20":
+            return "zs_pms_f20"
+        if not pms and not trained_pms:
+            return bat
+        return None
     existing = {str(m["id"]): set((m.get("evals") or {}).keys()) for m in reg["models"]}
     out: dict[str, dict] = {}
     skipped = []
@@ -62,10 +82,14 @@ def main():
                 skipped.append(f"{csv.name} (not committed yet)")
                 continue
             mt = re.fullmatch(r"(.+)_(f20|s2x20|att10|la4|d100)\.csv", csv.name)
-            if not mt or mt.group(1) not in ids:
+            if mt and mt.group(1) not in ids:   # <id>_pms_<bat>, unless the whole stem is an id (e.g. 1_30_pms)
+                mt = re.fullmatch(r"(.+?)(_pms)?_(f20|s2x20|att10|la4|d100)\.csv", csv.name)
+            elif mt:
+                mt = re.fullmatch(r"(.+)()_(f20|s2x20|att10|la4|d100)\.csv", csv.name)
+            if not mt or mt.group(1) not in ids or key_for(mt.group(1), bool(mt.group(2)), mt.group(3)) is None:
                 skipped.append(csv.name)
                 continue
-            mid, item = mt.groups()
+            mid, item = mt.group(1), key_for(mt.group(1), bool(mt.group(2)), mt.group(3))
             if item in existing[mid]:
                 skipped.append(f"{csv.name} (models.yaml already has {item})")
                 continue
@@ -94,17 +118,19 @@ def main():
     for d in reg.get("test_sources", {}).get("feasible_2x20", []):
         tracked = subprocess.run(["git", "-C", str(code), "ls-files", d], capture_output=True, text=True).stdout.split()
         for rel in sorted(tracked):
-            mt = re.fullmatch(r".*/(.+?)_(feas40|test51)(_la4)?\.csv", rel)
+            mt = re.fullmatch(r".*/(.+?)(_pms)?_(feas40|test51)(_la4)?\.csv", rel)
             if not mt or mt.group(1) not in ids:
                 continue
-            out.setdefault(mt.group(1), {}).setdefault("evals", {})["fx_" + mt.group(2) + (mt.group(3) or "")] = rel
+            if bool(mt.group(2)) != (use_case(mt.group(1)) == 2):
+                continue   # point-merge sets for MXP agents (or MXP sets for point-merge agents) are not imported
+            out.setdefault(mt.group(1), {}).setdefault("evals", {})["fx_" + mt.group(3) + (mt.group(4) or "")] = rel
 
     # Zero-shot transfer to point merge (BGY, use case 2): MXP-trained agents scored unchanged; committed only.
     for d in reg.get("test_sources", {}).get("zeroshot_pms", []):
         tracked = subprocess.run(["git", "-C", str(code), "ls-files", d], capture_output=True, text=True).stdout.split()
         for rel in sorted(tracked):
             mt = re.fullmatch(r".*/(.+?)_pms_f20\.csv", rel)
-            if not mt or mt.group(1) not in ids:
+            if not mt or mt.group(1) not in ids or use_case(mt.group(1)) == 2:
                 continue
             out.setdefault(mt.group(1), {}).setdefault("evals", {})["zs_pms_f20"] = rel
 
