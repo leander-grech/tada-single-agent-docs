@@ -8,9 +8,10 @@ What the experiments established, one short page each. Model scores live on the 
 | [Reselection](reselection.md) | Precision was bandwidth-limited: a second clearance per step roughly doubled solved streams; the safety cost trained away on 20-flight streams. |
 | [Sequencing](sequencing.md) | Precision is lost where traffic must be reordered; showing the sequence did not help until the agent could act on two flights at once. |
 | [Order first? (Phase 0)](order-first.md) | Establishing the AMAN order early does not predict success, and forcing it makes every model tested worse. |
-| [Over-capacity scenarios and long streams](capacity.md) | Most losses of separation are in scenarios needing more delay than the airspace can absorb; the agent is stable along a stream. |
+| [Over-capacity scenarios](capacity.md) | Most losses of separation are in scenarios needing more delay than the airspace can absorb; 17 validation seeds have never been solved by anything. |
+| [Long streams](long-streams.md) | On feasible 60- and 100-flight streams the champion and every model trained on stitched streams to the end never lose separation, and precision does not drift; losses come from over-capacity waves, the norm in generated traffic. |
 | [Search at inference](lookahead.md) | Critic-guided lookahead keeps both safety and precision only on the reselection policies; shields are net harmful. |
-| [Training from scratch](curriculum.md) | The full design learns from random weights but is far from the fine-tuned lineage at 10M; seed variance is as large as the arms' differences. |
+| [Training from scratch](curriculum.md) | The full design learns from random weights; you get what you train on (a curriculum ending on 20-flight streams is best there, one ending on stitched streams safer on long ones); none reaches the fine-tuned champion. |
 | [Evaluation noise](evaluation-noise.md) | In-training success rates, best-model picks, unpaired small differences and single bands have all misled; the protocol now avoids each. |
 
 Findings from the 10-aircraft track are in the [Archive](../archive/index.md): the 22- vs

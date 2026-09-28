@@ -134,8 +134,8 @@ rented GPU host. <a id="run-1-37"></a> [Reselection](findings/reselection.md) ·
 ### `1_38`, `1_39` — reselection continued; a bigger penalty (26 Sep) { #run-1-38 }
 
 `1_38` continued `1_36` for 5M steps and removed its safety cost on 20-flight streams: the current
-champion. `1_39` did the same with the separation penalty at 240 and lost precision everywhere for
-safety on long streams only; not adopted. <a id="run-1-39"></a> [`1_38`](models/1_38.md) ·
+champion. `1_39` did the same with the separation penalty at 240 and lost precision everywhere, with
+fewer losses only on stitched streams (not significant); not adopted. <a id="run-1-39"></a> [`1_38`](models/1_38.md) ·
 [`1_39`](models/1_39.md).
 
 ### Phase 0 — order first? (27 Sep) { #phase-0 }
@@ -143,12 +143,21 @@ safety on long streams only; not adopted. <a id="run-1-39"></a> [`1_38`](models/
 Not a training run: a test of whether establishing the AMAN order early is a route to solving
 streams, on `1_35`, `1_37` and `1_38`. It is not. [Order first?](findings/order-first.md).
 
-### `1_40`–`1_43` — from scratch (27 Sep–) { #run-1-40 }
+### `1_40`–`1_44`, `1_46` — from scratch, and a continuation (27–28 Sep) { #run-1-40 }
 
 The whole design from random weights in 10M steps (`recipes/windowed_from_scratch.sh`): arm A twice
-(`1_40`, `1_42`), arm B with flat potentials (`1_41`), arm C with a traffic curriculum (`1_43`, in
-progress). It learns, but at 10M it is far from the fine-tuned lineage, and seeds vary as much as
-arms. <a id="run-1-41"></a> <a id="run-1-42"></a> <a id="run-1-43"></a> [Training from scratch](findings/curriculum.md).
+(`1_40`, `1_42`), arm B with flat potentials (`1_41`), arm C with a curriculum ending on stitched
+streams (`1_43`), arm D with one ending on 20-flight streams (`1_44`). D is the best from-scratch
+20-flight agent and became the recipe default; C is safer on long streams. `1_46` continued `1_43`
+for 10M more steps on 20-flight streams. None reaches the champion `1_38`. <a id="run-1-41"></a>
+<a id="run-1-42"></a> <a id="run-1-43"></a> <a id="run-1-44"></a> <a id="run-1-46"></a>
+[Training from scratch](findings/curriculum.md).
+
+### Long streams (27–28 Sep) { #long-streams }
+
+Not a training run: 60- and 100-flight streams, split into feasible and over-capacity, on the
+champion and the from-scratch models. A scorer bug that cut long streams short was found and fixed
+along the way. [Long streams](findings/long-streams.md).
 
 ## Changes outside the MDP
 

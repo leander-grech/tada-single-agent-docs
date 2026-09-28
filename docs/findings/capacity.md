@@ -1,14 +1,35 @@
-# Over-capacity scenarios and long streams
+# Over-capacity scenarios
 
 !!! abstract "Summary"
-    Most losses of separation happen in scenarios that need more delay than the airspace can
-    absorb. **49 of the 100 validation seeds** contain a flight more than 650 s early at t = 0,
-    beyond the generator's own cap on the delay a flight may need, and they held 16 of `1_33`'s 17
-    deterministic losses. Such seeds should be reported apart, and the scenario filter does not
-    catch them. On long streams the generator also builds a growing backlog, so a 40-flight
-    scenario tests backlog handling, not stability. Stitched streams separate the two: within a
-    stream the agent flies the second segment as precisely as the first, and what compounds is the
-    separation risk per stretch of traffic.
+    Some generated scenarios cannot be flown safely at all: flights start so early that absorbing
+    the delay would take tens of minutes of holding that the airspace does not have. A handful of
+    validation seeds have never been solved by any model, attempt or lookahead, and the worst have
+    never been flown without a loss of separation. **49 of the 100 validation seeds** hold a flight
+    more than 650 s early at t = 0, the generator's own cap, and they held 16 of `1_33`'s 17
+    deterministic losses. On long streams such waves are the norm, not the exception: only 4.5% of
+    60-flight and 0.5% of 100-flight generated streams are free of them, and on those the champion
+    never loses separation ([Long streams](long-streams.md)). Separation rates should be reported with
+    this split in mind; the scenario filter does not catch these seeds.
+
+## Scenarios no agent has flown { #never-solved }
+
+<!-- gen:never-solved -->
+17 of the 100 validation seeds were never solved in any of the 16 900 deterministic, sampled or lookahead episodes that 15 windowed models have flown on them (20-flight evaluations, 10 attempts, lookahead).
+
+<table class="tada-table tada-sortable"><thead><tr><th>seed</th><th>earliest flight at t = 0</th><th>predicted losses at t = 0</th><th>episodes flown</th><th>episodes without a loss</th><th>best on-time rate</th></tr></thead><tbody><tr><td>1159417075</td><td>2 549.5 s (42.5 min)</td><td>9</td><td>169</td><td>2</td><td>0.25</td></tr><tr><td>1566942273</td><td>2 278.1 s (38.0 min)</td><td>6</td><td>169</td><td>29</td><td>0.20</td></tr><tr><td>1947382419</td><td>1 889.4 s (31.5 min)</td><td>11</td><td>169</td><td>23</td><td>0.40</td></tr><tr><td>1123251507</td><td>1 690.5 s (28.2 min)</td><td>8</td><td>169</td><td>97</td><td>0.50</td></tr><tr><td>1351531223</td><td>1 487.6 s (24.8 min)</td><td>12</td><td>169</td><td>64</td><td>0.55</td></tr><tr><td>1595180635</td><td>1 438.6 s (24.0 min)</td><td>7</td><td>169</td><td>98</td><td>0.70</td></tr><tr><td>1631775357</td><td>1 392.1 s (23.2 min)</td><td>6</td><td>169</td><td>122</td><td>0.60</td></tr><tr><td>1051454923</td><td>1 209.9 s (20.2 min)</td><td>3</td><td>169</td><td>133</td><td>0.75</td></tr><tr><td>941975480</td><td>1 103.7 s (18.4 min)</td><td>4</td><td>169</td><td>138</td><td>0.95</td></tr><tr><td>1193448329</td><td>905.1 s (15.1 min)</td><td>6</td><td>169</td><td>131</td><td>0.95</td></tr><tr><td>373399426</td><td>628.4 s (10.5 min)</td><td>2</td><td>169</td><td>169</td><td>0.95</td></tr><tr><td>1051802512</td><td>563.3 s (9.4 min)</td><td>5</td><td>169</td><td>169</td><td>0.95</td></tr><tr><td>735034881</td><td>543.0 s (9.1 min)</td><td>4</td><td>169</td><td>165</td><td>0.95</td></tr><tr><td>999829240</td><td>522.2 s (8.7 min)</td><td>8</td><td>169</td><td>152</td><td>0.95</td></tr><tr><td>1715412119</td><td>334.9 s (5.6 min)</td><td>3</td><td>169</td><td>169</td><td>0.95</td></tr><tr><td>1970753705</td><td>304.6 s (5.1 min)</td><td>1</td><td>169</td><td>167</td><td>0.90</td></tr><tr><td>1392783743</td><td>185.7 s (3.1 min)</td><td>1</td><td>169</td><td>169</td><td>0.95</td></tr></tbody></table>
+
+No seed that any episode solved had a flight more than 1 253.8 s (20.9 min) early; 49 of the 100 have one more than 650 s early. Leads and predicted conflicts: `analysis/2026-09-27_scratch/validation_seed_capacity.csv`.
+
+<!-- /gen -->
+
+*Earliest flight* is how early the most-early flight would arrive if nothing were done, from the
+do-nothing prediction the agent sees at t = 0. Episodes are pooled over every windowed model's
+20-flight evaluations (deterministic, 10 attempts, lookahead).
+
+The worst seed, 1159417075, starts with its earliest flight 42.5 minutes ahead of its slot. In all
+those episodes it was flown without a loss of separation exactly once, by a sampled attempt of
+`1_40` that delayed every flight: none landed on time, the worst 2 375 s off. There, separation
+can be bought only with all of the precision.
 
 ## How early is the earliest flight?
 
@@ -109,3 +130,6 @@ use is the per-stretch loss rate compounding: two independent 20-flight episodes
 lose separation 1 − 0.79² ≈ 38% of the time, close to the 41% observed. Every later model is
 scored on stitched streams as part of the standard battery. The current numbers are on the
 [leaderboard](../models/index.md).
+
+For 60- and 100-flight streams, with the over-capacity waves separated from the feasible ones, see
+[Long streams](long-streams.md).

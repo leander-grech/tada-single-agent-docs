@@ -63,7 +63,7 @@ clearance, and the shaping still telescopes: over random episodes with frequent 
 90 was sized to one window's bracket range (10 flights × 6). Training streams hold 40 flights, so
 a policy precise enough could rationally accept some extra risk. `1_39` tested a penalty sized to
 the training stream (240 = 40 × 6). The policy became more cautious everywhere, not only where
-separation was at stake: precision fell and only long streams got safer. The default stayed at 90
+separation was at stake: precision fell, and the only safety gain, on stitched streams, was not significant. The default stayed at 90
 ([`1_39`](../models/1_39.md), [Findings → reselection](../findings/reselection.md)).
 
 ## Earlier rewards

@@ -46,10 +46,13 @@ clearances as it can. The current agent flies a stream of 20 flights through a w
 
 - **Reselection** (a second clearance within the 45 s step) was the largest single gain: precision
   had been limited by bandwidth ([Findings](findings/reselection.md)).
+- **Long streams:** on feasible 60- and 100-flight streams the champion never loses separation, and
+  precision does not drift ([Long streams](findings/long-streams.md)).
 - **Order first?** Forcing the AMAN order early makes every model tested worse
   ([Phase 0](findings/order-first.md)).
-- **From scratch:** the full design learns from random weights; a traffic-curriculum run is in
-  progress ([Training from scratch](findings/curriculum.md)).
+- **From scratch:** the full design learns from random weights. You get what you train on: a
+  curriculum ending on 20-flight streams (the new recipe default) is best there, one ending on
+  stitched streams is safer on long ones ([Training from scratch](findings/curriculum.md)).
 
 Full history: [experiment log](log.md). What's next: [roadmap](roadmap.md). Terms: [glossary](glossary.md).
 

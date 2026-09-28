@@ -35,17 +35,42 @@ champion:
     battery: d100
     order: [success desc, separation_lost asc]
 
+# Per validation seed: how early its earliest flight arrives at t = 0 under do-nothing, and the
+# predicted losses of separation at t = 0 (analysis/validation_seed_capacity.py).
+seed_capacity: analysis/2026-09-27_scratch/validation_seed_capacity.csv
+
 models:
 
   # ---------------------------------------------------------------- windowed, from scratch
+  - id: "1_46"
+    track: windowed
+    run: experiments/atc_run_1_46_cont_1_43
+    checkpoint: final_model.zip
+    parent: "1_43"
+    status: complete
+    whats_new: "1_43 (arm C) continued for another 10M steps on 20-flight streams (not stitched), LR 1e-4 to 1e-5, 100k critic warm-up. 20M steps in all; not from scratch."
+    curve: [{file: experiments/atc_run_1_46_cont_1_43/track.csv, kind: track}]
+    evals: {f20: experiments/atc_run_1_46_cont_1_43/track_scores/final_model.csv}   # track_windowed.py's score of the final model
+
+  - id: "1_44"
+    track: windowed
+    run: experiments/atc_run_1_44_scratch_d_s1
+    checkpoint: final_model.zip
+    parent: null
+    status: complete
+    whats_new: "From scratch, arm D (the recipe's default since commit 0f9bdc9): 10-flight streams to 2.5M, then 20-flight streams to 10M, no stitched stage. Seed 1."
+    curve: [{file: experiments/atc_run_1_44_scratch_d_s1/track.csv, kind: track}]
+    evals: {f20: experiments/atc_run_1_44_scratch_d_s1/track_scores/final_model.csv}   # track_windowed.py's score of the final model
+
   - id: "1_43"
     track: windowed
     run: experiments/atc_run_1_43_scratch_c_s1
     checkpoint: final_model.zip
     parent: null
-    status: in_progress
+    status: complete
     whats_new: "From scratch, arm C: arm A plus a traffic curriculum in one run (10-flight streams to 2.5M, 20-flight to 5.5M, stitched 2x20 to 10M). Seed 1."
     curve: [{file: experiments/atc_run_1_43_scratch_c_s1/track.csv, kind: track}]
+    evals: {f20: experiments/atc_run_1_43_scratch_c_s1/track_scores/final_model.csv}   # track_windowed.py's score of the final model
 
   - id: "1_42"
     track: windowed
@@ -108,6 +133,10 @@ models:
       la4: analysis/2026-09-26_1_36_multipick/eval_cont/la4.csv
     renders:
       - {file: 1_38_deterministic_seed599310825.mp4, meta: analysis/2026-09-27_renders_seed599310825/1_38_deterministic_seed599310825_solutions.json}
+      - {file: 1_38_k5_best_seed868278894.mp4, meta: analysis/2026-09-27_scratch/longstreams/renders/1_38_k5_best_seed868278894_solutions.json, stream: "5×20-flight stitched stream, feasible, gaps 600–900 s"}
+      - {file: 1_38_k5_typical_seed1417723440.mp4, meta: analysis/2026-09-27_scratch/longstreams/renders/1_38_k5_typical_seed1417723440_solutions.json, stream: "5×20-flight stitched stream, feasible, gaps 600–900 s"}
+      - {file: 1_38_k5_typical_seed1210104633.mp4, meta: analysis/2026-09-27_scratch/longstreams/renders/1_38_k5_typical_seed1210104633_solutions.json, stream: "5×20-flight stitched stream, feasible, gaps 600–900 s"}
+      - {file: 1_38_k5_loss_seed1357624909.mp4, meta: analysis/2026-09-27_scratch/longstreams/renders/1_38_k5_loss_seed1357624909_solutions.json, stream: "5×20-flight stitched stream, unfiltered, gaps 600–900 s"}
 
   - id: "1_37"
     track: windowed

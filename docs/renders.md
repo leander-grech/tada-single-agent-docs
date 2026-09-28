@@ -86,7 +86,79 @@ Seed 599310825, 20 flights, each model's deterministic policy.
 <figcaption><span class="tada-render__by">Rendered by 1_42</span> (final_model.zip) · seed 599310825 · deterministic · 18 of 20 on time, worst 95 s, 174 clearances</figcaption>
 </figure>
 
+### 1_43
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_43_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_43_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_43</span> (final_model.zip) · seed 599310825 · deterministic · 17 of 20 on time, worst 536 s, 160 clearances</figcaption>
+</figure>
+
+### 1_44
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_44_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_44_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_44</span> (final_model.zip) · seed 599310825 · deterministic · 13 of 20 on time, worst 744 s, 140 clearances</figcaption>
+</figure>
+
+### 1_46
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_46_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_46_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_46</span> (final_model.zip) · seed 599310825 · deterministic · 20 of 20 on time, worst 41 s, 168 clearances</figcaption>
+</figure>
+
 ## By model
+
+### [1_46](models/1_46.md)
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_46_best_seed2144181937_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_46_best_seed2144181937.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_46</span> (final_model.zip) · seed 2144181937 · deterministic · 20 of 20 on time, worst 10 s, 173 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_46_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_46_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_46</span> (final_model.zip) · seed 599310825 · deterministic · 20 of 20 on time, worst 41 s, 168 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_46_failure_seed373399426_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_46_failure_seed373399426.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_46</span> (final_model.zip) · seed 373399426 · deterministic · 18 of 20 on time, worst 73 s, 151 clearances</figcaption>
+</figure>
+
+### [1_44](models/1_44.md)
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_44_best_seed2144181937_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_44_best_seed2144181937.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_44</span> (final_model.zip) · seed 2144181937 · deterministic · 20 of 20 on time, worst 16 s, 201 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_44_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_44_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_44</span> (final_model.zip) · seed 599310825 · deterministic · 13 of 20 on time, worst 744 s, 140 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_44_failure_seed107420369_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_44_failure_seed107420369.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_44</span> (final_model.zip) · seed 107420369 · deterministic · 18 of 20 on time, worst 116 s, 145 clearances</figcaption>
+</figure>
+
+### [1_43](models/1_43.md)
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_43_best_seed983753977_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_43_best_seed983753977.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_43</span> (final_model.zip) · seed 983753977 · deterministic · 20 of 20 on time, worst 21 s, 118 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_43_comparison_seed599310825_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_43_comparison_seed599310825.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_43</span> (final_model.zip) · seed 599310825 · deterministic · 17 of 20 on time, worst 536 s, 160 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_43_failure_seed196814233_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_43_failure_seed196814233.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_43</span> (final_model.zip) · seed 196814233 · deterministic · 18 of 20 on time, worst 67 s, 164 clearances</figcaption>
+</figure>
 
 ### [1_42](models/1_42.md)
 
@@ -161,6 +233,26 @@ Seed 599310825, 20 flights, each model's deterministic policy.
 <figure class="tada-render" title="metadata: analysis/2026-09-27_renders_seed599310825/1_38_deterministic_seed599310825_solutions.json · file verified identical">
 <video controls preload="metadata" src="../assets/renders/1_38_deterministic_seed599310825.mp4"></video>
 <figcaption><span class="tada-render__by">Rendered by 1_38</span> (final_model.zip) · seed 599310825 · deterministic · 20 of 20 on time, worst 30 s, 128 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/longstreams/renders/1_38_k5_best_seed868278894_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_38_k5_best_seed868278894.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_38</span> (final_model.zip) · seed 868278894 · 5×20-flight stitched stream, feasible, gaps 600–900 s · deterministic · 99 of 100 on time, worst 66 s, 568 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/longstreams/renders/1_38_k5_typical_seed1417723440_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_38_k5_typical_seed1417723440.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_38</span> (final_model.zip) · seed 1417723440 · 5×20-flight stitched stream, feasible, gaps 600–900 s · deterministic · 98 of 100 on time, worst 85 s, 608 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/longstreams/renders/1_38_k5_typical_seed1210104633_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_38_k5_typical_seed1210104633.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_38</span> (final_model.zip) · seed 1210104633 · 5×20-flight stitched stream, feasible, gaps 600–900 s · deterministic · 99 of 100 on time, worst 102 s, 558 clearances</figcaption>
+</figure>
+
+<figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/longstreams/renders/1_38_k5_loss_seed1357624909_solutions.json · file verified identical">
+<video controls preload="metadata" src="../assets/renders/1_38_k5_loss_seed1357624909.mp4"></video>
+<figcaption><span class="tada-render__by">Rendered by 1_38</span> (final_model.zip) · seed 1357624909 · 5×20-flight stitched stream, unfiltered, gaps 600–900 s · deterministic · 76 of 100 on time, loss of separation at step 527, 645 clearances</figcaption>
 </figure>
 
 <figure class="tada-render" title="metadata: analysis/2026-09-27_scratch/backfill/renders/1_38_best_seed338444264_solutions.json · file verified identical">

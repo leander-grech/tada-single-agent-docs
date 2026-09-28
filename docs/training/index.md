@@ -23,14 +23,19 @@ TADA_SEQUENCE_OBS=1 TADA_MAX_PICKS=2 JAX_PLATFORMS=cpu python tests/test_multi_p
 ## 2. Train
 
 ```bash
-recipes/windowed_from_scratch.sh 1 A      # SEED=1, ARM=A
+recipes/windowed_from_scratch.sh 1 D      # SEED=1, ARM=D (the default)
 ```
 
 | arm | what it trains |
 |---|---|
-| **A** (default) | the design the fine-tuned models ended up with, from step 0 |
+| A | the design the fine-tuned models ended up with, from step 0, on stitched 2×20 streams |
 | B | A with flat (un-ramped) sequence and conflict potentials |
 | C | A with a traffic curriculum: 10-flight streams to 2.5M, 20-flight to 5.5M, stitched 2×20 to 10M |
+| **D** (default) | the same curriculum without the stitched stage: 10-flight streams to 2.5M, then 20-flight streams to 10M |
+
+**Which arm.** D gives the best 20-flight agent from scratch; C is safer on stitched and long
+streams. Pick D unless long-stream safety matters more than 20-flight precision
+([Training from scratch](../findings/curriculum.md)). Each has been run on one seed.
 
 The design is fixed by environment variables read at import time:
 
@@ -54,7 +59,7 @@ TensorBoard, `run_meta.json`, and a `snapshot/` of the source packages.
 In a second terminal:
 
 ```bash
-python analysis/track_windowed.py --run experiments/atc_run_1_<N>_scratch_a_s1 --every 1000000 --workers 8
+python analysis/track_windowed.py --run experiments/atc_run_1_<N>_scratch_d_s1 --every 1000000 --workers 8
 ```
 
 Every 1M steps it scores the newest checkpoint deterministically on the 100 validation seeds (which
@@ -71,17 +76,18 @@ The same recipe on our hardware. Curves are on each card:
 | [`1_40`](../models/1_40.md) | A, 1 | complete |
 | [`1_42`](../models/1_42.md) | A, 2 | complete |
 | [`1_41`](../models/1_41.md) | B, 1 | complete |
-| [`1_43`](../models/1_43.md) | C, 1 | in progress |
+| [`1_43`](../models/1_43.md) | C, 1 | complete |
+| [`1_44`](../models/1_44.md) | **D**, 1 | complete |
 
-<!-- gen:compare models=1_40,1_42,1_41 batteries=f20,s2x20,att10,la4 -->
-<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../models/1_40/">1_40</a></th><th><a href="../models/1_42/">1_42</a></th><th><a href="../models/1_41/">1_41</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>22</td><td>16</td><td>14</td></tr><tr><td>20-flight: hard-solved</td><td>2</td><td>1</td><td>2</td></tr><tr><td>20-flight: separation lost</td><td>9</td><td>7</td><td>9</td></tr><tr><td>20-flight: flights on time</td><td>0.779</td><td>0.790</td><td>0.793</td></tr><tr><td>20-flight: clearances / stream</td><td>161.9</td><td>155.8</td><td>158.1</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>0.98</td><td>0.62</td><td>0.60</td></tr><tr><td>stitched 2×20: solved</td><td>1</td><td>1</td><td>3</td></tr><tr><td>stitched 2×20: hard-solved</td><td>0</td><td>0</td><td>0</td></tr><tr><td>stitched 2×20: separation lost</td><td>13</td><td>21</td><td>20</td></tr><tr><td>stitched 2×20: flights on time</td><td>0.729</td><td>0.701</td><td>0.723</td></tr><tr><td>pass@10 (seeds)</td><td>38</td><td>37</td><td>34</td></tr><tr><td>separation lost, best of 10</td><td>0</td><td>1</td><td>2</td></tr><tr><td>with lookahead: solved</td><td>19</td><td>29</td><td>22</td></tr><tr><td>with lookahead: hard-solved</td><td>0</td><td>1</td><td>1</td></tr><tr><td>with lookahead: separation lost</td><td>7</td><td>5</td><td>2</td></tr><tr><td>with lookahead: flights on time</td><td>0.802</td><td>0.817</td><td>0.835</td></tr></tbody></table>
+<!-- gen:compare models=1_44,1_43,1_40,1_42,1_41 batteries=f20,s2x20,att10,la4 -->
+<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../models/1_44/">1_44</a></th><th><a href="../models/1_43/">1_43</a></th><th><a href="../models/1_40/">1_40</a></th><th><a href="../models/1_42/">1_42</a></th><th><a href="../models/1_41/">1_41</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>37</td><td>22</td><td>22</td><td>16</td><td>14</td></tr><tr><td>20-flight: hard-solved</td><td>13</td><td>6</td><td>2</td><td>1</td><td>2</td></tr><tr><td>20-flight: separation lost</td><td>6</td><td>6</td><td>9</td><td>7</td><td>9</td></tr><tr><td>20-flight: flights on time</td><td>0.817</td><td>0.801</td><td>0.779</td><td>0.790</td><td>0.793</td></tr><tr><td>20-flight: clearances / stream</td><td>153.7</td><td>140.6</td><td>161.9</td><td>155.8</td><td>158.1</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>1.07</td><td>1.05</td><td>0.98</td><td>0.62</td><td>0.60</td></tr><tr><td>stitched 2×20: solved</td><td>10</td><td>8</td><td>1</td><td>1</td><td>3</td></tr><tr><td>stitched 2×20: hard-solved</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>stitched 2×20: separation lost</td><td>17</td><td>11</td><td>13</td><td>21</td><td>21</td></tr><tr><td>stitched 2×20: flights on time</td><td>0.738</td><td>0.745</td><td>0.730</td><td>0.704</td><td>0.725</td></tr><tr><td>pass@10 (seeds)</td><td>51</td><td>34</td><td>38</td><td>37</td><td>34</td></tr><tr><td>separation lost, best of 10</td><td>2</td><td>1</td><td>0</td><td>1</td><td>2</td></tr><tr><td>with lookahead: solved</td><td>31</td><td>24</td><td>19</td><td>29</td><td>22</td></tr><tr><td>with lookahead: hard-solved</td><td>7</td><td>4</td><td>0</td><td>1</td><td>1</td></tr><tr><td>with lookahead: separation lost</td><td>4</td><td>1</td><td>7</td><td>5</td><td>2</td></tr><tr><td>with lookahead: flights on time</td><td>0.825</td><td>0.788</td><td>0.802</td><td>0.817</td><td>0.835</td></tr></tbody></table>
 
 <!-- /gen -->
 
 **Your numbers will not be bit-identical.** GPU arithmetic differs between machines. Compare
 statistically, against the spread between our two arm-A seeds, which is large
-([Findings → training from scratch](../findings/curriculum.md)). A run that lands between or near
-them is behaving normally.
+([Findings → training from scratch](../findings/curriculum.md)). Arm D has one reference seed and
+its last checkpoints are noisy (14, 26, 37 solved at 8, 9, 10M), so expect a wide spread there too.
 
 ## 5. Run the full battery
 
@@ -90,7 +96,7 @@ protocol](../evaluation.md)):
 
 ```bash
 export TADA_SEQUENCE_OBS=1 TADA_MAX_PICKS=2
-M=experiments/atc_run_1_<N>_scratch_a_s1/final_model.zip
+M=experiments/atc_run_1_<N>_scratch_d_s1/final_model.zip
 python analysis/score_windowed.py --models $M --seeds 100 --attempts 9
 python analysis/score_windowed.py --models $M --seeds 100 --segments 2 --gap 120 900
 python analysis/score_windowed.py --models $M --seeds 100 --lookahead 4

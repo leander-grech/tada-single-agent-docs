@@ -419,7 +419,7 @@ class Build:
                 if not vid.exists():
                     self.errors.append(f"{m.id}: render {f} not in docs/assets/renders/")
                     continue
-                rec = {"file": f, "model": m.id, "known": True}
+                rec = {"file": f, "model": m.id, "known": True, "stream": r.get("stream")}
                 if "meta" in r:
                     mp = self.code / r["meta"]
                     if not mp.exists():
@@ -509,7 +509,10 @@ class Build:
         else:
             where = f"{r['reel']}-episode reel (seeds not recorded)" if r["reel"] != "all" else "every evaluation seed (seeds not recorded)"
         mode = r["mode"] + (f" ({r['mode_detail']})" if r.get("mode_detail") else "")
-        s = f'<span class="tada-render__by">Rendered by {esc(m.id)}</span> ({esc(ck)}) · {esc(where)} · {esc(mode)}'
+        s = f'<span class="tada-render__by">Rendered by {esc(m.id)}</span> ({esc(ck)}) · {esc(where)}'
+        if r.get("stream"):
+            s += f" · {esc(r['stream'])}"
+        s += f" · {esc(mode)}"
         if r.get("outcome"):
             s += f" · {esc(r['outcome'])}"
         return s
@@ -687,7 +690,7 @@ class Build:
         lines = []
         if m.track == "windowed":
             if mt.get("init_weights") is None and "scratch" in m.run:
-                arm = re.search(r"scratch_([abc])_s(\d+)", m.run)
+                arm = re.search(r"scratch_([abcd])_s(\d+)", m.run)
                 lines.append(f"recipes/windowed_from_scratch.sh {arm.group(2)} {arm.group(1).upper()}")
             else:
                 env = []
@@ -1283,6 +1286,8 @@ class Build:
                 ids = args["models"].split(",")
                 bats = args.get("batteries", "f20").split(",")
                 body = self.compare_table(ids, bats)
+            elif kind == "never-solved":
+                body = self.never_solved_table()
             elif kind == "render":
                 m, r = self.find_render(args["file"])
                 if m is None:
@@ -1294,6 +1299,52 @@ class Build:
                 return mt.group(0)
             return f"<!-- gen:{kind}{mt.group(2)}-->\n{body}<!-- /gen -->"
         return self.MARK.sub(repl, text)
+
+    def never_solved_table(self) -> str:
+        """Validation seeds no windowed model solved in any f20 / att10 / la4 episode."""
+        frames = []
+        for m in self.models.values():
+            if m.track != "windowed":
+                continue
+            for bat in ("f20", "att10", "la4"):
+                if bat in m.evals:
+                    d = m.evals[bat]
+                    frames.append(pd.DataFrame({"seed": d["seed"].values, "model": m.id,
+                                                "sep": b(d["sep"]).values, "on_time": d["on_time"].values,
+                                                "solved": (b(d["all_on_time"]) & ~b(d["sep"])).values}))
+        allf = pd.concat(frames)
+        g = allf.groupby("seed")
+        never = g.solved.sum()
+        never = never[never == 0].index
+        cap = self.csv(self.reg["seed_capacity"]).set_index("seed") if self.reg.get("seed_capacity") else None
+        rows = []
+        for seed in never:
+            e = allf[allf.seed == seed]
+            if cap is not None and seed in cap.index:
+                lead = float(cap.loc[seed, "largest_early_s"])
+                lead_s, pairs = f"{lead:,.1f} s ({lead / 60:.1f} min)".replace(",", " "), int(cap.loc[seed, "predicted_los_pairs_t0"])
+            else:
+                lead, lead_s, pairs = -1.0, "—", "—"
+            rows.append((lead, seed, len(e), int((~e.sep).sum()), float(e.on_time.max()), lead_s, pairs))
+        rows.sort(key=lambda r: (-r[0], r[1]))
+        n_models = allf.model.nunique()
+        body = "".join(f"<tr><td>{sd}</td><td>{ls}</td><td>{pr}</td><td>{n}</td><td>{safe}</td><td>{best:.2f}</td></tr>"
+                       for _, sd, n, safe, best, ls, pr in rows)
+        extra = ""
+        if cap is not None:
+            solved_seeds = sorted(set(allf.seed) - set(never))
+            mx = cap.loc[cap.index.intersection(solved_seeds), "largest_early_s"].max()
+            mx_s = f"{mx:,.1f}".replace(",", " ")
+            extra = (f"No seed that any episode solved had a flight more than {mx_s} s ({mx / 60:.1f} min) early; "
+                     f"{int(cap.over_650s.sum())} of the 100 have one more than 650 s early. "
+                     f"Leads and predicted conflicts: `{self.reg['seed_capacity']}`.\n\n")
+        n_ep = f"{len(allf):,}".replace(",", " ")
+        return (f"{len(never)} of the 100 validation seeds were never solved in any of the "
+                f"{n_ep} deterministic, sampled or lookahead episodes that {n_models} windowed models "
+                "have flown on them (20-flight evaluations, 10 attempts, lookahead).\n\n"
+                + '<table class="tada-table tada-sortable"><thead><tr><th>seed</th><th>earliest flight at t = 0</th>'
+                "<th>predicted losses at t = 0</th><th>episodes flown</th><th>episodes without a loss</th><th>best on-time rate</th></tr></thead>"
+                f"<tbody>{body}</tbody></table>\n\n" + extra)
 
     # ------------------------------------------------------------------ nav
     def nav_block(self) -> str:

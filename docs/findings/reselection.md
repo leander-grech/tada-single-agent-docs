@@ -5,7 +5,8 @@
     on about a third of its decisions. Against an identical control without it, solved streams
     roughly doubled and AMAN swaps almost disappeared: **precision had been limited by how many
     clearances the agent could issue, not by what it knew**. The price was some safety. Another 5M
-    steps (`1_38`) removed that cost on 20-flight streams but not on stitched 40-flight ones. A
+    steps (`1_38`) removed that cost on 20-flight streams; on stitched 40-flight ones it still loses
+    separation a little more often than the control (not significant). A
     larger separation penalty (`1_39`) made the policy timid everywhere and was not adopted. With
     the critic-guided lookahead the reselection policy is both safe and precise.
 
@@ -21,7 +22,7 @@ settings; only `1_36` may ask for a second pick. `1_36` starts computing exactly
 training the share of decisions asking for another pick grew from 3.5% to ~35%.
 
 <!-- gen:compare models=1_35,1_37,1_36,1_38,1_39 batteries=f20,s2x20,att10,la4 -->
-<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../../models/1_35/">1_35</a></th><th><a href="../../models/1_37/">1_37</a></th><th><a href="../../models/1_36/">1_36</a></th><th><a href="../../models/1_38/">1_38</a></th><th><a href="../../models/1_39/">1_39</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>24</td><td>34</td><td>65</td><td>63</td><td>40</td></tr><tr><td>20-flight: hard-solved</td><td>0</td><td>1</td><td>29</td><td>24</td><td>5</td></tr><tr><td>20-flight: separation lost</td><td>8</td><td>4</td><td>9</td><td>3</td><td>5</td></tr><tr><td>20-flight: flights on time</td><td>0.826</td><td>0.832</td><td>0.916</td><td>0.927</td><td>0.858</td></tr><tr><td>20-flight: clearances / stream</td><td>86.8</td><td>80.6</td><td>128.3</td><td>121.9</td><td>125.2</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>0.85</td><td>1.02</td><td>0.07</td><td>0.54</td><td>0.66</td></tr><tr><td>stitched 2×20: solved</td><td>4</td><td>8</td><td>36</td><td>32</td><td>12</td></tr><tr><td>stitched 2×20: hard-solved</td><td>0</td><td>0</td><td>5</td><td>9</td><td>1</td></tr><tr><td>stitched 2×20: separation lost</td><td>10</td><td>11</td><td>16</td><td>15</td><td>9</td></tr><tr><td>stitched 2×20: flights on time</td><td>0.784</td><td>0.765</td><td>0.873</td><td>0.860</td><td>0.818</td></tr><tr><td>pass@10 (seeds)</td><td>47</td><td>54</td><td>80</td><td>76</td><td>67</td></tr><tr><td>separation lost, best of 10</td><td>4</td><td>1</td><td>2</td><td>2</td><td>1</td></tr><tr><td>with lookahead: solved</td><td>8</td><td>7</td><td>39</td><td>30</td><td>26</td></tr><tr><td>with lookahead: hard-solved</td><td>0</td><td>0</td><td>10</td><td>8</td><td>6</td></tr><tr><td>with lookahead: separation lost</td><td>5</td><td>7</td><td>2</td><td>1</td><td>5</td></tr><tr><td>with lookahead: flights on time</td><td>0.781</td><td>0.774</td><td>0.896</td><td>0.893</td><td>0.833</td></tr></tbody></table>
+<table class="tada-table tada-compare"><thead><tr><th>100 seeds, deterministic unless stated</th><th><a href="../../models/1_35/">1_35</a></th><th><a href="../../models/1_37/">1_37</a></th><th><a href="../../models/1_36/">1_36</a></th><th><a href="../../models/1_38/">1_38</a></th><th><a href="../../models/1_39/">1_39</a></th></tr></thead><tbody><tr><td>20-flight: solved</td><td>24</td><td>34</td><td>65</td><td>63</td><td>40</td></tr><tr><td>20-flight: hard-solved</td><td>0</td><td>1</td><td>29</td><td>24</td><td>5</td></tr><tr><td>20-flight: separation lost</td><td>8</td><td>4</td><td>9</td><td>3</td><td>5</td></tr><tr><td>20-flight: flights on time</td><td>0.826</td><td>0.832</td><td>0.916</td><td>0.927</td><td>0.858</td></tr><tr><td>20-flight: clearances / stream</td><td>86.8</td><td>80.6</td><td>128.3</td><td>121.9</td><td>125.2</td></tr><tr><td>20-flight: AMAN swaps / stream</td><td>0.85</td><td>1.02</td><td>0.07</td><td>0.54</td><td>0.66</td></tr><tr><td>stitched 2×20: solved</td><td>5</td><td>10</td><td>38</td><td>34</td><td>12</td></tr><tr><td>stitched 2×20: hard-solved</td><td>0</td><td>0</td><td>6</td><td>9</td><td>1</td></tr><tr><td>stitched 2×20: separation lost</td><td>10</td><td>11</td><td>16</td><td>15</td><td>9</td></tr><tr><td>stitched 2×20: flights on time</td><td>0.788</td><td>0.770</td><td>0.878</td><td>0.865</td><td>0.822</td></tr><tr><td>pass@10 (seeds)</td><td>47</td><td>54</td><td>80</td><td>76</td><td>67</td></tr><tr><td>separation lost, best of 10</td><td>4</td><td>1</td><td>2</td><td>2</td><td>1</td></tr><tr><td>with lookahead: solved</td><td>8</td><td>7</td><td>39</td><td>30</td><td>26</td></tr><tr><td>with lookahead: hard-solved</td><td>0</td><td>0</td><td>10</td><td>8</td><td>6</td></tr><tr><td>with lookahead: separation lost</td><td>5</td><td>7</td><td>2</td><td>1</td><td>5</td></tr><tr><td>with lookahead: flights on time</td><td>0.781</td><td>0.774</td><td>0.896</td><td>0.893</td><td>0.833</td></tr></tbody></table>
 
 <!-- /gen -->
 
@@ -40,9 +41,9 @@ significant) are on the cards, against each model's parent and against the champ
   rationally accept a little more risk.
 - **More training removed that cost on 20-flight streams.** `1_38` fixes several of `1_36`'s losses
   and introduces none (significant on its card) at unchanged precision. On stitched 2×20 streams it
-  is still riskier than the one-pick control.
+  still loses separation more often than the one-pick control, though not significantly.
 - **A bigger penalty is not the lexicographic order.** `1_39` (240 = 40 flights × 6) lost precision
-  broadly and got safer only on long streams. Scaling one penalty makes the policy cautious
+  broadly; its only safety gain was fewer losses on stitched streams, and not a significant one. Scaling one penalty makes the policy cautious
   everywhere, not only where separation is at stake.
 - **More training alone mostly buys safety.** The control `1_37` has fewer losses than its start
   `1_35` and solves more; reselection on the same step budget solves far more again.
