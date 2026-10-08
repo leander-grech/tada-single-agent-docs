@@ -69,6 +69,7 @@ not_in_nav: |
 
 nav:
   - Home: index.md
+  - Progress board: progress.md
   - Models:
       - Best model: models/best.md
       - Leaderboard: models/index.md
