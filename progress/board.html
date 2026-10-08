@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TADA Single-Agent Progress</title>
+<style>body{margin:0}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+/* Layout: approach-control board. Lineage lanes of flight strips on top, training traces below. */
+:root {
+  --bg: #edf0f2; --panel: #ffffff; --ink: #15202a; --muted: #5a6774; --line: #d5dce2; --soft: #f4f6f8;
+  --tmb: #1f5f9e; --pms: #b8730c; --good: #23784f; --bad: #b5401a; --gold: #8a6a08; --run: #1f5f9e;
+  --s1: #1f5f9e; --s2: #c05a1a; --s3: #1b8a70; --s4: #7a4fb0; --ref: #8d98a3;
+  --display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e151b; --panel: #161f27; --ink: #e5ecf1; --muted: #94a2ae; --line: #2a3742; --soft: #1b2630;
+  --tmb: #74aae6; --pms: #e8a93c; --good: #5cc28c; --bad: #ef8460; --gold: #e2c25a; --run: #74aae6;
+  --s1: #74aae6; --s2: #ef9a5c; --s3: #4fc7a8; --s4: #b896e8; --ref: #6f7c88; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e151b; --panel: #161f27; --ink: #e5ecf1; --muted: #94a2ae; --line: #2a3742; --soft: #1b2630;
+  --tmb: #74aae6; --pms: #e8a93c; --good: #5cc28c; --bad: #ef8460; --gold: #e2c25a; --run: #74aae6;
+  --s1: #74aae6; --s2: #ef9a5c; --s3: #4fc7a8; --s4: #b896e8; --ref: #6f7c88; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.5 }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 56px; display: grid; gap: 34px }
+header { display: grid; gap: 10px }
+.eyebrow { font-family: var(--mono); font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+h1 { font-family: var(--display); font-weight: 600; font-size: clamp(28px, 4vw, 40px); line-height: 1.05; margin: 0; text-wrap: balance }
+h2 { font-family: var(--display); font-weight: 600; font-size: 22px; margin: 0 }
+.lede { color: var(--muted); max-width: 72ch; margin: 0 }
+.key { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12.5px; color: var(--muted) }
+.key span { display: inline-flex; align-items: center; gap: 6px }
+.sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block }
+.section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin-bottom: 12px }
+.lanes { display: grid; grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); gap: 16px; align-items: start }
+.lane { display: grid; gap: 0; min-width: 0 }
+.lane-head { padding: 0 2px 10px; border-bottom: 2px solid var(--ink); margin-bottom: 12px }
+.lane-head b { font-family: var(--display); font-size: 17px; font-weight: 600; display: block }
+.lane-head small { color: var(--muted); font-size: 12px }
+.strip { position: relative; background: var(--panel); border: 1px solid var(--line); border-left: 6px solid var(--tmb);
+  border-radius: 3px; padding: 9px 11px 10px; display: grid; gap: 5px }
+.strip.PMS { border-left-color: var(--pms) }
+.strip.invalid, .strip.lost, .strip.crashed, .strip.failed { opacity: .72 }
+.strip.champion { box-shadow: 0 0 0 2px var(--gold) }
+.row1 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap }
+.rid { font-family: var(--mono); font-weight: 500; font-size: 15px }
+.proc { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; padding: 1px 5px; border-radius: 2px;
+  color: var(--panel); background: var(--tmb) }
+.strip.PMS .proc { background: var(--pms) }
+.pill { margin-left: auto; font-size: 11px; font-family: var(--mono); padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted) }
+.pill.champion { color: var(--gold); border-color: var(--gold) }
+.pill.running { color: var(--run); border-color: var(--run) }
+.pill.running::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--run); margin-right: 5px; vertical-align: 1px; animation: blink 1.6s infinite }
+.pill.crashed, .pill.lost, .pill.failed { color: var(--bad); border-color: var(--bad) }
+@keyframes blink { 50% { opacity: .2 } }
+@media (prefers-reduced-motion: reduce) { .pill.running::before { animation: none } }
+.desc { font-size: 13px }
+.from { font-size: 11.5px; color: var(--muted); font-family: var(--mono) }
+.metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 2px }
+.m { display: grid; gap: 3px }
+.m .lab { font-size: 10.5px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase }
+.m .val { font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums }
+.bar { height: 4px; background: var(--soft); border-radius: 2px; overflow: hidden }
+.bar i { display: block; height: 100% }
+.foot { font-size: 11px; color: var(--muted); font-family: var(--mono) }
+.prog { height: 3px; background: var(--soft); border-radius: 2px; overflow: hidden; margin-top: 3px }
+.prog i { display: block; height: 100%; background: var(--run) }
+.link { height: 16px; margin-left: 18px; border-left: 2px solid var(--muted) }
+.link.recipe { border-left-style: dashed; opacity: .6 }
+.link.none { border-left-color: transparent }
+.panels { display: grid; gap: 18px }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px 12px; display: grid; gap: 10px; min-width: 0 }
+.panel-head { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px }
+.panel-head h3 { font-family: var(--display); font-weight: 600; font-size: 17px; margin: 0 }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: var(--muted) }
+.legend span { display: inline-flex; align-items: center; gap: 6px }
+.legend i { width: 18px; height: 0; border-top: 2.5px solid; display: inline-block }
+.legend i.dash { border-top-style: dashed }
+.charts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px }
+.chart { min-width: 0 }
+.chart .t { font-size: 11.5px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px }
+.chart .box { position: relative; height: 190px }
+.note { color: var(--muted); font-size: 12.5px; max-width: 90ch }
+@media (max-width: 760px) { .charts { grid-template-columns: 1fr } .chart .box { height: 170px } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">TADA · arrival management · single agent</div>
+    <h1>Single-agent progress board</h1>
+    <p class="lede">Every model lineage and its training trace. Scores are the deterministic policy on the 100 fixed validation seeds, 20-flight streams, each run under its own MDP. <b>Success</b>: every flight within ±60 s of its AMAN target with no loss of separation. <b>LoS</b>: streams with a loss of separation (≤ 3 NM and ≤ 500 ft). <b>On-time</b>: flights within ±60 s.</p>
+    <div class="key" id="key"></div>
+  </header>
+
+  <section>
+    <div class="section-head"><h2>Model lineages</h2><span class="note" id="status"></span></div>
+    <div class="lanes" id="lanes"></div>
+  </section>
+
+  <section>
+    <div class="section-head"><h2>Training traces</h2><span class="note">x-axis: total training steps in the policy so far, ancestors included. Dotted lines mark where a new run took over.</span></div>
+    <div class="panels" id="panels"></div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const DATA = {"updated":"08 Oct 2026, 09:03 UTC","lanes":[["warm","Warm-start lineage","Each run continues the previous run's weights."],["scratch","From-scratch recipe","10M-step recipe arms and their continuations."],["oct7","Feasible pools \u00b7 7 Oct","Training only on streams within \u00b1900 s; procedure-specific actions."],["oct8","Mask fix \u00b7 8 Oct","Best recipes \u00d7 3 seeds with corrected turn/skip legality."]],"nodes":[{"id":"1_29","proc":"TMB","lane":"warm","desc":"10-aircraft env \u00b7 PBRS + attention","parent":null,"link":null,"status":"base","metrics":null,"final":false,"step":null,"scored_at":null},{"id":"1_32","proc":"TMB","lane":"warm","desc":"Windowed 20-flight stream","parent":"1_29","link":"cont","status":"done","metrics":{"success":29,"los":21,"ontime":73.0},"final":true,"step":null,"scored_at":null},{"id":"1_33","proc":"TMB","lane":"warm","desc":"+ AMAN-sequence features","parent":"1_32","link":"cont","status":"done","metrics":{"success":20,"los":17,"ontime":75.0},"final":true,"step":null,"scored_at":null},{"id":"1_34","proc":"TMB","lane":"warm","desc":"Lexicographic outcome reward","parent":"1_33","link":"cont","status":"done","metrics":{"success":21,"los":13,"ontime":77.2},"final":false,"step":null,"scored_at":799744},{"id":"1_35","proc":"TMB","lane":"warm","desc":"JAX trainer \u00b7 stitched 2\u00d720 streams","parent":"1_34","link":"cont","status":"done","metrics":{"success":19,"los":7,"ontime":82.6},"final":false,"step":null,"scored_at":4001792},{"id":"1_36","proc":"TMB","lane":"warm","desc":"Reselection: up to 2 clearances/step","parent":"1_35","link":"cont","status":"done","metrics":{"success":65,"los":9,"ontime":91.6},"final":true,"step":null,"scored_at":null},{"id":"1_38","proc":"TMB","lane":"warm","desc":"1_36 + 5M","parent":"1_36","link":"cont","status":"champion","metrics":{"success":63,"los":3,"ontime":92.7},"final":true,"step":null,"scored_at":null},{"id":"1_43","proc":"TMB","lane":"scratch","desc":"Arm C: 10 \u2192 20 \u2192 2\u00d720 flights","parent":null,"link":null,"status":"done","metrics":{"success":22,"los":6,"ontime":80.1},"final":true,"step":null,"scored_at":null},{"id":"1_46","proc":"TMB","lane":"scratch","desc":"1_43 + 10M","parent":"1_43","link":"cont","status":"done","metrics":{"success":44,"los":7,"ontime":85.2},"final":true,"step":null,"scored_at":null},{"id":"1_48","proc":"TMB","lane":"scratch","desc":"+ \u00b130 s hard bracket","parent":"1_46","link":"cont","status":"done","metrics":{"success":48,"los":4,"ontime":86.4},"final":true,"step":null,"scored_at":null},{"id":"1_51","proc":"TMB","lane":"scratch","desc":"+ release MDP, low LR","parent":"1_48","link":"cont","status":"failed","metrics":{"success":27,"los":11,"ontime":75.2},"final":true,"step":null,"scored_at":null},{"id":"1_44","proc":"TMB","lane":"scratch","desc":"Arm D: 10 \u2192 20 flights","parent":null,"link":null,"status":"done","metrics":{"success":37,"los":6,"ontime":81.8},"final":true,"step":null,"scored_at":null},{"id":"1_47","proc":"TMB","lane":"scratch","desc":"+ \u00b130 s hard bracket","parent":"1_44","link":"cont","status":"done","metrics":{"success":36,"los":8,"ontime":85.0},"final":true,"step":null,"scored_at":null},{"id":"1_50","proc":"TMB","lane":"scratch","desc":"Arm D + release MDP","parent":"1_44","link":"recipe","status":"done","metrics":{"success":51,"los":20,"ontime":84.4},"final":true,"step":null,"scored_at":null},{"id":"1_52","proc":"PMS","lane":"scratch","desc":"1_50 fine-tuned on point merge","parent":"1_50","link":"cont","status":"invalid","metrics":{"success":8,"los":34,"ontime":68.2},"final":true,"step":null,"scored_at":null},{"id":"1_53","proc":"PMS","lane":"scratch","desc":"Arm D + release on point merge","parent":"1_50","link":"recipe","status":"invalid","metrics":{"success":12,"los":28,"ontime":70.5},"final":true,"step":null,"scored_at":null},{"id":"1_55","proc":"TMB","lane":"oct7","desc":"Control: arm D, feasible pool","parent":"1_50","link":"recipe","status":"done","metrics":{"success":40,"los":14,"ontime":85.7},"final":true,"step":null,"scored_at":null},{"id":"1_54","proc":"TMB","lane":"oct7","desc":"Difficulty curriculum (easy \u2192 hard)","parent":"1_50","link":"recipe","status":"done","metrics":{"success":47,"los":18,"ontime":82.5},"final":true,"step":null,"scored_at":null},{"id":"1_58","proc":"TMB","lane":"oct7","desc":"1_54 + MONAD per-airport mask","parent":"1_54","link":"recipe","status":"done","metrics":{"success":56,"los":17,"ontime":84.4},"final":true,"step":null,"scored_at":null},{"id":"1_57","proc":"PMS","lane":"oct7","desc":"Control: arm D, canonical point merge","parent":"1_53","link":"recipe","status":"done","metrics":{"success":10,"los":12,"ontime":70.2},"final":true,"step":null,"scored_at":null},{"id":"1_56","proc":"PMS","lane":"oct7","desc":"Difficulty curriculum, canonical point merge","parent":"1_53","link":"recipe","status":"done","metrics":{"success":15,"los":14,"ontime":73.1},"final":true,"step":null,"scored_at":null},{"id":"1_59","proc":"PMS","lane":"oct7","desc":"1_56 + MONAD mask (no turns, no skip-4)","parent":"1_56","link":"recipe","status":"done","metrics":{"success":11,"los":11,"ontime":70.2},"final":true,"step":null,"scored_at":null},{"id":"1_60","proc":"PMS","lane":"oct7","desc":"1_56 + 10M","parent":"1_56","link":"cont","status":"lost","metrics":{"success":13,"los":8,"ontime":75.5},"final":true,"step":null,"scored_at":null},{"id":"1_61","proc":"TMB","lane":"oct8","desc":"1_58 recipe + mask fix \u00b7 seed 1","parent":"1_58","link":"recipe","status":"running","metrics":{"success":19,"los":30,"ontime":69.5},"final":false,"step":7475200,"scored_at":2002944},{"id":"1_63","proc":"TMB","lane":"oct8","desc":"1_58 recipe + mask fix \u00b7 seed 2","parent":"1_58","link":"recipe","status":"running","metrics":{"success":23,"los":37,"ontime":68.8},"final":false,"step":7323648,"scored_at":2002944},{"id":"1_65","proc":"TMB","lane":"oct8","desc":"1_58 recipe + mask fix \u00b7 seed 3","parent":"1_58","link":"recipe","status":"running","metrics":{"success":17,"los":27,"ontime":69.7},"final":false,"step":7172096,"scored_at":2002944},{"id":"1_62","proc":"PMS","lane":"oct8","desc":"1_56 recipe + mask fix \u00b7 seed 1","parent":"1_56","link":"recipe","status":"running","metrics":null,"final":false,"step":8060928,"scored_at":null},{"id":"1_64","proc":"PMS","lane":"oct8","desc":"1_56 recipe + mask fix \u00b7 seed 2","parent":"1_56","link":"recipe","status":"crashed","metrics":{"success":4,"los":39,"ontime":58.5},"final":false,"step":null,"scored_at":2002944},{"id":"1_67","proc":"PMS","lane":"oct8","desc":"Seed 2 rerun (1_64 crashed)","parent":"1_56","link":"recipe","status":"running","metrics":{"success":12,"los":23,"ontime":66.8},"final":false,"step":4808704,"scored_at":4001792},{"id":"1_66","proc":"PMS","lane":"oct8","desc":"1_56 recipe + mask fix \u00b7 seed 3","parent":"1_56","link":"recipe","status":"running","metrics":null,"final":false,"step":7823360,"scored_at":null}],"panels":[{"title":"TMB \u00b7 warm-start lineage","series":[{"label":"1_32 \u2192 1_38","style":"solid","segs":[{"run":"1_32","start":0,"pts":[[1.0,10,26,69.0],[2.0,20,26,68.7],[3.0,17,27,66.5],[4.0,24,21,71.6],[5.0,28,19,73.8]]},{"run":"1_33","start":5000000,"pts":[[6.025,18,21,68.3],[7.024,15,13,72.8],[8.024,13,25,69.2],[9.024,14,15,72.0]]},{"run":"1_34","start":10000000,"pts":[[10.275,20,17,75.0],[10.5,17,17,75.6],[10.75,26,13,78.8],[10.8,21,13,77.2]]},{"run":"1_35","start":10799744,"pts":[[11.803,22,8,78.5],[12.803,29,10,79.4],[13.802,32,11,80.4],[14.802,19,7,82.6]]},{"run":"1_36","start":15449744,"pts":[[16.453,32,8,82.2],[17.453,43,7,85.7],[18.452,47,10,89.1],[19.452,63,7,91.2],[20.451,65,9,91.6]]},{"run":"1_38","start":20449744,"pts":[[21.453,42,5,90.1],[22.453,45,7,90.2],[23.452,57,7,90.1],[24.452,60,5,91.3],[25.451,63,3,92.7]]}]}]},{"title":"TMB \u00b7 from-scratch recipe","series":[{"label":"1_43 \u2192 1_46 \u2192 1_48 \u2192 1_51","style":"solid","segs":[{"run":"1_43","start":0,"pts":[[1.004,13,20,70.4],[2.003,15,14,74.6],[3.002,8,10,66.0],[4.002,16,15,62.6],[5.001,12,8,70.7],[6.001,4,21,63.7],[7.0,11,11,69.9],[8.004,18,8,76.6],[9.003,24,10,78.6],[10.002,22,6,80.1]]},{"run":"1_46","start":10002432,"pts":[[11.006,33,6,81.0],[12.005,19,12,74.9],[13.005,29,10,78.6],[14.004,30,9,79.3],[15.004,23,8,78.0],[16.003,28,8,79.0],[17.002,19,10,77.3],[18.006,32,6,83.0],[19.005,49,4,86.6],[20.005,44,7,85.2]]},{"run":"1_48","start":20004864,"pts":[[21.008,20,5,79.2],[22.008,21,7,80.2],[23.007,13,10,77.3],[24.007,25,6,78.8],[25.006,24,6,80.2],[26.006,17,5,80.1],[27.005,28,6,81.3],[28.008,35,3,85.2],[29.008,40,5,84.1],[30.007,48,4,86.4]]},{"run":"1_51","start":30007296,"pts":[[31.011,30,6,78.1],[32.01,30,6,82.7],[33.01,17,4,77.8],[34.009,21,11,75.3],[35.009,23,10,74.8],[36.008,16,12,72.7],[37.007,22,10,75.8],[38.011,32,8,81.0],[39.01,24,14,77.0],[40.01,27,11,75.2]]}]},{"label":"1_44 \u2192 1_47","style":"solid","segs":[{"run":"1_44","start":0,"pts":[[1.004,13,20,70.4],[2.003,15,14,74.6],[3.002,8,10,66.0],[4.002,16,15,62.6],[5.001,12,8,70.7],[6.001,9,13,66.7],[7.0,9,16,73.7],[8.004,14,8,74.8],[9.003,26,7,78.8],[10.002,37,6,81.8]]},{"run":"1_47","start":10002432,"pts":[[11.006,24,8,79.4],[12.005,17,11,73.2],[13.005,13,11,73.8],[14.004,11,9,76.4],[15.004,19,8,77.8],[16.003,33,7,84.5],[17.002,38,7,84.4],[18.006,39,4,84.2],[19.005,44,5,85.9],[20.005,36,8,85.0]]}]},{"label":"1_50","style":"solid","segs":[{"run":"1_50","start":0,"pts":[[1.004,18,40,63.6],[2.003,30,24,75.9],[3.002,28,25,78.4],[4.002,35,31,75.3],[5.001,37,21,82.7],[6.001,35,22,81.0],[7.0,47,24,82.0],[8.004,41,24,80.1],[9.003,48,18,83.7],[10.002,51,20,84.4]]}]}]},{"title":"TMB \u00b7 feasible pools (7 Oct)","series":[{"label":"1_54 curriculum","style":"solid","segs":[{"run":"1_54","start":0,"pts":[[1.004,8,22,71.2],[2.003,21,34,68.5],[3.002,14,34,68.2],[4.002,31,26,75.2],[5.001,35,23,77.2],[6.001,39,17,79.5],[7.0,39,19,80.3],[8.004,34,14,82.9],[9.003,32,17,81.6],[10.002,47,18,82.5]]}]},{"label":"1_55 control","style":"solid","segs":[{"run":"1_55","start":0,"pts":[[1.004,22,12,73.9],[2.003,39,17,83.2],[3.002,28,17,79.0],[4.002,32,19,79.0],[5.001,30,15,80.7],[6.001,39,18,81.6],[7.0,44,11,86.2],[8.004,34,15,84.0],[9.003,38,13,85.4],[10.002,40,14,85.7]]}]},{"label":"1_58 + MONAD mask","style":"solid","segs":[{"run":"1_58","start":0,"pts":[[1.004,12,27,68.7],[2.003,9,29,62.6],[3.002,28,20,75.4],[4.002,22,21,76.2],[5.001,25,16,79.0],[6.001,24,19,78.8],[7.0,42,14,84.4],[8.004,40,27,77.1],[9.003,48,23,81.9],[10.002,56,17,84.4]]}]}]},{"title":"TMB \u00b7 mask fix, 3 seeds (8 Oct)","series":[{"label":"1_61 seed 1","style":"solid","segs":[{"run":"1_61","start":0,"pts":[[1.004,11,33,71.2],[2.003,19,30,69.5]]}]},{"label":"1_63 seed 2","style":"solid","segs":[{"run":"1_63","start":0,"pts":[[1.004,15,37,65.8],[2.003,23,37,68.8]]}]},{"label":"1_65 seed 3","style":"solid","segs":[{"run":"1_65","start":0,"pts":[[1.004,9,33,55.6],[2.003,17,27,69.7]]}]},{"label":"1_58 (before fix)","style":"ref","segs":[{"run":"1_58","start":0,"pts":[[1.004,12,27,68.7],[2.003,9,29,62.6],[3.002,28,20,75.4],[4.002,22,21,76.2],[5.001,25,16,79.0],[6.001,24,19,78.8],[7.0,42,14,84.4],[8.004,40,27,77.1],[9.003,48,23,81.9],[10.002,56,17,84.4]]}]}]},{"title":"PMS \u00b7 canonical point merge (7 Oct)","series":[{"label":"1_56 \u2192 1_60","style":"solid","segs":[{"run":"1_56","start":0,"pts":[[1.004,1,20,49.5],[2.003,1,30,55.0],[3.002,3,29,59.9],[4.002,1,24,61.6],[5.001,2,19,65.0],[6.001,3,29,62.9],[7.0,5,11,66.5],[8.004,8,11,70.7],[9.003,7,9,72.4],[10.002,15,14,73.1]]},{"run":"1_60","start":10002432,"pts":[[11.006,8,12,66.1],[12.005,5,17,68.6],[13.005,8,20,70.2],[14.004,9,15,71.5],[15.004,12,15,72.6],[16.003,14,10,73.0],[17.002,10,7,73.9],[18.006,14,9,73.2],[19.005,14,12,74.6],[20.005,13,8,75.5]]}]},{"label":"1_57 control","style":"solid","segs":[{"run":"1_57","start":0,"pts":[[1.004,1,16,46.4],[2.003,1,22,55.4],[3.002,0,23,56.4],[4.002,2,12,63.2],[5.001,5,16,62.3],[6.001,4,9,63.6],[7.0,3,13,66.6],[8.004,6,19,68.2],[9.003,2,12,71.0],[10.002,10,12,70.2]]}]},{"label":"1_59 + MONAD mask","style":"solid","segs":[{"run":"1_59","start":0,"pts":[[1.004,0,30,42.8],[2.003,2,40,55.1],[3.002,6,28,61.8],[4.002,5,22,62.7],[5.001,5,19,65.1],[6.001,4,20,64.8],[7.0,8,20,64.6],[8.004,8,12,70.7],[9.003,10,18,68.5],[10.002,11,11,70.2]]}]},{"label":"1_53 (old actions)","style":"old","segs":[{"run":"1_53","start":0,"pts":[[1.004,0,16,46.2],[2.003,1,12,49.6],[3.002,0,20,54.8],[4.002,2,34,61.8],[5.001,6,31,61.2],[6.001,12,29,67.2],[7.0,11,32,67.8],[8.004,12,30,71.4],[9.003,13,27,71.3],[10.002,12,28,70.5]]}]}]},{"title":"PMS \u00b7 mask fix, 3 seeds (8 Oct)","series":[{"label":"1_62 seed 1","style":"solid","segs":[{"run":"1_62","start":0,"pts":[]}]},{"label":"1_67 seed 2","style":"solid","segs":[{"run":"1_67","start":0,"pts":[[1.004,1,35,54.5],[2.003,6,31,60.7],[3.002,10,24,67.5],[4.002,12,23,66.8]]}]},{"label":"1_66 seed 3","style":"solid","segs":[{"run":"1_66","start":0,"pts":[]}]},{"label":"1_56 (before fix)","style":"ref","segs":[{"run":"1_56","start":0,"pts":[[1.004,1,20,49.5],[2.003,1,30,55.0],[3.002,3,29,59.9],[4.002,1,24,61.6],[5.001,2,19,65.0],[6.001,3,29,62.9],[7.0,5,11,66.5],[8.004,8,11,70.7],[9.003,7,9,72.4],[10.002,15,14,73.1]]}]}]}],"champion":{"success":63,"los":3,"ontime":92.7}};
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const byId = Object.fromEntries(DATA.nodes.map(n => [n.id, n]));
+const STATUS = { champion: "champion", running: "training", done: "done", crashed: "crashed", lost: "weights lost",
+  invalid: "old PMS actions", failed: "regressed", base: "10-aircraft env" };
+
+document.getElementById("key").innerHTML =
+  `<span><i class="sw" style="background:var(--tmb)"></i>TMB · MXP trombone</span>` +
+  `<span><i class="sw" style="background:var(--pms)"></i>PMS · BGY point merge</span>` +
+  `<span>── continues weights</span><span>┄┄ new run, parent's recipe + one change</span>` +
+  `<span>Updated ${DATA.updated}</span>`;
+const running = DATA.nodes.filter(n => n.status === "running");
+document.getElementById("status").textContent = running.length
+  ? `${running.length} run${running.length > 1 ? "s" : ""} training: ${running.map(n => n.id).join(", ")}`
+  : "No runs training";
+
+function metric(lab, v, max, color) {
+  if (v == null) return `<div class="m"><span class="lab">${lab}</span><span class="val">–</span><div class="bar"></div></div>`;
+  return `<div class="m"><span class="lab">${lab}</span><span class="val">${v}%</span><div class="bar"><i style="width:${Math.min(100, v / max * 100)}%;background:${color}"></i></div></div>`;
+}
+function strip(n) {
+  const m = n.metrics || {};
+  const from = n.parent ? (n.link === "cont" ? `↳ continues ${n.parent}` : `↳ recipe of ${n.parent}`) : "";
+  let foot = "";
+  if (n.status === "running") {
+    const pct = Math.min(100, (n.step || 0) / 1e7 * 100);
+    foot = `<div class="foot">${n.scored_at ? `scored at ${(n.scored_at / 1e6).toFixed(0)}M · ` : ""}training ${((n.step || 0) / 1e6).toFixed(1)}M / 10M</div><div class="prog"><i style="width:${pct}%"></i></div>`;
+  } else if (n.metrics) {
+    foot = `<div class="foot">${n.final ? "final model" : "last scored checkpoint"}</div>`;
+  } else if (n.status === "base") {
+    foot = `<div class="foot">not scored on streams</div>`;
+  }
+  return `<div class="strip ${n.proc} ${n.status}">
+    <div class="row1"><span class="rid">${n.id}</span><span class="proc">${n.proc}</span><span class="pill ${n.status}">${STATUS[n.status] || n.status}</span></div>
+    <div class="desc">${n.desc}</div>${from ? `<div class="from">${from}</div>` : ""}
+    ${n.metrics || n.status !== "base" ? `<div class="metrics">${metric("Success", m.success, 100, "var(--good)")}${metric("LoS", m.los, 100, "var(--bad)")}${metric("On-time", m.ontime, 100, "var(--good)")}</div>` : ""}
+    ${foot}</div>`;
+}
+document.getElementById("lanes").innerHTML = DATA.lanes.map(([key, name, sub]) => {
+  const ns = DATA.nodes.filter(n => n.lane === key);
+  const parts = ns.map((n, i) => {
+    const prev = ns[i - 1];
+    const link = i === 0 ? "" : `<div class="link ${n.parent === prev.id ? n.link : "none"}"></div>`;
+    return link + strip(n);
+  });
+  return `<div class="lane"><div class="lane-head"><b>${name}</b><small>${sub}</small></div>${parts.join("")}</div>`;
+}).join("");
+
+const charts = [];
+const METRICS = [["Success %", 1], ["LoS %", 2], ["On-time %", 3]];
+const vlines = {
+  id: "vlines",
+  afterDatasetsDraw(chart, _a, opts) {
+    const { ctx, chartArea: a, scales: { x } } = chart;
+    ctx.save(); ctx.font = `11px ${css("--mono").split(",")[0]}`;
+    for (const b of opts.lines || []) {
+      const px = x.getPixelForValue(b.x);
+      if (px < a.left || px > a.right) continue;
+      ctx.strokeStyle = b.color; ctx.globalAlpha = .55; ctx.setLineDash([2, 3]);
+      ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+      ctx.globalAlpha = .9; ctx.setLineDash([]); ctx.fillStyle = b.color; ctx.fillText(b.label, px + 3, a.top + 10 + 11 * (b.k || 0));
+    }
+    for (const h of opts.hlines || []) {
+      const py = chart.scales.y.getPixelForValue(h.y);
+      ctx.strokeStyle = h.color; ctx.globalAlpha = .7; ctx.setLineDash([5, 4]);
+      ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke();
+      ctx.setLineDash([]); ctx.fillStyle = h.color; ctx.textAlign = "right"; ctx.fillText(h.label, a.right - 2, py - 3); ctx.textAlign = "left";
+    }
+    ctx.restore();
+  }
+};
+function drawPanels() {
+  charts.splice(0).forEach(c => c.destroy());
+  const pal = ["--s1", "--s2", "--s3", "--s4"].map(css), ref = css("--ref"), grid = css("--line"), muted = css("--muted"), ink = css("--ink");
+  Chart.defaults.font.family = css("--body"); Chart.defaults.color = muted;
+  const host = document.getElementById("panels");
+  host.innerHTML = DATA.panels.map((p, i) => {
+    let k = 0;
+    const leg = p.series.map(s => {
+      const c = s.style === "solid" ? pal[k++ % pal.length] : ref; s._c = c;
+      return `<span><i class="${s.style === "solid" ? "" : "dash"}" style="border-color:${c}"></i>${s.label}</span>`;
+    }).join("");
+    return `<div class="panel"><div class="panel-head"><h3>${p.title}</h3><div class="legend">${leg}</div></div>
+      <div class="charts">${METRICS.map(([t], j) => `<div class="chart"><div class="t">${t}</div><div class="box"><canvas id="c${i}_${j}" aria-label="${p.title}: ${t}" role="img"></canvas></div></div>`).join("")}</div></div>`;
+  }).join("");
+  DATA.panels.forEach((p, i) => {
+    const tmb = p.title.startsWith("TMB");
+    METRICS.forEach(([t, col], j) => {
+      const datasets = [], lines = [];
+      let maxx = 0;
+      p.series.forEach((s, si) => s.segs.forEach((g, gi) => {
+        if (gi > 0) lines.push({ x: g.start / 1e6, label: g.run, color: s._c, k: si });
+        g.pts.forEach(q => { maxx = Math.max(maxx, q[0]); });
+        datasets.push({ label: `${g.run}`, data: g.pts.map(q => ({ x: q[0], y: q[col] })), borderColor: s._c, backgroundColor: s._c,
+          borderWidth: s.style === "solid" ? 2 : 1.6, borderDash: s.style === "solid" ? [] : [5, 4], pointRadius: 2.2, pointHoverRadius: 4, tension: .25 });
+      }));
+      const champ = DATA.champion && tmb ? [{ y: [0, DATA.champion.success, DATA.champion.los, DATA.champion.ontime][col], label: "1_38 final", color: ink }] : [];
+      charts.push(new Chart(document.getElementById(`c${i}_${j}`), {
+        type: "line", data: { datasets },
+        options: { responsive: true, maintainAspectRatio: false, animation: false, parsing: true,
+          interaction: { mode: "nearest", intersect: false },
+          scales: { x: { type: "linear", min: 0, suggestedMax: Math.max(10, Math.ceil(maxx)), grid: { color: grid }, ticks: { callback: v => v + "M", maxTicksLimit: 7 } },
+                    y: { min: 0, max: col === 3 ? 100 : undefined, suggestedMax: col === 3 ? 100 : 70, grid: { color: grid }, ticks: { maxTicksLimit: 6 } } },
+          plugins: { legend: { display: false }, vlines: { lines, hlines: champ },
+            tooltip: { callbacks: { title: it => `${it[0].dataset.label} · ${it[0].parsed.x.toFixed(1)}M total steps`, label: it => `${t}: ${it.parsed.y}` } } } },
+        plugins: [vlines] }));
+    });
+  });
+}
+if (window.Chart) drawPanels(); else document.getElementById("panels").innerHTML = `<p class="note">The chart library did not load; the lineage above is complete.</p>`;
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => window.Chart && drawPanels());
+new MutationObserver(() => window.Chart && drawPanels()).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+</script>
+
+</body>
+</html>
