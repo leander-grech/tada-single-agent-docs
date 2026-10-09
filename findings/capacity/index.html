@@ -2306,6 +2306,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../training/distillation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search distillation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../training/compute/" class="md-nav__link">
         
   
@@ -2711,6 +2739,17 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#procedure-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Procedure capacity, revised (9 Oct 2026)
+      
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#never-solved" class="md-nav__link">
@@ -3286,6 +3325,17 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#procedure-capacity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Procedure capacity, revised (9 Oct 2026)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#never-solved" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3398,6 +3448,58 @@ deterministic losses. On long streams such waves are the norm, not the exception
 never loses separation (<a href="../long-streams/">Long streams</a>). Separation rates should be reported with
 this split in mind; the scenario filter does not catch these seeds.</p>
 </div>
+<h2 id="procedure-capacity">Procedure capacity, revised (9 Oct 2026)<a class="headerlink" href="#procedure-capacity" title="Permanent link">&para;</a></h2>
+<p><code>analysis/procedure_capacity.py</code> asks, flight by flight, how much delay or advance a flight's own
+clearances can absorb when it is flown alone. Its first version (7 Oct) used one greedy lever order and
+called 78 TMB and 26 PMS validation seeds feasible. It was not an upper bound: agents and the rollout
+search solved 17 TMB and 34 PMS seeds it called infeasible. Replaying only the short flight's
+clearances, with every other flight doing nothing, reproduces the agents' deviations exactly, so the
+extra capacity is the agents' lever choice, not interaction between flights:</p>
+<ul>
+<li><strong>late flights</strong> skip the next waypoint immediately after spawn, while they still fly about 350 kt,
+  before the waypoint's 230–250 kt limit applies;</li>
+<li><strong>early point-merge flights</strong> turn first and slow down afterwards, because turns are legal only on
+  the inbound leg just after spawn and a rejoin undoes earlier slow-downs.</li>
+</ul>
+<p>The revised estimate (v2: best of 12 lever orders, first-decision timing, one-step lookahead;
+<code>analysis/2026-10-09_capacity/</code>) puts every seed ever solved inside the feasible set:</p>
+<table>
+<thead>
+<tr>
+<th>validation seeds</th>
+<th>TMB</th>
+<th>PMS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>feasible, 7 Oct estimate</td>
+<td>78</td>
+<td>26</td>
+</tr>
+<tr>
+<td><strong>feasible, v2</strong></td>
+<td><strong>100</strong></td>
+<td><strong>67</strong></td>
+</tr>
+<tr>
+<td>solved by some model, attempt or search</td>
+<td>92</td>
+<td>60</td>
+</tr>
+<tr>
+<td>solved but v2-infeasible</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>On TMB the per-flight check excludes nothing: each flight alone can absorb very large delays on the
+trombone. The 8 never-solved TMB seeds have 8–14 flights that each need more than 900 s of delay at
+the same time (every solved seed has at most 7), so they are limited by flights sharing the trombone
+with separation. On PMS the 33 excluded seeds hold early flights needing more delay than the arc,
+speed and turn levers give (about 520–547 s); a much deeper search made none of the borderline ones
+feasible. v2 is an achievable lower bound on capacity, not a proof of infeasibility.</p>
 <h2 id="never-solved">Scenarios no agent has flown<a class="headerlink" href="#never-solved" title="Permanent link">&para;</a></h2>
 <!-- gen:never-solved -->
 <p>14 of the 100 validation seeds were never solved in any of the 19 700 deterministic, sampled or lookahead episodes that 19 windowed models have flown on them (20-flight evaluations, 10 attempts, lookahead).</p>

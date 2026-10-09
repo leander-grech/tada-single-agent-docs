@@ -2446,6 +2446,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../training/distillation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search distillation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../training/compute/" class="md-nav__link">
         
   
@@ -3661,7 +3689,9 @@ That costs little (10 slots) and lets the entropy be computed exactly (below).</
    (<code>mask_select</code>). If no flight is under control, any visible slot may be picked, so no row is
    ever all-masked.</li>
 <li><strong>Clearance.</strong> The clearance head's row for the chosen slot, masked by <code>mask_action_per_ac</code>
-   (geometry, route constraints, what the aircraft can still do). <code>DO_NOTHING</code> is always legal.</li>
+   (geometry, route constraints, what the aircraft can still do). <code>DO_NOTHING</code> is legal unless the
+   forecast shows this aircraft losing separation (≤ 3 NM and ≤ 500 ft within 2880 s); that removes
+   it on about a quarter of TMB decisions. Something is always legal.</li>
 <li><strong>Again.</strong> With reselection, the again head's logit at (aircraft, clearance) gives a
    Bernoulli. It is forced to 0 when the budget is spent or no other aircraft could be picked
    (<code>mask_again</code>), and after <code>DO_NOTHING</code>, which always ends the step.</li>

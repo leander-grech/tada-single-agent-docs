@@ -2306,6 +2306,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../training/distillation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search distillation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../training/compute/" class="md-nav__link">
         
   
@@ -3416,6 +3444,10 @@ cards are generated from the evaluation files, so no number on them is typed by 
   per seed, so a deterministic model reproduces its episode exactly and two models are compared on
   identical inputs.</li>
 <li><strong>The seed is the sample.</strong> Nothing is averaged over anything smaller than an episode.</li>
+<li><strong>Dev and test seeds (9 Oct 2026).</strong> The 100 validation seeds had picked the best of about 25 runs,
+  so they are no longer an unbiased measurement. Two fresh sets of 100 seeds, disjoint from the
+  validation seeds and from every training pool, are in <code>analysis/2026-10-09_distill/seeds/</code>:
+  <code>dev.txt</code> selects distillation epochs and rounds, and <code>test.txt</code> is used only for the final numbers.</li>
 </ul>
 <h2 id="the-battery">The battery<a class="headerlink" href="#the-battery" title="Permanent link">&para;</a></h2>
 <table>

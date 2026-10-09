@@ -2306,6 +2306,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../training/distillation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search distillation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../training/compute/" class="md-nav__link">
         
   
@@ -2808,6 +2836,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#rollout-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rollout search (MPC)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-refusal-shield" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3292,6 +3331,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#rollout-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rollout search (MPC)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#the-refusal-shield" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3396,6 +3446,66 @@ evaluation files):</p>
   <code>1_50</code> 51 solved to 24, losses 20 to 15; <code>1_51</code> 27 to 21, losses 11 to 6. A weaker policy has more to gain from a critic that
   can overrule its first choice.</li>
 </ul>
+<h2 id="rollout-search">Rollout search (MPC)<a class="headerlink" href="#rollout-search" title="Permanent link">&para;</a></h2>
+<p><code>analysis/rollout_search.py</code> (8 Oct): a receding-horizon search that rolls <strong>whole episodes</strong> out in
+the simulator, instead of scoring one step with the critic. Every M = 10 decisions it snapshots the
+environment and rolls K = 8 candidates to the end of the stream: the incumbent plan, the
+deterministic policy and six sampled policy rollouts. It scores them by outcome (no loss of
+separation, then flights within ±60 s, then total |deviation|, then clearances) and executes the
+first 10 actions of the best. Ties keep the incumbent, so the realised outcome is never worse than an
+earlier plan.</p>
+<table>
+<thead>
+<tr>
+<th>100 validation seeds, solved / LoS</th>
+<th>deterministic</th>
+<th>pass@11</th>
+<th>rollout search</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TMB <code>1_65</code></td>
+<td>47 / 18</td>
+<td>72 / 5</td>
+<td>83 / 4</td>
+</tr>
+<tr>
+<td>TMB <code>1_74</code></td>
+<td>54 / 13</td>
+<td>79 / 6</td>
+<td>86 / 2</td>
+</tr>
+<tr>
+<td>TMB <code>1_76</code></td>
+<td>59 / 10</td>
+<td>85 / 4</td>
+<td><strong>88 / 2</strong></td>
+</tr>
+<tr>
+<td>PMS <code>1_67</code></td>
+<td>30 / 12</td>
+<td>49 / 3</td>
+<td>52 / 2</td>
+</tr>
+<tr>
+<td>PMS <code>1_75</code></td>
+<td>38 / 9</td>
+<td>52 / 1</td>
+<td>56 / 0</td>
+</tr>
+<tr>
+<td>PMS <code>1_77</code></td>
+<td>41 / 9</td>
+<td>49 / 1</td>
+<td><strong>54 / 0</strong></td>
+</tr>
+</tbody>
+</table>
+<p>(The pass@11 LoS column counts seeds where <em>every</em> attempt lost separation.) The search never
+loses a seed the deterministic policy solves. On TMB it costs about 16 rollouts per episode, roughly a
+minute of one core per 2-hour stream, so it runs far faster than real time; it assumes the simulator
+is a perfect model. Distilling it back into the policy: <a href="../../training/distillation/">Search distillation</a>.</p>
 <h2 id="the-refusal-shield">The refusal shield<a class="headerlink" href="#the-refusal-shield" title="Permanent link">&para;</a></h2>
 <p><code>render_policy.py</code>'s shield refuses a clearance that introduces a near-horizon conflict that
 do-nothing would not, and issues the best clearance that passes instead (<code>next_best</code>). On <code>1_32</code>,

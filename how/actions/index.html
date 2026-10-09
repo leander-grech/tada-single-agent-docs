@@ -2402,6 +2402,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../../training/distillation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search distillation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../training/compute/" class="md-nav__link">
         
   
@@ -3327,14 +3355,25 @@ turned out to be the largest single improvement in the project.</p>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a> 4 SPEED_UP_SMALL      9 SHORTEN_TROMBONE      14 VECTOR_TO_ILS
 </code></pre></div>
 <ul>
-<li><strong>Speed</strong> steps are ±10/20/30 kt, and the set is deliberately asymmetric (three slow-downs, two
-  speed-ups). Arrivals fly near their speed ceiling: six consecutive large speed-ups move the
+<li><strong>Speed</strong> steps are −10/−20/−30 kt and +10/+20 kt (no +30), deliberately asymmetric (three
+  slow-downs, two speed-ups). The TMB runs from <code>1_58</code> on add the MONAD airport overlay
+  (<code>TADA_AIRPORT_MASK=monad</code>), which blocks −10 and +20 kt. Arrivals fly near their speed ceiling: six consecutive large speed-ups move the
   landing by −18 s, six large slow-downs by +339 s.</li>
 <li><strong>The trombone</strong> lengthens or shortens by one level. The two are exact inverses and stack
   (capacity 4 levels); shortening never goes below the published route, so it only undoes the
   agent's own lengthening.</li>
-<li><strong>Turns</strong> leave the route and rejoin it; <strong>skips</strong> cut waypoints; <code>VECTOR_TO_ILS</code> sends the
+<li><strong>Turns</strong> leave the route 40° off the target heading and resume route following after 10 NM,
+  direct to the unchanged next waypoint. The rejoin is a timed command, so a clock step that issues
+  a turn lasts about 150 s instead of 45 s. <strong>Skips</strong> cut waypoints; <code>VECTOR_TO_ILS</code> sends the
   aircraft to final.</li>
+<li><strong>Turn legality was mirrored (found 9 Oct 2026).</strong> The command turns +40° for <code>TURN_LEFT</code>
+  (mathematical heading, counter-clockwise) and −40° for <code>TURN_RIGHT</code>, but the mask tested
+  <code>TURN_LEFT</code> on the −40° geometry and <code>TURN_RIGHT</code> on the +40° one. About 13% of TMB and 11% of PMS
+  turn-legality decisions disagree with the turn actually flown. Every model to date trained with
+  it. <code>TADA_TURN_MASK_FIX=1</code> tests the flown turn; it is off by default, recorded in <code>run_meta.json</code>
+  (<code>turn_mask_fix</code>) and matched to a checkpoint when it is loaded, so old models replay unchanged.
+  The first fine-tunes with the fix (<code>1_94</code>, <code>1_95</code>) ran on a faulty GPU host and are void; the effect
+  of the fix is still unmeasured.</li>
 </ul>
 <p>The move from 22 clearances to 15, and the evidence for each cut, is in
 <a href="../../archive/clearance-sets/">Archive → 22 clearances vs 15</a>. The set is chosen by an environment
@@ -3479,8 +3518,8 @@ moves on. The flight numbers and clearances are illustrative.</p>
 <ul>
 <li><strong>Action:</strong> (aircraft, clearance, <strong>again</strong>). With again = 1 the clearance is queued, the clock
   does not move, and the next observation's prediction includes every queued clearance. With
-  again = 0 the queued clearances and this one are applied together and the clock advances 45 s,
-  as in a one-pick step.</li>
+  again = 0 the queued clearances and this one are applied together and the clock advances 45 s
+  (longer if a turn is among them), as in a one-pick step.</li>
 <li><strong>Masks:</strong> <code>mask_select</code> allows only under-control flights not yet cleared at this step; an
   aircraft cleared at this step can only be left alone until the clock moves; <code>mask_again</code> allows
   another pick only with budget left and another aircraft to clear. <code>DO_NOTHING</code> always ends the
