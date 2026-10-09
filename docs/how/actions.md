@@ -21,14 +21,25 @@ Source: `actions/actions_v2.py`, `actions/action_set.py`, `network/autoregressiv
  4 SPEED_UP_SMALL      9 SHORTEN_TROMBONE      14 VECTOR_TO_ILS
 ```
 
-- **Speed** steps are ±10/20/30 kt, and the set is deliberately asymmetric (three slow-downs, two
-  speed-ups). Arrivals fly near their speed ceiling: six consecutive large speed-ups move the
+- **Speed** steps are −10/−20/−30 kt and +10/+20 kt (no +30), deliberately asymmetric (three
+  slow-downs, two speed-ups). The TMB runs from `1_58` on add the MONAD airport overlay
+  (`TADA_AIRPORT_MASK=monad`), which blocks −10 and +20 kt. Arrivals fly near their speed ceiling: six consecutive large speed-ups move the
   landing by −18 s, six large slow-downs by +339 s.
 - **The trombone** lengthens or shortens by one level. The two are exact inverses and stack
   (capacity 4 levels); shortening never goes below the published route, so it only undoes the
   agent's own lengthening.
-- **Turns** leave the route and rejoin it; **skips** cut waypoints; `VECTOR_TO_ILS` sends the
+- **Turns** leave the route 40° off the target heading and resume route following after 10 NM,
+  direct to the unchanged next waypoint. The rejoin is a timed command, so a clock step that issues
+  a turn lasts about 150 s instead of 45 s. **Skips** cut waypoints; `VECTOR_TO_ILS` sends the
   aircraft to final.
+- **Turn legality was mirrored (found 9 Oct 2026).** The command turns +40° for `TURN_LEFT`
+  (mathematical heading, counter-clockwise) and −40° for `TURN_RIGHT`, but the mask tested
+  `TURN_LEFT` on the −40° geometry and `TURN_RIGHT` on the +40° one. About 13% of TMB and 11% of PMS
+  turn-legality decisions disagree with the turn actually flown. Every model to date trained with
+  it. `TADA_TURN_MASK_FIX=1` tests the flown turn; it is off by default, recorded in `run_meta.json`
+  (`turn_mask_fix`) and matched to a checkpoint when it is loaded, so old models replay unchanged.
+  The first fine-tunes with the fix (`1_94`, `1_95`) ran on a faulty GPU host and are void; the effect
+  of the fix is still unmeasured.
 
 The move from 22 clearances to 15, and the evidence for each cut, is in
 [Archive → 22 clearances vs 15](../archive/clearance-sets.md). The set is chosen by an environment
@@ -182,8 +193,8 @@ moves on. The flight numbers and clearances are illustrative.
 
 - **Action:** (aircraft, clearance, **again**). With again = 1 the clearance is queued, the clock
   does not move, and the next observation's prediction includes every queued clearance. With
-  again = 0 the queued clearances and this one are applied together and the clock advances 45 s,
-  as in a one-pick step.
+  again = 0 the queued clearances and this one are applied together and the clock advances 45 s
+  (longer if a turn is among them), as in a one-pick step.
 - **Masks:** `mask_select` allows only under-control flights not yet cleared at this step; an
   aircraft cleared at this step can only be left alone until the clock moves; `mask_again` allows
   another pick only with budget left and another aircraft to clear. `DO_NOTHING` always ends the

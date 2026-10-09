@@ -192,6 +192,26 @@ Not a training run: 60- and 100-flight streams, split into feasible and over-cap
 champion and the from-scratch models. A scorer bug that cut long streams short was found and fixed
 along the way. [Long streams](findings/long-streams.md).
 
+### 9 Oct — capacity v2, search distillation, a faulty GPU host { #oct-9 }
+
+- **Procedure capacity revised.** The 7 Oct per-flight estimate was a weak greedy, not a bound.
+  The revised one puts every seed ever solved inside the feasible set: TMB 100/100, PMS 67/100.
+  [Over-capacity scenarios](findings/capacity.md#procedure-capacity).
+- **Search distillation.** The rollout search was cloned into the policy (`1_80`–`1_88`, `1_100`).
+  TMB gains +3 to +5 solved streams per 100 (`1_82`: test 61 vs 59, validation 64 vs 59); point merge
+  gains nothing. [Search distillation](training/distillation.md).
+- **Fresh seed sets.** 100 test seeds and 300 dev seeds, disjoint from validation and from every pool
+  ([Evaluation](evaluation.md)). Non-learning baselines on validation (solved / LoS / on time):
+  random TMB 0 / 100 / 9%, greedy rule TMB 2 / 74 / 50%, random PMS 0 / 99 / 3%, greedy PMS 0 / 76 / 37%.
+- **Turn legality was mirrored** in every model; `TADA_TURN_MASK_FIX` corrects it, off by default
+  ([Actions](how/actions.md)).
+- **Void runs `1_90`–`1_99`.** The replications of the fine-tune chain (`1_90`–`1_93`, `1_96`–`1_99`) and
+  the turn-fix fine-tunes (`1_94`, `1_95`) were trained on a rented host with a CMP 170HX mining GPU.
+  Its JAX numerics were inconsistent: PPO's approx-KL was already 0.007–0.18 before any update
+  (other hosts: about 1e-9), so every update used corrupted probability ratios, and several runs
+  collapsed. Search data and scoring there ran in torch on the CPU and are unaffected. Check the
+  critic warm-up's approx-KL (≈ 0) in the first log lines before trusting a new host.
+
 ## Changes outside the MDP
 
 Tooling and infrastructure bugs that changed what could be seen or trusted:

@@ -130,6 +130,7 @@ nav:
   - Training:
       - From scratch: training/index.md
       - Reference: training/reference.md
+      - Search distillation: training/distillation.md
       - Compute: training/compute.md
       - TensorBoard: training/tensorboard.md
   - Evaluation:

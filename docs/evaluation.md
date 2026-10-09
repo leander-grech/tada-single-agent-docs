@@ -20,6 +20,10 @@ Source: `analysis/score_windowed.py`, `analysis/track_windowed.py`, `analysis/lo
   per seed, so a deterministic model reproduces its episode exactly and two models are compared on
   identical inputs.
 - **The seed is the sample.** Nothing is averaged over anything smaller than an episode.
+- **Dev and test seeds (9 Oct 2026).** The 100 validation seeds had picked the best of about 25 runs,
+  so they are no longer an unbiased measurement. Two fresh sets of 100 seeds, disjoint from the
+  validation seeds and from every training pool, are in `analysis/2026-10-09_distill/seeds/`:
+  `dev.txt` selects distillation epochs and rounds, and `test.txt` is used only for the final numbers.
 
 ## The battery
 

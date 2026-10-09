@@ -217,7 +217,9 @@ That costs little (10 slots) and lets the entropy be computed exactly (below).
    (`mask_select`). If no flight is under control, any visible slot may be picked, so no row is
    ever all-masked.
 2. **Clearance.** The clearance head's row for the chosen slot, masked by `mask_action_per_ac`
-   (geometry, route constraints, what the aircraft can still do). `DO_NOTHING` is always legal.
+   (geometry, route constraints, what the aircraft can still do). `DO_NOTHING` is legal unless the
+   forecast shows this aircraft losing separation (≤ 3 NM and ≤ 500 ft within 2880 s); that removes
+   it on about a quarter of TMB decisions. Something is always legal.
 3. **Again.** With reselection, the again head's logit at (aircraft, clearance) gives a
    Bernoulli. It is forced to 0 when the budget is spent or no other aircraft could be picked
    (`mask_again`), and after `DO_NOTHING`, which always ends the step.

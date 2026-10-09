@@ -11,6 +11,37 @@
     never loses separation ([Long streams](long-streams.md)). Separation rates should be reported with
     this split in mind; the scenario filter does not catch these seeds.
 
+## Procedure capacity, revised (9 Oct 2026) { #procedure-capacity }
+
+`analysis/procedure_capacity.py` asks, flight by flight, how much delay or advance a flight's own
+clearances can absorb when it is flown alone. Its first version (7 Oct) used one greedy lever order and
+called 78 TMB and 26 PMS validation seeds feasible. It was not an upper bound: agents and the rollout
+search solved 17 TMB and 34 PMS seeds it called infeasible. Replaying only the short flight's
+clearances, with every other flight doing nothing, reproduces the agents' deviations exactly, so the
+extra capacity is the agents' lever choice, not interaction between flights:
+
+- **late flights** skip the next waypoint immediately after spawn, while they still fly about 350 kt,
+  before the waypoint's 230–250 kt limit applies;
+- **early point-merge flights** turn first and slow down afterwards, because turns are legal only on
+  the inbound leg just after spawn and a rejoin undoes earlier slow-downs.
+
+The revised estimate (v2: best of 12 lever orders, first-decision timing, one-step lookahead;
+`analysis/2026-10-09_capacity/`) puts every seed ever solved inside the feasible set:
+
+| validation seeds | TMB | PMS |
+|---|---|---|
+| feasible, 7 Oct estimate | 78 | 26 |
+| **feasible, v2** | **100** | **67** |
+| solved by some model, attempt or search | 92 | 60 |
+| solved but v2-infeasible | 0 | 0 |
+
+On TMB the per-flight check excludes nothing: each flight alone can absorb very large delays on the
+trombone. The 8 never-solved TMB seeds have 8–14 flights that each need more than 900 s of delay at
+the same time (every solved seed has at most 7), so they are limited by flights sharing the trombone
+with separation. On PMS the 33 excluded seeds hold early flights needing more delay than the arc,
+speed and turn levers give (about 520–547 s); a much deeper search made none of the borderline ones
+feasible. v2 is an achievable lower bound on capacity, not a proof of infeasibility.
+
 ## Scenarios no agent has flown { #never-solved }
 
 <!-- gen:never-solved -->

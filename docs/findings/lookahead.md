@@ -56,6 +56,30 @@ evaluation files):
   `1_50` 51 solved to 24, losses 20 to 15; `1_51` 27 to 21, losses 11 to 6. A weaker policy has more to gain from a critic that
   can overrule its first choice.
 
+## Rollout search (MPC) { #rollout-search }
+
+`analysis/rollout_search.py` (8 Oct): a receding-horizon search that rolls **whole episodes** out in
+the simulator, instead of scoring one step with the critic. Every M = 10 decisions it snapshots the
+environment and rolls K = 8 candidates to the end of the stream: the incumbent plan, the
+deterministic policy and six sampled policy rollouts. It scores them by outcome (no loss of
+separation, then flights within ±60 s, then total |deviation|, then clearances) and executes the
+first 10 actions of the best. Ties keep the incumbent, so the realised outcome is never worse than an
+earlier plan.
+
+| 100 validation seeds, solved / LoS | deterministic | pass@11 | rollout search |
+|---|---|---|---|
+| TMB `1_65` | 47 / 18 | 72 / 5 | 83 / 4 |
+| TMB `1_74` | 54 / 13 | 79 / 6 | 86 / 2 |
+| TMB `1_76` | 59 / 10 | 85 / 4 | **88 / 2** |
+| PMS `1_67` | 30 / 12 | 49 / 3 | 52 / 2 |
+| PMS `1_75` | 38 / 9 | 52 / 1 | 56 / 0 |
+| PMS `1_77` | 41 / 9 | 49 / 1 | **54 / 0** |
+
+(The pass@11 LoS column counts seeds where *every* attempt lost separation.) The search never
+loses a seed the deterministic policy solves. On TMB it costs about 16 rollouts per episode, roughly a
+minute of one core per 2-hour stream, so it runs far faster than real time; it assumes the simulator
+is a perfect model. Distilling it back into the policy: [Search distillation](../training/distillation.md).
+
 ## The refusal shield
 
 `render_policy.py`'s shield refuses a clearance that introduces a near-horizon conflict that
