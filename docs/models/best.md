@@ -9,6 +9,10 @@ The current windowed champion is **[`1_38`](1_38.md)**, chosen by the [champion 
 <div class="tada-best__foot">20-flight streams · 100 validation seeds · deterministic · tile footnotes: parent 1_36 · source <code>analysis/2026-09-26_1_36_multipick/eval_cont/f20.csv</code> · <a href="../../models/">champion rule</a></div>
 </div>
 
+`1_101` solves more seeds (66) but loses separation on 9, above the gate of 5, so it is not eligible.
+
+`1_82` solves more seeds (64) but loses separation on 9, above the gate of 5, so it is not eligible.
+
 `1_36` solves more seeds (65) but loses separation on 9, above the gate of 5, so it is not eligible.
 
 ## How `1_38` compares

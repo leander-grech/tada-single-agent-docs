@@ -51,7 +51,399 @@ test_sources:
   zeroshot_pms: [analysis/2026-09-28_release/zeroshot, analysis/2026-09-28_pms/eval]   # MXP agents scored unchanged on point merge; committed files only
   pms_capacity: analysis/2026-09-28_pms/eval/pms_validation_capacity.csv   # point-merge capacity of the 100 validation seeds
 
+# Run directories in the code repo deliberately left out of the registry; the coverage page lists them with the reason.
+not_registered:
+  atc_run_1_80_distill_tmb_r1_bc: "search distillation round 1 (TMB), plain behaviour cloning: scored on the dev seeds only"
+  atc_run_1_81_distill_tmb_r1_awr: "search distillation round 1 (TMB), AWR without the KL anchor: scored on the dev seeds only"
+  atc_run_1_83_distill_pms_r1_bc: "search distillation round 1 (point merge), behaviour cloning: dev seeds only, no gain"
+  atc_run_1_84_distill_pms_r1_awr: "search distillation round 1 (point merge), AWR: dev seeds only, no gain"
+  atc_run_1_85_distill_pms_r1_awr_anchor: "search distillation round 1 (point merge), AWR + KL anchor: dev seeds only, no gain"
+  atc_run_1_86_distill_tmb_r1b_awr_anchor: "search distillation round 1b (TMB, 1 200 episodes), AWR + KL anchor 0.3: dev seeds only, no better than 1_82"
+  atc_run_1_87_distill_tmb_r1b_awr_anchor1: "search distillation round 1b (TMB, 1 200 episodes), AWR + KL anchor 1.0: dev seeds only, no better than 1_82"
+  atc_run_1_88_distill_tmb_r2_awr_anchor_vf: "search distillation round 2 (TMB, from 1_82): dev seeds only (300 dev seeds 177 vs 1_76's 166)"
+  atc_run_1_89_placeholder: "numbering placeholder, no run"
+  atc_run_1_90_rep2_tmb_1_61: "void: trained on a rented host whose GPU (CMP 170HX) corrupted PPO's probability ratios"
+  atc_run_1_91_rep2_tmb_1_63: "void: trained on a rented host whose GPU (CMP 170HX) corrupted PPO's probability ratios"
+  atc_run_1_92_rep2_pms_1_62: "void: trained on a rented host whose GPU (CMP 170HX) corrupted PPO's probability ratios"
+  atc_run_1_93_rep2_pms_1_66: "void: trained on a rented host whose GPU (CMP 170HX) corrupted PPO's probability ratios"
+  atc_run_1_94_turnfix_tmb_1_76: "void: trained on a rented host whose GPU (CMP 170HX) corrupted PPO's probability ratios; re-run cleanly as 1_101"
+  atc_run_1_95_turnfix_pms_1_77: "void: trained on a rented host whose GPU (CMP 170HX) corrupted PPO's probability ratios"
+  atc_run_1_96_rep3_pms_1_62: "void: trained on a rented host whose GPU (CMP 170HX) corrupted PPO's probability ratios"
+  atc_run_1_97_rep3_tmb_1_61: "void: trained on a rented host whose GPU (CMP 170HX) corrupted PPO's probability ratios"
+  atc_run_1_98_rep3_pms_1_66: "void: trained on a rented host whose GPU (CMP 170HX) corrupted PPO's probability ratios"
+  atc_run_1_99_rep3_tmb_1_63: "void: trained on a rented host whose GPU (CMP 170HX) corrupted PPO's probability ratios"
+  atc_run_1_100_distill_tmb_r12_awr_anchor_vf: "search distillation (TMB, from 1_82, rounds 1b and 2 data, 2 400 episodes): dev seeds only"
+
 models:
+
+  # ---------------------------------------------------------------- windowed, 7-10 Oct 2026
+  # Procedure-dependent clearance sets (TMB = MXP trombone, v2; PMS = canonical BGY point merge, v2pms),
+  # feasible training pools, the release MDP switches of 1_50. Scores: score_windowed.py on the final model,
+  # in the job's eval/ directory (identical to the run's track_scores/final_model.csv). Point-merge runs are
+  # recognised from run_meta (use case 2). Runs up to 1_60 trained and are scored with the legacy
+  # (mixed-frame) turn/skip/ILS mask; later runs with the mask-frame fix (run_meta mask_frame_fix).
+
+  - id: "1_101"
+    track: windowed
+    run: experiments/atc_run_1_101_turnfix_tmb_1_76
+    checkpoint: final_model.zip
+    parent: "1_76"
+    status: complete
+    whats_new: "Turn-legality fix: 1_76 continued for 5M steps at stage-3 settings (LR 1e-5 to 1e-6, entropy 0.001, full TMB stream distribution) with TADA_TURN_MASK_FIX=1, the corrected turn-legality mask (left and right turns were mirrored in every earlier model)."
+    evals: {f20: analysis/2026-10-10_docs_eval/1_101_f20.csv}   # score_windowed.py, final model, 2026-10-10
+    note: "Validation 66 solved against 1_76's 59 (this card), test seeds 53 against 59: 119 against 118 over both sets, with similar losses of separation, so the fix has no measurable effect. Trained on the laptop; it replaces 1_94, the same fine-tune trained on a faulty GPU host and void. No tracker ran during training, so there is no curve."
+
+  - id: "1_82"
+    track: windowed
+    run: experiments/atc_run_1_82_distill_tmb_r1_awr_anchor
+    checkpoint: final_model.zip   # = epochs/e4/final_model.zip (SELECTED_EPOCH)
+    parent: "1_76"
+    status: complete
+    whats_new: "Search distillation, round 1: 1_76 fine-tuned by AWR-weighted behaviour cloning of the rollout search (601 search episodes on training seeds, AWR β 1, KL anchor 0.3 to 1_76, 6 epochs at LR 3e-5); this is epoch 4."
+    evals: {f20: analysis/2026-10-10_docs_eval/1_82_f20.csv}   # score_windowed.py, final model (epoch 4), 2026-10-10
+    note: "Epoch 4 was selected on the 100 dev seeds (63 solved against 1_76's 55, the best of nine checkpoints of 1_80 to 1_82, so optimistic). On seeds it was not selected on: test 61 against 1_76's 59, validation 64 against 59 (this card), 300 dev seeds (the selection set plus 200 new) 176 against 166. The final_model.zip at the run root is epochs/e4. The dev-only variants 1_80, 1_81, 1_83 to 1_88 and 1_100 are not registered; see Search distillation."
+
+  - id: "1_79"
+    track: windowed
+    run: experiments/atc_run_1_79_ft3_pms_feas
+    checkpoint: final_model.zip
+    parent: "1_75"
+    status: complete
+    whats_new: "Fine-tune stage 3, feasible streams only: 1_75 continued for 5M steps at LR 1e-5 to 1e-6, entropy 0.001 (2% warm-up, 100k critic warm-up) on the feasible point-merge pool, the control for the lower LR and entropy alone."
+    curve: [{file: experiments/atc_run_1_79_ft3_pms_feas/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-08_ft3/eval/1_79_pms_f20.csv}
+
+  - id: "1_78"
+    track: windowed
+    run: experiments/atc_run_1_78_ft3_tmb_feas
+    checkpoint: final_model.zip
+    parent: "1_74"
+    status: complete
+    whats_new: "Fine-tune stage 3, feasible streams only: 1_74 continued for 5M steps at LR 1e-5 to 1e-6, entropy 0.001 (2% warm-up, 100k critic warm-up) on the feasible TMB pool, the control for the lower LR and entropy alone."
+    curve: [{file: experiments/atc_run_1_78_ft3_tmb_feas/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-08_ft3/eval/1_78_tmb_f20.csv}
+
+  - id: "1_77"
+    track: windowed
+    run: experiments/atc_run_1_77_ft3_pms_full
+    checkpoint: final_model.zip
+    parent: "1_75"
+    status: complete
+    whats_new: "Fine-tune stage 3, all streams: 1_75 continued for 5M steps at LR 1e-5 to 1e-6, entropy 0.001 (2% warm-up, 100k critic warm-up) on the full point-merge stream distribution, feasible and harder streams as in the validation seeds."
+    curve: [{file: experiments/atc_run_1_77_ft3_pms_full/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-08_ft3/eval/1_77_pms_f20.csv}
+    note: "Its control is 1_79, the same stage on feasible streams only."
+
+  - id: "1_76"
+    track: windowed
+    run: experiments/atc_run_1_76_ft3_tmb_full
+    checkpoint: final_model.zip
+    parent: "1_74"
+    status: complete
+    whats_new: "Fine-tune stage 3, all streams: 1_74 continued for 5M steps at LR 1e-5 to 1e-6, entropy 0.001 (2% warm-up, 100k critic warm-up) on the full TMB stream distribution, feasible and harder streams as in the validation seeds."
+    curve: [{file: experiments/atc_run_1_76_ft3_tmb_full/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-08_ft3/eval/1_76_tmb_f20.csv}
+    note: "Its control is 1_78, the same stage on feasible streams only. Its tracker peaked at 68 solved at 2M and 3M steps; the card scores the final model, as for every run. 1_82 and 1_101 continue from it."
+
+  - id: "1_75"
+    track: windowed
+    run: experiments/atc_run_1_75_ft_pms_1_67
+    checkpoint: final_model.zip
+    parent: "1_67"
+    status: complete
+    whats_new: "Fine-tune stage 2: 1_67 continued for 5M steps at 1_38's low LR and entropy (LR 3e-5 to 3e-6, entropy 0.003, 2% warm-up, 100k critic warm-up) on the feasible point-merge pool, single 20-flight streams, otherwise 1_67's MDP."
+    curve: [{file: experiments/atc_run_1_75_ft_pms_1_67/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-08_batch2/eval/1_75_pms_f20.csv}
+
+  - id: "1_74"
+    track: windowed
+    run: experiments/atc_run_1_74_ft_tmb_1_65
+    checkpoint: final_model.zip
+    parent: "1_65"
+    status: complete
+    whats_new: "Fine-tune stage 2: 1_65 continued for 5M steps at 1_38's low LR and entropy (LR 3e-5 to 3e-6, entropy 0.003, 2% warm-up, 100k critic warm-up) on the feasible TMB pool, single 20-flight streams, otherwise 1_65's MDP."
+    curve: [{file: experiments/atc_run_1_74_ft_tmb_1_65/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-08_batch2/eval/1_74_tmb_f20.csv}
+
+  - id: "1_73"
+    track: windowed
+    run: experiments/atc_run_1_73_p3_pms_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_62"
+    status: not_adopted
+    whats_new: "Up to 3 clearances per step (reselection budget 3), seed 1: otherwise 1_62's recipe (canonical point merge v2pms, difficulty curriculum from scratch, mask-frame fix)."
+    curve: [{file: experiments/atc_run_1_73_p3_pms_s1/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-08_batch2/eval/1_73_pms_f20.csv}
+    note: "No gain over the 2-pick baseline (1_62, 1_67, 1_66), so budget 2 stayed."
+
+  - id: "1_72"
+    track: windowed
+    run: experiments/atc_run_1_72_p3_tmb_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_61"
+    status: not_adopted
+    whats_new: "Up to 3 clearances per step (reselection budget 3), seed 1: otherwise 1_61's recipe (TMB, difficulty curriculum from scratch, v2 with the MONAD mask, mask-frame fix)."
+    curve: [{file: experiments/atc_run_1_72_p3_tmb_s1/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-08_batch2/eval/1_72_tmb_f20.csv}
+    note: "No gain over the 2-pick baseline (1_61, 1_63, 1_65): the second pick was already used on only about a quarter of steps. Budget 2 stayed."
+
+  - id: "1_71"
+    track: windowed
+    run: experiments/atc_run_1_71_nohb_pms_s2
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_62"
+    status: not_adopted
+    whats_new: "No ±30 s bracket, seed 2: 1_62's recipe (canonical point merge v2pms, difficulty curriculum from scratch, mask-frame fix) without the ±30 s landing bracket, so the top bracket is ±60 s, the success definition."
+    curve: [{file: experiments/atc_run_1_71_nohb_pms_s2/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-08_batch2/eval/1_71_pms_f20.csv}
+    note: "Two seeds (1_69, 1_71) against the three seeds of the baseline (1_62, 1_67, 1_66): worse on average, so the bracket stayed."
+
+  - id: "1_70"
+    track: windowed
+    run: experiments/atc_run_1_70_nohb_tmb_s2
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_61"
+    status: not_adopted
+    whats_new: "No ±30 s bracket, seed 2: 1_61's recipe (TMB, difficulty curriculum from scratch, v2 with the MONAD mask, mask-frame fix) without the ±30 s landing bracket, so the top bracket is ±60 s, the success definition."
+    curve: [{file: experiments/atc_run_1_70_nohb_tmb_s2/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-08_batch2/eval/1_70_tmb_f20.csv}
+    note: "Two seeds (1_68, 1_70) against the three seeds of the baseline (1_61, 1_63, 1_65): within the seed-to-seed spread, so the bracket stayed."
+
+  - id: "1_69"
+    track: windowed
+    run: experiments/atc_run_1_69_nohb_pms_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_62"
+    status: not_adopted
+    whats_new: "No ±30 s bracket, seed 1: 1_62's recipe (canonical point merge v2pms, difficulty curriculum from scratch, mask-frame fix) without the ±30 s landing bracket, so the top bracket is ±60 s, the success definition."
+    curve: [{file: experiments/atc_run_1_69_nohb_pms_s1/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-08_batch2/eval/1_69_pms_f20.csv}
+    note: "Two seeds (1_69, 1_71) against the three seeds of the baseline (1_62, 1_67, 1_66): worse on average, so the bracket stayed."
+
+  - id: "1_68"
+    track: windowed
+    run: experiments/atc_run_1_68_nohb_tmb_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_61"
+    status: not_adopted
+    whats_new: "No ±30 s bracket, seed 1: 1_61's recipe (TMB, difficulty curriculum from scratch, v2 with the MONAD mask, mask-frame fix) without the ±30 s landing bracket, so the top bracket is ±60 s, the success definition."
+    curve: [{file: experiments/atc_run_1_68_nohb_tmb_s1/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-08_batch2/eval/1_68_tmb_f20.csv}
+    note: "Two seeds (1_68, 1_70) against the three seeds of the baseline (1_61, 1_63, 1_65): within the seed-to-seed spread, so the bracket stayed."
+
+  - id: "1_67"
+    track: windowed
+    run: experiments/atc_run_1_67_pms_fix_s2b
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_56"
+    status: complete
+    whats_new: "Mask-frame fix, seed 2 (re-run after 1_64 crashed): 1_56's recipe with turn, skip and ILS legality computed with position and waypoints in one frame; difficulty curriculum from scratch on the canonical point merge (v2pms, no MONAD mask)."
+    curve: [{file: experiments/atc_run_1_67_pms_fix_s2b/track.csv, kind: track}]
+    evals:
+      f20: analysis/2026-10-08_maskfix/eval/1_67_pms_f20.csv
+      la4: analysis/2026-10-08_search/1_67_la4.csv   # score_windowed.py --lookahead 4, final model
+    note: "One of three seeds of the mask-fix recipe (1_62, 1_67, 1_66). 1_75 continues this one."
+
+  - id: "1_66"
+    track: windowed
+    run: experiments/atc_run_1_66_pms_fix_s3
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_56"
+    status: complete
+    whats_new: "Mask-frame fix, seed 3: 1_56's recipe with turn, skip and ILS legality computed with position and waypoints in one frame; difficulty curriculum from scratch on the canonical point merge (v2pms, no MONAD mask)."
+    curve: [{file: experiments/atc_run_1_66_pms_fix_s3/track.csv, kind: track}]
+    evals:
+      f20: analysis/2026-10-08_maskfix/eval/1_66_pms_f20.csv
+      la4: analysis/2026-10-08_search/1_66_la4.csv   # score_windowed.py --lookahead 4, final model
+    note: "One of three seeds of the mask-fix recipe (1_62, 1_67, 1_66)."
+
+  - id: "1_65"
+    track: windowed
+    run: experiments/atc_run_1_65_tmb_fix_s3
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_58"
+    status: complete
+    whats_new: "Mask-frame fix, seed 3: 1_58's recipe with turn, skip and ILS legality computed with position and waypoints in one frame; difficulty curriculum from scratch on TMB, clearance set v2 with the MONAD mask."
+    curve: [{file: experiments/atc_run_1_65_tmb_fix_s3/track.csv, kind: track}]
+    evals:
+      f20: analysis/2026-10-08_maskfix/eval/1_65_tmb_f20.csv
+      la4: analysis/2026-10-08_search/1_65_la4.csv   # score_windowed.py --lookahead 4, final model
+    note: "One of three seeds of the mask-fix recipe (1_61, 1_63, 1_65). 1_74 continues this one."
+
+  - id: "1_64"
+    track: windowed
+    run: experiments/atc_run_1_64_pms_fix_s2
+    checkpoint: checkpoints/ppo_tada_2002944_steps.zip   # the last checkpoint; no final model
+    parent: null
+    compare: "1_56"
+    status: stopped
+    steps: 2002944
+    whats_new: "Mask-frame fix, seed 2: 1_56's recipe with turn, skip and ILS legality computed with position and waypoints in one frame; difficulty curriculum from scratch on the canonical point merge (v2pms). Crashed at 2.0M steps."
+    curve: [{file: experiments/atc_run_1_64_pms_fix_s2/track.csv, kind: track}]
+    evals: {f20: experiments/atc_run_1_64_pms_fix_s2/track_scores/ppo_tada_2002944_steps.csv}   # the run's tracker
+    note: "Crashed at 2.0M steps when the simulator workers hit the host's thread limit (BlockingIOError); the recipe has set RAYON_NUM_THREADS=1 since. Re-run as 1_67. The card shows the last checkpoint, scored by the run's tracker."
+    no_backfill: "crashed at 2.0M steps and re-run as 1_67"
+    in_findings: false
+
+  - id: "1_63"
+    track: windowed
+    run: experiments/atc_run_1_63_tmb_fix_s2
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_58"
+    status: complete
+    whats_new: "Mask-frame fix, seed 2: 1_58's recipe with turn, skip and ILS legality computed with position and waypoints in one frame; difficulty curriculum from scratch on TMB, clearance set v2 with the MONAD mask."
+    curve: [{file: experiments/atc_run_1_63_tmb_fix_s2/track.csv, kind: track}]
+    evals:
+      f20: analysis/2026-10-08_maskfix/eval/1_63_tmb_f20.csv
+      la4: analysis/2026-10-08_search/1_63_la4.csv   # score_windowed.py --lookahead 4, final model
+    note: "One of three seeds of the mask-fix recipe (1_61, 1_63, 1_65)."
+
+  - id: "1_62"
+    track: windowed
+    run: experiments/atc_run_1_62_pms_fix_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_56"
+    status: complete
+    whats_new: "Mask-frame fix, seed 1: 1_56's recipe with turn, skip and ILS legality computed with position and waypoints in one frame; difficulty curriculum from scratch on the canonical point merge (v2pms, no MONAD mask)."
+    curve: [{file: experiments/atc_run_1_62_pms_fix_s1/track.csv, kind: track}]
+    evals:
+      f20: analysis/2026-10-08_maskfix/eval/1_62_pms_f20.csv
+      la4: analysis/2026-10-08_search/1_62_la4.csv   # score_windowed.py --lookahead 4, final model
+    note: "One of three seeds of the mask-fix recipe (1_62, 1_67, 1_66; seed 2 first ran as 1_64, which crashed). The fix stays on for every later run."
+
+  - id: "1_61"
+    track: windowed
+    run: experiments/atc_run_1_61_tmb_fix_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_58"
+    status: complete
+    whats_new: "Mask-frame fix, seed 1: 1_58's recipe with turn, skip and ILS legality computed with position and waypoints in one frame; difficulty curriculum from scratch on TMB, clearance set v2 with the MONAD mask."
+    curve: [{file: experiments/atc_run_1_61_tmb_fix_s1/track.csv, kind: track}]
+    evals:
+      f20: analysis/2026-10-08_maskfix/eval/1_61_tmb_f20.csv
+      la4: analysis/2026-10-08_search/1_61_la4.csv   # score_windowed.py --lookahead 4, final model
+    note: "One of three seeds of the mask-fix recipe (1_61, 1_63, 1_65). The fix stays on for every later run."
+
+  - id: "1_60"
+    track: windowed
+    run: experiments/atc_run_1_60_pms_cur_cont
+    checkpoint: final_model.zip   # lost; its score file names this path
+    parent: "1_56"
+    status: complete
+    whats_new: "1_56 continued for another 10M steps on every feasible point-merge stream (the curriculum's last tier), LR 1e-4 to 1e-5, entropy 0.01, 100k critic warm-up, seed 56."
+    curve: [{file: experiments/atc_run_1_60_pms_cur_cont/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-07_curriculum/eval/1_60_pms_f20.csv}   # scored on the rented host before the weights were lost
+    note: "Weights lost: the run directory was never copied back from the rented host before it was destroyed (the watcher's glob missed it), so its checkpoints, final_model.zip, TensorBoard and run_meta.json are gone. The recipe on this card is reconstructed from analysis/2026-10-07_curriculum/pipeline_pms_cont.sh. What survives: track.csv, rebuilt from the host's tracker log, and the final model's 20-flight score, made on the host. Legacy (mixed-frame) turn/skip/ILS mask."
+    no_backfill: "weights lost; nothing more can be scored"
+    run_meta:   # no run_meta.json survives; from analysis/2026-10-07_curriculum/pipeline_pms_cont.sh and 1_56's run_meta
+      trainer: jax
+      env: windowed
+      action_set: v2pms
+      init_weights: experiments/atc_run_1_56_pms_cur_s1/final_model.zip
+      sequence_obs: true
+      max_picks: 2
+      n_envs: 32
+      seed: 56
+      total_timesteps: 10000000
+      ent_coef: 0.01
+      vf_coef: 0.25
+      target_kl: 0.05
+      lr_schedule: {type: warmup_cosine, lr_max: 1.0e-4, lr_min: 1.0e-5, warmup_frac: 0.08}
+      critic_warmup: {steps: 100000, lr: 3.0e-4}
+      windowed_config:
+        use_case: 2
+        stitch_segments: 1
+        reward_mode: outcome_pbrs
+        landing_brackets: [[30.0, 4.0], [60.0, 3.0], [120.0, 1.0], [300.0, 0.0], [600.0, -1.5]]
+        release_locked: true
+        release_dev_s: 30.0
+        pay_at_release: true
+        pbrs_flat_deviation: true
+        train_seed_pool: analysis/2026-10-07_curriculum/pool/pms_feasible.txt
+
+  - id: "1_59"
+    track: windowed
+    run: experiments/atc_run_1_59_pms_cur_monad_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_56"
+    status: not_adopted
+    whats_new: "MONAD mask on point merge: 1_56 with MONAD's per-airport mask laid over v2pms (no turns, no LENGTHEN, no SKIP_4); difficulty curriculum from scratch, same pools, seed and switches."
+    curve: [{file: experiments/atc_run_1_59_pms_cur_monad_s1/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-07_curriculum/eval/1_59_pms_f20.csv}
+    note: "Not adopted: later point-merge runs use v2pms without the MONAD mask. Legacy (mixed-frame) turn/skip/ILS mask."
+
+  - id: "1_58"
+    track: windowed
+    run: experiments/atc_run_1_58_tmb_cur_monad_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_54"
+    status: complete
+    whats_new: "MONAD mask on TMB: 1_54 with MONAD's per-airport mask laid over clearance set v2 (no SLOW_DOWN_SMALL, no SPEED_UP_MEDIUM); difficulty curriculum from scratch, same pools, seed and switches."
+    curve: [{file: experiments/atc_run_1_58_tmb_cur_monad_s1/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-07_curriculum/eval/1_58_tmb_f20.csv}
+    note: "The MONAD mask stays on every later TMB run. Legacy (mixed-frame) turn/skip/ILS mask."
+
+  - id: "1_57"
+    track: windowed
+    run: experiments/atc_run_1_57_pms_ctl_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_53"
+    status: complete
+    whats_new: "Control for the point-merge curriculum: recipe arm D from scratch on the canonical point merge (v2pms; 10-flight streams to 2.5M, then 20-flight to 10M), drawn uniformly from the feasible point-merge pool. Release MDP switches, LR 3e-4 to 3e-5, entropy 0.01, seed 1."
+    curve: [{file: experiments/atc_run_1_57_pms_ctl_s1/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-07_curriculum/eval/1_57_pms_f20.csv}
+    note: "As 1_53 (arm D on point merge), but with the canonical clearance set v2pms and a pool of feasible streams (within ±900 s). Legacy (mixed-frame) turn/skip/ILS mask."
+
+  - id: "1_56"
+    track: windowed
+    run: experiments/atc_run_1_56_pms_cur_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_53"
+    status: complete
+    whats_new: "Difficulty curriculum on the canonical point merge (v2pms): from scratch, feasible point-merge streams ranked by difficulty, the easiest quarter to 2M steps, half to 4M, three quarters to 6M, all to 10M. Release MDP switches, LR 3e-4 to 3e-5, entropy 0.01, seed 1."
+    curve: [{file: experiments/atc_run_1_56_pms_cur_s1/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-07_curriculum/eval/1_56_pms_f20.csv}
+    note: "Trained, like every point-merge run from 1_56 and 1_57 on, with the canonical point-merge clearance set v2pms: flights fly the whole sequencing arc, DIRECT_TO_MERGE_POINT takes slot 14, lengthen and shorten are never legal. Its control is 1_57. Legacy (mixed-frame) turn/skip/ILS mask."
+
+  - id: "1_55"
+    track: windowed
+    run: experiments/atc_run_1_55_tmb_ctl_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_50"
+    status: complete
+    whats_new: "Control for the difficulty curriculum: recipe arm D from scratch on TMB (10-flight streams to 2.5M, then 20-flight to 10M), drawn uniformly from the feasible pool (no flight more than 900 s early or late with no action). Clearance set v2, release MDP switches of 1_50, LR 3e-4 to 3e-5, entropy 0.01, seed 1."
+    curve: [{file: experiments/atc_run_1_55_tmb_ctl_s1/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-07_curriculum/eval/1_55_tmb_f20.csv}
+    note: "As 1_50, but drawn from a pre-screened pool of feasible streams (within ±900 s) instead of redrawn at reset (at most 650 s early). Legacy (mixed-frame) turn/skip/ILS mask."
+
+  - id: "1_54"
+    track: windowed
+    run: experiments/atc_run_1_54_tmb_cur_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_50"
+    status: complete
+    whats_new: "Difficulty curriculum on TMB: from scratch, feasible 20-flight streams (no flight more than 900 s early or late with no action) ranked by difficulty, the easiest quarter to 2M steps, half to 4M, three quarters to 6M, all to 10M. Clearance set v2, release MDP switches of 1_50, LR 3e-4 to 3e-5, entropy 0.01, seed 1."
+    curve: [{file: experiments/atc_run_1_54_tmb_cur_s1/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-07_curriculum/eval/1_54_tmb_f20.csv}
+    note: "Its control is 1_55: the same feasible streams drawn uniformly, recipe arm D. Legacy (mixed-frame) turn/skip/ILS mask."
 
   # ---------------------------------------------------------------- windowed, from scratch
   - id: "1_50"

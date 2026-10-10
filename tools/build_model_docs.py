@@ -123,6 +123,11 @@ def esc(s) -> str:
     return html.escape(str(s), quote=True)
 
 
+def id_key(mid: str) -> tuple:
+    """Natural order of run ids, so 1_101 sorts after 1_99 (as strings it sorts before 1_16)."""
+    return tuple((0, int(t), "") if t.isdigit() else (1, 0, t) for t in re.findall(r"\d+|[a-z]+", mid))
+
+
 # ----------------------------------------------------------------------------- data model
 
 @dataclass
@@ -224,6 +229,8 @@ class Build:
             meta_p = self.code / m.run / "run_meta.json"
             if meta_p.exists():
                 m.meta = json.load(open(meta_p))
+            elif m.raw.get("run_meta"):  # run directory lost: settings reconstructed in models.yaml
+                m.meta = dict(m.raw["run_meta"])
             else:
                 self.errors.append(f"{m.id}: {meta_p} missing")
             m.steps = self.steps_of(m)
@@ -276,6 +283,8 @@ class Build:
                 num = pd.to_numeric(df["step"], errors="coerce").dropna()
                 return int(num.max()) if len(num) else None
             return None
+        if m.meta.get("trainer") == "distill_bc":
+            return 0  # behaviour cloning on recorded episodes: no environment steps
         return m.meta.get("total_timesteps")
 
     # ------------------------------------------------------------------ windowed metrics
@@ -678,7 +687,7 @@ class Build:
         def has(m):  # rules skip models kept out of findings tables (models.yaml: in_findings: false)
             return (any(b in m.summary for b in batteries) and m.raw.get("in_findings", True)
                     and not self.point_merge(m))  # point-merge scores never share a table with MXP ones
-        wm = sorted((m for m in self.models.values() if m.track == "windowed"), key=lambda m: m.id)
+        wm = sorted((m for m in self.models.values() if m.track == "windowed"), key=lambda m: id_key(m.id))
         out = []
         for tok in [t.strip() for t in spec.split(",") if t.strip()]:
             if tok in self.models:
@@ -771,7 +780,7 @@ class Build:
             mxp = m.evals.get("f20")
             rows.append(cells(f'<a href="{self._site_prefix}models/{mid}/"><code>{mid}</code></a>',
                               stats(m.evals["zs_pms_f20"]), stats(mxp) if mxp is not None else None))
-        for m in sorted((m for m in self.models.values() if self.point_merge(m) and "f20" in m.evals), key=lambda m: m.id):
+        for m in sorted((m for m in self.models.values() if self.point_merge(m) and "f20" in m.evals), key=lambda m: id_key(m.id)):
             rows.append(cells(f'<a href="{self._site_prefix}models/{m.id}/"><code>{m.id}</code></a> (trained on point merge)',
                               stats(m.evals["f20"]), None))
         for d in self.reg.get("test_sources", {}).get("zeroshot_pms", []):
@@ -805,7 +814,7 @@ class Build:
                     continue
                 g = lambda pat, b=block: re.search(pat, b)
                 out.append((m, block, g))
-        return sorted(out, key=lambda x: x[0].id)
+        return sorted(out, key=lambda x: id_key(x[0].id))
 
     def phase0_table(self, test: str) -> str:
         rows = []
@@ -905,13 +914,16 @@ class Build:
         runs = {Path(m.run).name for m in self.models.values()}
         runs |= {Path(c).name for m in self.models.values() for c in (m.raw.get("run_copies") or [])}
         runs |= {"atc_run_1_29_pbrs_attn"}  # folded into the 1_29 card
+        skip = {str(k): str(v) for k, v in (self.reg.get("not_registered") or {}).items()}  # run dir -> why not
         out = []
-        for d in sorted((self.code / "experiments").glob("atc_run_1_*")):
+        for d in sorted((self.code / "experiments").glob("atc_run_1_*"), key=lambda d: id_key(d.name)):
             n = re.match(r"atc_run_1_(\d+)", d.name)
             if not n or int(n.group(1)) < 16 or d.name in runs:
                 continue
             if (d / "ABORTED.txt").exists():
                 out.append((d.name, "aborted at start"))
+            elif d.name in skip:
+                out.append((d.name, skip[d.name]))
             elif d.name.endswith("_aborted") and d.name[:-len("_aborted")] in runs:
                 out.append((d.name, f"aborted and restarted as `{d.name[:-len('_aborted')]}`"))
             else:
@@ -926,7 +938,7 @@ class Build:
              "`--coverage` prints the same check.\n\n", "## Windowed agents\n\n"]
         head = "<tr><th>model</th><th>status</th>" + "".join(f"<th>{t}</th>" for _, t in self.TESTS_W) + "</tr>"
         rows = []
-        for m in sorted((m for m in self.models.values() if m.track == "windowed"), key=lambda m: m.id, reverse=True):
+        for m in sorted((m for m in self.models.values() if m.track == "windowed"), key=lambda m: id_key(m.id), reverse=True):
             cells = "".join(f'<td class="{"cov-ok" if c == "✓" else "cov-miss"}">{c}</td>'
                             for c in (self.coverage_cell(m, t) for t, _ in self.TESTS_W))
             rows.append(f'<tr><td><a href="{m.id}/">{m.id}</a></td><td>{STATUS_LABEL[m.status][0]}</td>{cells}</tr>'
@@ -936,7 +948,7 @@ class Build:
         o.append("## 10-aircraft agents\n\n")
         head = "<tr><th>model</th><th>100-seed score</th><th>attempts to solve</th><th>training curve</th><th>note</th></tr>"
         rows = []
-        for m in sorted((m for m in self.models.values() if m.track == "ten_aircraft"), key=lambda m: m.id, reverse=True):
+        for m in sorted((m for m in self.models.values() if m.track == "ten_aircraft"), key=lambda m: id_key(m.id), reverse=True):
             note = ("not replayable" if m.id < "1_26" else (m.raw.get("no_backfill") or ""))
             sc = "✓" if self.ten_head(m) else "—"
             at = "✓" if m.attempts else "—"
@@ -963,7 +975,7 @@ class Build:
         for n, ab in self.unregistered_runs():
             if not ab:
                 lines.append(f"UNREGISTERED RUN: {n}")
-        for m in sorted(self.models.values(), key=lambda m: m.id):
+        for m in sorted(self.models.values(), key=lambda m: id_key(m.id)):
             if m.track != "windowed" or m.raw.get("no_backfill"):
                 continue
             miss = [t for t, _ in self.TESTS_W if self.coverage_cell(m, t) not in ("✓", "n/a")]
@@ -1231,7 +1243,30 @@ class Build:
         mt = m.meta
         lines = []
         if m.track == "windowed":
-            if mt.get("init_weights") is None and "scratch" in m.run:
+            era = "action_set" in mt  # since 7 Oct 2026: clearance set, airport mask and mask fixes are env switches
+            uc = (mt.get("windowed_config") or {}).get("use_case") or mt.get("use_case")
+            era_env = []
+            if era:
+                era_env.append(f"TADA_ACTION_SET={mt['action_set']}")
+                if mt.get("airport_mask"):
+                    era_env.append(f"TADA_AIRPORT_MASK={mt['airport_mask']}")
+            dist = mt.get("distill") if mt.get("trainer") == "distill_bc" else None
+            if dist:
+                env = (["TADA_SEQUENCE_OBS=1"] if mt.get("sequence_obs") else []) + \
+                      ([f"TADA_MAX_PICKS={mt['max_picks']}"] if (mt.get("max_picks") or 1) > 1 else []) + era_env
+                flags = [f"--init {mt['init_weights']}", "--data " + " ".join(dist["data"]), f"--run {Path(m.run).name}",
+                         f"--epochs {dist['epochs']}", f"--lr {dist['lr']:g}", f"--batch {dist['batch']}"]
+                for k, fl in (("awr", "--awr"), ("anchor", "--anchor"), ("ent", "--ent"), ("vf_coef", "--vf-coef")):
+                    if dist.get(k):
+                        flags.append(f"{fl} {dist[k]:g}")
+                for k, fl in (("w_unsolved", "--w-unsolved"), ("w_correction", "--w-correction")):
+                    if dist.get(k, 1.0) != 1.0:
+                        flags.append(f"{fl} {dist[k]:g}")
+                if dist.get("seed"):
+                    flags.append(f"--seed {dist['seed']}")
+                lines.append("# relabel the recorded search episodes first: analysis/distill_relabel.py --model <init> --data <dir>")
+                lines.append(" ".join(env + ["python -u analysis/distill_bc.py"] + flags))
+            elif mt.get("init_weights") is None and "scratch" in m.run:
                 arm = re.search(r"scratch_([abcd])_(?:\w+_)?s(\d+)", m.run)
                 sw = self.env_switches(mt.get("windowed_config") or {})
                 suffix = f" --run-suffix {m.run.split('atc_run_' + m.id + '_', 1)[-1]}" if sw else ""
@@ -1243,15 +1278,25 @@ class Build:
                     env.append("TADA_SEQUENCE_OBS=1")
                 if (mt.get("max_picks") or 1) > 1:
                     env.append(f"TADA_MAX_PICKS={mt['max_picks']}")
+                if era:
+                    env += era_env + [f"TADA_MASK_FRAME_FIX={1 if mt.get('mask_frame_fix') else 0}"]
+                    if mt.get("turn_mask_fix"):
+                        env.append("TADA_TURN_MASK_FIX=1")
                 prog = "main_jax.py" if mt.get("trainer") == "jax" else "main.py"
                 wc = mt.get("windowed_config") or {}
                 flags = ["--env windowed"]
+                if era and uc:
+                    flags.append(f"--use-case {uc}")
                 if wc.get("reward_mode"):
                     flags.append(f"--reward-mode {wc['reward_mode']}")
                 if wc.get("stitch_segments", 1) > 1:
                     g = wc.get("stitch_gap_s", [])
                     flags.append(f"--stitch-segments {wc['stitch_segments']} --stitch-gap {g[0]:g} {g[1]:g}")
                 flags += self.env_switches(wc)
+                if era and mt.get("curriculum"):
+                    flags.append('--curriculum "' + ",".join(
+                        f"{c['flights']}:{c['segments']}:{c['until']}" + (f":{c['pool']}" if c.get("pool") else "")
+                        for c in mt["curriculum"]) + '"')
                 if mt.get("init_weights"):
                     flags.append(f"--init-weights {mt['init_weights']}")
                 if mt.get("n_envs"):
@@ -1274,18 +1319,27 @@ class Build:
                 if m.raw.get("extra_flags"):
                     flags.append(m.raw["extra_flags"])
                 flags.append(f"--total-timesteps {mt.get('total_timesteps')}")
+                if era and mt.get("seed") is not None:
+                    flags.append(f"--seed {mt['seed']}")
                 lines.append(" ".join(env + [f"python -u {prog}"] + flags))
             lines.append("")
             lines.append("# score: 20-flight and stitched 2x20, 10 attempts, lookahead (100 validation seeds)")
             mp = m.model_path
             env = " ".join((["TADA_SEQUENCE_OBS=1"] if mt.get("sequence_obs") else []) +
-                           ([f"TADA_MAX_PICKS={mt['max_picks']}"] if (mt.get("max_picks") or 1) > 1 else []))
+                           ([f"TADA_MAX_PICKS={mt['max_picks']}"] if (mt.get("max_picks") or 1) > 1 else []) + era_env)
             pre = (env + " ") if env else ""
-            lines.append(f"{pre}python analysis/score_windowed.py --models {mp} --seeds 100 --attempts 9")
-            lines.append(f"{pre}python analysis/score_windowed.py --models {mp} --seeds 100 --segments 2 --gap 120 900")
-            lines.append(f"{pre}python analysis/score_windowed.py --models {mp} --seeds 100 --lookahead 4")
+            suc = f" --use-case {uc or 1}" if era else ""  # the mask fixes follow the checkpoint's run_meta.json
+            lines.append(f"{pre}python analysis/score_windowed.py --models {mp} --seeds 100 --attempts 9{suc}")
+            lines.append(f"{pre}python analysis/score_windowed.py --models {mp} --seeds 100 --segments 2 --gap 120 900{suc}")
+            lines.append(f"{pre}python analysis/score_windowed.py --models {mp} --seeds 100 --lookahead 4{suc}")
             note = ("Reconstructed from `run_meta.json`; flags not recorded there are listed in `models.yaml` "
                     "(`extra_flags`). The run's exact source is in its `snapshot/` directory.")
+            if dist:
+                note = ("Reconstructed from `run_meta.json` (its `distill` record; the PPO settings there are the "
+                        "start model's). Distillation writes no `snapshot/` directory.")
+            elif m.raw.get("run_meta") and not (self.code / m.run / "run_meta.json").exists():
+                note = ("Reconstructed from the settings recorded in `models.yaml` (`run_meta`): the run's directory, "
+                        "with its `run_meta.json` and `snapshot/`, was lost.")
         else:
             aset = "TADA_ACTION_SET=v1 " if m.id == "1_26" else ""
             lines.append(f"{aset}python analysis/score_checkpoints.py --seeds 100 --models {m.model_path}")
@@ -1317,19 +1371,24 @@ class Build:
                      "not the MXP trombone: every score on this card is a point-merge score, on the same 100 "
                      "validation seeds. It is compared only with point-merge scores: its parent's and the MXP "
                      "champion's zero-shot scores ([Point merge](../findings/point-merge.md)), or a point-merge "
-                     "parent's own.\n\n")
+                     "parent's own."
+                     + (" It uses the canonical point-merge clearance set (`v2pms`); the MXP champion's zero-shot score, "
+                        "and any point-merge run trained before `v2pms`, used the old point-merge action model, so those "
+                        "comparisons also cross that change." if m.meta.get("action_set") == "v2pms" else "") + "\n\n")
         if m.track == "windowed" and m.raw.get("note"):
             o.append(f'!!! info "About this run"\n    {esc(m.raw["note"])}\n\n')
         # header facts
         chain = self.lineage(m)
         lin = " → ".join(self.link(c.id) if c.id != m.id else f"<strong><code>{c.id}</code></strong>" for c in chain)
         cum = sum((c.steps or 0) for c in chain)
+        mt = m.meta
+        dist = mt.get("distill") if mt.get("trainer") == "distill_bc" else None
         facts = [("Lineage", lin + (" (random initialisation)" if not chain[0].parent else "")),
-                 ("Steps", f"{steps_str(m.steps)} in this run; {steps_str(cum)} along the lineage"
+                 ("Steps", (f"none in the environment (behaviour cloning on {dist['episodes']} recorded episodes)"
+                            if dist else f"{steps_str(m.steps)} in this run") + f"; {steps_str(cum)} along the lineage"
                   + (" (upper bound: a best-model checkpoint's step is not recorded)"
                      if any("best_model" in c.checkpoint for c in chain[:-1]) else "")),
                  ("Checkpoint", f"<code>{esc(m.model_path)}</code>")]
-        mt = m.meta
         rec = []
         if mt.get("trainer"):
             rec.append(f"trainer {mt['trainer']}")
@@ -1349,13 +1408,16 @@ class Build:
         if wc.get("train_max_early_s") is not None:
             rec.append(f"feasible-only training by redraw at reset (≤ {wc['train_max_early_s']:g} s early)")
         if wc.get("train_seed_pool"):
-            rec.append(f"feasible-only training from a pre-screened pool (<code>{esc(wc['train_seed_pool'])}</code>)")
+            rec.append(("training streams from a pre-screened pool" if "action_set" in mt  # feasible or full pools
+                        else "feasible-only training from a pre-screened pool") + f" (<code>{esc(wc['train_seed_pool'])}</code>)")
         if mt.get("sequence_obs"):
             rec.append("sequence observations")
         if mt.get("max_picks"):
             rec.append(f"picks per step ≤ {mt['max_picks']}")
         if mt.get("curriculum"):
-            rec.append("curriculum " + ", ".join(f"{c['flights']}×{c['segments']} to {steps_str(c['until'])}" for c in mt["curriculum"]))
+            rec.append("curriculum " + ", ".join(f"{c['flights']}×{c['segments']} to {steps_str(c['until'])}"
+                                                 + (f" (<code>{esc(Path(c['pool']).stem)}</code>)" if c.get("pool") else "")
+                                                 for c in mt["curriculum"]))
         lr = mt.get("lr_schedule") or {}
         if lr:
             hi = lr.get("lr_max", lr.get("start_lr"))
@@ -1376,6 +1438,26 @@ class Build:
             rec.append(f"seed {mt['seed']}")
         if m.raw.get("extra_flags"):
             rec.append(m.raw["extra_flags"])
+        era = []
+        if "action_set" in mt:  # runs since the procedure-dependent clearance sets (7 Oct 2026)
+            era.append(f"clearance set {mt['action_set']}" + (f" + {mt['airport_mask']} mask" if mt.get("airport_mask") else ""))
+            era.append("mask-frame fix" if mt.get("mask_frame_fix") else "legacy mask frame")
+            if mt.get("turn_mask_fix"):
+                era.append("turn-mask fix")
+        rec += era
+        if dist:  # the PPO settings in its run_meta are its start model's; what ran is the distillation
+            num = lambda n: f"{n:,}".replace(",", " ")
+            rec = [f"trainer {mt['trainer']}: behaviour cloning of the rollout search, {num(dist['episodes'])} episodes, "
+                   f"{num(dist['steps'])} decisions ({num(dist['corrections'])} where the search departed from the start policy)",
+                   f"{dist['epochs']} epochs, LR {dist['lr']:g}, batch {dist['batch']}"]
+            if dist.get("awr"):
+                rec.append(f"AWR β {dist['awr']:g}")
+            if dist.get("anchor"):
+                rec.append(f"KL anchor {dist['anchor']:g} to the start model")
+            if dist.get("vf_coef"):
+                rec.append(f"value loss {dist['vf_coef']:g}")
+            rec.append("data " + ", ".join(f"<code>{esc(d)}</code>" for d in dist["data"]))
+            rec += era
         if rec:
             facts.append(("Recipe", "; ".join(rec)))
         if mt.get("git_commit"):
@@ -1650,7 +1732,7 @@ class Build:
                 "2×20 solved", "2×20 sep.", "pass@10", "lookahead sep.", "what changed"]
         rows = []
         wm = [m for m in self.models.values() if m.track == "windowed" and not self.point_merge(m)]
-        for m in sorted(wm, key=lambda m: m.id, reverse=True):
+        for m in sorted(wm, key=lambda m: id_key(m.id), reverse=True):
             f = m.summary.get("f20")
             s2 = m.summary.get("s2x20")
             a = m.summary.get("att10")
@@ -1681,7 +1763,7 @@ class Build:
                  "*pass@10*: seeds solved by at least one of 10 attempts. *Lookahead sep.*: losses of separation "
                  "with the critic-guided 4-candidate lookahead. — means not evaluated yet "
                  "([backfill list](../backfill.md)).\n\n")
-        pm = sorted((m for m in self.models.values() if self.point_merge(m)), key=lambda m: m.id, reverse=True)
+        pm = sorted((m for m in self.models.values() if self.point_merge(m)), key=lambda m: id_key(m.id), reverse=True)
         if pm:
             o.append("## Windowed agent on point merge (BGY)\n\n")
             o.append("Agents trained on the BGY point merge, scored there on the same 100 validation seeds. Not "
@@ -1711,7 +1793,7 @@ class Build:
         head = ["model", "scenario", "success", "sep. lost", "clean-subset", "mean tier", "worst dev (s)", "what changed"]
         rows = []
         tm = [m for m in self.models.values() if m.track == "ten_aircraft"]
-        for m in sorted(tm, key=lambda m: m.id, reverse=True):
+        for m in sorted(tm, key=lambda m: id_key(m.id), reverse=True):
             h = self.ten_head(m)
             cls = ' class="is-champion"' if m.id in champ_ids else ""
             if h:
@@ -1833,13 +1915,13 @@ class Build:
                 if r["known"] and r.get("seed") == cs and r.get("kind") == "det"]
         if same:
             o.append(f"## One scenario, many agents\n\nSeed {cs}, 20 flights, each model's deterministic policy.\n\n")
-            for m, r in sorted(same, key=lambda x: x[0].id):
+            for m, r in sorted(same, key=lambda x: id_key(x[0].id)):
                 o.append(f"### {m.id}\n\n" + self.figure(m, r, self._site_prefix) + "\n")
         o.append("## By model\n\n")
-        for m in sorted(self.models.values(), key=lambda m: (m.track != "windowed", m.id), reverse=False):
+        for m in sorted(self.models.values(), key=lambda m: (m.track != "windowed", id_key(m.id)), reverse=False):
             pass
-        order = sorted([m for m in self.models.values() if m.track == "windowed"], key=lambda m: m.id, reverse=True) + \
-            sorted([m for m in self.models.values() if m.track == "ten_aircraft"], key=lambda m: m.id, reverse=True)
+        order = sorted([m for m in self.models.values() if m.track == "windowed"], key=lambda m: id_key(m.id), reverse=True) + \
+            sorted([m for m in self.models.values() if m.track == "ten_aircraft"], key=lambda m: id_key(m.id), reverse=True)
         for m in order:
             known = [r for r in m.renders if r["known"]]
             if not known:
@@ -1863,7 +1945,7 @@ class Build:
              "render the docs expect and do not have. Seeds are the 100 validation seeds; renders use "
              f"`render_policy.py` with metadata (`--solutions-json`), comparison seed {self.comparison_seed}.\n\n"]
         unreplayable = []
-        for m in sorted(self.models.values(), key=lambda m: (m.track != "windowed", m.id)):
+        for m in sorted(self.models.values(), key=lambda m: (m.track != "windowed", id_key(m.id))):
             items = []
             replayable = not (m.track == "ten_aircraft" and m.id < "1_26")
             if m.track == "windowed":
@@ -2088,10 +2170,10 @@ class Build:
     def nav_block(self) -> str:
         lines = ["      # BEGIN generated model nav (tools/build_model_docs.py)"]
         lines.append("      - Windowed:")
-        for m in sorted([m for m in self.models.values() if m.track == "windowed"], key=lambda m: m.id, reverse=True):
+        for m in sorted([m for m in self.models.values() if m.track == "windowed"], key=lambda m: id_key(m.id), reverse=True):
             lines.append(f'          - "{m.id}": models/{m.id}.md')
         lines.append("      - 10-aircraft:")
-        for m in sorted([m for m in self.models.values() if m.track == "ten_aircraft"], key=lambda m: m.id, reverse=True):
+        for m in sorted([m for m in self.models.values() if m.track == "ten_aircraft"], key=lambda m: id_key(m.id), reverse=True):
             lines.append(f'          - "{m.id}": models/{m.id}.md')
         lines.append("      # END generated model nav")
         return "\n".join(lines)
