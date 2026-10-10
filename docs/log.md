@@ -192,16 +192,41 @@ Not a training run: 60- and 100-flight streams, split into feasible and over-cap
 champion and the from-scratch models. A scorer bug that cut long streams short was found and fixed
 along the way. [Long streams](findings/long-streams.md).
 
+### 7–8 Oct — the paper campaign: feasible pools, the mask fix, fine-tune stages { #oct-7 }
+
+Both procedures, procedure-specific clearance sets (TMB = MXP trombone, set v2; PMS = BGY canonical point
+merge, set v2pms), the release MDP and the ±30 s bracket throughout. Deterministic scores on the 100
+validation seeds (solved / losses of separation); the full tables are in the code repo's
+`analysis/2026-10-07_curriculum/report/`, and every lineage is on the [progress board](progress.md).
+
+- <a id="run-1-54"></a><a id="run-1-55"></a><a id="run-1-56"></a><a id="run-1-57"></a><a id="run-1-58"></a><a id="run-1-59"></a><a id="run-1-60"></a>**`1_54`–`1_60` (7 Oct): feasible pools and a difficulty curriculum.** Training only on streams with no
+  flight more than 900 s off, easiest streams first (four tiers by entry-order inversions and worst
+  deviation). TMB: curriculum `1_54` 47 / 18 against the control `1_55` 40 / 14; with the MONAD airport
+  mask `1_58` 56 / 17. PMS: `1_56` 15 / 14, control `1_57` 10 / 12.
+- **The mask-frame bug** ([Actions](how/actions.md)): turn, skip and vector-to-ILS legality mixed
+  the translated waypoints with the untranslated aircraft position. Fixed behind `TADA_MASK_FRAME_FIX`
+  (on for new runs).
+- <a id="run-1-61"></a><a id="run-1-62"></a><a id="run-1-63"></a><a id="run-1-64"></a><a id="run-1-65"></a><a id="run-1-66"></a><a id="run-1-67"></a>**`1_61`–`1_67` (8 Oct): the best recipes with the fix, three seeds each.** TMB 44.7 ± 4.0 solved
+  (`1_61`, `1_63`, `1_65`), PMS 26.3 ± 3.2 (`1_62`, `1_67`, `1_66`; `1_64` crashed at a thread limit).
+- <a id="run-1-68"></a><a id="run-1-69"></a><a id="run-1-70"></a><a id="run-1-71"></a><a id="run-1-72"></a><a id="run-1-73"></a><a id="run-1-74"></a><a id="run-1-75"></a>**`1_68`–`1_75` (8 Oct, batch 2).** Removing the ±30 s bracket (`1_68`/`1_70`, `1_69`/`1_71`) and a third
+  pick per step (`1_72`, `1_73`) did not help. A low-LR, low-entropy fine-tune did: `1_74` = `1_65` + 5M
+  at LR 3e-5 → 3e-6, entropy 0.003: 54 / 13; `1_75` = `1_67` + 5M: 38 / 9.
+- <a id="run-1-76"></a><a id="run-1-77"></a><a id="run-1-78"></a><a id="run-1-79"></a>**`1_76`–`1_79` (8 Oct): stage 3**, LR 1e-5 → 1e-6, entropy 0.001, on all streams (`1_76` TMB 59 / 10,
+  `1_77` PMS 41 / 9) or feasible streams only (`1_78` 60 / 13, `1_79` 38 / 11).
+- **Rollout search** on the stage-3 models: TMB 88 / 2, PMS 54 / 0 ([Search at inference](findings/lookahead.md#rollout-search)).
+
 ### 9 Oct — capacity v2, search distillation, a faulty GPU host { #oct-9 }
 
 - **Procedure capacity revised.** The 7 Oct per-flight estimate was a weak greedy, not a bound.
   The revised one puts every seed ever solved inside the feasible set: TMB 100/100, PMS 67/100.
   [Over-capacity scenarios](findings/capacity.md#procedure-capacity).
-- **Search distillation.** The rollout search was cloned into the policy (`1_80`–`1_88`, `1_100`).
+- <a id="run-1-82"></a>**Search distillation.** The rollout search was cloned into the policy (`1_80`–`1_88`, `1_100`).
   TMB gains +3 to +5 solved streams per 100 (`1_82`: test 61 vs 59, validation 64 vs 59); point merge
   gains nothing. [Search distillation](training/distillation.md).
 - **Fresh seed sets.** 100 test seeds and 300 dev seeds, disjoint from validation and from every pool
-  ([Evaluation](evaluation.md)). Non-learning baselines on validation (solved / LoS / on time):
+  ([Evaluation](evaluation.md)). On the test seeds (solved / LoS): `1_82` 61 / 15, `1_76` 59 / 14,
+  `1_101` 53 / 13, `1_78` 51 / 17, **`1_38` 46 / 12** (63 / 3 on validation, where it was selected);
+  PMS `1_77` 32 / 11, `1_75` 29 / 13, `1_79` 27 / 12. Non-learning baselines on validation (solved / LoS / on time):
   random TMB 0 / 100 / 9%, greedy rule TMB 2 / 74 / 50%, random PMS 0 / 99 / 3%, greedy PMS 0 / 76 / 37%.
 - **Turn legality was mirrored** in every model; `TADA_TURN_MASK_FIX` corrects it, off by default
   ([Actions](how/actions.md)).
@@ -211,7 +236,7 @@ along the way. [Long streams](findings/long-streams.md).
   (other hosts: about 1e-9), so every update used corrupted probability ratios, and several runs
   collapsed. Search data and scoring there ran in torch on the CPU and are unaffected. Check the
   critic warm-up's approx-KL (≈ 0) in the first log lines before trusting a new host.
-- **Turn fix, re-run cleanly (`1_101`, laptop).** `1_76` + 5M with corrected turn legality: validation
+- <a id="run-1-101"></a>**Turn fix, re-run cleanly (`1_101`, laptop).** `1_76` + 5M with corrected turn legality: validation
   66 vs 59, test 53 vs 59, 119 vs 118 over both seed sets, the same safety. No measurable effect.
 
 ## Changes outside the MDP

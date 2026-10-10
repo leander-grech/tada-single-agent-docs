@@ -24,6 +24,22 @@ Source: `analysis/score_windowed.py`, `analysis/track_windowed.py`, `analysis/lo
   so they are no longer an unbiased measurement. Two fresh sets of 100 seeds, disjoint from the
   validation seeds and from every training pool, are in `analysis/2026-10-09_distill/seeds/`:
   `dev.txt` selects distillation epochs and rounds, and `test.txt` is used only for the final numbers.
+- **What the test seeds showed.** Selection on the validation seeds inflates a model's score there. The
+  former champion `1_38` (chosen as the best of many runs on the validation seeds) solves 63 of them but
+  46 of the test seeds, with 12 losses of separation instead of 3; `1_76`, never selected against other
+  runs on validation, solves 59 on both. Deterministic test-seed results (solved / LoS / on time):
+
+| TMB | test seeds | | PMS | test seeds |
+|---|---|---|---|---|
+| `1_82` (distilled) | 61 / 15 / 0.871 | | `1_77` | 32 / 11 / 0.749 |
+| `1_76` | 59 / 14 / 0.873 | | `1_75` | 29 / 13 / 0.746 |
+| `1_101` (turn fix) | 53 / 13 / 0.864 | | `1_79` | 27 / 12 / 0.752 |
+| `1_78` | 51 / 17 / 0.845 | | rule-based | 0 / 87 / 0.282 |
+| `1_38` | 46 / 12 / 0.855 | | random | 0 / 100 / 0.021 |
+| rule-based | 0 / 75 / 0.453 | | | |
+| random | 0 / 98 / 0.091 | | | |
+
+Tables: `analysis/2026-10-07_curriculum/report_test/` (`paper_tables.py --test-seeds`).
 
 ## The battery
 
