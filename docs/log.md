@@ -211,6 +211,8 @@ along the way. [Long streams](findings/long-streams.md).
   (other hosts: about 1e-9), so every update used corrupted probability ratios, and several runs
   collapsed. Search data and scoring there ran in torch on the CPU and are unaffected. Check the
   critic warm-up's approx-KL (≈ 0) in the first log lines before trusting a new host.
+- **Turn fix, re-run cleanly (`1_101`, laptop).** `1_76` + 5M with corrected turn legality: validation
+  66 vs 59, test 53 vs 59, 119 vs 118 over both seed sets, the same safety. No measurable effect.
 
 ## Changes outside the MDP
 

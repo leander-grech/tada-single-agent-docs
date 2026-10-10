@@ -38,8 +38,10 @@ Source: `actions/actions_v2.py`, `actions/action_set.py`, `network/autoregressiv
   turn-legality decisions disagree with the turn actually flown. Every model to date trained with
   it. `TADA_TURN_MASK_FIX=1` tests the flown turn; it is off by default, recorded in `run_meta.json`
   (`turn_mask_fix`) and matched to a checkpoint when it is loaded, so old models replay unchanged.
-  The first fine-tunes with the fix (`1_94`, `1_95`) ran on a faulty GPU host and are void; the effect
-  of the fix is still unmeasured.
+  The first fine-tunes with the fix (`1_94`, `1_95`) ran on a faulty GPU host and are void. A clean
+  fine-tune of `1_76` with the fix (`1_101`, 5M steps at stage-3 settings) performs the same: 66 vs 59
+  solved on validation, 53 vs 59 on the test seeds, 119 vs 118 over both. The policy turns right about
+  nine times per stream and left under once, so the mirrored legality barely mattered.
 
 The move from 22 clearances to 15, and the evidence for each cut, is in
 [Archive → 22 clearances vs 15](../archive/clearance-sets.md). The set is chosen by an environment
