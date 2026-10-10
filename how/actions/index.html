@@ -3372,8 +3372,10 @@ turned out to be the largest single improvement in the project.</p>
   turn-legality decisions disagree with the turn actually flown. Every model to date trained with
   it. <code>TADA_TURN_MASK_FIX=1</code> tests the flown turn; it is off by default, recorded in <code>run_meta.json</code>
   (<code>turn_mask_fix</code>) and matched to a checkpoint when it is loaded, so old models replay unchanged.
-  The first fine-tunes with the fix (<code>1_94</code>, <code>1_95</code>) ran on a faulty GPU host and are void; the effect
-  of the fix is still unmeasured.</li>
+  The first fine-tunes with the fix (<code>1_94</code>, <code>1_95</code>) ran on a faulty GPU host and are void. A clean
+  fine-tune of <code>1_76</code> with the fix (<code>1_101</code>, 5M steps at stage-3 settings) performs the same: 66 vs 59
+  solved on validation, 53 vs 59 on the test seeds, 119 vs 118 over both. The policy turns right about
+  nine times per stream and left under once, so the mirrored legality barely mattered.</li>
 </ul>
 <p>The move from 22 clearances to 15, and the evidence for each cut, is in
 <a href="../../archive/clearance-sets/">Archive → 22 clearances vs 15</a>. The set is chosen by an environment

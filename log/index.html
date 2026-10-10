@@ -4085,6 +4085,8 @@ along the way. <a href="../findings/long-streams/">Long streams</a>.</p>
   (other hosts: about 1e-9), so every update used corrupted probability ratios, and several runs
   collapsed. Search data and scoring there ran in torch on the CPU and are unaffected. Check the
   critic warm-up's approx-KL (≈ 0) in the first log lines before trusting a new host.</li>
+<li><strong>Turn fix, re-run cleanly (<code>1_101</code>, laptop).</strong> <code>1_76</code> + 5M with corrected turn legality: validation
+  66 vs 59, test 53 vs 59, 119 vs 118 over both seed sets, the same safety. No measurable effect.</li>
 </ul>
 <h2 id="changes-outside-the-mdp">Changes outside the MDP<a class="headerlink" href="#changes-outside-the-mdp" title="Permanent link">&para;</a></h2>
 <p>Tooling and infrastructure bugs that changed what could be seen or trusted:</p>
