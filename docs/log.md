@@ -239,6 +239,21 @@ validation seeds (solved / losses of separation); the full tables are in the cod
 - <a id="run-1-101"></a>**Turn fix, re-run cleanly (`1_101`, laptop).** `1_76` + 5M with corrected turn legality: validation
   66 vs 59, test 53 vs 59, 119 vs 118 over both seed sets, the same safety. No measurable effect.
 
+### 10–11 Oct — discrete soft actor-critic (`1_102`–`1_104`) { #oct-10 }
+
+An off-policy learner on `1_65`'s MDP: discrete SAC in JAX, using the PPO policy network as its actor.
+Its reward scale, entropy target and starting temperature were measured on PPO `1_65`. Three seeds of
+3M steps each ran on the laptop, with the curriculum compressed into the 3M steps. The first launch was
+stopped at 80k steps because the temperature adapted too slowly.
+
+- **At matched 3M steps** (validation, three-seed means): 24.0 solved against PPO's 23.7, 14.3 losses
+  of separation against 27.0, and 82.5 % of flights on time against 73.1 %. But only 4.0 streams were
+  hard-solved (±30 s) against 10.3.
+- **Final** (validation / test solved): `1_102` 33 / 27, `1_103` 21 / 19, `1_104` 18 / 11. PPO's stage
+  1 reaches 44.7 / 32.3 after 10M steps.
+
+The bracket differences are small next to the critic's error. [Discrete SAC](training/sac.md).
+
 ## Changes outside the MDP
 
 Tooling and infrastructure bugs that changed what could be seen or trusted:

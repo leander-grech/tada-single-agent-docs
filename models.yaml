@@ -83,6 +83,42 @@ models:
   # recognised from run_meta (use case 2). Runs up to 1_60 trained and are scored with the legacy
   # (mixed-frame) turn/skip/ILS mask; later runs with the mask-frame fix (run_meta mask_frame_fix).
 
+  - id: "1_102"
+    track: windowed
+    run: experiments/atc_run_1_102_sac_tmb_s1
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_65"
+    status: complete
+    whats_new: "Discrete soft actor-critic (jax_sac/, main_sac.py) instead of PPO, seed 1: 1_65's MDP and difficulty curriculum compressed into 3M steps, the same policy network as actor, twin Q heads on the shared encoder, reward scale and entropy target measured on PPO 1_65."
+    curve: [{file: experiments/atc_run_1_102_sac_tmb_s1/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-10_docs_eval/1_102_f20.csv}   # tracker's score of the final model (score_windowed.py)
+    note: "3M steps on the laptop. 33 solved / 15 LoS on validation, 27 / 23 on test. At matched 3M steps SAC solves as many validation streams as PPO (24 vs 24, three-seed means) with half the losses of separation, but few streams within ±30 s; PPO reaches 45 by 10M. See Training → Discrete SAC."
+
+  - id: "1_103"
+    track: windowed
+    run: experiments/atc_run_1_103_sac_tmb_s2
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_65"
+    status: complete
+    whats_new: "Discrete soft actor-critic (jax_sac/, main_sac.py) instead of PPO, seed 2: 1_65's MDP and difficulty curriculum compressed into 3M steps, the same policy network as actor, twin Q heads on the shared encoder, reward scale and entropy target measured on PPO 1_65."
+    curve: [{file: experiments/atc_run_1_103_sac_tmb_s2/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-10_docs_eval/1_103_f20.csv}   # tracker's score of the final model (score_windowed.py)
+    note: "3M steps on the laptop. 21 / 15 on validation, 19 / 25 on test. At matched 3M steps SAC solves as many validation streams as PPO (24 vs 24, three-seed means) with half the losses of separation, but few streams within ±30 s; PPO reaches 45 by 10M. See Training → Discrete SAC."
+
+  - id: "1_104"
+    track: windowed
+    run: experiments/atc_run_1_104_sac_tmb_s3
+    checkpoint: final_model.zip
+    parent: null
+    compare: "1_65"
+    status: complete
+    whats_new: "Discrete soft actor-critic (jax_sac/, main_sac.py) instead of PPO, seed 3: 1_65's MDP and difficulty curriculum compressed into 3M steps, the same policy network as actor, twin Q heads on the shared encoder, reward scale and entropy target measured on PPO 1_65."
+    curve: [{file: experiments/atc_run_1_104_sac_tmb_s3/track.csv, kind: track}]
+    evals: {f20: analysis/2026-10-10_docs_eval/1_104_f20.csv}   # tracker's score of the final model (score_windowed.py)
+    note: "3M steps on the laptop. 18 / 13 on validation, 11 / 25 on test. At matched 3M steps SAC solves as many validation streams as PPO (24 vs 24, three-seed means) with half the losses of separation, but few streams within ±30 s; PPO reaches 45 by 10M. See Training → Discrete SAC."
+
   - id: "1_101"
     track: windowed
     run: experiments/atc_run_1_101_turnfix_tmb_1_76

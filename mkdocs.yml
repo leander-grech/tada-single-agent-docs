@@ -75,6 +75,9 @@ nav:
       - Leaderboard: models/index.md
       # BEGIN generated model nav (tools/build_model_docs.py)
       - Windowed:
+          - "1_104": models/1_104.md
+          - "1_103": models/1_103.md
+          - "1_102": models/1_102.md
           - "1_101": models/1_101.md
           - "1_82": models/1_82.md
           - "1_79": models/1_79.md
@@ -159,6 +162,7 @@ nav:
       - From scratch: training/index.md
       - Reference: training/reference.md
       - Search distillation: training/distillation.md
+      - Discrete SAC: training/sac.md
       - Compute: training/compute.md
       - TensorBoard: training/tensorboard.md
   - Evaluation:
