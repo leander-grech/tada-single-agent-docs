@@ -693,6 +693,90 @@
   
   
     <li class="md-nav__item">
+      <a href="../models/1_104/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_104
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_103/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_103
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_102/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_102
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../models/1_101/" class="md-nav__link">
         
   
@@ -3118,6 +3202,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../training/sac/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Discrete SAC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../training/compute/" class="md-nav__link">
         
   
@@ -4031,6 +4143,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#oct-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10–11 Oct — discrete soft actor-critic (1_102–1_104)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4699,6 +4822,17 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#oct-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10–11 Oct — discrete soft actor-critic (1_102–1_104)
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -4918,6 +5052,19 @@ validation seeds (solved / losses of separation); the full tables are in the cod
 <li><a id="run-1-101"></a><strong>Turn fix, re-run cleanly (<code>1_101</code>, laptop).</strong> <code>1_76</code> + 5M with corrected turn legality: validation
   66 vs 59, test 53 vs 59, 119 vs 118 over both seed sets, the same safety. No measurable effect.</li>
 </ul>
+<h3 id="oct-10">10–11 Oct — discrete soft actor-critic (<code>1_102</code>–<code>1_104</code>)<a class="headerlink" href="#oct-10" title="Permanent link">&para;</a></h3>
+<p>An off-policy learner on <code>1_65</code>'s MDP: discrete SAC in JAX, using the PPO policy network as its actor.
+Its reward scale, entropy target and starting temperature were measured on PPO <code>1_65</code>. Three seeds of
+3M steps each ran on the laptop, with the curriculum compressed into the 3M steps. The first launch was
+stopped at 80k steps because the temperature adapted too slowly.</p>
+<ul>
+<li><strong>At matched 3M steps</strong> (validation, three-seed means): 24.0 solved against PPO's 23.7, 14.3 losses
+  of separation against 27.0, and 82.5 % of flights on time against 73.1 %. But only 4.0 streams were
+  hard-solved (±30 s) against 10.3.</li>
+<li><strong>Final</strong> (validation / test solved): <code>1_102</code> 33 / 27, <code>1_103</code> 21 / 19, <code>1_104</code> 18 / 11. PPO's stage
+  1 reaches 44.7 / 32.3 after 10M steps.</li>
+</ul>
+<p>The bracket differences are small next to the critic's error. <a href="../training/sac/">Discrete SAC</a>.</p>
 <h2 id="changes-outside-the-mdp">Changes outside the MDP<a class="headerlink" href="#changes-outside-the-mdp" title="Permanent link">&para;</a></h2>
 <p>Tooling and infrastructure bugs that changed what could be seen or trusted:</p>
 <table>

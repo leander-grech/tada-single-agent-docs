@@ -687,6 +687,90 @@
   
   
     <li class="md-nav__item">
+      <a href="../models/1_104/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_104
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_103/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_103
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/1_102/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    1_102
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../models/1_101/" class="md-nav__link">
         
   
@@ -3112,6 +3196,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../training/sac/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Discrete SAC
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../training/compute/" class="md-nav__link">
         
   
@@ -4463,6 +4575,39 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#1_102" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1_102
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1_103" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1_103
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1_104" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1_104
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#1_28" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4975,6 +5120,51 @@
 <li>render <strong>comparison scenario</strong>: seed 599310825, deterministic (the scenario every agent is rendered on, deterministic)</li>
 <li>render <strong>best solved seed</strong>: seed 854001193, deterministic (deterministic solve with the smallest worst-flight deviation)</li>
 <li>render <strong>most typical failure</strong>: seed 127978094, deterministic (most common failure class: precision (safe, not all on time); seed nearest that class's median on-time rate)</li>
+</ul>
+<h2 id="1_102">1_102<a class="headerlink" href="#1_102" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>s2x20</strong>: stitched 2×20 streams, <code>experiments/atc_run_1_102_sac_tmb_s1/final_model.zip</code></li>
+<li><strong>att10</strong>: 10 attempts (deterministic + 9 sampled), <code>experiments/atc_run_1_102_sac_tmb_s1/final_model.zip</code></li>
+<li><strong>la4</strong>: critic-guided lookahead (4 candidates), <code>experiments/atc_run_1_102_sac_tmb_s1/final_model.zip</code></li>
+<li><strong>k3_feasible</strong>: long streams, 60 flights, feasible (<code>longstreams/seeds/</code>, the same seed files)</li>
+<li><strong>k3_all</strong>: long streams, 60 flights, unfiltered (<code>longstreams/seeds/</code>, the same seed files)</li>
+<li><strong>k5_feasible</strong>: long streams, 100 flights, feasible (<code>longstreams/seeds/</code>, the same seed files)</li>
+<li><strong>k5_all</strong>: long streams, 100 flights, unfiltered (<code>longstreams/seeds/</code>, the same seed files)</li>
+<li><strong>zs_pms_f20</strong>: zero-shot on point merge (<code>analysis/score_windowed.py --use-case 2</code>, 100 seeds, 20-flight, deterministic)</li>
+<li><strong>phase0</strong>: order-first test (<code>analysis/order_first.py</code>, 100 seeds, 9 attempts, <code>--order-first-far 600 0</code>)</li>
+<li>render <strong>comparison scenario</strong>: seed 599310825, deterministic (the scenario every agent is rendered on, deterministic)</li>
+<li>render <strong>best solved seed</strong>: seed 342703921, deterministic (deterministic solve with the smallest worst-flight deviation)</li>
+<li>render <strong>most typical failure</strong>: seed 27911967, deterministic (most common failure class: precision (safe, not all on time); seed nearest that class's median on-time rate)</li>
+</ul>
+<h2 id="1_103">1_103<a class="headerlink" href="#1_103" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>s2x20</strong>: stitched 2×20 streams, <code>experiments/atc_run_1_103_sac_tmb_s2/final_model.zip</code></li>
+<li><strong>att10</strong>: 10 attempts (deterministic + 9 sampled), <code>experiments/atc_run_1_103_sac_tmb_s2/final_model.zip</code></li>
+<li><strong>la4</strong>: critic-guided lookahead (4 candidates), <code>experiments/atc_run_1_103_sac_tmb_s2/final_model.zip</code></li>
+<li><strong>k3_feasible</strong>: long streams, 60 flights, feasible (<code>longstreams/seeds/</code>, the same seed files)</li>
+<li><strong>k3_all</strong>: long streams, 60 flights, unfiltered (<code>longstreams/seeds/</code>, the same seed files)</li>
+<li><strong>k5_feasible</strong>: long streams, 100 flights, feasible (<code>longstreams/seeds/</code>, the same seed files)</li>
+<li><strong>k5_all</strong>: long streams, 100 flights, unfiltered (<code>longstreams/seeds/</code>, the same seed files)</li>
+<li><strong>zs_pms_f20</strong>: zero-shot on point merge (<code>analysis/score_windowed.py --use-case 2</code>, 100 seeds, 20-flight, deterministic)</li>
+<li><strong>phase0</strong>: order-first test (<code>analysis/order_first.py</code>, 100 seeds, 9 attempts, <code>--order-first-far 600 0</code>)</li>
+<li>render <strong>comparison scenario</strong>: seed 599310825, deterministic (the scenario every agent is rendered on, deterministic)</li>
+<li>render <strong>best solved seed</strong>: seed 113971123, deterministic (deterministic solve with the smallest worst-flight deviation)</li>
+<li>render <strong>most typical failure</strong>: seed 107420369, deterministic (most common failure class: precision (safe, not all on time); seed nearest that class's median on-time rate)</li>
+</ul>
+<h2 id="1_104">1_104<a class="headerlink" href="#1_104" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>s2x20</strong>: stitched 2×20 streams, <code>experiments/atc_run_1_104_sac_tmb_s3/final_model.zip</code></li>
+<li><strong>att10</strong>: 10 attempts (deterministic + 9 sampled), <code>experiments/atc_run_1_104_sac_tmb_s3/final_model.zip</code></li>
+<li><strong>la4</strong>: critic-guided lookahead (4 candidates), <code>experiments/atc_run_1_104_sac_tmb_s3/final_model.zip</code></li>
+<li><strong>k3_feasible</strong>: long streams, 60 flights, feasible (<code>longstreams/seeds/</code>, the same seed files)</li>
+<li><strong>k3_all</strong>: long streams, 60 flights, unfiltered (<code>longstreams/seeds/</code>, the same seed files)</li>
+<li><strong>k5_feasible</strong>: long streams, 100 flights, feasible (<code>longstreams/seeds/</code>, the same seed files)</li>
+<li><strong>k5_all</strong>: long streams, 100 flights, unfiltered (<code>longstreams/seeds/</code>, the same seed files)</li>
+<li><strong>zs_pms_f20</strong>: zero-shot on point merge (<code>analysis/score_windowed.py --use-case 2</code>, 100 seeds, 20-flight, deterministic)</li>
+<li><strong>phase0</strong>: order-first test (<code>analysis/order_first.py</code>, 100 seeds, 9 attempts, <code>--order-first-far 600 0</code>)</li>
+<li>render <strong>comparison scenario</strong>: seed 599310825, deterministic (the scenario every agent is rendered on, deterministic)</li>
+<li>render <strong>best solved seed</strong>: seed 613628803, deterministic (deterministic solve with the smallest worst-flight deviation)</li>
+<li>render <strong>most typical failure</strong>: seed 107420369, deterministic (most common failure class: precision (safe, not all on time); seed nearest that class's median on-time rate)</li>
 </ul>
 <h2 id="1_28">1_28<a class="headerlink" href="#1_28" title="Permanent link">&para;</a></h2>
 <ul>
