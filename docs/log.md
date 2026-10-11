@@ -241,6 +241,7 @@ validation seeds (solved / losses of separation); the full tables are in the cod
 
 ### 10–11 Oct — discrete soft actor-critic (`1_102`–`1_104`) { #oct-10 }
 
+<a id="run-1-102"></a><a id="run-1-103"></a><a id="run-1-104"></a>
 An off-policy learner on `1_65`'s MDP: discrete SAC in JAX, using the PPO policy network as its actor.
 Its reward scale, entropy target and starting temperature were measured on PPO `1_65`. Three seeds of
 3M steps each ran on the laptop, with the curriculum compressed into the 3M steps. The first launch was
