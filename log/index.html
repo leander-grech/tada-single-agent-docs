@@ -5053,7 +5053,8 @@ validation seeds (solved / losses of separation); the full tables are in the cod
   66 vs 59, test 53 vs 59, 119 vs 118 over both seed sets, the same safety. No measurable effect.</li>
 </ul>
 <h3 id="oct-10">10–11 Oct — discrete soft actor-critic (<code>1_102</code>–<code>1_104</code>)<a class="headerlink" href="#oct-10" title="Permanent link">&para;</a></h3>
-<p>An off-policy learner on <code>1_65</code>'s MDP: discrete SAC in JAX, using the PPO policy network as its actor.
+<p><a id="run-1-102"></a><a id="run-1-103"></a><a id="run-1-104"></a>
+An off-policy learner on <code>1_65</code>'s MDP: discrete SAC in JAX, using the PPO policy network as its actor.
 Its reward scale, entropy target and starting temperature were measured on PPO <code>1_65</code>. Three seeds of
 3M steps each ran on the laptop, with the curriculum compressed into the 3M steps. The first launch was
 stopped at 80k steps because the temperature adapted too slowly.</p>
