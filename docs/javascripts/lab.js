@@ -1477,9 +1477,147 @@
         // heading: the direction of travel over this interval (else the previous one)
         var p = (b !== a && (b[1] !== a[1] || b[2] !== a[2])) ? [a, b] : [frames[Math.max(0, i - 1)].by[a[0]] || a, a];
         row.hd = Math.atan2(p[1][2] - p[0][2], p[1][1] - p[0][1]);
+        // flight-path angle over the interval, and bank from the turn rate (blended across the interval)
+        var dh = Math.hypot(p[1][1] - p[0][1], p[1][2] - p[0][2]) * 1852;
+        row.gam = dh > 1 ? Math.atan2((p[1][3] - p[0][3]) * 0.3048, dh) : 0;
+        var w0 = turnRate(a[0], i), w1 = turnRate(a[0], Math.min(frames.length - 1, i + 1));
+        row.bank = Math.atan(row[4] * 0.5144 * -(w0 + (w1 - w0) * fr) / 9.81);
         out.push(row);
       });
       return out;
+    }
+
+    // turn rate (rad/s, counter-clockwise positive) of a flight at frame k, from the headings either side of it
+    function turnRate(cs, k) {
+      var a = frames[Math.max(0, k - 1)].by[cs], b = frames[k].by[cs], c = frames[Math.min(frames.length - 1, k + 1)].by[cs];
+      if (!a || !b || !c || a === b || b === c) return 0;
+      var h0 = Math.atan2(b[2] - a[2], b[1] - a[1]), h1 = Math.atan2(c[2] - b[2], c[1] - b[1]);
+      var dt = (frames[Math.min(frames.length - 1, k + 1)].t - frames[Math.max(0, k - 1)].t) / 2;
+      if (dt <= 0 || Math.hypot(b[1] - a[1], b[2] - a[2]) < 1e-3 || Math.hypot(c[1] - b[1], c[2] - b[2]) < 1e-3) return 0;
+      var d_ = ((h1 - h0) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
+      return d_ / dt;
+    }
+
+    // ------------------------------------------------------------------ the A320 of the 3D view
+    // A low-poly A320 in metres (x forward from the centre of gravity, y to the left wing, z up), ~160 triangles,
+    // built once: tapered fuselage, low swept wings with sharklets, nacelles, tailplane and fin.
+    var A320 = (function () {
+      var tris = [];
+      function tri(a, b, c, part, flat) { tris.push({ v: [a, b, c], part: part, flat: !!flat }); }
+      function quad(a, b, c, d, part, flat) { tri(a, b, c, part, flat); tri(a, c, d, part, flat); }
+      // fuselage: rings [x, radius, height of the axis]
+      var rings = [[18.8, 0.05, -0.2], [17.6, 1.1, -0.1], [15.6, 1.85, 0], [12, 1.98, 0], [-9, 1.98, 0], [-13, 1.6, 0.25], [-16.2, 0.95, 0.7], [-18.8, 0.3, 1.1]];
+      var N = 6;
+      function ring(r) { var out = []; for (var k = 0; k < N; k++) { var t = k / N * 2 * Math.PI; out.push([r[0], r[1] * Math.cos(t), r[2] + r[1] * Math.sin(t) * 1.05]); } return out; }
+      for (var j = 0; j + 1 < rings.length; j++) {
+        var r0 = ring(rings[j]), r1 = ring(rings[j + 1]);
+        for (var k = 0; k < N; k++) quad(r0[k], r0[(k + 1) % N], r1[(k + 1) % N], r1[k], "body");
+      }
+      // wings (low, swept, a little dihedral) with sharklets
+      [1, -1].forEach(function (sd) {
+        var rl = [4.2, 1.9 * sd, -1.3], rt = [-3.6, 1.9 * sd, -1.3], tl = [-5.2, 17.0 * sd, -0.1], tt = [-7.0, 17.0 * sd, -0.1];
+        quad(rl, tl, tt, rt, "wing", true);
+        quad(tl, [-6.2, 17.15 * sd, 2.1], [-7.3, 17.15 * sd, 2.1], tt, "wing", true);
+        // tailplane and its root
+        quad([-13.2, 1.2 * sd, 0.7], [-16.6, 6.2 * sd, 1.0], [-18.0, 6.2 * sd, 1.0], [-17.6, 1.0 * sd, 0.75], "tail", true);
+        // engine nacelle: a six-sided tube under the wing
+        var ex = [4.6, 0.6], ey = 5.75 * sd, ez = -2.25, er = 1.05, M = 6, f0 = [], f1 = [];
+        for (var q = 0; q < M; q++) { var t = q / M * 2 * Math.PI; f0.push([ex[0], ey + er * Math.cos(t), ez + er * Math.sin(t)]); f1.push([ex[1], ey + er * 0.8 * Math.cos(t), ez + er * 0.8 * Math.sin(t)]); }
+        for (q = 0; q < M; q++) quad(f0[q], f0[(q + 1) % M], f1[(q + 1) % M], f1[q], "engine");
+        for (q = 1; q + 1 < M; q++) tri(f0[0], f0[q], f0[q + 1], "intake", true);
+        quad([3.0, ey, ez + er * 0.7], [0.5, ey, ez + er * 0.7], [-0.5, ey * 0.98, -1.3], [2.0, ey * 0.98, -1.3], "engine", true);  // pylon
+      });
+      // fin
+      quad([-12.4, 0, 1.6], [-16.5, 0, 7.6], [-18.5, 0, 7.6], [-18.6, 0, 1.4], "tail", true);
+      // outward normals (flat parts: the side facing up or outwards)
+      tris.forEach(function (t) {
+        var a = t.v[0], b = t.v[1], c = t.v[2];
+        var u1 = [b[0] - a[0], b[1] - a[1], b[2] - a[2]], u2 = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+        var n = [u1[1] * u2[2] - u1[2] * u2[1], u1[2] * u2[0] - u1[0] * u2[2], u1[0] * u2[1] - u1[1] * u2[0]], l = Math.hypot(n[0], n[1], n[2]) || 1;
+        n = [n[0] / l, n[1] / l, n[2] / l];
+        var cx = (a[0] + b[0] + c[0]) / 3, cy = (a[1] + b[1] + c[1]) / 3, cz = (a[2] + b[2] + c[2]) / 3;
+        var out = t.part === "body" ? [0, cy, cz] : t.flat ? (Math.abs(n[2]) > 0.5 ? [0, 0, 1] : [0, Math.sign(cy) || 1, 0]) : [0, cy - (cy > 0 ? 5.75 : -5.75), cz + 2.25];
+        // outward normal, and the vertices wound counter-clockwise around it (for back-face culling)
+        if (n[0] * out[0] + n[1] * out[1] + n[2] * out[2] < 0) { n = [-n[0], -n[1], -n[2]]; t.v = [a, c, b]; }
+        t.n = n; t.c = [cx, cy, cz];
+      });
+      return tris;
+    })();
+    var SUN = (function () { var v = [-0.45, -0.55, 0.7], l = Math.hypot(v[0], v[1], v[2]); return [v[0] / l, v[1] / l, v[2] / l]; })();
+    function rgbOf(hex) { var n = parseInt(hex.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; }
+    function mix(c, w, t) { return [c[0] + (w[0] - c[0]) * t, c[1] + (w[1] - c[1]) * t, c[2] + (w[2] - c[2]) * t]; }
+    // Draw one aircraft. Orientation is exaggerated for legibility (pitch ×3, bank ×1.6) and so is perspective: the
+    // model's size follows its distance more steeply than true perspective, and far aircraft fade into the dark.
+    function planeFrame(P, a, dpr, focal, refDist) {
+      var cpos = P(a[1], a[2], a[3]);
+      if (!cpos) return null;
+      var zc = cpos[2];
+      var depthK = Math.pow(refDist / zc, 0.55);                       // > 1 near, < 1 far (exaggerated)
+      var lenPx = Math.max(14, Math.min(80, 38 * depthK)) * dpr;      // on-screen length of the model
+      var nmPerM = Math.max(1 / 1852, lenPx * zc / focal / 37.6);      // never smaller than the real aircraft
+      var ftPerM = nmPerM * 6076.12 / layers.exag;                     // keeps the model's proportions under exaggeration
+      var psi = a.hd, gam = Math.max(-0.45, Math.min(0.45, (a.gam || 0) * 3)), phi = Math.max(-0.8, Math.min(0.8, (a.bank || 0) * 1.6));
+      var f = [Math.cos(gam) * Math.cos(psi), Math.cos(gam) * Math.sin(psi), Math.sin(gam)];
+      var l0 = [-Math.sin(psi), Math.cos(psi), 0];
+      var u0 = [f[1] * l0[2] - f[2] * l0[1], f[2] * l0[0] - f[0] * l0[2], f[0] * l0[1] - f[1] * l0[0]];
+      var cf = Math.cos(phi), sf = Math.sin(phi);
+      var L = [l0[0] * cf + u0[0] * sf, l0[1] * cf + u0[1] * sf, l0[2] * cf + u0[2] * sf];
+      var U = [u0[0] * cf - l0[0] * sf, u0[1] * cf - l0[1] * sf, u0[2] * cf - l0[2] * sf];
+      return { cpos: cpos, lenPx: lenPx, nmPerM: nmPerM, ftPerM: ftPerM, fog: Math.max(0.35, Math.min(1, 0.4 + 0.6 * depthK)),
+        W: function (m) { return [m[0] * f[0] + m[1] * L[0] + m[2] * U[0], m[0] * f[1] + m[1] * L[1] + m[2] * U[1], m[0] * f[2] + m[1] * L[2] + m[2] * U[2]]; } };
+    }
+    // the silhouette flattened onto the ground (all shadows are drawn before any aircraft)
+    function drawPlaneShadow(P, a, dpr, focal, refDist) {
+      var F = planeFrame(P, a, dpr, focal, refDist);
+      if (!F) return;
+      ctx.fillStyle = "rgba(0,0,0," + (0.28 * F.fog) + ")";
+      ctx.beginPath();
+      A320.forEach(function (t) {
+        if (t.part === "intake") return;
+        for (var k = 0; k < 3; k++) {
+          var w = F.W(t.v[k]), q = P(a[1] + w[0] * F.nmPerM, a[2] + w[1] * F.nmPerM, 0);
+          if (!q) return;
+          if (k) ctx.lineTo(q[0], q[1]); else ctx.moveTo(q[0], q[1]);
+        }
+        ctx.closePath();
+      });
+      ctx.fill();
+    }
+    function drawPlane(P, a, col, dpr, focal, refDist) {
+      var F = planeFrame(P, a, dpr, focal, refDist);
+      if (!F) return null;
+      var cpos = F.cpos, lenPx = F.lenPx, fog = F.fog;
+      var base = rgbOf(col), white = [236, 240, 246], body = mix(base, white, 0.62), grey = [120, 128, 140];
+      // a soft glow in the flight's colour keeps it findable against the ground
+      var gl = ctx.createRadialGradient(cpos[0], cpos[1], 0, cpos[0], cpos[1], lenPx * 0.9);
+      gl.addColorStop(0, col + "50"); gl.addColorStop(1, col + "00");
+      ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(cpos[0], cpos[1], lenPx * 0.9, 0, 2 * Math.PI); ctx.fill();
+      // faces, far to near, lit by the sun
+      var faces = [], small = lenPx < 22 * dpr;
+      A320.forEach(function (t) {
+        if (small && (t.part === "engine" || t.part === "intake")) return;  // far away: no nacelles
+        var pts = [];
+        for (var k = 0; k < 3; k++) {
+          var w = F.W(t.v[k]), q = P(a[1] + w[0] * F.nmPerM, a[2] + w[1] * F.nmPerM, a[3] + w[2] * F.ftPerM);
+          if (!q) return;
+          pts.push(q);
+        }
+        // closed parts: only the faces turned towards the camera (screen y points down: front faces wind clockwise)
+        if (!t.flat && (pts[1][0] - pts[0][0]) * (pts[2][1] - pts[0][1]) - (pts[1][1] - pts[0][1]) * (pts[2][0] - pts[0][0]) > 0) return;
+        var n = F.W(t.n), lit = n[0] * SUN[0] + n[1] * SUN[1] + n[2] * SUN[2];
+        if (t.flat) lit = Math.abs(lit) * (n[2] < 0 ? 0.55 : 1);
+        faces.push({ p: pts, z: (pts[0][2] + pts[1][2] + pts[2][2]) / 3, lit: lit, part: t.part });
+      });
+      faces.sort(function (x, y) { return y.z - x.z; });
+      faces.forEach(function (fc) {
+        var c0 = fc.part === "body" ? body : fc.part === "engine" ? grey : fc.part === "intake" ? [30, 34, 42] : base;
+        var k = (0.45 + 0.75 * Math.max(0, fc.lit)) * fog;              // strong contrast: orientation reads at a glance
+        var rgb = "rgb(" + Math.min(255, c0[0] * k) + "," + Math.min(255, c0[1] * k) + "," + Math.min(255, c0[2] * k) + ")";
+        ctx.fillStyle = rgb; ctx.strokeStyle = rgb; ctx.lineWidth = 0.6;
+        ctx.beginPath(); ctx.moveTo(fc.p[0][0], fc.p[0][1]); ctx.lineTo(fc.p[1][0], fc.p[1][1]); ctx.lineTo(fc.p[2][0], fc.p[2][1]); ctx.closePath();
+        ctx.fill(); ctx.stroke();
+      });
+      return { s: cpos, len: lenPx, fog: fog };
     }
 
     // ------------------------------------------------------------------ the scope
@@ -1897,7 +2035,7 @@
         P: function (x, y, zft) {
           var v0 = x - eye[0], v1 = y - eye[1], v2 = (zft || 0) * ex - eye[2];
           var zc = v0 * f[0] + v1 * f[1] + v2 * f[2];
-          if (zc < 1) return null;
+          if (zc < 0.05) return null;  // near plane, 0.05 NM: close enough for an aircraft model at the airport
           return [W / 2 + focal * (v0 * r[0] + v1 * r[1]) / zc, cy0 - focal * (v0 * up[0] + v1 * up[1] + v2 * up[2]) / zc, zc];
         },
         focal: focal
@@ -2045,7 +2183,8 @@
       // clearances of the last few decisions, on their aircraft
       var latest = {};
       for (var kL = Math.max(0, i - FADE); kL <= i; kL++) evByFrame[kL].forEach(function (e) { latest[e.cs] = e; });
-      // aircraft, far to near: drop line, ground shadow, chevron at altitude, label with flight level
+      // aircraft: every ground shadow first, then far to near: drop line, the A320 at altitude, label with flight level
+      air.forEach(function (a) { drawPlaneShadow(P, a, dpr, C.focal, cam.dist); });
       air.map(function (a) { return { a: a, s: P(a[1], a[2], a[3]) }; }).filter(function (o) { return o.s; })
         .sort(function (x, y) { return y.s[2] - x.s[2]; }).forEach(function (o) {
           var a = o.a, sp = o.s, cs = a[0], col = colors[cs], gp = P(a[1], a[2], 0);
@@ -2055,7 +2194,6 @@
             ctx.globalAlpha = 0.5; ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(gp[0], gp[1], 3 * dpr, 1.6 * dpr, 0, 0, 2 * Math.PI); ctx.fill();
             ctx.globalAlpha = 1;
           }
-          var ahead = P(a[1] + Math.cos(a.hd) * 2, a[2] + Math.sin(a.hd) * 2, a[3]), ang = ahead ? Math.atan2(ahead[1] - sp[1], ahead[0] - sp[0]) : 0;
           var sz = Math.max(4.5, Math.min(10, 7.5 * cam.dist / sp[2])) * dpr;
           var e = latest[cs];
           if (e) {
@@ -2065,10 +2203,8 @@
             drawGlyph(ctx, sp[0] + sz * 2.6, sp[1] - sz * 2.2, 13 * dpr, e.cat);
             ctx.globalAlpha = 1;
           }
-          ctx.save(); ctx.translate(sp[0], sp[1]); ctx.rotate(ang);
-          ctx.shadowColor = col; ctx.shadowBlur = 10 * dpr; ctx.fillStyle = col; ctx.strokeStyle = "#02060d"; ctx.lineWidth = 1.1 * dpr;
-          ctx.beginPath(); ctx.moveTo(sz * 1.5, 0); ctx.lineTo(-sz, sz * 0.9); ctx.lineTo(-sz * 0.45, 0); ctx.lineTo(-sz, -sz * 0.9); ctx.closePath(); ctx.fill(); ctx.stroke();
-          ctx.restore();
+          var pl = drawPlane(P, a, col, dpr, C.focal, cam.dist);
+          if (pl) sz = Math.max(sz, pl.len * 0.35);
           if (layers.labels !== "off") {
             var flv = "FL" + String(Math.round(a[3] / 100)).padStart(3, "0");
             ctx.font = "600 " + (9 * dpr) + "px " + mono; ctx.fillStyle = "rgba(244,248,255,0.88)";
