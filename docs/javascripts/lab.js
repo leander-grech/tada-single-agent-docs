@@ -75,14 +75,17 @@
     if (q.get("f")) S.sc.flights = +q.get("f");
     if (q.get("x")) S.sc.segments = +q.get("x");
     if (q.get("s")) S.sc.seed = +q.get("s");
+    S.sc.compose = /^[\d._]+$/.test(q.get("c") || "") ? q.get("c") : null;
+    syncCompose();
     if (q.get("a")) S.agent = q.get("a");
     if (q.get("m")) S.mode = q.get("m");
     if (q.get("k")) S.attempts = +q.get("k");
     if (q.get("sK")) S.search = { K: +q.get("sK"), M: +q.get("sM") || 10, J: +q.get("sJ") || 0, stop: q.get("sS") !== "0",
-      prune: q.get("sP") !== "0", lookMin: +q.get("sL") || 15 };
+      prune: q.get("sP") !== "0", lookMin: +q.get("sL") || 15, T: S.search.T };
   }
   function writeHash() {
     var q = new URLSearchParams({ p: S.sc.procedure, g: S.sc.generator, f: S.sc.flights, x: S.sc.segments, s: S.sc.seed });
+    if (S.sc.compose) q.set("c", S.sc.compose);
     if (S.agent) {
       q.set("a", S.agent); q.set("m", S.mode);
       if (S.mode === "sampled") q.set("k", S.attempts);
@@ -95,9 +98,22 @@
   }
   function scQuery() {
     return "procedure=" + S.sc.procedure + "&generator=" + S.sc.generator + "&flights=" + S.sc.flights +
-      "&segments=" + S.sc.segments + "&seed=" + S.sc.seed;
+      "&segments=" + S.sc.segments + "&seed=" + S.sc.seed + (S.sc.compose ? "&compose=" + S.sc.compose : "");
   }
-  function isPaperSetup() { return S.sc.generator === "monad" && S.sc.flights === 20 && S.sc.segments === 1; }
+  function isPaperSetup() { return S.sc.generator === "monad" && S.sc.flights === 20 && S.sc.segments === 1 && !S.sc.compose; }
+  // A composed stream travels as "flights.seed.gapMin_flights.seed.gapMin_..." (the first gap is unused).
+  function parseCompose(c) { return (c || "").split("_").filter(Boolean).map(function (t) { var p = t.split("."); return { f: +p[0], s: +p[1], g: +p[2] || 0 }; }); }
+  function fmtCompose(segs) { return segs.map(function (x, k) { return x.f + "." + x.s + "." + (k ? x.g : 0); }).join("_"); }
+  function syncCompose() {
+    if (!S.sc.compose) return;
+    var segs = parseCompose(S.sc.compose);
+    if (!segs.length) { S.sc.compose = null; return; }
+    S.sc.segments = segs.length; S.sc.seed = segs[0].s;
+  }
+  function totalFlights(sc) {
+    sc = sc || S.sc;
+    return sc.compose ? parseCompose(sc.compose).reduce(function (n, x) { return n + x.f; }, 0) : sc.flights * (sc.segments || 1);
+  }
   function curated() { return (S.catalog.curated || {})[S.sc.procedure] || []; }
   function curatedEntry() {
     var c = curated(); for (var i = 0; i < c.length; i++) if (c[i].seed === S.sc.seed) return c[i]; return null;
@@ -207,17 +223,23 @@
     }), S.sc.generator, function (v) { S.sc.generator = v; renderGen(); scenarioChanged(); }),
       cat.generators[S.sc.generator].detail));
 
+    var streams = [1, 2, 3].slice(0, cat.max_segments || 3).map(function (n) { return { value: "x" + n, label: n === 1 ? "single" : n + " stitched" }; });
+    if (cat.compose) streams.push({ value: "compose", label: "compose ✎", title: "Build your own stream: segments of different sizes and difficulty, joined by gaps you choose" });
+    body.appendChild(field("Stream", seg("stream", streams, S.sc.compose ? "compose" : "x" + S.sc.segments, function (v) {
+      if (v === "compose") {
+        if (!S.sc.compose) { S.sc.compose = S.lastCompose || null; if (!S.sc.compose) { applyPreset(COMPOSE_PRESETS[0][1]); return; } }
+      } else { if (S.sc.compose) S.lastCompose = S.sc.compose; S.sc.compose = null; S.sc.segments = +v.slice(1); }
+      syncCompose(); renderGen(); scenarioChanged();
+    }), S.sc.compose ? null : S.sc.segments > 1 ? "Generated scenarios joined by a random 2–15 min gap: a continuous-operation stress test." :
+      cat.compose ? "Or compose your own traffic: segments of different sizes and difficulty." : null));
+    if (S.sc.compose) { body.appendChild(composer()); return; }
+
     var flights = h("input", { type: "range", min: 4, max: 40, step: 1, value: S.sc.flights, class: "lab-range" });
     var fv = h("output", { class: "lab-num", text: S.sc.flights });
     flights.addEventListener("input", function () { fv.textContent = flights.value; });
     flights.addEventListener("change", function () { S.sc.flights = +flights.value; renderGen(); scenarioChanged(); });
     body.appendChild(field("Flights per stream", h("div", { class: "lab-row" }, [flights, fv]),
       "Agents train on 20; the window always shows the next 10 in AMAN order."));
-
-    body.appendChild(field("Stream segments", seg("segments", [1, 2, 3].slice(0, cat.max_segments || 3).map(function (n) {
-      return { value: n, label: n === 1 ? "single" : n + " stitched" };
-    }), S.sc.segments, function (v) { S.sc.segments = v; renderGen(); scenarioChanged(); }),
-      S.sc.segments > 1 ? "Generated scenarios joined by a random 2–15 min gap: a continuous-operation stress test." : null));
 
     // seed + difficulty
     var seedIn = h("input", { type: "number", min: 0, max: 2147483647, value: S.sc.seed, class: "lab-input lab-num" });
@@ -244,6 +266,131 @@
         body.appendChild(h("div", { class: "lab-note", html: note }));
       }
     }
+  }
+  // ---------------------------------------------------------------- the stream composer (in-browser engine)
+  // Difficulty is the curated seeds' measure, the worst |AMAN time to lose/gain| of a segment, in bands at the
+  // tertiles of the paper's 100 curated seeds. 20-flight segments draw from those seeds; other sizes search for one.
+  var COMPOSE_PRESETS = [
+    ["Warm-up · rush · cool-down", [[10, "easy", 0], [25, "hard", 5], [10, "easy", 5]]],
+    ["Escalating", [[10, "easy", 0], [15, "medium", 4], [20, "hard", 4]]],
+    ["Back-to-back rushes", [[20, "hard", 0], [20, "hard", 2]]],
+    ["Long shift", [[15, "easy", 0], [20, "medium", 6], [20, "hard", 3], [15, "easy", 8]]]
+  ];
+  var BANDS = ["easy", "medium", "hard"], GAPS = [1, 2, 3, 5, 8, 10, 15, 20, 30];
+  function bandEdges() {
+    var c = curated().map(function (x) { return x.difficulty; }).sort(function (a, b) { return a - b; });
+    if (!c.length) return [180, 300];
+    return [c[Math.floor(c.length / 3)], c[Math.floor(2 * c.length / 3)]];
+  }
+  function bandOf(worst) { var e = bandEdges(); return worst < e[0] ? "easy" : worst < e[1] ? "medium" : "hard"; }
+  var segCache = {};
+  function segInfo(x) {
+    var k = S.sc.procedure + "/" + x.s + "/" + x.f;
+    if (!segCache[k]) segCache[k] = api("/segment", { procedure: S.sc.procedure, seed: x.s, flights: x.f }).catch(function (e) { delete segCache[k]; throw e; });
+    return segCache[k];
+  }
+  function seedFor(band, flights) {
+    if (band === "any") return Promise.resolve(Math.floor(Math.random() * 2147483647));
+    var e = bandEdges(), lo = { easy: 0, medium: e[0], hard: e[1] }[band], hi = { easy: e[0], medium: e[1], hard: 1e9 }[band];
+    if (flights === 20) {
+      var pool = curated().filter(function (x) { return x.difficulty >= lo && x.difficulty < hi; });
+      if (pool.length) return Promise.resolve(pool[Math.floor(Math.random() * pool.length)].seed);
+    }
+    return api("/findseed", { procedure: S.sc.procedure, flights: flights, lo: lo, hi: hi, tries: 40 }).then(function (v) {
+      segCache[S.sc.procedure + "/" + v.seed + "/" + flights] = Promise.resolve(v);
+      return v.seed;
+    });
+  }
+  function applyPreset(spec) {
+    // show the shape at once (random seeds), then the seeds drawn for each segment's difficulty
+    if (!S.sc.compose) { S.sc.compose = fmtCompose(spec.map(function (x) { return { f: x[0], s: Math.floor(Math.random() * 2147483647), g: x[2] }; })); syncCompose(); }
+    S.composing = true; renderGen();
+    Promise.all(spec.map(function (x) { return seedFor(x[1], x[0]).then(function (seed) { return { f: x[0], s: seed, g: x[2] }; }); }))
+      .then(function (segs) { S.composing = false; S.sc.compose = fmtCompose(segs); syncCompose(); renderGen(); scenarioChanged(); })
+      .catch(function (e) { S.composing = false; renderGen(); $("#lab-gen-body").appendChild(errBox(e)); });
+  }
+  function composer() {
+    var segs = parseCompose(S.sc.compose), box = h("div", { class: "lab-compose" + (S.composing ? " is-busy" : "") });
+    function commit() { S.sc.compose = fmtCompose(segs); syncCompose(); renderGen(); scenarioChanged(); }
+    function busy(row, on) { row.classList.toggle("is-busy", on); }
+    box.appendChild(h("div", { class: "lab-compose__presets" }, [h("span", { class: "lab-layers__label", text: "Start from" })].concat(COMPOSE_PRESETS.map(function (p) {
+      return h("button", { type: "button", class: "lab-btn lab-btn--ghost lab-compose__preset", disabled: S.composing ? true : null,
+        title: p[1].map(function (x) { return x[0] + " " + x[1]; }).join(" → "), onclick: function () { applyPreset(p[1]); } }, [p[0]]);
+    }))));
+    var list = h("ol", { class: "lab-compose__list" });
+    var preview = h("div", { class: "lab-compose__bar", "aria-label": "the stream over time" });
+    var infos = [];
+    segs.forEach(function (x, k) {
+      var badge = h("span", { class: "lab-compose__info", text: "…" });
+      var row = h("li", { class: "lab-compose__seg" });
+      var fIn = h("input", { type: "range", min: 2, max: 40, step: 1, value: x.f, class: "lab-range", "aria-label": "flights in segment " + (k + 1) });
+      var fOut = h("output", { class: "lab-num", text: x.f });
+      fIn.addEventListener("input", function () { fOut.textContent = fIn.value; });
+      fIn.addEventListener("change", function () { x.f = +fIn.value; commit(); });
+      var bandSeg = h("div", { class: "lab-seg lab-seg--sm", role: "radiogroup", "aria-label": "difficulty" }, BANDS.concat(["any"]).map(function (b) {
+        return h("button", { type: "button", class: "lab-seg__btn lab-compose__band--" + b, "data-b": b, title: "Draw a " + (b === "any" ? "random" : b) + " seed for this segment",
+          onclick: function () {
+            busy(row, true);
+            seedFor(b, x.f).then(function (seed) { x.s = seed; commit(); }, function (e) { busy(row, false); badge.textContent = "⚠ " + e.message; });
+          } }, [b === "any" ? "⚄" : b]);
+      }));
+      var sIn = h("input", { type: "number", min: 0, max: 2147483647, value: x.s, class: "lab-input lab-num lab-compose__seed", "aria-label": "seed" });
+      sIn.addEventListener("change", function () { x.s = Math.max(0, Math.floor(+sIn.value || 0)); commit(); });
+      var gap = k === 0 ? h("span", { class: "lab-compose__gap is-first", text: "starts the stream" }) :
+        h("label", { class: "lab-compose__gap" }, ["after a ", h("select", { class: "lab-input", onchange: function () { x.g = +this.value; commit(); } },
+          GAPS.concat(GAPS.indexOf(x.g) < 0 ? [x.g] : []).sort(function (a, b) { return a - b; }).map(function (g) {
+            return h("option", { value: g, selected: g === x.g ? true : null, text: g + " min" });
+          })), " gap"]);
+      function move(d) { var t = segs[k + d]; segs[k + d] = segs[k]; segs[k] = t; if (k + d === 0 || k === 0) { segs[0].g = 0; segs[1].g = segs[1].g || 5; } commit(); }
+      var tools = h("span", { class: "lab-compose__tools" }, [
+        k > 0 ? h("button", { type: "button", class: "lab-btn lab-btn--link", title: "Move earlier", onclick: function () { move(-1); } }, ["↑"]) : null,
+        k < segs.length - 1 ? h("button", { type: "button", class: "lab-btn lab-btn--link", title: "Move later", onclick: function () { move(1); } }, ["↓"]) : null,
+        segs.length > 1 ? h("button", { type: "button", class: "lab-btn lab-btn--link", title: "Remove this segment", onclick: function () {
+          segs.splice(k, 1); if (segs[0]) segs[0].g = 0; commit(); } }, ["✕"]) : null]);
+      row.appendChild(h("div", { class: "lab-compose__head" }, [h("b", { class: "lab-compose__n", text: String(k + 1) }), gap, tools]));
+      row.appendChild(h("div", { class: "lab-compose__body" }, [
+        h("div", { class: "lab-row" }, [fIn, fOut, h("span", { class: "lab-field__hint", text: "flights" })]),
+        bandSeg,
+        h("label", { class: "lab-row lab-compose__seedrow" }, [h("span", { class: "lab-field__hint", text: "seed" }), sIn]),
+        badge]));
+      list.appendChild(row);
+      infos.push(segInfo(x).then(function (v) {
+        var b = bandOf(v.worst_ttl);
+        row.setAttribute("data-band", b);
+        bandSeg.querySelectorAll("button").forEach(function (bt) { bt.classList.toggle("is-on", bt.getAttribute("data-b") === b); });
+        badge.innerHTML = "";
+        badge.appendChild(h("span", { class: "lab-compose__chip lab-compose__band--" + b, text: b }));
+        badge.appendChild(document.createTextNode(" worst |AMAN TTL| " + Math.round(v.worst_ttl) + " s · " + v.on_time0 + "/" + v.flights +
+          " on time with no control · lands over " + fmtT(v.span_s)));
+        return v;
+      }, function (e) { badge.textContent = "⚠ " + e.message; return null; }));
+    });
+    box.appendChild(list);
+    if (segs.length < ((S.catalog.compose || {}).max_segments || 8))
+      box.appendChild(h("button", { type: "button", class: "lab-btn lab-btn--ghost", disabled: S.composing ? true : null, onclick: function () {
+        var last = segs[segs.length - 1] || { f: 20 };
+        seedFor("medium", last.f).then(function (seed) { segs.push({ f: last.f, s: seed, g: 5 }); commit(); });
+      } }, ["+ add a segment"]));
+    // the stream at a glance: each segment as wide as it takes to land, gaps dashed
+    box.appendChild(preview);
+    Promise.all(infos).then(function (vs) {
+      if (!preview.isConnected && !box.isConnected) return;
+      var total = 0;
+      segs.forEach(function (x, k) { total += (vs[k] ? vs[k].span_s : 600) + (k ? x.g * 60 : 0); });
+      segs.forEach(function (x, k) {
+        if (k) preview.appendChild(h("i", { class: "lab-compose__gapbar", style: "flex-grow:" + (x.g * 60 / total), title: x.g + " min gap" }));
+        var b = vs[k] ? bandOf(vs[k].worst_ttl) : "any";
+        preview.appendChild(h("i", { class: "lab-compose__segbar lab-compose__band--" + b, style: "flex-grow:" + ((vs[k] ? vs[k].span_s : 600) / total),
+          title: "segment " + (k + 1) + ": " + x.f + " flights, " + b }, [String(x.f)]));
+      });
+    });
+    var e = bandEdges();
+    box.appendChild(h("div", { class: "lab-field__hint", html: "<b>" + totalFlights() + " flights</b> in " + segs.length + " segment" + (segs.length > 1 ? "s" : "") +
+      ". Difficulty is a segment's worst |AMAN time to lose/gain|: easy &lt; " + Math.round(e[0]) + " s ≤ medium &lt; " + Math.round(e[1]) +
+      " s ≤ hard (tertiles of the paper's curated seeds). Each segment is exactly the single scenario of its seed and size; a gap " +
+      "runs from the previous segment's last target landing to this one's first, widened if a segment's flights would otherwise spawn before t = 0." }));
+    if (S.composing) box.appendChild(h("div", { class: "lab-field__hint", text: "Drawing seeds…" }));
+    return box;
   }
   function mark(r) {
     if (!r) return "–";
@@ -374,6 +521,15 @@
       "Sampled candidates sample only their first J actions, then follow the deterministic policy (all = sample throughout)"));
     box.appendChild(chips("lookMin", "Show ahead", [5, 10, 15, 30], function (v) { return v + "′"; },
       "How far ahead the radar draws each candidate's predicted tracks (minutes)"));
+    var cores = S.catalog.cores;
+    if (cores > 1) {  // in-browser engine: a plan's candidates on several cores (same plans, sooner)
+      var tOpts = [1, 2, 4, 8, 12, 16].filter(function (t) { return t < cores; }).concat([cores]);
+      if (!S.search.T) S.search.T = defaultThreads();
+      box.appendChild(chips("T", "CPU threads", tOpts, function (v) { return v === cores ? v + " (all)" : String(v); },
+        "Rollouts of a plan run on this many cores at once (this machine reports " + cores + "). The plans chosen are the same " +
+        "for any number of threads; more threads only finish them sooner, up to about the number of candidates a plan " +
+        "really needs (often 2–5) and the number of fast cores."));
+    }
     function toggle(key, label, hint) {
       var cb = h("input", { type: "checkbox", checked: sp[key] ? true : null });
       cb.addEventListener("change", function () { sp[key] = cb.checked; changed(); });
@@ -386,7 +542,7 @@
       toggle("prune", "exact pruning", "Abandon a rollout as soon as it can no longer reach the best candidate's on-time count"),
       h("label", { class: "lab-search__check", title: "Re-run the search on the shown flight as soon as a parameter changes" }, [live, " apply live"])]));
     // worst-case cost: every plan rolls K - 1 fresh candidates to the end of the stream
-    var decisions = 115 * (S.sc.flights / 20) * S.sc.segments, plans = Math.ceil(decisions / sp.M), worst = 1 + plans * (sp.K - 1);
+    var decisions = 115 * totalFlights() / 20, plans = Math.ceil(decisions / sp.M), worst = 1 + plans * (sp.K - 1);
     var tier = worst <= 60 ? ["light", "lab-c-ok"] : worst <= 250 ? ["medium", "lab-c-warn"] : ["heavy", "lab-c-bad"];
     box.appendChild(h("div", { class: "lab-search__cost" }, [
       "every " + fmtT(sp.M * 45) + " of flight · up to ~" + worst + " rollouts · ",
@@ -402,6 +558,13 @@
     if (scKey(cur.scenario) !== scKey(S.sc) || cur.agent !== S.agent) return;
     clearTimeout(liveTimer);
     liveTimer = setTimeout(function () { flySelected(true); }, 350);
+  }
+  function defaultThreads() {
+    var c = (S.catalog && S.catalog.cores) || 1, t = 1;
+    try { t = +localStorage.getItem("tada-lab-threads") || 0; } catch (e) {}
+    // 4 by default: a plan rarely has more than a few candidates worth running at once, and on laptops the cores
+    // beyond the first few are often slower efficiency cores (a plan waits for its slowest candidate)
+    return Math.max(1, Math.min(c, t || Math.min(4, c - 1)));
   }
   function searchParamsForJob() {
     var sp = S.search;
@@ -425,7 +588,7 @@
   function loadScenario() {
     var tok = ++S.token;
     var body = $("#lab-scen-body");
-    $("#lab-scen-title").textContent = "Scenario · " + S.catalog.procedures[S.sc.procedure].label + " · seed " + S.sc.seed;
+    $("#lab-scen-title").textContent = "Scenario · " + S.catalog.procedures[S.sc.procedure].label + " · " + scLabel(S.sc);
     body.innerHTML = ""; body.appendChild(progressBox("Generating scenario and flying do-nothing…"));
     refreshRows();
     runJob("fly", { scenario: S.sc, agent: "do-nothing", mode: "det" }, function (st) { setProgress(body, st); })
@@ -446,10 +609,16 @@
         body.innerHTML = ""; body.appendChild(errBox(e));
       });
   }
-  function scKey(sc) { return [sc.generator, sc.procedure, sc.flights, sc.segments, sc.seed].join("/"); }
+  function scKey(sc) { return [sc.generator, sc.procedure, sc.flights, sc.segments, sc.seed, sc.compose || ""].join("/"); }
   function flightKeyOf(job) {
     var sc = job.scenario, m = job.mode === "sampled" ? "sampled" + job.attempts : job.mode;
-    return sc.generator + "-" + sc.procedure + "-f" + sc.flights + "-x" + sc.segments + "-s" + sc.seed + "--" + job.agent + "--" + m;
+    return sc.generator + "-" + sc.procedure + (sc.compose ? "-c" + sc.compose : "-f" + sc.flights + "-x" + sc.segments + "-s" + sc.seed) +
+      "--" + job.agent + "--" + m;
+  }
+  function scLabel(sc) {
+    if (!sc.compose) return "seed " + sc.seed + (sc.segments > 1 ? " · " + sc.segments + " stitched" : "");
+    var segs = parseCompose(sc.compose);
+    return "composed · " + segs.length + " segment" + (segs.length > 1 ? "s" : "") + " · " + totalFlights(sc) + " flights";
   }
 
   function renderScenario(d) {
@@ -522,7 +691,7 @@
   function liveConsole(body, live) {
     var box = body.querySelector(".lab-live");
     if (!box) { box = h("div", { class: "lab-live" }); var pb = body.querySelector(".lab-progress"); body.insertBefore(box, pb ? pb.nextSibling : null); box._plans = []; }
-    var N = live.n_flights || S.sc.flights * (S.sc.segments || 1);
+    var N = live.n_flights || totalFlights();
     if (live.last_plan && (!box._plans.length || box._plans[box._plans.length - 1].t !== live.last_plan.t)) box._plans.push(live.last_plan);
     function chip(c, chosen) {
       var cls = c.pruned ? "pruned" : c.los ? "los" : c.on_time === N ? "solved" : "partial";
@@ -534,7 +703,8 @@
     box.innerHTML = "";
     box.appendChild(h("div", { class: "lab-live__head" }, [
       h("b", { text: live.planning ? "PLANNING · plan " + live.plan + ", candidate " + live.candidate + "/" + live.of : "FLYING THE PLAN" }),
-      h("span", { text: live.rollouts + " rollouts · " + (live.pruned || 0) + " pruned · " + (live.switches || 0) + " switches" })]));
+      h("span", { text: live.rollouts + " rollouts · " + (live.pruned || 0) + " pruned · " + (live.switches || 0) + " switches" +
+        (live.threads > 1 ? " · " + live.threads + " threads" : "") + (live.elapsed_s != null ? " · " + live.elapsed_s.toFixed(1) + " s" : "") })]));
     // the executed episode so far
     var landed = live.landed || 0, onT = live.on_time || 0;
     box.appendChild(h("div", { class: "lab-live__now" }, [
@@ -613,6 +783,10 @@
     var body = $("#lab-flight-body");
     var job = { scenario: S.sc, agent: S.agent, mode: S.agent === "do-nothing" ? "det" : S.mode, attempts: S.mode === "sampled" ? S.attempts : 0 };
     if (job.mode === "search" && S.catalog.search_params) job.search = searchParamsForJob();
+    if (job.mode === "search" && S.catalog.cores) {
+      job.threads = S.search.T || defaultThreads();
+      try { localStorage.setItem("tada-lab-threads", job.threads); } catch (e) {}
+    }
     S.flyingJob = job;
     $("#lab-flight-title").textContent = "Flight · " + S.agent + " · " + modeLabel(job);
     body.innerHTML = ""; body.appendChild(progressBox("Flying…"));
@@ -660,7 +834,7 @@
     S.flight = d; S.flightKey = key;
     var j = d.job, s = d.summary;
     $("#lab-flight-title").textContent = "Flight · " + j.agent + (j.agent === "do-nothing" ? " (scenario as generated)" : " · " + modeLabel(j)) +
-      " · " + S.catalog.procedures[j.scenario.procedure].label + " seed " + j.scenario.seed;
+      " · " + S.catalog.procedures[j.scenario.procedure].label + " " + scLabel(j.scenario);
     var body = $("#lab-flight-body"); body.innerHTML = "";
     var oc = s.los ? { v: "LoS", c: "bad", sub: "loss of separation (≤ 3 NM, ≤ 500 ft)" }
       : s.solved ? { v: s.hard_solved ? "SOLVED ±30" : "SOLVED", c: "ok", sub: "every flight within ±" + (s.hard_solved ? 30 : 60) + " s" }
@@ -673,7 +847,8 @@
       { label: "Min separation", value: s.min_separation_nm == null ? "–" : (+s.min_separation_nm).toFixed(1), unit: s.min_separation_nm == null ? null : "NM", cls: s.los ? "bad" : "" }
     ];
     if (d.attempts.length > 1) t.push({ label: "Attempt kept", value: d.chosen_attempt, sub: "of " + d.attempts.length + " (0 = deterministic)" });
-    if (d.search) t.push({ label: "Search", value: d.search.n_rollouts, unit: "rollouts", sub: d.search.n_plans + " plans · " + d.elapsed_s + " s" });
+    if (d.search) t.push({ label: "Search", value: d.search.n_rollouts, unit: "rollouts",
+      sub: d.search.n_plans + " plans · " + d.elapsed_s + " s" + (d.threads > 1 ? " on " + d.threads + " threads" : "") });
     body.appendChild(tiles(t));
 
     var tabs = [["replay", "Replay"], ["video", "MP4 render"], ["flights", "Flights"], ["clearances", "Clearances"]];
@@ -844,6 +1019,7 @@
     var tl, tlCtx, tlCache = null, tlGeo = null, tlHover = null, life = {};    // the clearance timeline
     var plans = [];                                                             // search plans (in-browser engine)
     var cv, ctx, strip, sctx, slider, tlabel, playBtn, bounds, evByFrame, wrap, airport, procLabel, sectors;
+    var segOf = {};                                                      // composed stream: callsign -> segment
     var wcv, wctx, evByCs, winN = 10, dtDec = 45, rowsNow = [];          // the agent's window (centre panel)
     var live = false, follow = false;                                   // a search in progress, radar following it
 
@@ -974,6 +1150,8 @@
         });
       });
       evByFrame.forEach(function (list, k) { list.forEach(function (e) { e.fi = k; }); });
+      segOf = {};
+      (d.composition || []).forEach(function (sg, k) { (sg.callsigns || []).forEach(function (cs) { segOf[cs] = k; }); });
       evByCs = {};
       d.trace.events.forEach(function (e) { (evByCs[e.cs] = evByCs[e.cs] || []).push(e); });
       plans = (d.plans || []).slice().sort(function (a, b) { return a.t - b.t; });
@@ -1556,6 +1734,14 @@
       }
       d.trace.queue.forEach(function (cs, k) {
         var y = g.top + k * g.rowH + g.rowH / 2, L = life[cs], col = colors[cs];
+        if (segOf[cs] != null && (k === 0 || segOf[cs] !== segOf[d.trace.queue[k - 1]])) {  // a composed stream's next segment
+          var sy = g.top + k * g.rowH, sg = d.composition[segOf[cs]];
+          if (k) { x.strokeStyle = "rgba(255,210,63,0.35)"; x.lineWidth = 1 * dpr; x.setLineDash([4 * dpr, 4 * dpr]);
+            x.beginPath(); x.moveTo(0, sy); x.lineTo(W, sy); x.stroke(); x.setLineDash([]); }
+          x.fillStyle = "rgba(255,210,63,0.75)"; x.font = "600 " + (8.5 * dpr) + "px " + mono;
+          var st_ = "SEGMENT " + (segOf[cs] + 1) + " · " + sg.flights + " flights" + (k ? " · after " + fmtT(sg.gap_s) : "");
+          x.fillText(st_, W - x.measureText(st_).width - 6 * dpr, sy + 9 * dpr);
+        }
         if (k % 2 === 0) { x.fillStyle = "rgba(255,255,255,0.025)"; x.fillRect(0, y - g.rowH / 2, W, g.rowH); }
         x.fillStyle = col; x.fillRect(4 * dpr, y - 3 * dpr, 3 * dpr, 6 * dpr);
         x.fillStyle = "rgba(233,241,255,0.85)"; x.font = Math.min(9.5, g.rowH / dpr - 1) * dpr + "px " + mono; x.fillText(shortCs(cs), 11 * dpr, y + g.rowH * 0.28);
@@ -1933,6 +2119,7 @@
       var setup = cat.setup || { ok: true, checks: [] };
       if (!setup.ok) { setupProblems(found, setup); return; }
       if (!cat.generators[S.sc.generator].available) S.sc.generator = "legacy";
+      dropComposeIfUnsupported();
       root.innerHTML = "";
       build();
       root.insertBefore(connBar(found), root.firstChild);
@@ -1946,11 +2133,16 @@
       if (q.get("a") && q.get("a") !== "do-nothing") { S.autoFly = true; }
       // a pasted or edited link (our own updates use replaceState and fire no event)
       window.addEventListener("hashchange", function () {
-        readHash(); S.flight = null;
+        readHash(); dropComposeIfUnsupported(); S.flight = null;
         S.autoFly = !!S.agent && S.agent !== "do-nothing";
         renderGen(); renderAgents(); loadScenario();
       });
     });
+  }
+  // composed streams are an in-browser-engine feature; a runner gets the paper's stitched streams
+  function dropComposeIfUnsupported() {
+    if (S.catalog.compose || !S.sc.compose) return;
+    S.sc.compose = null; S.sc.segments = Math.min(S.sc.segments, S.catalog.max_segments || 3); S.sc.seed = S.sc.seed || 41;
   }
   function setupProblems(found, setup) {
     root.innerHTML = "";

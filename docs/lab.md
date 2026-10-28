@@ -22,6 +22,15 @@ before the lab are in the [render archive](renders.md).
 
 Without a runner the Lab still works in the browser with an engine key (MONAD generator, the two paper agents,
 single or stitched streams, policy, best-of-K and rollout search with adjustable parameters). The key unlocks the published, encrypted simulator; keys are issued by hand by the TADA team.
+The in-browser engine also has two things the runner does not:
+
+- **Compose your own traffic.** Under *Stream*, pick *compose ✎* and build a stream from up to eight segments, each
+  with its own number of flights (2–40) and difficulty (easy, medium or hard: a segment's worst |AMAN time to
+  lose/gain|, banded at the tertiles of the paper's curated seeds), joined by gaps you choose. Each segment is exactly
+  the single scenario of its seed and size, so a segment you liked can be reused anywhere. The link in the address bar
+  holds the whole composition.
+- **Parallel planning.** Rollout search spreads each plan's candidates over several CPU cores (*CPU threads* in the
+  search settings). The plans chosen are the same for any number of threads; more threads only finish them sooner.
 For everything else, run the **lab runner**: a small local server that drives the simulator and every agent's
 checkpoint. You start it once, and this page finds it by itself on `http://localhost:8800`.
 
