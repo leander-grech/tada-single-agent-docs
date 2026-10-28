@@ -1039,6 +1039,9 @@
     var segOf = {};                                                      // composed stream: callsign -> segment
     var initialOf = {}, devHover = null, devGeo = null;                  // the whole-stream deviation chart
     // the 3D view: an orbit camera around a ground point (yaw from north, pitch above the horizon, distance in NM)
+    // zFloor: the lowest altitude a controlled flight reaches (where the simulator hands it over to land, ~3000 ft):
+    // the 3D view exaggerates altitude above it only, so descents end right over the airport, just steeper
+    var zFloor = 0;
     var cam = null, spin = null, FT_NM = 1 / 6076.12, setViewFn = null, compassBtn = null, converting = false;
     // restricted orbits: above the ground, below top-down (past PITCH_TOP the view becomes the radar)
     var PITCH_MIN = 6, PITCH_TOP = 80, ZOOM_MAX = 150;
@@ -1161,6 +1164,9 @@
 
       view = { zoom: 1, cx: (bounds.x0 + bounds.x1) / 2, cy: (bounds.y0 + bounds.y1) / 2 };
       if (!cam || !opts.keep) cam = defaultCam();
+      zFloor = Infinity;
+      frames.forEach(function (f) { f.ac.forEach(function (a) { if (a[5] === 1 && a[3] < zFloor) zFloor = a[3]; }); });
+      zFloor = isFinite(zFloor) ? Math.max(0, Math.floor(zFloor / 100) * 100) : 0;
       // per flight: when it came under control, when it landed and how far off
       life = {};
       d.trace.queue.forEach(function (cs) { life[cs] = { on: null, land: null, dev: null, seen: null }; });
@@ -1555,7 +1561,7 @@
       var depthK = Math.pow(refDist / zc, 0.55);                       // > 1 near, < 1 far (exaggerated)
       var lenPx = Math.max(14, Math.min(80, 38 * depthK)) * dpr;      // on-screen length of the model
       var nmPerM = Math.max(1 / 1852, lenPx * zc / focal / 37.6);      // never smaller than the real aircraft
-      var ftPerM = nmPerM * 6076.12 / layers.exag;                     // keeps the model's proportions under exaggeration
+      var ftPerM = nmPerM * 6076.12;                                   // true-scale height offsets (P's dz): proportions kept
       var psi = a.hd, gam = Math.max(-0.45, Math.min(0.45, (a.gam || 0) * 3)), phi = Math.max(-0.8, Math.min(0.8, (a.bank || 0) * 1.6));
       var f = [Math.cos(gam) * Math.cos(psi), Math.cos(gam) * Math.sin(psi), Math.sin(gam)];
       var l0 = [-Math.sin(psi), Math.cos(psi), 0];
@@ -1598,7 +1604,7 @@
         if (small && (t.part === "engine" || t.part === "intake")) return;  // far away: no nacelles
         var pts = [];
         for (var k = 0; k < 3; k++) {
-          var w = F.W(t.v[k]), q = P(a[1] + w[0] * F.nmPerM, a[2] + w[1] * F.nmPerM, a[3] + w[2] * F.ftPerM);
+          var w = F.W(t.v[k]), q = P(a[1] + w[0] * F.nmPerM, a[2] + w[1] * F.nmPerM, a[3], w[2] * F.ftPerM);
           if (!q) return;
           pts.push(q);
         }
@@ -2029,11 +2035,14 @@
       var f = [-cp * sy, cp * cy, -sp], r = [cy, sy, 0], up = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]];
       // the target sits low in the view when looking across the ground (the ground fills the bottom, the sky stays
       // small) and moves to the centre as the view turns top-down, where it hands over to the radar
-      var focal = Math.min(W, H) * 1.25, ex = layers.exag * FT_NM, cy0 = H / 2 + Math.max(0, 1 - cam.pitch / 90) * 0.26 * H;
+      var focal = Math.min(W, H) * 1.25, ex = layers.exag, zf = zFloor, cy0 = H / 2 + Math.max(0, 1 - cam.pitch / 90) * 0.26 * H;
       return {
-        // world (NM, NM, ft) -> [screen x, screen y, depth]; null behind the camera
-        P: function (x, y, zft) {
-          var v0 = x - eye[0], v1 = y - eye[1], v2 = (zft || 0) * ex - eye[2];
+        // world (NM, NM, altitude ft) -> [screen x, screen y, depth]; null behind the camera. The altitude is shown
+        // exaggerated above zFloor (true scale below it); dz adds a true-scale height on top (a model's own shape,
+        // a building)
+        P: function (x, y, zft, dz) {
+          var z = zft || 0, zd = z > zf ? zf + (z - zf) * ex : z;
+          var v0 = x - eye[0], v1 = y - eye[1], v2 = (zd + (dz || 0)) * FT_NM - eye[2];
           var zc = v0 * f[0] + v1 * f[1] + v2 * f[2];
           if (zc < 0.05) return null;  // near plane, 0.05 NM: close enough for an aircraft model at the airport
           return [W / 2 + focal * (v0 * r[0] + v1 * r[1]) / zc, cy0 - focal * (v0 * up[0] + v1 * up[1] + v2 * up[2]) / zc, zc];
@@ -2111,6 +2120,11 @@
           ctx.fillStyle = "rgba(233,241,255,0.6)"; ctx.fillRect(tk[0] - 4 * dpr, tk[1] - 0.5 * dpr, 8 * dpr, 1.2 * dpr);
           ctx.fillText("FL" + String(fl / 100).padStart(3, "0"), tk[0] + 6 * dpr, tk[1] + 3 * dpr);
         }
+        var hf = zFloor && layers.exag > 1 ? P(airport[0], airport[1], zFloor) : null;  // where exaggeration starts
+        if (hf) {
+          ctx.fillStyle = "rgba(255,210,63,0.8)"; ctx.fillRect(hf[0] - 5 * dpr, hf[1] - 0.6 * dpr, 10 * dpr, 1.4 * dpr);
+          ctx.fillText("FL" + String(Math.round(zFloor / 100)).padStart(3, "0") + " hand-off", hf[0] + 6 * dpr, hf[1] + 3 * dpr);
+        }
         ctx.strokeStyle = "#f4f8ff"; ctx.lineWidth = 1.6 * dpr;
         ctx.beginPath(); ctx.arc(base[0], base[1], 4.5 * dpr, 0, 2 * Math.PI); ctx.stroke();
         ctx.fillStyle = "#f4f8ff"; ctx.font = "600 " + (11 * dpr) + "px " + head; ctx.fillText(procLabel, base[0] + 9 * dpr, base[1] + 14 * dpr);
@@ -2183,6 +2197,16 @@
       // clearances of the last few decisions, on their aircraft
       var latest = {};
       for (var kL = Math.max(0, i - FADE); kL <= i; kL++) evByFrame[kL].forEach(function (e) { latest[e.cs] = e; });
+      // the hand-off: aircraft on final are joined to the runway threshold by a dotted line in their colour
+      var thr = P(airport[0], airport[1], 0);
+      if (thr) air.forEach(function (a) {
+        var dist = Math.hypot(a[1] - airport[0], a[2] - airport[1]);
+        if (dist > 8) return;
+        var q = P(a[1], a[2], a[3]);
+        if (!q) return;
+        ctx.strokeStyle = colors[a[0]]; ctx.globalAlpha = 0.25 + 0.5 * (1 - dist / 8); ctx.lineWidth = 1.2 * dpr; ctx.setLineDash([2 * dpr, 4 * dpr]);
+        ctx.beginPath(); ctx.moveTo(q[0], q[1]); ctx.lineTo(thr[0], thr[1]); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+      });
       // aircraft: every ground shadow first, then far to near: drop line, the A320 at altitude, label with flight level
       air.forEach(function (a) { drawPlaneShadow(P, a, dpr, C.focal, cam.dist); });
       air.map(function (a) { return { a: a, s: P(a[1], a[2], a[3]) }; }).filter(function (o) { return o.s; })
@@ -2219,7 +2243,7 @@
       ctx.fillStyle = "rgba(2,6,13,0.7)"; roundRect(ctx, m, m, 150 * dpr, 34 * dpr, 4 * dpr); ctx.fill();
       ctx.fillStyle = "#f4f8ff"; ctx.font = "600 " + (15 * dpr) + "px " + mono; ctx.fillText("t+" + fmtT(stateTime()), m + 8 * dpr, m + 16 * dpr);
       ctx.fillStyle = "rgba(63,208,255,0.85)"; ctx.font = (9 * dpr) + "px " + mono;
-      ctx.fillText("3D · altitude ×" + layers.exag + " · " + procLabel, m + 8 * dpr, m + 28 * dpr);
+      ctx.fillText("3D · altitude ×" + layers.exag + (zFloor && layers.exag > 1 ? " above FL" + String(Math.round(zFloor / 100)).padStart(3, "0") : "") + " · " + procLabel, m + 8 * dpr, m + 28 * dpr);
       ctx.fillStyle = "rgba(154,171,198,0.75)";
       ctx.fillText("drag rotate · right-drag pan · " + (/Mac/.test(navigator.platform) ? "⌘" : "Ctrl") + " + scroll zoom · double-click reset", m, m + 48 * dpr);
       var c0 = P(cam.cx, cam.cy, 0), c1 = P(cam.cx, cam.cy + 5, 0);
@@ -2358,7 +2382,7 @@
       function sub(p, z, close) {
         var ok = false;
         for (var i = 0; i < p.length; i += 2) {
-          var q = P(p[i], p[i + 1], z || 0);
+          var q = P(p[i], p[i + 1], 0, z || 0);
           if (!q) { ok = false; continue; }
           if (ok) ctx.lineTo(q[0], q[1]); else { ctx.moveTo(q[0], q[1]); ok = true; }
         }
@@ -2378,7 +2402,7 @@
       function stroke() { ctx.stroke(); }
       function both() { ctx.fill(); ctx.stroke(); }
       var aLand = clamp01((pxNm - 14) / 30), aAir = clamp01((pxNm - 30) / 40), mpx = pxNm * dpr / 1852;
-      var hx = 3.28084 / layers.exag;  // metres -> feet at true scale (P() multiplies every height by layers.exag)
+      var hx = 3.28084;  // metres -> feet, a true-scale height (P's dz is never exaggerated)
       function roof(f) { return f.v * hx; }
       ctx.save(); ctx.lineJoin = "round"; ctx.lineCap = "round";
       ctx.globalAlpha = aLand;
@@ -2409,7 +2433,7 @@
           list.forEach(function (f) {
             if (!vis(f)) return;
             for (var i = 0; i < f.p.length; i += 2) {
-              var q0 = P(f.p[i], f.p[i + 1], 0), q1 = P(f.p[i], f.p[i + 1], roof(f));
+              var q0 = P(f.p[i], f.p[i + 1], 0), q1 = P(f.p[i], f.p[i + 1], 0, roof(f));
               if (q0 && q1) { ctx.moveTo(q0[0], q0[1]); ctx.lineTo(q1[0], q1[1]); }
             }
           });
