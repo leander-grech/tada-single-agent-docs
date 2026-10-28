@@ -912,6 +912,14 @@
         "Chrome may ask to let this site reach apps on your device: allow it." +
         (https ? " From this https page only a runner on <code>localhost</code> can be reached; a runner on another " +
           "machine has to serve the page itself (<code>--host 0.0.0.0</code>, then open its <code>/lab/</code>)." : "") }),
+      https ? h("div", { class: "lab-note", html:
+        "<b>Runner already running?</b> Then your browser is keeping this page away from <code>localhost</code>. " +
+        "Chrome asks first (\u201cAccess other apps and services on this device\u201d): allow it, or check the site settings " +
+        "(lock icon \u2192 Local network access). Embedded and some other browsers refuse silently. " +
+        "Either way you can use the Lab straight from your runner: " +
+        "<a href=\"http://localhost:8800/lab/" + location.hash + "\">http://localhost:8800/lab/</a> " +
+        "(<a href=\"http://localhost:8800/api/health\" target=\"_blank\" rel=\"noopener\">health check</a>: " +
+        "if it shows <code>\"ok\": true</code>, the runner is up)." }) : null,
       h("p", { class: "lab-field__hint", text: "Looked at: " + tried.map(label).join(", ") + ". Retrying every few seconds." }),
       runnerForm(saved() || "")
     ]));
