@@ -46,7 +46,14 @@
     return (m < 10 ? "0" : "") + m + ":" + (r < 10 ? "0" : "") + r;
   }
   function sgn(v) { v = Math.round(v); return (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v); }
-  function css(name) { return getComputedStyle(document.body).getPropertyValue(name).trim() || "#888"; }
+  // theme colours and fonts, read once per theme (getComputedStyle in every frame stalls the replay)
+  var cssCache = {};
+  function css(name) {
+    var v = cssCache[name];
+    if (v == null) v = cssCache[name] = getComputedStyle(document.body).getPropertyValue(name).trim() || "#888";
+    return v;
+  }
+  new MutationObserver(function () { cssCache = {}; }).observe(document.body, { attributes: true, attributeFilter: ["data-md-color-scheme"] });
   var TAB20 = ["#4cc9f0", "#f72585", "#7bf1a8", "#ffd166", "#b388ff", "#ff8c42", "#06d6a0", "#ef476f", "#a0c4ff", "#f9c74f",
     "#90e0ef", "#ff70a6", "#c3f73a", "#ffadad", "#9b5de5", "#00f5d4", "#fee440", "#f15bb5", "#00bbf9", "#e9ff70"];  // the radar's flight colours
   var ABBR = {
@@ -1005,7 +1012,7 @@
     var TRAIL = 12;      // decisions of track history drawn behind each aircraft
     var LAYERS_KEY = "tada-lab-layers-v2";
     // starts quiet: call-sign tags only; full data blocks are one click away
-    var layers = { sectors: true, rings: true, routes: true, labels: "tags", plans: true, view: "2d", exag: 12, exagV: 2 };
+    var layers = { sectors: true, rings: true, routes: true, labels: "tags", plans: true, view: "2d", exag: 12, exagV: 2, rate: 60 };
     // predicted rollouts of the search: their own palette, so they never read as real traffic. Only the latest
     // unbeaten plan (the one being flown) is gold; the other candidates stay muted.
     var PRED = { chosen: "#ffd23f", other: "#7d8fb3", los: "#b5677a", pruned: "#4c566a", text: "rgba(200,212,235,0.85)" };
@@ -1018,7 +1025,13 @@
     if (["off", "tags", "full"].indexOf(layers.labels) < 0) layers.labels = "tags";
     function saveLayers() { try { localStorage.setItem(LAYERS_KEY, JSON.stringify(layers)); } catch (e) {} }
 
-    var d, frames, colors, playing = false, speed = 2, u = 0, raf = null, lastTs = 0;
+    var d, frames, colors, playing = false, u = 0, raf = null, lastTs = 0, liveBtn;
+    // playback rates in simulated seconds per second: the playhead runs on the simulation clock, so every rate is
+    // exact whatever the spacing of the decisions
+    var RATES = [[1, "1×", "Real time"], [10, "10×", "Ten times real time"], [30, "30×", "Thirty times real time"],
+      [60, "1 min/s", "One minute of flight per second (60×)"], [120, "2 min/s", "Two minutes of flight per second (120×)"],
+      [300, "5 min/s", "Five minutes of flight per second (300×)"]];
+    if (!RATES.some(function (r) { return r[0] === layers.rate; })) layers.rate = 60;
     var view = { zoom: 1, cx: null, cy: null }, proj = null;  // zoom/pan (world NM at the canvas centre)
     var tl, tlCtx, tlCache = null, tlGeo = null, tlHover = null, life = {};    // the clearance timeline
     var plans = [];                                                             // search plans (in-browser engine)
@@ -1028,7 +1041,8 @@
     // the 3D view: an orbit camera around a ground point (yaw from north, pitch above the horizon, distance in NM)
     var cam = null, spin = null, FT_NM = 1 / 6076.12, setViewFn = null, compassBtn = null, converting = false;
     // restricted orbits: above the ground, below top-down (past PITCH_TOP the view becomes the radar)
-    var PITCH_MIN = 6, PITCH_TOP = 80;
+    var PITCH_MIN = 6, PITCH_TOP = 80, ZOOM_MAX = 150;
+    var osmData = {}, osmGeo = null;  // the airport layout from OpenStreetMap: per airport as published, per flight in NM
     var wcv, wctx, evByCs, winN = 10, dtDec = 45, rowsNow = [];          // the agent's window (centre panel)
     var live = false, follow = false;                                   // a search in progress, radar following it
 
@@ -1185,11 +1199,15 @@
       slider.addEventListener("input", function () { u = +slider.value; follow = false; draw(); });
       tlabel = h("span", { class: "lab-num lab-tlabel" });
       playBtn = h("button", { type: "button", class: "lab-btn lab-btn--play", onclick: toggle, "aria-label": "play" }, ["▶"]);
-      var spd = h("div", { class: "lab-seg lab-seg--sm" }, [0.5, 1, 2, 4, 8].map(function (s) {
-        return h("button", { type: "button", class: "lab-seg__btn" + (s === speed ? " is-on" : ""), "data-s": s, onclick: function () {
-          speed = s; spd.querySelectorAll("button").forEach(function (b) { b.classList.toggle("is-on", +b.getAttribute("data-s") === s); });
-        } }, [s + "×"]);
+      var spd = h("div", { class: "lab-seg lab-seg--sm", role: "radiogroup", "aria-label": "playback rate" }, RATES.map(function (r) {
+        return h("button", { type: "button", class: "lab-seg__btn" + (r[0] === layers.rate ? " is-on" : ""), "data-s": r[0], title: r[2], onclick: function () {
+          layers.rate = r[0]; saveLayers(); lastTs = 0;
+          spd.querySelectorAll("button").forEach(function (b) { b.classList.toggle("is-on", +b.getAttribute("data-s") === r[0]); });
+        } }, [r[1]]);
       }));
+      // a live search runs ahead of the playback: catching up is a click, never an automatic jump
+      liveBtn = h("button", { type: "button", class: "lab-btn lab-btn--ghost lab-livebtn", hidden: true, title: "Jump to the search's latest decision",
+        onclick: function () { u = frames.length - 1; follow = true; draw(); } }, ["⏭ live"]);
       // display toolbar: layer toggle buttons and the label density
       var layerList = [["sectors", "Sectors", "#8da0cb"], ["rings", "Range rings", "#3fd0ff"], ["routes", "Flight plans", "#9aabc6"]];
       if (plans.length) layerList.push(["plans", "Search plans", PRED.chosen]);
@@ -1231,7 +1249,7 @@
         if (spin) stopSpin(); else startSpin(); spinBtn.setAttribute("aria-pressed", spin ? "true" : "false"); spinBtn.classList.toggle("is-on", !!spin);
       } }, ["⟳"]);
       var view3d = h("div", { class: "lab-view3d" }, [
-        h("div", { class: "lab-view3d__row" }, [["Oblique", -25, 32, 1.05], ["Low", -25, PITCH_MIN + 4, 1.05]].map(function (p) {
+        h("div", { class: "lab-view3d__row" }, [["Oblique", -25, 32, 1.05], ["Side", -25, PITCH_MIN + 4, 1.05]].map(function (p) {
           return h("button", { type: "button", class: "lab-zoom__btn lab-view3d__preset", title: p[0] + " view", onclick: function () { flyCam(p[1], p[2], p[3]); } }, [p[0]]);
         }).concat([h("button", { type: "button", class: "lab-zoom__btn lab-view3d__preset", title: "Top down: back to the radar", onclick: function () { toRadar(); } }, ["Top"]), spinBtn])),
         h("div", { class: "lab-view3d__row" }, [h("span", { class: "lab-layers__label", text: "Altitude" }), exagSeg])
@@ -1268,7 +1286,7 @@
           h("button", { type: "button", class: "lab-zoom__btn", title: "Fit the whole stream", "aria-label": "reset view", onclick: resetView }, ["⤢"])
         ]), view3d, compassBtn]), h("div", { class: "lab-replay__win" }, [wcv]), h("div", { class: "lab-replay__dev" }, [strip])]),
         h("div", { class: "lab-timeline-wrap" }, [tl]),
-        h("div", { class: "lab-replay__ctl" }, [playBtn, slider, tlabel, spd]),
+        h("div", { class: "lab-replay__ctl" }, [playBtn, slider, tlabel, liveBtn, spd]),
         legend
       ]);
       wrap.addEventListener("keydown", function (e) {
@@ -1283,7 +1301,6 @@
           if (!pr[0]) return; pr[1].width = pr[0].width; pr[1].height = pr[0].height; pr[1].style.width = pr[0].style.width; pr[1].style.height = pr[0].style.height;
         });
         follow = was.follow;
-        if (live && follow) u = Math.max(u, frames.length - 4);  // never trail a live search by more than a few decisions
         draw();
         if (u < frames.length - 1 && (was.playing || follow)) { playing = true; playBtn.textContent = "❚❚"; lastTs = 0; raf = requestAnimationFrame(tick); }
       } else if (live) { u = frames.length - 1; follow = true; }
@@ -1298,7 +1315,7 @@
     function zoomBy(f, px, py) {
       if (layers.view === "3d") { cam.dist /= f; clampCam(); draw(); return; }
       if (!proj) return;
-      var z = Math.max(1, Math.min(10, view.zoom * f));
+      var z = Math.max(1, Math.min(ZOOM_MAX, view.zoom * f));
       if (px != null) {  // keep the point under the cursor fixed
         var wx = proj.ix(px), wy = proj.iy(py);
         view.cx = wx - (wx - view.cx) * view.zoom / z; view.cy = wy - (wy - view.cy) * view.zoom / z;
@@ -1307,7 +1324,7 @@
     }
     function zoomHint(c) {
       var host = c.parentNode, tip = host.querySelector(".lab-zoomhint");
-      if (!tip) { tip = h("div", { class: "lab-zoomhint", text: (/Mac/.test(navigator.platform) ? "⌘" : "Ctrl") + " + scroll to zoom · drag to pan" }); host.appendChild(tip); }
+      if (!tip) { tip = h("div", { class: "lab-zoomhint", text: (/Mac/.test(navigator.platform) ? "⌘" : "Ctrl") + " + scroll to zoom · drag to pan · right-drag to tilt into 3D" }); host.appendChild(tip); }
       tip.classList.add("is-on");
       clearTimeout(tip._t); tip._t = setTimeout(function () { tip.classList.remove("is-on"); }, 1100);
     }
@@ -1321,13 +1338,21 @@
         if (layers.view === "3d") { cam.dist *= Math.exp(e.deltaY * 0.0015); clampCam(); draw(); return; }
         zoomBy(Math.exp(-e.deltaY * 0.0015), (e.clientX - r.left) * dpr, (e.clientY - r.top) * dpr);
       }, { passive: false });
-      c.addEventListener("contextmenu", function (e) { if (layers.view === "3d") e.preventDefault(); });
+      c.addEventListener("contextmenu", function (e) { e.preventDefault(); });
       c.addEventListener("pointerdown", function (e) {
-        drag = { x: e.clientX, y: e.clientY, pan: e.button === 2 || e.shiftKey }; c.setPointerCapture(e.pointerId); c.classList.add("is-dragging");
+        var alt = e.button === 2 || e.shiftKey;
+        // in 3D the secondary drag pans; on the radar it tilts the view into 3D
+        drag = { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY, pan: layers.view === "3d" && alt, tilt: layers.view !== "3d" && alt };
+        try { c.setPointerCapture(e.pointerId); } catch (err) {}
+        c.classList.add("is-dragging");
       });
       c.addEventListener("pointermove", function (e) {
         if (!drag) return;
         var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+        if (drag.tilt && layers.view !== "3d") {  // a tilt on the radar: once it moves, become the 3D view looking straight down
+          if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 4) return;
+          enter3DTopDown(); drag.entering = true; drag.tilt = false;
+        }
         drag.x = e.clientX; drag.y = e.clientY;
         if (layers.view === "3d") {
           if (drag.pan) {  // move the ground point the camera looks at, in the screen's directions
@@ -1338,6 +1363,11 @@
             if (converting) return;
             cam.yaw -= dx * 0.008;
             var p_ = cam.pitch + dy * 0.35;
+            if (drag.entering) {  // just tilted off the radar: free above the top limit until the view is below it
+              cam.pitch = Math.max(PITCH_MIN, Math.min(89.5, p_));
+              if (cam.pitch < PITCH_TOP) drag.entering = false;
+              draw(); return;
+            }
             if (p_ > PITCH_TOP) { cam.pitch = PITCH_TOP; toRadar(); return; }  // looking straight down: that is the radar
             cam.pitch = Math.max(PITCH_MIN, p_);
           }
@@ -1378,12 +1408,20 @@
       playing = true; playBtn.textContent = "❚❚"; lastTs = 0; raf = requestAnimationFrame(tick);
     }
     function stop() { playing = false; if (raf) cancelAnimationFrame(raf); raf = null; if (playBtn) playBtn.textContent = "▶"; }
+    // the frame position of simulated time T (decisions are not evenly spaced in time)
+    function uOf(T) {
+      var lo = 0, hi = frames.length - 1;
+      if (T <= frames[0].t) return 0;
+      if (T >= frames[hi].t) return hi;
+      while (hi - lo > 1) { var mid = (lo + hi) >> 1; if (frames[mid].t <= T) lo = mid; else hi = mid; }
+      var span = frames[hi].t - frames[lo].t;
+      return span > 0 ? lo + (T - frames[lo].t) / span : lo;
+    }
     function tick(ts) {
       if (!playing) return;
       if (!cv.isConnected) { stop(); return; }
-      // 1 decision (45 s) per second at 1×; following a live search, catch up with its edge in about a second
-      var sp = live && follow ? Math.max(speed, (frames.length - 1 - u) / 1.2) : speed;
-      if (lastTs) u = Math.min(frames.length - 1, u + (ts - lastTs) / 1000 * sp);
+      // advance the simulation clock by the elapsed time × rate; a long frame (a busy page) is capped, not jumped over
+      if (lastTs) u = uOf(stateTime() + Math.min(0.1, (ts - lastTs) / 1000) * layers.rate);
       lastTs = ts;
       draw();
       if (u >= frames.length - 1) { stop(); if (live) follow = true; return; }
@@ -1396,6 +1434,11 @@
       var i = Math.min(frames.length - 1, Math.floor(u));
       slider.value = Math.round(u);
       tlabel.textContent = "t+" + fmtT(stateTime()) + " · " + (i + 1) + "/" + frames.length;
+      if (liveBtn) {
+        var behind = live ? frames[frames.length - 1].t - stateTime() : 0;
+        liveBtn.hidden = !(behind > 2 * dtDec);
+        if (!liveBtn.hidden) liveBtn.textContent = "⏭ live (" + fmtT(behind) + " behind)";
+      }
       rowsNow = windowRows();
       if (layers.view === "3d") draw3D(); else drawMap();
       drawWindow(); drawStrip(); drawTimeline();
@@ -1501,6 +1544,9 @@
       var ac = aircraftAt();
       var landedSet = {};
       ac.forEach(function (a) { if (a[5] === 2) landedSet[a[0]] = 1; });
+
+      // the airport and its surroundings, once zoomed in
+      var osmShown = osm2D(X, Y, sc, dpr);
 
       // flight plans (as filed at t = 0) of flights still airborne
       if (layers.routes) {
@@ -1733,6 +1779,9 @@
       ctx.fillStyle = "#f4f8ff"; ctx.font = "600 " + (15 * dpr) + "px " + mono; ctx.fillText("t+" + fmtT(stateTime()), m + 8 * dpr, m + 16 * dpr);
       ctx.fillStyle = "rgba(63,208,255,0.85)"; ctx.font = (9 * dpr) + "px " + mono;
       ctx.fillText("decision " + (i + 1) + "/" + frames.length + " · " + procLabel, m + 8 * dpr, m + 28 * dpr);
+      ctx.fillStyle = "rgba(154,171,198,0.55)"; ctx.font = (9 * dpr) + "px " + mono;
+      var th = "right-drag or ⇧ + drag: tilt into 3D";
+      ctx.fillText(th, (W - ctx.measureText(th).width) / 2, H - m);
       if (active) {  // the active plan's scoreboard
         var rowsN = active.cands.length, bw2 = 196 * dpr, bh2 = (22 + rowsN * 13) * dpr, by2 = m + 40 * dpr;
         ctx.fillStyle = "rgba(2,6,13,0.78)"; roundRect(ctx, m, by2, bw2, bh2, 4 * dpr); ctx.fill();
@@ -1756,6 +1805,7 @@
       ctx.beginPath(); ctx.moveTo(m, H - m); ctx.lineTo(m + bl, H - m); ctx.moveTo(m, H - m - 4 * dpr); ctx.lineTo(m, H - m); ctx.moveTo(m + bl, H - m - 4 * dpr); ctx.lineTo(m + bl, H - m); ctx.stroke();
       ctx.fillStyle = "rgba(233,241,255,0.75)"; ctx.font = (9 * dpr) + "px " + mono; ctx.fillText(nmLen + " NM", m, H - m - 6 * dpr);
       if (view.zoom > 1.01) { ctx.fillStyle = "rgba(63,208,255,0.8)"; ctx.fillText("×" + view.zoom.toFixed(1) + " · double-click to fit", m + bl + 10 * dpr, H - m); }
+      if (osmShown) osmCredit(W, H, m, dpr, mono);
       // north
       ctx.fillStyle = "rgba(233,241,255,0.7)"; ctx.font = "600 " + (10 * dpr) + "px " + head;
       ctx.fillText("N", W - m - 6 * dpr, H - m - 18 * dpr);
@@ -1787,7 +1837,7 @@
     // keep the camera over the traffic: target inside the stream's extent, distance within limits
     function clampCam() {
       var sp = span_();
-      cam.dist = Math.max(sp * 0.2, Math.min(sp * 2.5, cam.dist));
+      cam.dist = Math.max(1.2, Math.min(sp * 2.5, cam.dist));  // close enough to see the airport's buildings
       cam.cx = Math.max(bounds.x0, Math.min(bounds.x1, cam.cx)); cam.cy = Math.max(bounds.y0, Math.min(bounds.y1, cam.cy));
     }
     // the radar's scale (px per NM at zoom 1) and the 3D view's (px per NM at the target, looking down)
@@ -1800,17 +1850,20 @@
       converting = true; stopSpin();
       flyCam(0, 89.5, null, function () {
         converting = false;
-        view = { zoom: Math.max(1, Math.min(10, focalPx() / cam.dist / radarScale())), cx: cam.cx, cy: cam.cy };
+        view = { zoom: Math.max(1, Math.min(ZOOM_MAX, focalPx() / cam.dist / radarScale())), cx: cam.cx, cy: cam.cy };
         setViewFn("2d");
       });
     }
     // radar -> 3D: start looking straight down at the radar's centre and scale, then tilt down to an oblique view
-    function to3D() {
-      if (layers.view === "3d") return;
+    function enter3DTopDown() {
       cam = cam || defaultCam();
       cam.cx = view.cx; cam.cy = view.cy; cam.yaw = 0; cam.pitch = 89.5; cam.dist = focalPx() / (radarScale() * view.zoom);
       clampCam();
       setViewFn("3d");
+    }
+    function to3D() {
+      if (layers.view === "3d") return;
+      enter3DTopDown();
       flyCam(-25, 32, null);
     }
     function flyCam(yawDeg, pitch, distF, done) {  // ease to a view over ~0.6 s (distF null: keep the distance)
@@ -1895,6 +1948,8 @@
       });
       var ac = aircraftAt(), byNow = {}, landed = {};
       ac.forEach(function (a) { byNow[a[0]] = a; if (a[5] === 2) landed[a[0]] = 1; });
+      // the airport and its surroundings, once close enough
+      var osmShown3 = osm3D(P, C.focal / cam.dist / dpr, dpr);
       // flight plans on the ground
       if (layers.routes) Object.keys(d.trace.routes).forEach(function (cs) {
         var r = d.trace.routes[cs];
@@ -2033,6 +2088,7 @@
       ctx.fillText("drag rotate · right-drag pan · " + (/Mac/.test(navigator.platform) ? "⌘" : "Ctrl") + " + scroll zoom · double-click reset", m, m + 48 * dpr);
       var c0 = P(cam.cx, cam.cy, 0), c1 = P(cam.cx, cam.cy + 5, 0);
       if (c0 && c1 && compassBtn) compassBtn.style.setProperty("--north", (Math.atan2(c1[1] - c0[1], c1[0] - c0[0]) + Math.PI / 2) + "rad");
+      if (osmShown3) osmCredit(W, H, m + 44 * dpr, dpr, mono);
       if (live) {
         ctx.font = "700 " + (11 * dpr) + "px " + head;
         var lt = "● LIVE · SEARCH RUNNING", ltw = ctx.measureText(lt).width, lx0 = (W - ltw) / 2;
@@ -2046,6 +2102,188 @@
         ctx.strokeStyle = col2; ctx.lineWidth = 1.5 * dpr; ctx.stroke();
         ctx.fillStyle = col2; ctx.fillText(txt, W - tw2 - 2 * m, m * 2.4 + 19 * dpr);
       }
+    }
+
+    // ------------------------------------------------------------------ the airport from OpenStreetMap
+    // lab/osm_airports.py bakes each airport in metres around the landing threshold the simulator uses; here it is
+    // turned onto the flights' own final approach (the scenario generator varies it by a few degrees) and moved to the
+    // airport. Surroundings (plain geometry: built-up areas, woods, water, roads) appear from about 14 px per NM, the
+    // airport itself, with its buildings, from about 30.
+    function osmLoad(name) {
+      if (osmData[name] !== undefined) return osmData[name];
+      osmData[name] = null;
+      fetch(ASSETS + "osm/" + name + ".json").then(function (r) { return r.ok ? r.json() : false; })
+        .then(function (j) { osmData[name] = j || false; osmGeo = null; draw(); }, function () { osmData[name] = false; });
+      return null;
+    }
+    function osmLayout() {
+      if (osmGeo && osmGeo.d === d) return osmGeo;
+      var raw = osmLoad(procLabel);
+      if (!raw) return null;
+      var sx = 0, sy = 0;
+      Object.keys(d.trace.routes).forEach(function (cs) {
+        var r = d.trace.routes[cs];
+        if (r.length < 2) return;
+        var a = r[r.length - 1], b = r[r.length - 2], n = Math.hypot(b[0] - a[0], b[1] - a[1]);
+        if (n > 0) { sx += (b[0] - a[0]) / n; sy += (b[1] - a[1]) / n; }
+      });
+      var rot = sx || sy ? Math.atan2(sy, sx) - raw.approach_deg * Math.PI / 180 : 0, c = Math.cos(rot), s_ = Math.sin(rot), k = 1 / 1852;
+      var delta = raw.encoding === "delta";
+      function tf(arr, from) {
+        var p = new Float64Array(arr.length - from), x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, mx = 0, my = 0;
+        for (var i = from; i + 1 < arr.length; i += 2) {
+          if (delta && i > from) { mx += arr[i]; my += arr[i + 1]; } else { mx = arr[i]; my = arr[i + 1]; }
+          var x = airport[0] + (mx * c - my * s_) * k, y = airport[1] + (mx * s_ + my * c) * k;
+          p[i - from] = x; p[i - from + 1] = y;
+          if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+        }
+        return { p: p, b: [x0, y0, x1, y1] };
+      }
+      osmGeo = { d: d, credit: raw.attribution };
+      ["aprons", "urban", "wood", "water", "rivers"].forEach(function (key) { osmGeo[key] = (raw[key] || []).map(function (a) { return tf(a, 0); }); });
+      ["runways", "taxiways", "terminals", "buildings", "roads"].forEach(function (key) {
+        osmGeo[key] = (raw[key] || []).map(function (a) { var f = tf(a, 1); f.v = a[0]; return f; });
+      });
+      return osmGeo;
+    }
+    function osmCredit(W, H, bottom, dpr, mono) {
+      var t = "© OpenStreetMap contributors";
+      ctx.font = (8.5 * dpr) + "px " + mono; ctx.fillStyle = "rgba(154,171,198,0.7)";
+      ctx.fillText(t, W - ctx.measureText(t).width - 36 * dpr, H - bottom - 2 * dpr);
+    }
+    function clamp01(v) { return Math.max(0, Math.min(1, v)); }
+    // Each layer is one canvas path of many sub-paths, filled or stroked once: thousands of buildings stay cheap.
+    function osm2D(X, Y, sc, dpr) {
+      var pxNm = sc / dpr;
+      if (pxNm < 14) return false;
+      var g = osmLayout();
+      if (!g) return false;
+      var W = cv.width, H = cv.height, vx0 = proj.ix(0), vx1 = proj.ix(W), vy0 = proj.iy(H), vy1 = proj.iy(0);
+      function vis(f) { return f.b[2] >= vx0 && f.b[0] <= vx1 && f.b[3] >= vy0 && f.b[1] <= vy1; }
+      function sub(p, close) {
+        for (var i = 0; i < p.length; i += 2) { var x = X(p[i]), y = Y(p[i + 1]); if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y); }
+        if (close) ctx.closePath();
+      }
+      // a layer in chunks of sub-paths, each chunk painted by `paint` (one huge path is slow to fill)
+      function layer(list, close, test, paint) {
+        var n = 0;
+        ctx.beginPath();
+        list.forEach(function (f) {
+          if (!vis(f) || (test && !test(f))) return;
+          sub(f.p, close);
+          if (++n % 150 === 0) { paint(); ctx.beginPath(); }
+        });
+        if (n % 150) paint();
+      }
+      function fill() { ctx.fill(); }
+      function stroke() { ctx.stroke(); }
+      function both() { ctx.fill(); ctx.stroke(); }
+      var aLand = clamp01((pxNm - 14) / 30), aAir = clamp01((pxNm - 30) / 40), mpx = sc / 1852;
+      ctx.save(); ctx.lineJoin = "round"; ctx.lineCap = "round";
+      ctx.globalAlpha = aLand;
+      [["urban", "rgba(140,155,185,0.12)"], ["wood", "rgba(70,150,100,0.13)"], ["water", "rgba(60,150,230,0.28)"]].forEach(function (l) {
+        ctx.fillStyle = l[1]; layer(g[l[0]], true, null, fill);
+      });
+      ctx.strokeStyle = "rgba(60,150,230,0.5)"; ctx.lineWidth = 2 * dpr; layer(g.rivers, false, null, stroke);
+      [[3, "rgba(230,200,140,0.32)"], [2, "rgba(200,195,175,0.24)"], [1, "rgba(200,195,175,0.2)"]].forEach(function (r) {
+        ctx.strokeStyle = r[1]; ctx.lineWidth = (0.6 + 0.5 * r[0]) * dpr; layer(g.roads, false, function (f) { return f.v === r[0]; }, stroke);
+      });
+      if (aAir > 0) {
+        ctx.globalAlpha = aAir;
+        ctx.fillStyle = "rgba(150,165,190,0.22)"; layer(g.aprons, true, null, fill);
+        ctx.strokeStyle = "rgba(175,190,210,0.42)";
+        g.taxiways.forEach(function (f) { if (vis(f)) { ctx.lineWidth = Math.max(1 * dpr, f.v * mpx); ctx.beginPath(); sub(f.p); ctx.stroke(); } });
+        ctx.lineCap = "butt";
+        g.runways.forEach(function (f) {  // asphalt with white edges, a dashed centreline when close
+          if (!vis(f)) return;
+          var w = Math.max(2.5 * dpr, f.v * mpx);
+          ctx.beginPath(); sub(f.p);
+          ctx.strokeStyle = "rgba(233,241,255,0.55)"; ctx.lineWidth = w + 2 * dpr; ctx.stroke();
+          ctx.strokeStyle = "#151b26"; ctx.lineWidth = w; ctx.stroke();
+          if (pxNm > 150) { ctx.strokeStyle = "rgba(233,241,255,0.7)"; ctx.lineWidth = Math.max(1, 0.9 * mpx); ctx.setLineDash([30 * mpx, 20 * mpx]); ctx.stroke(); ctx.setLineDash([]); }
+        });
+        ctx.lineCap = "round";
+        [["buildings", "rgba(170,185,210,0.34)", "rgba(220,230,245,0.45)"], ["terminals", "rgba(205,218,240,0.55)", "rgba(240,246,255,0.7)"]].forEach(function (l) {
+          ctx.fillStyle = l[1]; ctx.strokeStyle = l[2]; ctx.lineWidth = 0.8 * dpr;
+          layer(g[l[0]], true, null, both);
+        });
+      }
+      ctx.restore();
+      return true;
+    }
+    // In 3D the ground layers lie flat and the airport's buildings stand as blocks at their real height, whatever the
+    // altitude exaggeration (exaggerated, a terminal would become a spike).
+    function osm3D(P, pxNm, dpr) {
+      if (pxNm < 14) return false;
+      var g = osmLayout();
+      if (!g) return false;
+      var near = Math.max(4, cam.dist * 1.6);
+      function vis(f, r) { r = r || near; return f.b[2] >= cam.cx - r && f.b[0] <= cam.cx + r && f.b[3] >= cam.cy - r && f.b[1] <= cam.cy + r; }
+      function sub(p, z, close) {
+        var ok = false;
+        for (var i = 0; i < p.length; i += 2) {
+          var q = P(p[i], p[i + 1], z || 0);
+          if (!q) { ok = false; continue; }
+          if (ok) ctx.lineTo(q[0], q[1]); else { ctx.moveTo(q[0], q[1]); ok = true; }
+        }
+        if (close && ok) ctx.closePath();
+      }
+      function layer(list, close, z, r, paint) {  // in chunks, as in osm2D
+        var n = 0;
+        ctx.beginPath();
+        list.forEach(function (f) {
+          if (!vis(f, r)) return;
+          sub(f.p, z == null ? 0 : z(f), close);
+          if (++n % 150 === 0) { paint(); ctx.beginPath(); }
+        });
+        if (n % 150) paint();
+      }
+      function fill() { ctx.fill(); }
+      function stroke() { ctx.stroke(); }
+      function both() { ctx.fill(); ctx.stroke(); }
+      var aLand = clamp01((pxNm - 14) / 30), aAir = clamp01((pxNm - 30) / 40), mpx = pxNm * dpr / 1852;
+      var hx = 3.28084 / layers.exag;  // metres -> feet at true scale (P() multiplies every height by layers.exag)
+      function roof(f) { return f.v * hx; }
+      ctx.save(); ctx.lineJoin = "round"; ctx.lineCap = "round";
+      ctx.globalAlpha = aLand;
+      [["urban", "rgba(140,155,185,0.12)"], ["wood", "rgba(70,150,100,0.13)"], ["water", "rgba(60,150,230,0.28)"]].forEach(function (l) {
+        ctx.fillStyle = l[1]; layer(g[l[0]], true, null, null, fill);
+      });
+      ctx.strokeStyle = "rgba(60,150,230,0.5)"; ctx.lineWidth = 2 * dpr; layer(g.rivers, false, null, null, stroke);
+      ctx.strokeStyle = "rgba(220,200,160,0.25)"; ctx.lineWidth = 1 * dpr; layer(g.roads, false, null, null, stroke);
+      if (aAir > 0) {
+        ctx.globalAlpha = aAir;
+        ctx.fillStyle = "rgba(150,165,190,0.22)"; layer(g.aprons, true, null, null, fill);
+        ctx.strokeStyle = "rgba(175,190,210,0.42)";
+        g.taxiways.forEach(function (f) { if (vis(f)) { ctx.lineWidth = Math.max(1 * dpr, f.v * mpx); ctx.beginPath(); sub(f.p); ctx.stroke(); } });
+        ctx.lineCap = "butt";
+        g.runways.forEach(function (f) {
+          if (!vis(f)) return;
+          var w = Math.max(2.5 * dpr, f.v * mpx);
+          ctx.beginPath(); sub(f.p);
+          ctx.strokeStyle = "rgba(233,241,255,0.55)"; ctx.lineWidth = w + 2 * dpr; ctx.stroke();
+          ctx.strokeStyle = "#151b26"; ctx.lineWidth = w; ctx.stroke();
+        });
+        ctx.lineCap = "round";
+        [["buildings", "rgba(170,185,210,", 0.32, 0.6], ["terminals", "rgba(205,218,240,", 0.5, 0.85]].forEach(function (l) {
+          var list = g[l[0]];
+          ctx.fillStyle = l[1] + l[2] * 0.6 + ")"; layer(list, true, null, null, fill);
+          ctx.strokeStyle = l[1] + l[3] * 0.6 + ")"; ctx.lineWidth = 0.7 * dpr;
+          ctx.beginPath();  // the walls' vertical edges
+          list.forEach(function (f) {
+            if (!vis(f)) return;
+            for (var i = 0; i < f.p.length; i += 2) {
+              var q0 = P(f.p[i], f.p[i + 1], 0), q1 = P(f.p[i], f.p[i + 1], roof(f));
+              if (q0 && q1) { ctx.moveTo(q0[0], q0[1]); ctx.lineTo(q1[0], q1[1]); }
+            }
+          });
+          ctx.stroke();
+          ctx.fillStyle = l[1] + l[2] + ")"; ctx.strokeStyle = l[1] + l[3] + ")";
+          layer(list, true, roof, null, both);
+        });
+      }
+      ctx.restore();
+      return true;
     }
 
     function roundRect(c, x, y, w, h_, r) {

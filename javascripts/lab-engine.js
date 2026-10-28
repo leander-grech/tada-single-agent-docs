@@ -29,9 +29,12 @@
   }
   function decryptEngine(assets, keyText) {
     var key = keyBytes(keyText);
+    // the manifest is always revalidated and names the build, so a new engine is never served from a stale cache
+    var manifestP = fetch(assets + "engine.json", { cache: "no-cache" }).then(function (r) { if (!r.ok) throw new Error("engine manifest missing"); return r.json(); });
     return Promise.all([
-      fetch(assets + "engine.json").then(function (r) { if (!r.ok) throw new Error("engine manifest missing"); return r.json(); }),
-      fetch(assets + "engine.bin").then(function (r) { if (!r.ok) throw new Error("engine file missing"); return r.arrayBuffer(); }),
+      manifestP,
+      manifestP.then(function (mf) { return fetch(assets + "engine.bin?v=" + String(mf.plain_sha256 || mf.built || "").slice(0, 16)); })
+        .then(function (r) { if (!r.ok) throw new Error("engine file missing"); return r.arrayBuffer(); }),
       crypto.subtle.digest("SHA-256", key),
     ]).then(function (res) {
       var manifest = res[0], blob = new Uint8Array(res[1]);
