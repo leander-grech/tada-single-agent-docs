@@ -24,6 +24,29 @@ onmessage = async (e) => {
       const j = m.job, sc = j.scenario, t0 = performance.now();
       const pol = j.agent === "do-nothing" ? 0 : policies[j.agent];
       if (pol === undefined) throw new Error("download " + j.agent + " first");
+      if (j.mode === "search") {
+        const ep = engine.newSearchEpisode(sc.procedure, sc.seed, sc.flights, pol, j.search);
+        let done = false, last = 0;
+        while (!done) {
+          done = engine.step(ep, 1);
+          const now = performance.now();
+          if (now - last > 120 || done) {
+            last = now;
+            const st = engine.status(ep);
+            const b = st.best;
+            postMessage({ id: m.id, frac: st.progress, live: st,
+              stage: st.planning ? `plan ${st.plan}: candidate ${st.candidate}/${st.of}` + (b ? ` · best ${b.on_time}/${sc.flights} on time${b.los ? ", LoS" : ""}` : "")
+                : `flying the plan (decision ${st.decisions})` });
+          }
+        }
+        const r = engine.result(ep);
+        engine.free(ep);
+        r.attempts = [Object.assign({ attempt: 0 }, r.summary)];
+        r.chosen_attempt = 0;
+        r.elapsed_s = Math.round((performance.now() - t0) / 10) / 100;
+        postMessage({ id: m.id, done: true, result: r });
+        return;
+      }
       const n = j.mode === "sampled" ? j.attempts + 1 : 1;
       let best = null, bestRank = null;
       const attempts = [];
