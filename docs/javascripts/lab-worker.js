@@ -149,10 +149,10 @@ async function search(m, j, sc, pol, t0) {
     st.threads = pool.length || 1;
     st.elapsed_s = Math.round((now - t0) / 100) / 10;
     const b = st.best, total = st.n_flights;
-    // the episode so far, after each finished plan and every 0.7 s of flying: the page follows it on the radar
+    // the episode so far, after each finished plan and every 1.5 s of flying (each one re-mounts the replay): the page follows it on the radar
     let partial = null;
     const newPlan = (st.history || []).length > plansSeen, moved = st.decisions > lastDec;
-    if (!done && ((newPlan && now - lastPartial > 400) || (moved && now - lastPartial > 700))) {
+    if (!done && ((newPlan && now - lastPartial > 1000) || (moved && now - lastPartial > 1500))) {
       plansSeen = (st.history || []).length; lastPartial = now; lastDec = st.decisions;
       partial = engine.result(ep);  // ~80 ms for a 60-flight stream
     }

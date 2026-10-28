@@ -29,6 +29,11 @@ The in-browser engine also has two things the runner does not:
   lose/gain|, banded at the tertiles of the paper's curated seeds), joined by gaps you choose. Each segment is exactly
   the single scenario of its seed and size, so a segment you liked can be reused anywhere. The link in the address bar
   holds the whole composition.
+- **Airports from OpenStreetMap.** Zoom in on the radar or the 3D view and MXP or BGY appears: runways, taxiways,
+  aprons and the airport's buildings (at their real height in 3D, whatever the altitude exaggeration), with the
+  surroundings as plain shapes (built-up areas, woods, water, rivers, major roads). Each layout is placed on the
+  simulator's landing threshold and turned onto the flights' final approach. Map data © OpenStreetMap contributors,
+  under the [ODbL](https://opendatacommons.org/licenses/odbl/); baked by `lab/osm_airports.py`.
 - **Parallel planning.** Rollout search spreads each plan's candidates over several CPU cores (*CPU threads* in the
   search settings). The plans chosen are the same for any number of threads; more threads only finish them sooner.
 For everything else, run the **lab runner**: a small local server that drives the simulator and every agent's
