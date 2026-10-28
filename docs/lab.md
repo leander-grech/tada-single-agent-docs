@@ -9,18 +9,21 @@ hide:
 Generate a scenario, pick an agent, fly it. Every flight runs the real simulator and the agent's own checkpoint,
 scored exactly as the paper scores it (scenario and observation frame pinned by the seed), so a curated seed on the
 MONAD-aligned generator reproduces the paper's episode. The replay is instant; the MP4 render is drawn in the
-background and cached. Flights run on your own machine through the lab runner (`lab/run.sh` in the docs repo), which
-this page finds by itself. Renders made before the lab are in the [render archive](renders.md).
+background and cached. Flights run on your own machine: either right here in the browser (the simulator and the paper's
+agents compiled to WebAssembly, nothing to install; it unlocks with an engine key from the TADA team), or through the lab runner (`lab/run.sh` in the docs repo), which
+adds every agent, the legacy generator, search and MP4 renders; the page finds a running one by itself. Renders made
+before the lab are in the [render archive](renders.md).
 
-<div id="lab-app" class="tada-lab" data-runners="http://localhost:8800 http://127.0.0.1:8800">
+<div id="lab-app" class="tada-lab" data-runners="http://localhost:8800 http://127.0.0.1:8800" data-assets="../assets/lab/" data-worker="../javascripts/lab-worker.js">
   <noscript>The lab needs JavaScript.</noscript>
 </div>
 
 ## Run the Lab on your machine { #run-the-lab }
 
-This page never computes anything in your browser and never downloads model files into it. Flights run in
-the **lab runner**, a small local server that drives the simulator and the agents' checkpoints. You start
-it once, and this page finds it by itself on `http://localhost:8800`.
+Without a runner the Lab still works in the browser with an engine key (MONAD generator, the two paper agents, policy
+and best-of-K). The key unlocks the published, encrypted simulator; keys are issued by hand by the TADA team.
+For everything else, run the **lab runner**: a small local server that drives the simulator and every agent's
+checkpoint. You start it once, and this page finds it by itself on `http://localhost:8800`.
 
 **You need**
 

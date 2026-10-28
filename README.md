@@ -78,3 +78,11 @@ into `~/.cache/tada-lab/models/<id>/` (`TADA_LAB_MODELS` overrides). Agents whos
 repo's `experiments/` need no download. To publish more agents: `python lab/make_agent_bundles.py OUT_DIR <ids>` (it
 rewrites `lab/registry.json`), upload `OUT_DIR/*.zip` to a release, commit the registry. `lab/run.sh --registry-only`
 shows what a machine without `experiments/` sees.
+
+### In-browser engine
+
+Without a runner, the Lab can fly the paper agents (1_76, 1_77) in the browser with a WebAssembly build of the TADA
+simulator and environment. It is published encrypted (`docs/assets/lab/engine.bin`, `engine.json`) and unlocks with
+an engine key that the TADA team shares confidentially; the page decrypts it in memory with WebCrypto. The agent
+weights (`docs/assets/lab/agents/*.safetensors`, exported from the `paper-agents-v1` bundles by
+`inference/export_weights.py`) load only when the viewer presses Download, checked against `agents.json`'s sha256.

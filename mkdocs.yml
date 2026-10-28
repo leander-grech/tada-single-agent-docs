@@ -37,6 +37,7 @@ extra_css:
 
 extra_javascript:
   - javascripts/tada.js
+  - javascripts/lab-engine.js
   - javascripts/lab.js
 
 markdown_extensions:

@@ -5,3 +5,10 @@ lab/cache/
 lab/server.log
 lab/.venv/
 lab/runner.env
+browser/target/
+browser/fixtures/
+browser/pkg/
+browser/assets/
+browser/web/*.wasm
+browser/web/*.safetensors
+docs/assets/lab/tada_browser.wasm

@@ -1,0 +1,59 @@
+{
+ "procedures": {
+  "tmb": {
+   "label": "TMB",
+   "name": "Trombone (MXP)",
+   "use_case": 1
+  },
+  "pms": {
+   "label": "PMS",
+   "name": "Point merge (BGY)",
+   "use_case": 2
+  }
+ },
+ "reference": {
+  "tmb": "1_76",
+  "pms": "1_77"
+ },
+ "generators": {
+  "monad": "5 NM AMAN spacing, no random extra TTL: the multi-agent team's generator, paper figures v5"
+ },
+ "agents": [
+  {
+   "id": "1_76",
+   "procedure": "tmb",
+   "whats_new": "Fine-tune stage 3, all streams: 1_74 continued for 5M steps at LR 1e-5 to 1e-6, entropy 0.001 (2% warm-up, 100k critic warm-up) on the full TMB stream distribution, feasible and harder streams as in the validation seeds.",
+   "note": "Its control is 1_78, the same stage on feasible streams only. Its tracker peaked at 68 solved at 2M and 3M steps; the card scores the final model, as for every run. 1_82 and 1_101 continue from it.",
+   "headline": {
+    "n": 100,
+    "solved": 59,
+    "los": 10
+   },
+   "trainer": "jax",
+   "card": "models/1_76/",
+   "weights": {
+    "url": "agents/1_76.safetensors",
+    "size": 791256,
+    "sha256": "7144506c514d8327330280495941ab78c99e5bb77357149c499daea3f279dc16"
+   }
+  },
+  {
+   "id": "1_77",
+   "procedure": "pms",
+   "whats_new": "Fine-tune stage 3, all streams: 1_75 continued for 5M steps at LR 1e-5 to 1e-6, entropy 0.001 (2% warm-up, 100k critic warm-up) on the full point-merge stream distribution, feasible and harder streams as in the validation seeds.",
+   "note": "Its control is 1_79, the same stage on feasible streams only.",
+   "headline": {
+    "n": 100,
+    "solved": 41,
+    "los": 9
+   },
+   "trainer": "jax",
+   "card": "models/1_77/",
+   "weights": {
+    "url": "agents/1_77.safetensors",
+    "size": 791272,
+    "sha256": "29d06aa6e60407aeedf0e02847480be6f42bcbf9c662f6fe62a9cccf9887ef79"
+   }
+  }
+ ]
+}
