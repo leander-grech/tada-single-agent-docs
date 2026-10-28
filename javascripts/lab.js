@@ -8,6 +8,14 @@
   var RUNNERS = (root.getAttribute("data-runners") || "http://localhost:8800 http://127.0.0.1:8800").split(/\s+/);
   var SAVED_KEY = "tada-lab-runner";
   var BASE = "";  // runner origin; "" = the origin that served this page
+  // The in-browser engine (WebAssembly simulator + policy, javascripts/lab-engine.js): used when started
+  // from the page, instead of a runner. Its assets load only then.
+  var ENGINE = null;
+  var ASSETS = root.getAttribute("data-assets") || "../assets/lab/";
+  var WORKER = root.getAttribute("data-worker") || "../javascripts/lab-worker.js";
+  var ENGINE_KEY = "tada-lab-engine";
+  var KEY_STORE = "tada-lab-key";
+  var KEY_REQUEST = root.getAttribute("data-key-request") || "";  // where viewers ask for an engine key
 
   // ---------------------------------------------------------------- helpers
   function h(tag, attrs, kids) {
@@ -26,6 +34,7 @@
   }
   function $(sel, el) { return (el || root).querySelector(sel); }
   function api(path, body) {
+    if (ENGINE) return ENGINE.api(path, body);
     var opt = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
     return fetch(BASE + "/api" + path, opt).then(function (r) {
       return r.json().then(function (j) { if (!r.ok) throw new Error(j.error || r.statusText); return j; });
@@ -98,7 +107,7 @@
       });
     });
   }
-  function loadFlight(key) { return fetch(BASE + "/lab-cache/" + key + ".json").then(function (r) { return r.json(); }); }
+  function loadFlight(key) { if (ENGINE) return ENGINE.flight(key); return fetch(BASE + "/lab-cache/" + key + ".json").then(function (r) { return r.json(); }); }
 
   // ---------------------------------------------------------------- downloads (registry agents)
   // A public agent that is not on the runner's machine is fetched only when its Download button is
@@ -108,9 +117,10 @@
   function needDownload(e) { var m = /download (\S+) first/.exec(e && e.message || ""); return m ? m[1] : null; }
   function downloadBtn(a, why) {
     var btn = h("button", { type: "button", class: "lab-btn lab-btn--fly lab-btn--dl", title: a.download ? a.download.url : null },
-      ["⬇ Download ", h("b", { text: a.id }), " to the runner" + (a.download ? " · " + mb(a.download.size) : "")]);
+      ["⬇ Download ", h("b", { text: a.id }), (ENGINE ? " to this browser" : " to the runner") + (a.download ? " · " + mb(a.download.size) : "")]);
     var hint = h("div", { class: "lab-field__hint", text: (why ? why + " " : "") +
-      "The runner fetches the published bundle (GitHub release) onto its own machine and checks its sha256; nothing is saved by your browser." });
+      (ENGINE ? "The page fetches the published weights into this tab's memory (nothing is stored) and checks their sha256." :
+        "The runner fetches the published bundle (GitHub release) onto its own machine and checks its sha256; nothing is saved by your browser.") });
     btn.addEventListener("click", function () {
       btn.disabled = true; btn.textContent = "Downloading " + a.id + "…";
       runJob("install", { agent: a.id }, function (st) {
@@ -194,7 +204,7 @@
     body.appendChild(field("Flights per stream", h("div", { class: "lab-row" }, [flights, fv]),
       "Agents train on 20; the window always shows the next 10 in AMAN order."));
 
-    body.appendChild(field("Stream segments", seg("segments", [1, 2, 3].map(function (n) {
+    body.appendChild(field("Stream segments", seg("segments", [1, 2, 3].slice(0, cat.max_segments || 3).map(function (n) {
       return { value: n, label: n === 1 ? "single" : n + " stitched" };
     }), S.sc.segments, function (v) { S.sc.segments = v; renderGen(); scenarioChanged(); }),
       S.sc.segments > 1 ? "Generated scenarios joined by a random 2–15 min gap: a continuous-operation stress test." : null));
@@ -255,6 +265,8 @@
     var modes = [{ value: "det", label: "Policy", title: "The deterministic policy, as deployed" },
       { value: "sampled", label: "Best of K", title: "Attempt 0 deterministic plus K sampled attempts; the best is kept (no LoS, then brackets, then fewest clearances)" },
       { value: "search", label: "Policy + search", title: "Receding-horizon rollout search: K=8 full-episode rollouts every 10 decisions (the paper's best agent)" }];
+    if (S.catalog.modes) modes = modes.filter(function (m) { return S.catalog.modes.indexOf(m.value) >= 0; });
+    if (modes.every(function (m) { return m.value !== S.mode; })) S.mode = "det";
     body.appendChild(field("Mode", seg("mode", modes, S.mode, function (v) { S.mode = v; renderAgents(); syncFlightTitle(); })));
     if (S.mode === "sampled") {
       var k = h("select", { class: "lab-input", onchange: function () { S.attempts = +this.value; } },
@@ -263,7 +275,7 @@
     }
     var all = h("button", { type: "button", class: "lab-btn lab-btn--ghost", onclick: flyAll, title: "Deterministic policy of every installed agent of this procedure, on this scenario" }, ["Fly every agent"]);
     if (S.agent !== "do-nothing" && !isInstalled(S.agent)) {
-      body.appendChild(downloadBtn(agentById(S.agent), S.agent + " is not on this runner yet."));
+      body.appendChild(downloadBtn(agentById(S.agent), S.agent + (ENGINE ? " is not loaded in this browser yet." : " is not on this runner yet.")));
     } else {
       var fly = h("button", { type: "button", class: "lab-btn lab-btn--fly", id: "lab-fly", onclick: function () { flySelected(); } },
         ["Fly ", h("b", { text: S.agent }), " ▸"]);
@@ -283,7 +295,7 @@
         a.paper ? h("span", { class: "lab-agent__tag", text: "paper" }) : null,
         h("span", { class: "lab-agent__what", text: a.whats_new.split(/[:.]/)[0] }),
         h("span", { class: "lab-agent__meta" }, [a.trainer.replace("jax_sac", "SAC").replace("jax", "PPO·JAX").replace("sb3", "PPO·SB3").replace("distill_bc", "distilled"), hl ? " · " : "", hl,
-          !a.installed ? h("span", { class: "lab-agent__dl", text: " · ⬇ " + (a.download ? mb(a.download.size) : "") + " not on this runner" })
+          !a.installed ? h("span", { class: "lab-agent__dl", text: " · ⬇ " + (a.download ? mb(a.download.size) : "") + (ENGINE ? " to download" : " not on this runner") })
             : a.source === "downloaded" ? " · downloaded" : a.public ? " · public" : ""])
       ]);
     }
@@ -441,7 +453,7 @@
       .catch(function (e) {
         S.flying = false;
         var id = needDownload(e);
-        if (id) { downloadPrompt(body, id, id + " is not on this runner yet."); return; }
+        if (id) { downloadPrompt(body, id, id + (ENGINE ? " is not loaded in this browser yet." : " is not on this runner yet.")); return; }
         body.innerHTML = ""; body.appendChild(errBox(e));
       });
   }
@@ -470,7 +482,7 @@
       { label: "On time (±60 s)", value: s.on_time + "/" + s.n_flights, cls: s.on_time === s.n_flights ? "ok" : "" , sub: s.landed + " landed" },
       { label: "Max |landing dev|", value: Math.round(s.max_dev), unit: "s", cls: s.landed ? (s.max_dev <= 60 ? "ok" : "warn") : "" },
       { label: "Clearances", value: s.clearances },
-      { label: "Min separation", value: s.min_separation_nm == null ? "–" : (+s.min_separation_nm).toFixed(1), unit: "NM", cls: s.los ? "bad" : "" }
+      { label: "Min separation", value: s.min_separation_nm == null ? "–" : (+s.min_separation_nm).toFixed(1), unit: s.min_separation_nm == null ? null : "NM", cls: s.los ? "bad" : "" }
     ];
     if (d.attempts.length > 1) t.push({ label: "Attempt kept", value: d.chosen_attempt, sub: "of " + d.attempts.length + " (0 = deterministic)" });
     if (d.search) t.push({ label: "Search", value: d.search.n_rollouts, unit: "rollouts", sub: d.search.n_plans + " plans · " + d.elapsed_s + " s" });
@@ -499,6 +511,11 @@
 
   function videoPane(d, key) {
     var box = h("div", { class: "lab-video" });
+    if (ENGINE) {
+      box.appendChild(h("p", { class: "lab-field__hint", html: "The official MP4 render is drawn by a lab runner (matplotlib). " +
+        "In the browser, the Replay tab shows the same flight. <a href=\"#run-the-lab\">Run the Lab on your machine \u2193</a>" }));
+      return box;
+    }
     function show() {
       box.innerHTML = "";
       box.appendChild(h("video", { controls: true, preload: "metadata", src: BASE + "/lab-cache/" + key + ".mp4" }));
@@ -878,8 +895,16 @@
   function connBar(found) {
     var bar = h("div", { class: "lab-conn" }, [
       h("span", { class: "lab-conn__dot", "aria-hidden": "true" }),
-      h("span", {}, ["Runner ", h("code", { text: label(found.base) }), " · " + found.info.agents + " agents · " + found.info.cached + " cached flights"]),
-      h("button", { type: "button", class: "lab-btn lab-btn--link", onclick: function () { bar.replaceWith(runnerForm(found.base)); } }, ["change"])
+      found.base === "browser"
+        ? h("span", {}, ["Engine ", h("code", { text: "this browser (WebAssembly)" }), " · paper agents · MONAD generator · nothing installed on your machine"])
+        : h("span", {}, ["Runner ", h("code", { text: label(found.base) }), " · " + found.info.agents + " agents · " + found.info.cached + " cached flights"]),
+      found.base === "browser"
+        ? h("span", {}, [
+            h("button", { type: "button", class: "lab-btn lab-btn--link", onclick: function () { store(null); storeEngine(null); location.reload(); } }, ["use a runner instead"]),
+            " · ",
+            h("button", { type: "button", class: "lab-btn lab-btn--link", title: "Remove the engine key from this browser",
+              onclick: function () { storeKey(null); storeEngine(null); location.reload(); } }, ["forget key"])])
+        : h("button", { type: "button", class: "lab-btn lab-btn--link", onclick: function () { bar.replaceWith(runnerForm(found.base)); } }, ["change"])
     ]);
     return bar;
   }
@@ -901,11 +926,14 @@
       msg
     ]);
   }
-  function offline(tried) {
+  var LAST_TRIED = [];
+  function offline(tried, keyError) {
+    LAST_TRIED = tried;
     root.innerHTML = "";
     var https = location.protocol === "https:";
     root.appendChild(h("div", { class: "lab-offline" }, [
       h("div", { class: "lab-offline__head" }, [h("span", { class: "lab-conn__dot is-off", "aria-hidden": "true" }), "No lab runner found"]),
+      window.TadaBrowserEngine ? engineOffer(keyError) : null,
       h("p", { html: "The Lab flies agents with the simulator and the checkpoints on <b>your</b> machine, through a small " +
         "local runner. Set it up once (Linux x86-64, Python 3.12, access to the private TADA code repository), then start it; " +
         "this page connects by itself as soon as it is up:" }),
@@ -980,8 +1008,52 @@
       h("p", { class: "lab-field__hint", html: "Fix the ✗ items, restart <code>lab/run.sh</code> and reload this page. <a href=\"#run-the-lab\">Setup instructions \u2193</a>" })
     ]));
   }
+  function savedKey() { try { return localStorage.getItem(KEY_STORE); } catch (e) { return null; } }
+  function storeKey(v) { try { if (v == null) localStorage.removeItem(KEY_STORE); else localStorage.setItem(KEY_STORE, v); } catch (e) {} }
+  function engineOffer(err) {
+    var input = h("input", { class: "lab-input lab-key__input", type: "password", autocomplete: "off", spellcheck: "false",
+      placeholder: "tada1-…", "aria-label": "engine key" });
+    var remember = h("input", { type: "checkbox", checked: true, id: "lab-key-remember" });
+    var go = function () { if (input.value.trim()) startBrowser(input.value.trim(), remember.checked); };
+    input.addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
+    return h("div", { class: "lab-engine-offer" }, [
+      h("div", { class: "lab-offline__head lab-key__head", text: "Run the Lab in this browser" }),
+      h("p", { class: "lab-field__hint", text: "The in-browser engine is the TADA simulator with the paper's two agents (1_76 trombone, " +
+        "1_77 point merge), compiled to WebAssembly: nothing to install. It is shared with registered users, so it is published " +
+        "encrypted and unlocks with an engine key. Agent weights (under 1 MB each) load only when you press Download." }),
+      err ? h("div", { class: "lab-error", text: "⚠ " + err }) : null,
+      h("div", { class: "lab-row lab-key" }, [input,
+        h("button", { type: "button", class: "lab-btn lab-btn--fly", onclick: go }, ["Unlock ▸"])]),
+      h("label", { class: "lab-field__hint lab-key__remember", for: "lab-key-remember" }, [remember, " remember the key on this browser"]),
+      h("p", { class: "lab-field__hint", html: (KEY_REQUEST
+        ? "No key? <a href=\"" + KEY_REQUEST + "\" target=\"_blank\" rel=\"noopener\">Request one</a>; keys are issued by hand by the TADA team. "
+        : "No key? Ask the TADA team; keys are issued by hand. ") +
+        "A lab runner (below) needs no key but needs the TADA code repository." })
+    ]);
+  }
+  function storeEngine(v) { try { if (v == null) localStorage.removeItem(ENGINE_KEY); else localStorage.setItem(ENGINE_KEY, v); } catch (e) {} }
+  function startBrowser(key, remember) {
+    if (ENGINE) return;
+    root.innerHTML = ""; root.appendChild(progressBox("Unlocking the in-browser engine…"));
+    window.TadaBrowserEngine.start(ASSETS, WORKER, key).then(function (eng) {
+      ENGINE = eng;
+      if (remember) { storeKey(key); storeEngine("browser"); }
+      return start({ base: "browser", info: eng.info() });
+    }).catch(function (e) {
+      ENGINE = null;
+      storeKey(null); storeEngine(null);
+      offline(LAST_TRIED, e.message);
+    });
+  }
   function boot(retry) {
+    if (ENGINE) return;
     findRunner().then(start).catch(function (tried) {
+      if (ENGINE) return;
+      if (!retry) {
+        var pref = null;
+        try { pref = localStorage.getItem(ENGINE_KEY); } catch (e) {}
+        if (pref === "browser" && window.TadaBrowserEngine && savedKey()) { startBrowser(savedKey(), true); return; }
+      }
       if (!Array.isArray(tried)) { root.innerHTML = ""; root.appendChild(errBox(tried)); return; }
       if (!retry) offline(tried);
       setTimeout(function () { if (!root.querySelector(".lab-conn--form input:focus")) boot(true); }, 3000);

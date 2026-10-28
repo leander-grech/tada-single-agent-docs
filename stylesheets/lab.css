@@ -250,3 +250,9 @@ output.lab-num { min-width: 2em; text-align: right; font-size: 0.8rem; color: va
 .lab-check--error b { color: var(--tada-bad); }
 .lab-seg__btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .lab-offline__cmd code { white-space: pre; }
+.lab-engine-offer { margin: 0.6rem 0 1rem; padding: 0.7rem 0.8rem; border: 1px solid var(--tada-champion); border-radius: var(--tada-radius); background: var(--tada-champion-bg); }
+.lab-engine-offer .lab-field__hint { margin-top: 0.5rem; }
+.lab-key { margin: 0.4rem 0; flex-wrap: wrap; }
+.lab-key__input { flex: 1 1 18rem; font-family: var(--tada-font-mono); }
+.lab-key__head { color: var(--tada-champion); margin-bottom: 0.3rem; }
+.lab-key__remember { display: flex; align-items: center; gap: 0.35rem; }
