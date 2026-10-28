@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "release": "paper-agents-v1",
+  "repo": "leander-grech/tada-single-agent-docs",
+  "agents": [
+    {
+      "id": "1_76",
+      "procedure": "tmb",
+      "run": "atc_run_1_76_ft3_tmb_full",
+      "url": "https://github.com/leander-grech/tada-single-agent-docs/releases/download/paper-agents-v1/tada-agent-1_76.zip",
+      "file": "tada-agent-1_76.zip",
+      "size": 823893,
+      "sha256": "7eadcffb757682530bf9f0240a5a73980f8af5b50511e04dc615cf1d793feefe"
+    },
+    {
+      "id": "1_77",
+      "procedure": "pms",
+      "run": "atc_run_1_77_ft3_pms_full",
+      "url": "https://github.com/leander-grech/tada-single-agent-docs/releases/download/paper-agents-v1/tada-agent-1_77.zip",
+      "file": "tada-agent-1_77.zip",
+      "size": 821796,
+      "sha256": "75bee2f5f5d6ef4a70f0e03ec19f06bc0ec2afd2c10b4c248f0b490ab62e8fd5"
+    }
+  ]
+}

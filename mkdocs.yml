@@ -33,9 +33,11 @@ theme:
 extra_css:
   - stylesheets/tada-components.css
   - stylesheets/theme.css
+  - stylesheets/lab.css
 
 extra_javascript:
   - javascripts/tada.js
+  - javascripts/lab.js
 
 markdown_extensions:
   - admonition
@@ -149,7 +151,7 @@ nav:
           - "1_16_a": models/1_16_a.md
           - "1_16": models/1_16.md
       # END generated model nav
-  - Renders: renders.md
+  - Lab: lab.md
   - How it works:
       - The problem: how/problem.md
       - Environments: how/environments.md
@@ -188,4 +190,5 @@ nav:
       - 10-aircraft tests: archive/ten-aircraft-tests.md
       - Early runs: archive/early-runs.md
       - Point merge: archive/point-merge.md
+      - Render archive: renders.md
   - Glossary: glossary.md

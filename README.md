@@ -13,6 +13,7 @@ The public docs of the TADA single-agent RL project (mkdocs-material, Glass Cock
 | everything else in `docs/` | hand-written |
 | `render-meta/<batch>/` | renders made on this machine: the script, each video's `_solutions.json` and log (the videos themselves go to `docs/assets/renders/`) |
 | `docs/stylesheets/theme.css`, `tada-components.css`, `docs/javascripts/tada.js` | theme tokens, components, sortable tables |
+| `lab/`, `docs/lab.md`, `docs/javascripts/lab.js`, `docs/stylesheets/lab.css` | the TADA Lab: scenario generator, agent picker, live flights and cached renders |
 
 ## Adding a model or an evaluation
 
@@ -36,3 +37,38 @@ registry (evaluations only where a model has none for that battery).
 ## Publishing
 
 Manual, and only after review: `git push origin main`, then `mkdocs gh-deploy --force`.
+
+## TADA Lab
+
+The Lab tab replaces the render gallery: pick scenario parameters (procedure, generator, flights, stitched
+segments, seed or a curated-seed difficulty), pick an agent and a mode (deterministic policy, best of K sampled,
+policy + rollout search), and fly it. Flights run live through the code repo on the viewer's machine, through the
+lab runner:
+
+```bash
+lab/run.sh            # runner on 127.0.0.1:8800; add --open to open the published Lab page
+```
+
+The Lab page looks for a runner by itself (a runner URL saved in the page, then the server that served the page, then
+`http://localhost:8800`, then `http://127.0.0.1:8800`), so the **published** page works with a runner on the
+viewer's own machine: browsers treat `http://localhost` as a secure origin, and the runner answers CORS and Chrome's
+private-network preflight for `https://leander-grech.github.io` and localhost pages only (`--allow-origin` adds
+others); POSTs must be JSON from an allowed origin. From the https page only localhost is reachable; to use a runner
+on another machine, serve the page from it: `lab/run.sh --build --host 0.0.0.0`, then open `http://<host>:8800/lab/`.
+`--build` runs `mkdocs build` first; the server serves `site/` (if built), the job API and `lab/cache/` (flights as
+JSON, renders as MP4, gitignored). Each job is one `lab/worker.py` process with the agent's
+environment variables from its `run_meta.json`; episodes are flown exactly as `analysis/score_windowed.py` scores
+them, and a render replays the flight's executed actions and refuses to write a video if the replay diverges.
+Agents come from `models.yaml` (windowed track, checkpoint present; point-merge runs before the v2pms action set
+are left out). Renders made before the lab stay in the render archive (`renders.md`, under Archive).
+
+### Public agents and downloads
+
+The paper agents (1_76 TMB, 1_77 PMS) are published as bundles on the GitHub release
+[`paper-agents-v1`](https://github.com/leander-grech/tada-single-agent-docs/releases/tag/paper-agents-v1); `lab/registry.json`
+lists each bundle's URL, size and sha256. A runner lists registry agents it does not have with a **Download** button:
+only when that button is pressed does the runner (never the browser) fetch the bundle, check the hash and unpack it
+into `~/.cache/tada-lab/models/<id>/` (`TADA_LAB_MODELS` overrides). Agents whose checkpoints are already in the code
+repo's `experiments/` need no download. To publish more agents: `python lab/make_agent_bundles.py OUT_DIR <ids>` (it
+rewrites `lab/registry.json`), upload `OUT_DIR/*.zip` to a release, commit the registry. `lab/run.sh --registry-only`
+shows what a machine without `experiments/` sees.
