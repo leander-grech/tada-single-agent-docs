@@ -753,11 +753,14 @@
     var SECTOR_HUES = ["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854", "#ffd92f", "#e5c494", "#80b1d3", "#fb8072", "#bebada"];
     var FADE = 5;        // decisions a clearance glyph stays on the scope
     var TRAIL = 12;      // decisions of track history drawn behind each aircraft
-    var LAYERS_KEY = "tada-lab-layers";
-    var layers = { sectors: true, rings: true, routes: true, labels: true, plans: true };
+    var LAYERS_KEY = "tada-lab-layers-v2";
+    // starts quiet: call-sign tags only; full data blocks are one click away
+    var layers = { sectors: true, rings: true, routes: true, labels: "tags", plans: true };
     // predicted rollouts of the search: their own palette, so they never read as real traffic
     var PRED = { chosen: "#ffe66d", other: "#dff6ff", los: "#ff6b8b", pruned: "#8a94a6" };
     try { Object.assign(layers, JSON.parse(localStorage.getItem(LAYERS_KEY) || "{}")); } catch (e) {}
+    if (["off", "tags", "full"].indexOf(layers.labels) < 0) layers.labels = "tags";
+    function saveLayers() { try { localStorage.setItem(LAYERS_KEY, JSON.stringify(layers)); } catch (e) {} }
 
     var d, frames, colors, playing = false, speed = 2, u = 0, raf = null, lastTs = 0;
     var view = { zoom: 1, cx: null, cy: null }, proj = null;  // zoom/pan (world NM at the canvas centre)
@@ -889,7 +892,7 @@
       tl = h("canvas", { class: "lab-timeline", "aria-label": "clearance timeline: click or drag to seek" });
       tlCache = null; tlHover = null;
       attachTimeline(tl);
-      cv = h("canvas", { class: "lab-map", "aria-label": "radar replay: scroll to zoom, drag to pan, double-click to reset" });
+      cv = h("canvas", { class: "lab-map", "aria-label": "radar replay: Ctrl + scroll to zoom, drag to pan, double-click to reset" });
       attachZoom(cv);
       strip = h("canvas", { class: "lab-strip", "aria-label": "deviation per flight" });
       slider = h("input", { type: "range", min: 0, max: frames.length - 1, step: 1, value: 0, class: "lab-range lab-scrub", "aria-label": "time" });
@@ -901,17 +904,28 @@
           speed = s; spd.querySelectorAll("button").forEach(function (b) { b.classList.toggle("is-on", +b.getAttribute("data-s") === s); });
         } }, [s + "×"]);
       }));
-      var layerList = [["sectors", "Sectors"], ["rings", "Range rings"], ["routes", "Flight plans"], ["labels", "Data blocks"]];
-      if (plans.length) layerList.push(["plans", "Search plans (predicted)"]);
-      var toggles = h("div", { class: "lab-layers" }, layerList.map(function (l) {
-        var cb = h("input", { type: "checkbox", checked: layers[l[0]] ? true : null });
-        cb.addEventListener("change", function () {
-          layers[l[0]] = cb.checked;
-          try { localStorage.setItem(LAYERS_KEY, JSON.stringify(layers)); } catch (e) {}
+      // display toolbar: layer toggle buttons and the label density
+      var layerList = [["sectors", "Sectors", "#8da0cb"], ["rings", "Range rings", "#3fd0ff"], ["routes", "Flight plans", "#9aabc6"]];
+      if (plans.length) layerList.push(["plans", "Search plans", "#ffe66d"]);
+      var labelSeg = seg("labels", [{ value: "off", label: "Off", title: "No aircraft labels" },
+        { value: "tags", label: "Tags", title: "Call signs only" },
+        { value: "full", label: "Full", title: "Data blocks: call sign, deviation, flight level, speed" }], layers.labels, function (v) {
+        layers.labels = v; saveLayers();
+        labelSeg.querySelectorAll("button").forEach(function (b, n) { var on = ["off", "tags", "full"][n] === v; b.classList.toggle("is-on", on); b.setAttribute("aria-checked", on ? "true" : "false"); });
+        draw();
+      });
+      labelSeg.classList.add("lab-seg--sm");
+      var toggles = h("div", { class: "lab-layers", role: "toolbar", "aria-label": "radar display" }, layerList.map(function (l) {
+        var b = h("button", { type: "button", class: "lab-tgl" + (layers[l[0]] ? " is-on" : ""), "aria-pressed": layers[l[0]] ? "true" : "false",
+          title: (layers[l[0]] ? "Hide " : "Show ") + l[1].toLowerCase() }, [h("i", { class: "lab-tgl__dot", style: "background:" + l[2] }), l[1]]);
+        b.addEventListener("click", function () {
+          layers[l[0]] = !layers[l[0]]; saveLayers();
+          b.classList.toggle("is-on", layers[l[0]]); b.setAttribute("aria-pressed", layers[l[0]] ? "true" : "false");
+          b.title = (layers[l[0]] ? "Hide " : "Show ") + l[1].toLowerCase();
           draw();
         });
-        return h("label", { class: "lab-layers__item" }, [cb, " " + l[1]]);
-      }));
+        return b;
+      }).concat([h("span", { class: "lab-layers__sep", "aria-hidden": "true" }), h("span", { class: "lab-layers__label", text: "Labels" }), labelSeg]));
       var cats = [["SLOW_DOWN_LARGE", "slow down (1–3 steps)"], ["SPEED_UP_MEDIUM", "speed up"], ["TURN_LEFT_AND_RETURN_TO_ROUTE", "turn L/R + rejoin"],
         ["LENGTHEN_TROMBONE", "trombone ±"], ["SKIP_2_WAYPOINTS_NOT_NEXT", "skip n waypoints"],
         [procLabel === "BGY" ? "DIRECT_TO_MERGE_POINT" : "VECTOR_TO_ILS", procLabel === "BGY" ? "direct to merge point" : "vector to ILS"]];
@@ -954,9 +968,17 @@
       }
       view.zoom = z; draw();
     }
+    function zoomHint(c) {
+      var host = c.parentNode, tip = host.querySelector(".lab-zoomhint");
+      if (!tip) { tip = h("div", { class: "lab-zoomhint", text: (/Mac/.test(navigator.platform) ? "⌘" : "Ctrl") + " + scroll to zoom · drag to pan" }); host.appendChild(tip); }
+      tip.classList.add("is-on");
+      clearTimeout(tip._t); tip._t = setTimeout(function () { tip.classList.remove("is-on"); }, 1100);
+    }
     function attachZoom(c) {
       var drag = null;
       c.addEventListener("wheel", function (e) {
+        // plain scrolling scrolls the page; Ctrl/Cmd + scroll (and trackpad pinch, which sends ctrlKey) zooms
+        if (!e.ctrlKey && !e.metaKey) { zoomHint(c); return; }
         e.preventDefault();
         var r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
         zoomBy(Math.exp(-e.deltaY * 0.0015), (e.clientX - r.left) * dpr, (e.clientY - r.top) * dpr);
@@ -1261,7 +1283,7 @@
         if (a[5] === 0) {
           ctx.globalAlpha = 0.55; ctx.strokeStyle = col; ctx.lineWidth = 1.2 * dpr;
           ctx.beginPath(); ctx.arc(x, y, 3.5 * dpr, 0, 2 * Math.PI); ctx.stroke();
-          if (layers.labels) { ctx.fillStyle = "rgba(154,171,198,0.7)"; ctx.font = (9 * dpr) + "px " + mono; ctx.fillText(shortCs(cs), x + 6 * dpr, y + 3 * dpr); }
+          if (layers.labels === "full") { ctx.fillStyle = "rgba(154,171,198,0.7)"; ctx.font = (9 * dpr) + "px " + mono; ctx.fillText(shortCs(cs), x + 6 * dpr, y + 3 * dpr); }
           ctx.globalAlpha = 1; return;
         }
         if (halo[cs]) {
@@ -1279,7 +1301,10 @@
         var s = 7.5 * dpr;
         ctx.beginPath(); ctx.moveTo(s * 1.5, 0); ctx.lineTo(-s, s * 0.9); ctx.lineTo(-s * 0.45, 0); ctx.lineTo(-s, -s * 0.9); ctx.closePath(); ctx.fill(); ctx.stroke();
         ctx.restore();
-        if (layers.labels) {
+        if (layers.labels === "tags") {  // call sign only, tucked above-right of the aircraft
+          ctx.font = "600 " + (9 * dpr) + "px " + mono; ctx.fillStyle = "rgba(244,248,255,0.82)";
+          ctx.fillText(shortCs(cs), x + 7 * dpr, y - 7 * dpr);
+        } else if (layers.labels === "full") {
           var dev = a[6], dc = Math.abs(dev) <= 60 ? ok : Math.abs(dev) <= 300 ? warn : bad;
           var l1 = shortCs(cs), l1b = sgn(dev) + "s", l2 = "FL" + Math.round(a[3] / 100) + " " + Math.round(a[4]) + "kt";
           ctx.font = "700 " + (10 * dpr) + "px " + mono;
