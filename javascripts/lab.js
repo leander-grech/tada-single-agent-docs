@@ -1022,7 +1022,9 @@
     var segOf = {};                                                      // composed stream: callsign -> segment
     var initialOf = {}, devHover = null, devGeo = null;                  // the whole-stream deviation chart
     // the 3D view: an orbit camera around a ground point (yaw from north, pitch above the horizon, distance in NM)
-    var cam = null, spin = null, FT_NM = 1 / 6076.12;
+    var cam = null, spin = null, FT_NM = 1 / 6076.12, setViewFn = null, compassBtn = null, converting = false;
+    // restricted orbits: above the ground, below top-down (past PITCH_TOP the view becomes the radar)
+    var PITCH_MIN = 6, PITCH_TOP = 80;
     var wcv, wctx, evByCs, winN = 10, dtDec = 45, rowsNow = [];          // the agent's window (centre panel)
     var live = false, follow = false;                                   // a search in progress, radar following it
 
@@ -1198,16 +1200,22 @@
       // 2D scope or 3D view, and the 3D view's camera presets and vertical exaggeration
       function setView(v) {
         layers.view = v; saveLayers();
+        compassBtn.hidden = v !== "3d";
         viewSeg.querySelectorAll("button").forEach(function (b, n) { var on = ["2d", "3d"][n] === v; b.classList.toggle("is-on", on); b.setAttribute("aria-checked", on ? "true" : "false"); });
         view3d.hidden = v !== "3d"; if (v !== "3d") stopSpin();
         viewBtn.textContent = v === "3d" ? "Radar" : "3D"; viewBtn.title = v === "3d" ? "Back to the radar (plan view)" : "3D view with altitudes";
         draw();
       }
+      setViewFn = setView;
       var viewSeg = seg("view", [{ value: "2d", label: "Radar", title: "Plan view" }, { value: "3d", label: "3D", title: "3D view with altitudes: drag to rotate" }],
-        layers.view, setView);
+        layers.view, function (v) { if (v === "3d") to3D(); else toRadar(); });
       // the same switch on the scope itself
-      var viewBtn = h("button", { type: "button", class: "lab-zoom__btn lab-zoom__view", onclick: function () { setView(layers.view === "3d" ? "2d" : "3d"); } },
+      var viewBtn = h("button", { type: "button", class: "lab-zoom__btn lab-zoom__view", onclick: function () { if (layers.view === "3d") toRadar(); else to3D(); } },
         [layers.view === "3d" ? "Radar" : "3D"]);
+      // the 3D view's compass: it turns with the view; pressing it faces north
+      compassBtn = h("button", { type: "button", class: "lab-compass", title: "Face north", "aria-label": "turn the view to face north",
+        onclick: function () { flyCam(0, cam.pitch, null); } }, [h("span", { class: "lab-compass__rose" }, [h("i", { class: "lab-compass__needle" }), h("b", { text: "N" })])]);
+      compassBtn.hidden = layers.view !== "3d";
       viewSeg.classList.add("lab-seg--sm");
       var exagSeg = seg("altitude", [1, 3, 5, 10].map(function (x) { return { value: x, label: "×" + x, title: "Vertical exaggeration ×" + x }; }), layers.exag, function (v) {
         layers.exag = v; saveLayers();
@@ -1219,9 +1227,9 @@
         if (spin) stopSpin(); else startSpin(); spinBtn.setAttribute("aria-pressed", spin ? "true" : "false"); spinBtn.classList.toggle("is-on", !!spin);
       } }, ["⟳"]);
       var view3d = h("div", { class: "lab-view3d" }, [
-        h("div", { class: "lab-view3d__row" }, [["Top", 0, 89, 1.2], ["Oblique", -25, 32, 1.05], ["Side", 0, 4, 0.8]].map(function (p) {
+        h("div", { class: "lab-view3d__row" }, [["Oblique", -25, 32, 1.05], ["Low", -25, PITCH_MIN + 4, 0.8]].map(function (p) {
           return h("button", { type: "button", class: "lab-zoom__btn lab-view3d__preset", title: p[0] + " view", onclick: function () { flyCam(p[1], p[2], p[3]); } }, [p[0]]);
-        }).concat([spinBtn])),
+        }).concat([h("button", { type: "button", class: "lab-zoom__btn lab-view3d__preset", title: "Top down: back to the radar", onclick: function () { toRadar(); } }, ["Top"]), spinBtn])),
         h("div", { class: "lab-view3d__row" }, [h("span", { class: "lab-layers__label", text: "Altitude" }), exagSeg])
       ]);
       view3d.hidden = layers.view !== "3d";
@@ -1254,7 +1262,7 @@
           h("button", { type: "button", class: "lab-zoom__btn", title: "Zoom in", "aria-label": "zoom in", onclick: function () { zoomBy(1.5); } }, ["+"]),
           h("button", { type: "button", class: "lab-zoom__btn", title: "Zoom out", "aria-label": "zoom out", onclick: function () { zoomBy(1 / 1.5); } }, ["−"]),
           h("button", { type: "button", class: "lab-zoom__btn", title: "Fit the whole stream", "aria-label": "reset view", onclick: resetView }, ["⤢"])
-        ]), view3d]), h("div", { class: "lab-replay__win" }, [wcv]), h("div", { class: "lab-replay__dev" }, [strip])]),
+        ]), view3d, compassBtn]), h("div", { class: "lab-replay__win" }, [wcv]), h("div", { class: "lab-replay__dev" }, [strip])]),
         h("div", { class: "lab-timeline-wrap" }, [tl]),
         h("div", { class: "lab-replay__ctl" }, [playBtn, slider, tlabel, spd]),
         legend
@@ -1284,7 +1292,7 @@
       draw();
     }
     function zoomBy(f, px, py) {
-      if (layers.view === "3d") { cam.dist = Math.max(10, Math.min(1500, cam.dist / f)); draw(); return; }
+      if (layers.view === "3d") { cam.dist /= f; clampCam(); draw(); return; }
       if (!proj) return;
       var z = Math.max(1, Math.min(10, view.zoom * f));
       if (px != null) {  // keep the point under the cursor fixed
@@ -1306,7 +1314,7 @@
         if (!e.ctrlKey && !e.metaKey) { zoomHint(c); return; }
         e.preventDefault();
         var r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
-        if (layers.view === "3d") { cam.dist = Math.max(10, Math.min(1500, cam.dist * Math.exp(e.deltaY * 0.0015))); draw(); return; }
+        if (layers.view === "3d") { cam.dist *= Math.exp(e.deltaY * 0.0015); clampCam(); draw(); return; }
         zoomBy(Math.exp(-e.deltaY * 0.0015), (e.clientX - r.left) * dpr, (e.clientY - r.top) * dpr);
       }, { passive: false });
       c.addEventListener("contextmenu", function (e) { if (layers.view === "3d") e.preventDefault(); });
@@ -1321,8 +1329,13 @@
           if (drag.pan) {  // move the ground point the camera looks at, in the screen's directions
             var k = cam.dist / 700, co = Math.cos(cam.yaw), si = Math.sin(cam.yaw);
             cam.cx += (-co * dx - si * dy) * k; cam.cy += (-si * dx + co * dy) * k;
+            clampCam();
           } else {
-            cam.yaw -= dx * 0.008; cam.pitch = Math.max(2, Math.min(89, cam.pitch + dy * 0.35));
+            if (converting) return;
+            cam.yaw -= dx * 0.008;
+            var p_ = cam.pitch + dy * 0.35;
+            if (p_ > PITCH_TOP) { cam.pitch = PITCH_TOP; toRadar(); return; }  // looking straight down: that is the radar
+            cam.pitch = Math.max(PITCH_MIN, p_);
           }
           draw(); return;
         }
@@ -1766,14 +1779,43 @@
       return { cx: ((bounds.x0 + bounds.x1) / 2 + airport[0]) / 2, cy: ((bounds.y0 + bounds.y1) / 2 + airport[1]) / 2,
                yaw: -25 * Math.PI / 180, pitch: 32, dist: span * 1.05 };
     }
-    function flyCam(yawDeg, pitch, distF) {  // ease to a preset over ~0.6 s
-      var span = Math.max(bounds.x1 - bounds.x0, bounds.y1 - bounds.y0);
-      var a = { yaw: cam.yaw, pitch: cam.pitch, dist: cam.dist }, b = { yaw: yawDeg * Math.PI / 180, pitch: pitch, dist: span * distF }, t0 = performance.now();
+    function span_() { return Math.max(bounds.x1 - bounds.x0, bounds.y1 - bounds.y0); }
+    // keep the camera over the traffic: target inside the stream's extent, distance within limits
+    function clampCam() {
+      var sp = span_();
+      cam.dist = Math.max(sp * 0.2, Math.min(sp * 2.5, cam.dist));
+      cam.cx = Math.max(bounds.x0, Math.min(bounds.x1, cam.cx)); cam.cy = Math.max(bounds.y0, Math.min(bounds.y1, cam.cy));
+    }
+    // the radar's scale (px per NM at zoom 1) and the 3D view's (px per NM at the target, looking down)
+    function radarScale() { var m = 14 * (window.devicePixelRatio || 1); return Math.min((cv.width - 2 * m) / (bounds.x1 - bounds.x0), (cv.height - 2 * m) / (bounds.y1 - bounds.y0)); }
+    function focalPx() { return Math.min(cv.width, cv.height) * 1.25; }
+    // 3D -> radar: turn north-up, look straight down, then hand over at the same centre and scale
+    function toRadar() {
+      if (layers.view !== "3d") { setViewFn("2d"); return; }
+      if (converting) return;
+      converting = true; stopSpin();
+      flyCam(0, 89.5, null, function () {
+        converting = false;
+        view = { zoom: Math.max(1, Math.min(10, focalPx() / cam.dist / radarScale())), cx: cam.cx, cy: cam.cy };
+        setViewFn("2d");
+      });
+    }
+    // radar -> 3D: start looking straight down at the radar's centre and scale, then tilt down to an oblique view
+    function to3D() {
+      if (layers.view === "3d") return;
+      cam = cam || defaultCam();
+      cam.cx = view.cx; cam.cy = view.cy; cam.yaw = 0; cam.pitch = 89.5; cam.dist = focalPx() / (radarScale() * view.zoom);
+      clampCam();
+      setViewFn("3d");
+      flyCam(-25, 32, null);
+    }
+    function flyCam(yawDeg, pitch, distF, done) {  // ease to a view over ~0.6 s (distF null: keep the distance)
+      var a = { yaw: cam.yaw, pitch: cam.pitch, dist: cam.dist }, b = { yaw: yawDeg * Math.PI / 180, pitch: pitch, dist: distF == null ? cam.dist : span_() * distF }, t0 = performance.now();
       var dyaw = ((b.yaw - a.yaw) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
       (function step() {
         var f = Math.min(1, (performance.now() - t0) / 600), e = f * f * (3 - 2 * f);
         cam.yaw = a.yaw + dyaw * e; cam.pitch = a.pitch + (b.pitch - a.pitch) * e; cam.dist = a.dist + (b.dist - a.dist) * e; draw();
-        if (f < 1) requestAnimationFrame(step);
+        if (f < 1) requestAnimationFrame(step); else if (done) done();
       })();
     }
     function startSpin() {
@@ -1790,14 +1832,16 @@
       var ph = cam.pitch * Math.PI / 180, cp = Math.cos(ph), sp = Math.sin(ph), sy = Math.sin(cam.yaw), cy = Math.cos(cam.yaw);
       var eye = [cam.cx + cam.dist * cp * sy, cam.cy - cam.dist * cp * cy, cam.dist * sp];
       var f = [-cp * sy, cp * cy, -sp], r = [cy, sy, 0], up = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]];
-      var focal = Math.min(W, H) * 1.25, ex = layers.exag * FT_NM;
+      // the target sits low in the view when looking across the ground (the ground fills the bottom, the sky stays
+      // small) and moves to the centre as the view turns top-down, where it hands over to the radar
+      var focal = Math.min(W, H) * 1.25, ex = layers.exag * FT_NM, cy0 = H / 2 + Math.max(0, 1 - cam.pitch / 90) * 0.26 * H;
       return {
         // world (NM, NM, ft) -> [screen x, screen y, depth]; null behind the camera
         P: function (x, y, zft) {
           var v0 = x - eye[0], v1 = y - eye[1], v2 = (zft || 0) * ex - eye[2];
           var zc = v0 * f[0] + v1 * f[1] + v2 * f[2];
           if (zc < 1) return null;
-          return [W / 2 + focal * (v0 * r[0] + v1 * r[1]) / zc, H / 2 - focal * (v0 * up[0] + v1 * up[1] + v2 * up[2]) / zc, zc];
+          return [W / 2 + focal * (v0 * r[0] + v1 * r[1]) / zc, cy0 - focal * (v0 * up[0] + v1 * up[1] + v2 * up[2]) / zc, zc];
         },
         focal: focal
       };
@@ -1983,14 +2027,8 @@
       ctx.fillText("3D · altitude ×" + layers.exag + " · " + procLabel, m + 8 * dpr, m + 28 * dpr);
       ctx.fillStyle = "rgba(154,171,198,0.75)";
       ctx.fillText("drag rotate · right-drag pan · " + (/Mac/.test(navigator.platform) ? "⌘" : "Ctrl") + " + scroll zoom · double-click reset", m, m + 48 * dpr);
-      var nc = [W - m - 22 * dpr, H - m - 30 * dpr], c0 = P(cam.cx, cam.cy, 0), c1 = P(cam.cx, cam.cy + 5, 0);
-      if (c0 && c1) {
-        var na = Math.atan2(c1[1] - c0[1], c1[0] - c0[0]);
-        ctx.save(); ctx.translate(nc[0], nc[1]); ctx.rotate(na + Math.PI / 2);
-        ctx.fillStyle = "rgba(233,241,255,0.75)"; ctx.beginPath(); ctx.moveTo(0, -12 * dpr); ctx.lineTo(5 * dpr, 4 * dpr); ctx.lineTo(-5 * dpr, 4 * dpr); ctx.closePath(); ctx.fill();
-        ctx.restore();
-        ctx.font = "600 " + (10 * dpr) + "px " + head; ctx.fillText("N", nc[0] + Math.cos(na) * 20 * dpr - 3 * dpr, nc[1] + Math.sin(na) * 20 * dpr + 4 * dpr);
-      }
+      var c0 = P(cam.cx, cam.cy, 0), c1 = P(cam.cx, cam.cy + 5, 0);
+      if (c0 && c1 && compassBtn) compassBtn.style.setProperty("--north", (Math.atan2(c1[1] - c0[1], c1[0] - c0[0]) + Math.PI / 2) + "rad");
       if (live) {
         ctx.font = "700 " + (11 * dpr) + "px " + head;
         var lt = "● LIVE · SEARCH RUNNING", ltw = ctx.measureText(lt).width, lx0 = (W - ltw) / 2;
