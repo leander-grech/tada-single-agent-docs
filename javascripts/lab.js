@@ -340,34 +340,68 @@
   }
 
   // ---------------------------------------------------------------- search parameters
+  var SEARCH_PRESETS = [
+    ["Paper", { K: 8, M: 10, J: 0 }, "The paper's best agent: K = 8 candidates every 10 decisions"],
+    ["Quick", { K: 4, M: 20, J: 0 }, "Few candidates, rare replanning: fast"],
+    ["Thorough", { K: 16, M: 5, J: 0 }, "Twice the candidates, replanning twice as often"],
+    ["Exhaustive", { K: 24, M: 3, J: 10 }, "Many short-branched candidates, replanning every 3 decisions: slow"]];
   function searchControls() {
     if (!S.catalog.search_params) {
       return h("div", { class: "lab-field__hint", text: "This runner flies the paper's search: K = 8 candidates every M = 10 decisions. " +
         "The in-browser engine lets you set them, and draws the predicted rollouts on the radar." });
     }
     var sp = S.search, box = h("div", { class: "lab-search" });
-    function slider(key, label, min, max, fmt, hint) {
-      var out = h("output", { class: "lab-num", text: fmt(sp[key]) });
-      var r = h("input", { type: "range", min: min, max: max, step: 1, value: sp[key], class: "lab-range", "aria-label": label });
-      r.addEventListener("input", function () { sp[key] = +r.value; out.textContent = fmt(sp[key]); });
-      r.addEventListener("change", writeHash);
-      return h("div", { class: "lab-search__row", title: hint }, [h("span", { class: "lab-search__label", text: label }), r, out]);
+    function changed() { writeHash(); renderAgents(); scheduleLiveSearch(); }
+    function chips(key, label, values, fmt, hint) {
+      return h("div", { class: "lab-search__row", title: hint }, [
+        h("span", { class: "lab-search__label", text: label }),
+        h("div", { class: "lab-seg lab-seg--sm lab-search__chips", role: "radiogroup", "aria-label": label }, values.map(function (v) {
+          var on = sp[key] === v;
+          return h("button", { type: "button", class: "lab-seg__btn" + (on ? " is-on" : ""), role: "radio", "aria-checked": on ? "true" : "false",
+            onclick: function () { if (sp[key] !== v) { sp[key] = v; changed(); } } }, [fmt(v)]);
+        }))]);
     }
-    function check(key, label, hint) {
+    var current = SEARCH_PRESETS.filter(function (p) { return p[1].K === sp.K && p[1].M === sp.M && p[1].J === sp.J; })[0];
+    box.appendChild(h("div", { class: "lab-search__presets" }, SEARCH_PRESETS.map(function (p) {
+      return h("button", { type: "button", class: "lab-btn lab-search__preset" + (current === p ? " is-on" : ""), title: p[2],
+        onclick: function () { sp.K = p[1].K; sp.M = p[1].M; sp.J = p[1].J; changed(); } }, [p[0]]);
+    })));
+    box.appendChild(chips("K", "Candidates K", [2, 4, 8, 12, 16, 24], String,
+      "Full-episode rollouts per plan: the incumbent, the deterministic policy, then sampled ones"));
+    box.appendChild(chips("M", "Replan every", [1, 3, 5, 10, 20, 30], function (v) { return v + (v === 1 ? " dec" : ""); },
+      "Decisions executed from each plan before the next one (one decision = 45 s of flight)"));
+    box.appendChild(chips("J", "Branch depth", [0, 3, 5, 10, 20], function (v) { return v ? String(v) : "all"; },
+      "Sampled candidates sample only their first J actions, then follow the deterministic policy (all = sample throughout)"));
+    box.appendChild(chips("lookMin", "Show ahead", [5, 10, 15, 30], function (v) { return v + "′"; },
+      "How far ahead the radar draws each candidate's predicted tracks (minutes)"));
+    function toggle(key, label, hint) {
       var cb = h("input", { type: "checkbox", checked: sp[key] ? true : null });
-      cb.addEventListener("change", function () { sp[key] = cb.checked; writeHash(); });
+      cb.addEventListener("change", function () { sp[key] = cb.checked; changed(); });
       return h("label", { class: "lab-search__check", title: hint }, [cb, " " + label]);
     }
-    box.appendChild(slider("K", "Candidates K", 2, 24, String, "Full-episode rollouts per plan: the incumbent, the deterministic policy, then sampled ones"));
-    box.appendChild(slider("M", "Replan every M", 1, 30, function (v) { return v + " dec."; }, "Decisions executed from each plan before the next one"));
-    box.appendChild(slider("J", "Branch depth J", 0, 30, function (v) { return v ? v + " dec." : "all"; },
-      "Sampled candidates sample only their first J actions, then follow the deterministic policy (0 = sample throughout)"));
-    box.appendChild(slider("lookMin", "Show ahead", 3, 40, function (v) { return v + " min"; }, "How far ahead the radar draws each candidate's predicted tracks"));
-    box.appendChild(h("div", { class: "lab-row" }, [
-      check("stop", "stop when solved", "Stop generating candidates once one solves the episode (it cannot be beaten on the main criteria)"),
-      check("prune", "exact pruning", "Abandon a rollout as soon as it can no longer reach the best candidate's on-time count")]));
-    box.appendChild(h("div", { class: "lab-field__hint", text: "Paper: K = 8, M = 10, J = all, both on. Larger K and smaller M search harder and take longer." }));
+    var live = h("input", { type: "checkbox", checked: S.liveSearch !== false ? true : null });
+    live.addEventListener("change", function () { S.liveSearch = live.checked; });
+    box.appendChild(h("div", { class: "lab-search__toggles" }, [
+      toggle("stop", "stop when solved", "Stop generating candidates once one solves the episode (it cannot be beaten on the main criteria)"),
+      toggle("prune", "exact pruning", "Abandon a rollout as soon as it can no longer reach the best candidate's on-time count"),
+      h("label", { class: "lab-search__check", title: "Re-run the search on the shown flight as soon as a parameter changes" }, [live, " apply live"])]));
+    // worst-case cost: every plan rolls K - 1 fresh candidates to the end of the stream
+    var decisions = 115 * (S.sc.flights / 20) * S.sc.segments, plans = Math.ceil(decisions / sp.M), worst = 1 + plans * (sp.K - 1);
+    var tier = worst <= 60 ? ["light", "lab-c-ok"] : worst <= 250 ? ["medium", "lab-c-warn"] : ["heavy", "lab-c-bad"];
+    box.appendChild(h("div", { class: "lab-search__cost" }, [
+      "every " + fmtT(sp.M * 45) + " of flight · up to ~" + worst + " rollouts · ",
+      h("span", { class: tier[1], text: tier[0] }),
+      sp.stop ? h("span", { class: "lab-field__hint", text: " (stop-when-solved usually needs far fewer)" }) : null]));
     return box;
+  }
+  var liveTimer = null;
+  // apply live: re-fly the shown search flight with the new parameters (a still-running search is cancelled)
+  function scheduleLiveSearch() {
+    var cur = S.flying ? S.flyingJob : (S.flight && S.flight.job);  // the search running now, or the one on screen
+    if (S.liveSearch === false || S.mode !== "search" || !cur || cur.mode !== "search") return;
+    if (scKey(cur.scenario) !== scKey(S.sc) || cur.agent !== S.agent) return;
+    clearTimeout(liveTimer);
+    liveTimer = setTimeout(function () { flySelected(true); }, 350);
   }
   function searchParamsForJob() {
     var sp = S.search;
@@ -510,22 +544,26 @@
   }
   function flySelected(quiet) {
     writeHash();
+    var token = S.flyToken = (S.flyToken || 0) + 1;  // a newer flight supersedes this one
     S.flying = true; S.autoFly = S.agent !== "do-nothing";
     var body = $("#lab-flight-body");
     var job = { scenario: S.sc, agent: S.agent, mode: S.agent === "do-nothing" ? "det" : S.mode, attempts: S.mode === "sampled" ? S.attempts : 0 };
     if (job.mode === "search" && S.catalog.search_params) job.search = searchParamsForJob();
+    S.flyingJob = job;
     $("#lab-flight-title").textContent = "Flight · " + S.agent + " · " + modeLabel(job);
     body.innerHTML = ""; body.appendChild(progressBox("Flying…"));
     if (!quiet) body.scrollIntoView({ behavior: "smooth", block: "start" });
     var want = scKey(S.sc);
-    runJob("fly", job, function (st) { setProgress(body, st); })
+    runJob("fly", job, function (st) { if (token === S.flyToken) setProgress(body, st); })
       .then(function (st) { return loadFlight(st.key).then(function (d) {
+        if (token !== S.flyToken) return;
         S.flying = false;
         if (want === scKey(S.sc)) showFlight(d, st.key);
         else if (S.autoFly) flySelected(true);  // the scenario changed while this one flew
         refreshRows();
       }); })
       .catch(function (e) {
+        if (token !== S.flyToken) return;  // superseded (e.g. a cancelled search)
         S.flying = false;
         var id = needDownload(e);
         if (id) { downloadPrompt(body, id, id + (ENGINE ? " is not loaded in this browser yet." : " is not on this runner yet.")); return; }

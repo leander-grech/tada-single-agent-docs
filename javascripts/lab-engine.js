@@ -1,7 +1,7 @@
 // The Lab's in-browser engine: the same small API the lab runner serves (lab/server.py), answered by the
 // WebAssembly simulator + policy in a Web Worker. Nothing is fetched until the page starts it, and agent
 // weights only when their Download button is pressed (then checked against the published sha256).
-// MONAD-aligned generator, single streams, policy and best-of-K modes; search and MP4 renders need a runner.
+// MONAD-aligned generator, single or stitched streams, policy, best-of-K and rollout search; MP4 renders need a runner.
 (function () {
   "use strict";
   function searchTag(p) {
@@ -59,9 +59,10 @@
         else if (e.data.done) { delete waiting[e.data.id]; w.resolve(e.data.result); }
         else if (w.progress) w.progress(e.data);
       };
-      function call(msg, progress, transfer) {
+      function call(msg, progress, transfer, onId) {
         return new Promise(function (resolve, reject) {
           msg.id = ++seq;
+          if (onId) onId(msg.id);
           waiting[msg.id] = { resolve: resolve, reject: reject, progress: progress };
           worker.postMessage(msg, transfer || []);
         });
@@ -73,7 +74,7 @@
       ]).then(function (res) {
         var reg = res[0], curated = res[1], scene = res[2] || {};
         var catalog = {
-          engine: "browser", code_ok: true, setup: { ok: true, checks: [] }, max_segments: 1, modes: ["det", "sampled", "search"], search_params: true,
+          engine: "browser", code_ok: true, setup: { ok: true, checks: [] }, max_segments: 3, modes: ["det", "sampled", "search"], search_params: true,
           sectors: scene.sectors || [],
           procedures: reg.procedures, reference: reg.reference, curated: curated,
           generators: {
@@ -96,7 +97,7 @@
           var sc = body.scenario, mode = body.agent === "do-nothing" ? "det" : (body.mode || "det");
           var attempts = mode === "sampled" ? (body.attempts | 0) : 0;
           if (sc.generator !== "monad") throw new Error("the in-browser engine has the MONAD-aligned generator only");
-          if (sc.segments !== 1) throw new Error("stitched streams need a lab runner");
+          if (sc.segments < 1 || sc.segments > 3) throw new Error("1 to 3 stream segments");
           var search = null;
           if (mode === "search") {
             var q = body.search || {};
@@ -109,9 +110,20 @@
           }
           var key = flightKey(sc, body.agent, mode, attempts, search);
           if (results[key] || (jobs[key] && jobs[key].status === "running")) return status(key);
+          if (mode === "search") {  // a new search on this scenario and agent supersedes one still running
+            var prefix = flightKey(sc, body.agent, "det", 0).replace(/--det$/, "--search-");
+            Object.keys(jobs).forEach(function (k2) {
+              var o = jobs[k2];
+              if (k2.indexOf(prefix) === 0 && o.status === "running" && o.wid) {
+                worker.postMessage({ cmd: "cancel", target: o.wid });
+                o.status = "error"; o.error = "cancelled"; delete jobs[k2];
+              }
+            });
+          }
           var job = { scenario: sc, agent: body.agent, mode: mode, attempts: attempts, search: search };
           var j = jobs[key] = { kind: "fly", status: "running", stage: "queued", frac: null, error: null, live: null };
-          call({ cmd: "fly", job: job }, function (p) { j.stage = p.stage; j.frac = p.frac; if (p.live) j.live = p.live; }).then(function (r) {
+          call({ cmd: "fly", job: job }, function (p) { j.stage = p.stage; j.frac = p.frac; if (p.live) j.live = p.live; }, null,
+            function (id) { j.wid = id; }).then(function (r) {
             r.job = job; r.search = null; results[key] = r; j.status = "done"; j.stage = "done"; j.frac = 1;
           }, function (e) { j.status = "error"; j.error = e.message; });
           return status(key);
