@@ -8,10 +8,13 @@
     return "search-K" + p.K + "-M" + p.M + "-J" + (p.J || 0) + (p.stop ? "s" : "") + (p.prune ? "p" : "") + "-L" + p.look;
   }
   function flightKey(sc, agent, mode, attempts, search) {
-    return sc.generator + "-" + sc.procedure + "-f" + sc.flights + "-x" + sc.segments + "-s" + sc.seed + "--" + agent +
-      "--" + (mode === "sampled" ? "sampled" + attempts : mode === "search" ? searchTag(search) : mode);
+    return scenarioKey(sc) + "--" + agent + "--" + (mode === "sampled" ? "sampled" + attempts : mode === "search" ? searchTag(search) : mode);
   }
-  function scenarioKey(sc) { return sc.generator + "-" + sc.procedure + "-f" + sc.flights + "-x" + sc.segments + "-s" + sc.seed; }
+  // a composed stream is keyed by its segments ("flights.seed.gapMin_..."), else flights x segments + seed
+  function scenarioKey(sc) {
+    return sc.generator + "-" + sc.procedure + (sc.compose ? "-c" + sc.compose : "-f" + sc.flights + "-x" + sc.segments + "-s" + sc.seed);
+  }
+  var COMPOSE_RE = /^(\d{1,2}\.\d{1,10}\.\d{1,2})(_\d{1,2}\.\d{1,10}\.\d{1,2}){0,7}$/;
   function hex(buf) { return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, "0"); }).join(""); }
 
   // The published engine is encrypted (browser/tools/encrypt_engine.py): b"TADAENC1" | nonce | AES-256-GCM.
@@ -52,6 +55,22 @@
     },
     start: function (assets, workerUrl, keyText) {
       var worker = new Worker(workerUrl), seq = 0, waiting = {};
+      // parallel planning: follower workers, each its own engine instance from the one compiled module, linked to
+      // the coordinating worker by a MessagePort; started when a search first asks for more than one thread
+      var module = null, followers = [], weights = {};
+      var CORES = Math.max(1, navigator.hardwareConcurrency || 4);
+      function ensureFollowers(n) {
+        n = Math.min(n, CORES);
+        while (followers.length < n) {
+          var w = new Worker(workerUrl), ch = new MessageChannel();
+          w.onerror = function () {};
+          w.postMessage({ cmd: "init", module: module, id: 0 });
+          Object.keys(weights).forEach(function (id) { w.postMessage({ cmd: "policy", agent: id, bytes: weights[id].slice(0), id: 0 }); });
+          w.postMessage({ cmd: "serve", port: ch.port2, id: 0 }, [ch.port2]);
+          worker.postMessage({ cmd: "follower", port: ch.port1 }, [ch.port1]);
+          followers.push(w);
+        }
+      }
       worker.onmessage = function (e) {
         var w = waiting[e.data.id];
         if (!w) return;
@@ -70,11 +89,13 @@
       return Promise.all([
         fetch(assets + "agents.json").then(function (r) { return r.json(); }),
         fetch(assets + "curated.json").then(function (r) { return r.json(); }).catch(function () { return {}; }),
-        Promise.resolve().then(function () { return decryptEngine(assets, keyText); }).then(function (bytes) { return call({ cmd: "init", bytes: bytes }, null, [bytes]); }),
+        Promise.resolve().then(function () { return decryptEngine(assets, keyText); })
+          .then(function (bytes) { return WebAssembly.compile(bytes); })
+          .then(function (mod) { module = mod; return call({ cmd: "init", module: mod }); }),
       ]).then(function (res) {
         var reg = res[0], curated = res[1], scene = res[2] || {};
         var catalog = {
-          engine: "browser", code_ok: true, setup: { ok: true, checks: [] }, max_segments: 3, modes: ["det", "sampled", "search"], search_params: true,
+          engine: "browser", code_ok: true, setup: { ok: true, checks: [] }, max_segments: 3, cores: CORES, compose: { max_segments: 8, max_flights: 40, max_gap_min: 30 }, modes: ["det", "sampled", "search"], search_params: true,
           sectors: scene.sectors || [],
           procedures: reg.procedures, reference: reg.reference, curated: curated,
           generators: {
@@ -98,7 +119,13 @@
           var sc = body.scenario, mode = body.agent === "do-nothing" ? "det" : (body.mode || "det");
           var attempts = mode === "sampled" ? (body.attempts | 0) : 0;
           if (sc.generator !== "monad") throw new Error("the in-browser engine has the MONAD-aligned generator only");
-          if (sc.segments < 1 || sc.segments > 3) throw new Error("1 to 3 stream segments");
+          if (sc.compose) {
+            if (!COMPOSE_RE.test(sc.compose)) throw new Error("a composed stream is 1 to 8 segments flights.seed.gapMin");
+            sc.compose.split("_").forEach(function (t) {
+              var p = t.split(".");
+              if (+p[0] < 2 || +p[0] > 40 || +p[1] > 2147483647 || +p[2] > 30) throw new Error("segments of 2-40 flights, gaps up to 30 min");
+            });
+          } else if (sc.segments < 1 || sc.segments > 3) throw new Error("1 to 3 stream segments");
           var search = null;
           if (mode === "search") {
             var q = body.search || {};
@@ -122,6 +149,10 @@
             });
           }
           var job = { scenario: sc, agent: body.agent, mode: mode, attempts: attempts, search: search };
+          if (search) {  // threads change how fast, not what: the chosen plans are the same (search.rs finish_plan)
+            job.threads = Math.max(1, Math.min(CORES, body.threads | 0 || 1));
+            if (job.threads > 1) ensureFollowers(job.threads);
+          }
           var j = jobs[key] = { kind: "fly", status: "running", stage: "queued", frac: null, error: null, live: null };
           call({ cmd: "fly", job: job }, function (p) {
             j.stage = p.stage; j.frac = p.frac;
@@ -129,7 +160,7 @@
             if (p.partial) { p.partial.job = job; p.partial.search = p.partial.search || null; j.partial = p.partial; j.partialN = (j.partialN || 0) + 1; }
           }, null,
             function (id) { j.wid = id; }).then(function (r) {
-            r.job = job; r.search = null; results[key] = r; j.status = "done"; j.stage = "done"; j.frac = 1;
+            r.job = job; r.search = r.search || null; results[key] = r; j.status = "done"; j.stage = "done"; j.frac = 1;
           }, function (e) { j.status = "error"; j.error = e.message; });
           return status(key);
         }
@@ -145,6 +176,8 @@
             return crypto.subtle.digest("SHA-256", buf).then(function (d) {
               if (hex(d) !== a.weights.sha256) throw new Error("sha256 mismatch: not the published weights");
               j.stage = "loading";
+              weights[id] = buf.slice(0);  // kept for follower workers
+              followers.forEach(function (w) { w.postMessage({ cmd: "policy", agent: id, bytes: buf.slice(0), id: 0 }); });
               return call({ cmd: "policy", agent: id, bytes: buf }, null, [buf]);
             });
           }).then(function () { a.installed = true; j.status = "done"; j.frac = 1; },
@@ -153,7 +186,7 @@
         }
         function rows(q) {
           var sk = scenarioKey({ generator: q.get("generator"), procedure: q.get("procedure"), flights: q.get("flights"),
-            segments: q.get("segments"), seed: q.get("seed") });
+            segments: q.get("segments"), seed: q.get("seed"), compose: q.get("compose") || null });
           var out = [];
           Object.keys(results).forEach(function (k) {
             if (k.indexOf(sk + "--") !== 0) return;
@@ -190,6 +223,8 @@
                 })() : status(id));
               }
               if (p === "/scenario") return Promise.resolve(rows(u.searchParams));
+              if (p === "/segment") return call({ cmd: "segment", procedure: body.procedure, seed: body.seed, flights: body.flights });
+              if (p === "/findseed") return call({ cmd: "findseed", procedure: body.procedure, flights: body.flights, lo: body.lo, hi: body.hi, tries: body.tries });
               return Promise.reject(new Error("unknown " + p));
             } catch (e) { return Promise.reject(e); }
           },
