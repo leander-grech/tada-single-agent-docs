@@ -1005,12 +1005,16 @@
     var TRAIL = 12;      // decisions of track history drawn behind each aircraft
     var LAYERS_KEY = "tada-lab-layers-v2";
     // starts quiet: call-sign tags only; full data blocks are one click away
-    var layers = { sectors: true, rings: true, routes: true, labels: "tags", plans: true, view: "2d", exag: 5 };
+    var layers = { sectors: true, rings: true, routes: true, labels: "tags", plans: true, view: "2d", exag: 12, exagV: 2 };
     // predicted rollouts of the search: their own palette, so they never read as real traffic. Only the latest
     // unbeaten plan (the one being flown) is gold; the other candidates stay muted.
     var PRED = { chosen: "#ffd23f", other: "#7d8fb3", los: "#b5677a", pruned: "#4c566a", text: "rgba(200,212,235,0.85)" };
     var PAST = 720, AHEAD = 240;   // the clearance window: 12 min of history, 4 min ahead of now
-    try { Object.assign(layers, JSON.parse(localStorage.getItem(LAYERS_KEY) || "{}")); } catch (e) {}
+    try {
+      var savedLayers = JSON.parse(localStorage.getItem(LAYERS_KEY) || "{}");
+      if (savedLayers.exagV !== 2) { delete savedLayers.exag; savedLayers.exagV = 2; }  // the earlier ×5 default was too flat to read
+      Object.assign(layers, savedLayers);
+    } catch (e) {}
     if (["off", "tags", "full"].indexOf(layers.labels) < 0) layers.labels = "tags";
     function saveLayers() { try { localStorage.setItem(LAYERS_KEY, JSON.stringify(layers)); } catch (e) {} }
 
@@ -1217,7 +1221,7 @@
         onclick: function () { flyCam(0, cam.pitch, null); } }, [h("span", { class: "lab-compass__rose" }, [h("i", { class: "lab-compass__needle" }), h("b", { text: "N" })])]);
       compassBtn.hidden = layers.view !== "3d";
       viewSeg.classList.add("lab-seg--sm");
-      var exagSeg = seg("altitude", [1, 3, 5, 10].map(function (x) { return { value: x, label: "×" + x, title: "Vertical exaggeration ×" + x }; }), layers.exag, function (v) {
+      var exagSeg = seg("altitude", [1, 6, 12, 20, 30].map(function (x) { return { value: x, label: "×" + x, title: x === 1 ? "True scale" : "Vertical exaggeration ×" + x }; }), layers.exag, function (v) {
         layers.exag = v; saveLayers();
         exagSeg.querySelectorAll("button").forEach(function (b) { b.classList.toggle("is-on", b.textContent === "×" + v); });
         draw();
@@ -1227,7 +1231,7 @@
         if (spin) stopSpin(); else startSpin(); spinBtn.setAttribute("aria-pressed", spin ? "true" : "false"); spinBtn.classList.toggle("is-on", !!spin);
       } }, ["⟳"]);
       var view3d = h("div", { class: "lab-view3d" }, [
-        h("div", { class: "lab-view3d__row" }, [["Oblique", -25, 32, 1.05], ["Low", -25, PITCH_MIN + 4, 0.8]].map(function (p) {
+        h("div", { class: "lab-view3d__row" }, [["Oblique", -25, 32, 1.05], ["Low", -25, PITCH_MIN + 4, 1.05]].map(function (p) {
           return h("button", { type: "button", class: "lab-zoom__btn lab-view3d__preset", title: p[0] + " view", onclick: function () { flyCam(p[1], p[2], p[3]); } }, [p[0]]);
         }).concat([h("button", { type: "button", class: "lab-zoom__btn lab-view3d__preset", title: "Top down: back to the radar", onclick: function () { toRadar(); } }, ["Top"]), spinBtn])),
         h("div", { class: "lab-view3d__row" }, [h("span", { class: "lab-layers__label", text: "Altitude" }), exagSeg])
