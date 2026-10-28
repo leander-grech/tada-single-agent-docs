@@ -239,3 +239,14 @@ output.lab-num { min-width: 2em; text-align: right; font-size: 0.8rem; color: va
 .lab-btn--dl { text-transform: none; letter-spacing: 0.02em; }
 .lab-btn--dl:disabled { opacity: 0.75; cursor: progress; }
 .lab-agent__dl { color: var(--tada-warn); }
+
+/* setup notes */
+.lab-conn--warn { display: block; border-left: 3px solid var(--tada-warn); }
+.lab-conn--warn summary { cursor: pointer; color: var(--tada-warn); }
+.lab-conn--warn ul, .lab-checks { margin: 0.4rem 0 0.2rem 1.1rem; padding: 0; }
+.lab-check { margin: 0.25rem 0; }
+.lab-check--ok b { color: var(--tada-ok); }
+.lab-check--warn b { color: var(--tada-warn); }
+.lab-check--error b { color: var(--tada-bad); }
+.lab-seg__btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.lab-offline__cmd code { white-space: pre; }

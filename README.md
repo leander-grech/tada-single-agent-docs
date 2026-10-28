@@ -43,10 +43,11 @@ Manual, and only after review: `git push origin main`, then `mkdocs gh-deploy --
 The Lab tab replaces the render gallery: pick scenario parameters (procedure, generator, flights, stitched
 segments, seed or a curated-seed difficulty), pick an agent and a mode (deterministic policy, best of K sampled,
 policy + rollout search), and fly it. Flights run live through the code repo on the viewer's machine, through the
-lab runner:
+lab runner. Viewer-facing setup instructions are on the Lab page itself ("Run the Lab on your machine"):
 
 ```bash
-lab/run.sh            # runner on 127.0.0.1:8800; add --open to open the published Lab page
+lab/setup.sh /path/to/monorepo/reinforcement_learning/single_agent_rllib   # once: lab/.venv (uv if present), checks
+lab/run.sh            # runner on 127.0.0.1:8800; --check only checks; --open opens the published Lab page
 ```
 
 The Lab page looks for a runner by itself (a runner URL saved in the page, then the server that served the page, then

@@ -122,7 +122,7 @@ def load_registry() -> dict:
     return json.loads(REGISTRY.read_text()) if REGISTRY.exists() else {"agents": []}
 
 
-def build_catalog(registry_only: bool = False) -> dict:
+def build_catalog(registry_only: bool = False, setup: dict | None = None) -> dict:
     """Agents the runner can fly or download. Installed: checkpoints in the code repo (unless
     registry_only) and bundles downloaded from the registry into MODELS. Downloadable: registry bundles
     not installed yet (installed only when the page's Download button asks for it)."""
@@ -176,8 +176,10 @@ def build_catalog(registry_only: bool = False) -> dict:
         if ref in by_id:
             by_id[ref]["paper"] = True
     code_ok = (code_repo / "render_policy.py").exists()
-    return {"code_repo": str(code_repo), "code_ok": code_ok, "agents": agents, "procedures": PROCEDURES,
-            "generators": GENERATORS, "reference": REFERENCE, "curated": curated_seeds(code_repo) if code_ok else {}}
+    avail = (setup or {}).get("generators", {"monad": True, "legacy": True})
+    gens = {k: {**v, "available": bool(avail.get(k, True))} for k, v in GENERATORS.items()}
+    return {"code_repo": str(code_repo), "code_ok": code_ok, "setup": setup, "agents": agents, "procedures": PROCEDURES,
+            "generators": gens, "reference": REFERENCE, "curated": curated_seeds(code_repo) if code_ok else {}}
 
 
 def curated_seeds(code_repo: Path) -> dict:
@@ -213,6 +215,91 @@ def curated_seeds(code_repo: Path) -> dict:
 
 
 # --------------------------------------------------------------------------------------
+# preflight: can this machine fly?
+# --------------------------------------------------------------------------------------
+
+SIM_VERSION = "0.2.81"  # the simulator every windowed agent and the paper results were flown on
+_IMPORT_PROBE = r"""
+import importlib, importlib.metadata as md, json, sys
+bad = []
+for m in ("flight_simulator", "torch", "stable_baselines3", "sb3_contrib", "gymnasium", "matplotlib",
+          "imageio_ffmpeg", "pandas", "scipy", "dotenv", "yaml"):
+    try:
+        importlib.import_module(m)
+    except Exception as e:  # noqa: BLE001
+        bad.append(f"{m} ({type(e).__name__}: {e})"[:160])
+try:
+    sim = md.version("flight_simulator")
+except Exception:  # noqa: BLE001
+    sim = None
+print(json.dumps({"py": list(sys.version_info[:2]), "bad": bad, "sim": sim}))
+"""
+
+
+def preflight(code_repo: Path) -> dict:
+    """What the runner needs, checked once at start. error = cannot fly; warn = works, with a gap."""
+    checks = []
+
+    def add(name, ok, msg, fix="", level="error"):
+        checks.append({"name": name, "ok": bool(ok), "level": "ok" if ok else level, "msg": msg, "fix": fix})
+
+    setup_fix = "run lab/setup.sh /path/to/single_agent_rllib"
+    probe = None
+    if not Path(PY).exists():
+        add("python", False, f"runner Python not found: {PY}", setup_fix)
+    else:
+        try:
+            r = subprocess.run([PY, "-c", _IMPORT_PROBE], capture_output=True, text=True, timeout=180)
+            probe = json.loads(r.stdout.strip().splitlines()[-1])
+        except Exception as e:  # noqa: BLE001
+            add("python", False, f"could not run {PY}: {e}", setup_fix)
+    if probe:
+        add("python", probe["py"] == [3, 12], f"Python {probe['py'][0]}.{probe['py'][1]} ({PY})",
+            "the simulator wheel is built for Python 3.12; " + setup_fix)
+        add("packages", not probe["bad"], "packages importable" if not probe["bad"] else "missing: " + "; ".join(probe["bad"]),
+            setup_fix)
+        add("simulator", probe["sim"] == SIM_VERSION, f"flight_simulator {probe['sim']}",
+            f"install simulator/wheels/flight_simulator-{SIM_VERSION}-*.whl from the code repo: other versions "
+            "generate different scenarios from the same seed", level="error" if probe["sim"] is None else "warn")
+    code_ok = (code_repo / "render_policy.py").exists()
+    add("code", code_ok, f"single-agent code at {code_repo}" if code_ok else f"no single-agent code at {code_repo}",
+        "point TADA_CODE_REPO (or lab/setup.sh) at monorepo/reinforcement_learning/single_agent_rllib")
+    simcfg = (code_repo / "config" / "simulation_config" / "scenario_generator").is_dir()
+    add("simconfig", simcfg or not code_ok, "simulator configuration found" if simcfg else
+        "config/simulation_config does not resolve (it links to the monorepo's top-level simulation_config/)",
+        "clone the whole monorepo, not only the single_agent_rllib folder")
+    def text(rel):
+        f = code_repo / rel
+        return f.read_text() if f.exists() else ""
+    lab_api = "aman_ttl" in text("analysis/paper_results.py") and "observer=None" in text("analysis/rollout_search.py")
+    add("codeapi", lab_api or not code_ok, "code has the hooks the lab flies through" if lab_api else
+        "this code checkout predates the lab: analysis/paper_results.py has no per-flight AMAN TTL and/or "
+        "analysis/rollout_search.py has no episode observer",
+        "use a code checkout that includes the lab's analysis hooks (single-agent paper work of 2026-10-26)")
+    cfg = (code_repo / "config" / "config.py").read_text() if code_ok else ""
+    monad = ("TADA_GENERATOR" in cfg and (code_repo / "config" / "simulation_config_monad_mxp").is_dir()
+             and (code_repo / "config" / "simulation_config_monad_bgy").is_dir())
+    add("monad", monad or not code_ok, "MONAD-aligned generator available" if monad else
+        "this code checkout has no MONAD-aligned generator (TADA_GENERATOR, config/simulation_config_monad_*): "
+        "only the legacy generator is offered", "use a code checkout that includes the generator switch", level="warn")
+    seeds = (code_repo / "paper_results" / "seeds_curated.txt").exists()
+    add("seeds", seeds or not code_ok, "paper's curated seeds found" if seeds else
+        "no paper_results/seeds_curated.txt: no curated seeds or paper results in the seed picker", "", level="warn")
+    add("site", (SITE / "index.html").exists(), "docs site built: the runner also serves the Lab at /lab/" if (SITE / "index.html").exists()
+        else "docs site not built: only the published page can use this runner", "lab/run.sh builds it on start (needs mkdocs)",
+        level="warn")
+    return {"ok": all(c["ok"] or c["level"] != "error" for c in checks), "checks": checks,
+            "generators": {"monad": monad, "legacy": True}}
+
+
+def print_checks(pf: dict) -> None:
+    mark = {"ok": "  ok ", "warn": " WARN", "error": "ERROR"}
+    for c in pf["checks"]:
+        print(f"[lab] {mark[c['level']]}  {c['name']:<9} {c['msg']}" + (f"\n[lab]         fix: {c['fix']}" if not c["ok"] and c["fix"] else ""),
+              flush=True)
+
+
+# --------------------------------------------------------------------------------------
 # jobs
 # --------------------------------------------------------------------------------------
 
@@ -239,9 +326,10 @@ def clean_scenario(raw: dict) -> dict:
 
 
 class Lab:
-    def __init__(self, registry_only: bool = False):
+    def __init__(self, registry_only: bool = False, setup: dict | None = None):
         CACHE.mkdir(parents=True, exist_ok=True)
         self.registry_only = registry_only
+        self.setup = setup
         self.reload()
         self.fly_pool = ThreadPoolExecutor(FLY_WORKERS, thread_name_prefix="fly")
         self.render_pool = ThreadPoolExecutor(RENDER_WORKERS, thread_name_prefix="render")
@@ -250,7 +338,7 @@ class Lab:
         self.index = self._load_index()
 
     def reload(self) -> None:
-        self.catalog = build_catalog(self.registry_only)
+        self.catalog = build_catalog(self.registry_only, self.setup)
         self.agents = {a["id"]: a for a in self.catalog["agents"]}
 
     # -- downloads: only when the page asks, only registry bundles, hash-checked ---------------
@@ -341,6 +429,10 @@ class Lab:
 
     def submit_fly(self, body: dict) -> dict:
         sc = clean_scenario(body.get("scenario") or {})
+        if not self.catalog["generators"][sc["generator"]]["available"]:
+            raise ValueError("this runner's code checkout has no MONAD-aligned generator; use the legacy generator")
+        if self.setup and not self.setup["ok"]:
+            raise ValueError("this runner is not set up to fly: run lab/run.sh --check")
         agent = str(body.get("agent"))
         mode = str(body.get("mode", "det"))
         attempts = int(body.get("attempts", 0)) if mode == "sampled" else 0
@@ -522,7 +614,8 @@ class Handler(SimpleHTTPRequestHandler):
             if u.path == "/api/health":
                 return self._json({"ok": True, "api": API_VERSION, "agents": len(self.lab.catalog["agents"]),
                                    "installed": sum(bool(a.get("installed")) for a in self.lab.catalog["agents"]),
-                                   "cached": len(self.lab.index), "code_ok": self.lab.catalog["code_ok"]})
+                                   "cached": len(self.lab.index), "code_ok": self.lab.catalog["code_ok"],
+                                   "setup_ok": bool((self.lab.setup or {}).get("ok", True))})
             if u.path == "/api/catalog":
                 return self._json(self.lab.catalog)
             if u.path.startswith("/api/job/"):
@@ -618,6 +711,7 @@ def main():
     ap.add_argument("--allow-origin", action="append", default=[],
                     help=f"another page origin that may use this runner (always: {', '.join(sorted(PUBLIC_ORIGINS))}, localhost)")
     ap.add_argument("--open", action="store_true", help="open the published Lab page in the browser")
+    ap.add_argument("--check", action="store_true", help="check the setup and exit (non-zero if it cannot fly)")
     ap.add_argument("--registry-only", action="store_true",
                     help="list only the public registry agents, as on a machine without the experiments")
     args = ap.parse_args()
@@ -625,7 +719,13 @@ def main():
         mkdocs = MKDOCS if Path(MKDOCS).exists() else [os.environ.get("TADA_PY", sys.executable), "-m", "mkdocs"]
         subprocess.run(([mkdocs] if isinstance(mkdocs, str) else mkdocs) + ["build", "-q"], cwd=DOCS, check=False)
     Handler.allowed_origins = set(PUBLIC_ORIGINS) | {o.rstrip("/") for o in args.allow_origin}
-    Handler.lab = Lab(registry_only=args.registry_only)
+    reg = yaml.safe_load((DOCS / "models.yaml").read_text())
+    pf = preflight(Path(os.environ.get("TADA_CODE_REPO") or reg["code_repo"]))
+    print_checks(pf)
+    if args.check:
+        print(f"[lab] {'ready to fly' if pf['ok'] else 'NOT ready: fix the errors above'}", flush=True)
+        sys.exit(0 if pf["ok"] else 1)
+    Handler.lab = Lab(registry_only=args.registry_only, setup=pf)
     server = ThreadingHTTPServer((args.host, args.port), Handler)
     site = f", docs site at http://{args.host}:{args.port}/lab/" if (SITE / "index.html").exists() else ""
     print(f"[lab] runner up: {len(Handler.lab.catalog['agents'])} agents, {len(Handler.lab.index)} cached flights; "

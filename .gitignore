@@ -3,3 +3,5 @@ site-preview-*/
 __pycache__/
 lab/cache/
 lab/server.log
+lab/.venv/
+lab/runner.env
