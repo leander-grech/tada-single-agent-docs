@@ -90,7 +90,8 @@
         function agent(id) { return catalog.agents.filter(function (a) { return a.id === id; })[0]; }
         function status(key) {
           var j = jobs[key];
-          return j ? { key: key, kind: j.kind, status: j.status, stage: j.stage, frac: j.frac, error: j.error, live: j.live }
+          return j ? { key: key, kind: j.kind, status: j.status, stage: j.stage, frac: j.frac, error: j.error, live: j.live,
+            partial: j.partial, partialN: j.partialN || 0 }
             : { key: key, status: results[key] ? "done" : "missing" };
         }
         function fly(body) {
@@ -122,7 +123,11 @@
           }
           var job = { scenario: sc, agent: body.agent, mode: mode, attempts: attempts, search: search };
           var j = jobs[key] = { kind: "fly", status: "running", stage: "queued", frac: null, error: null, live: null };
-          call({ cmd: "fly", job: job }, function (p) { j.stage = p.stage; j.frac = p.frac; if (p.live) j.live = p.live; }, null,
+          call({ cmd: "fly", job: job }, function (p) {
+            j.stage = p.stage; j.frac = p.frac;
+            if (p.live) j.live = p.live;
+            if (p.partial) { p.partial.job = job; p.partial.search = p.partial.search || null; j.partial = p.partial; j.partialN = (j.partialN || 0) + 1; }
+          }, null,
             function (id) { j.wid = id; }).then(function (r) {
             r.job = job; r.search = null; results[key] = r; j.status = "done"; j.stage = "done"; j.frac = 1;
           }, function (e) { j.status = "error"; j.error = e.message; });

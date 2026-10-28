@@ -110,7 +110,8 @@ class TraceObserver:
             dev = land_t.get(cs, env._eta.get(cs, 0.0)) - env._eta.get(cs, 0.0)
             ac_rows.append([cs, round(float(p.x), 2), round(float(p.y), 2), int(round(float(p.z))),
                             int(round(float(v.length()))), status, round(float(dev), 1)])
-        frames.append({"t": round(t, 1), "ac": ac_rows})
+        win = [cs for cs in (getattr(env, "_prev_aircraft_order", None) or []) if cs]  # the agent's window (AMAN order)
+        frames.append({"t": round(t, 1), "ac": ac_rows, "win": win})
 
     def before_step(self, env, obs, action):
         self.paper.before_step(env, obs, action)
