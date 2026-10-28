@@ -256,3 +256,19 @@ output.lab-num { min-width: 2em; text-align: right; font-size: 0.8rem; color: va
 .lab-key__input { flex: 1 1 18rem; font-family: var(--tada-font-mono); }
 .lab-key__head { color: var(--tada-champion); margin-bottom: 0.3rem; }
 .lab-key__remember { display: flex; align-items: center; gap: 0.35rem; }
+
+/* radar replay */
+.lab-layers { display: flex; flex-wrap: wrap; gap: 0.2rem 1rem; margin-bottom: 0.4rem; font-size: 0.62rem; color: var(--lab-mute); }
+.lab-layers__item { display: inline-flex; align-items: center; gap: 0.3em; cursor: pointer; }
+.lab-layers__item input { accent-color: var(--tada-champion); }
+.lab-lg-glyph { display: inline-block; vertical-align: middle; background: #02060d; border-radius: 50%; }
+.lab-map { background: #02060d; }
+.lab-replay__map { position: relative; }
+.lab-map { cursor: grab; touch-action: none; }
+.lab-map.is-dragging { cursor: grabbing; }
+.lab-zoom { position: absolute; top: 0.5rem; right: 1.6rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.lab-zoom__btn {
+  width: 1.6rem; height: 1.6rem; font: 600 0.8rem var(--tada-font-mono); cursor: pointer;
+  color: #3fd0ff; background: rgba(2, 6, 13, 0.8); border: 1px solid rgba(63, 208, 255, 0.4); border-radius: var(--tada-radius);
+}
+.lab-zoom__btn:hover { border-color: var(--tada-champion); color: var(--tada-champion); }

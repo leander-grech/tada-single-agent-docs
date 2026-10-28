@@ -16,7 +16,7 @@ onmessage = async (e) => {
   try {
     if (m.cmd === "init") {
       engine = await loadTadaEngine(m.bytes || m.wasm);
-      postMessage({ id: m.id, done: true });
+      postMessage({ id: m.id, done: true, result: { sectors: engine.sectors() } });
     } else if (m.cmd === "policy") {
       policies[m.agent] = engine.loadPolicy(m.bytes);
       postMessage({ id: m.id, done: true });

@@ -68,9 +68,10 @@
         fetch(assets + "curated.json").then(function (r) { return r.json(); }).catch(function () { return {}; }),
         Promise.resolve().then(function () { return decryptEngine(assets, keyText); }).then(function (bytes) { return call({ cmd: "init", bytes: bytes }, null, [bytes]); }),
       ]).then(function (res) {
-        var reg = res[0], curated = res[1];
+        var reg = res[0], curated = res[1], scene = res[2] || {};
         var catalog = {
           engine: "browser", code_ok: true, setup: { ok: true, checks: [] }, max_segments: 1, modes: ["det", "sampled"],
+          sectors: scene.sectors || [],
           procedures: reg.procedures, reference: reg.reference, curated: curated,
           generators: {
             monad: { label: "MONAD-aligned", available: true, detail: reg.generators.monad },

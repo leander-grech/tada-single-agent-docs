@@ -177,8 +177,12 @@ def build_catalog(registry_only: bool = False, setup: dict | None = None) -> dic
             by_id[ref]["paper"] = True
     code_ok = (code_repo / "render_policy.py").exists()
     avail = (setup or {}).get("generators", {"monad": True, "legacy": True})
+    sectors = []
+    cat_file = code_repo / "static" / "sector_catalog" / "tada_sector_catalog.json"
+    if cat_file.exists():  # airspace sectors for the radar (the same catalog the MP4 render draws)
+        sectors = [{"name": k, "polygon": v["polygon"]} for k, v in json.loads(cat_file.read_text())["sectors"].items()]
     gens = {k: {**v, "available": bool(avail.get(k, True))} for k, v in GENERATORS.items()}
-    return {"code_repo": str(code_repo), "code_ok": code_ok, "setup": setup, "agents": agents, "procedures": PROCEDURES,
+    return {"code_repo": str(code_repo), "code_ok": code_ok, "setup": setup, "sectors": sectors, "agents": agents, "procedures": PROCEDURES,
             "generators": gens, "reference": REFERENCE, "curated": curated_seeds(code_repo) if code_ok else {}}
 
 
