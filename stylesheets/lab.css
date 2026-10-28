@@ -173,13 +173,21 @@ output.lab-num { min-width: 2em; text-align: right; font-size: 0.8rem; color: va
 
 /* replay */
 .lab-replay { outline: none; }
-/* radar | the agent's window (clearances) | landing deviation (narrower) */
-.lab-replay__view { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr) minmax(0, 0.58fr); gap: 0.5rem; }
-@media (max-width: 1180px) { .lab-replay__view { grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.9fr); } .lab-replay__map { grid-column: 1 / -1; } }
-@media (max-width: 640px) { .lab-replay__view { grid-template-columns: minmax(0, 1fr); } }
-.lab-replay__map, .lab-replay__strip, .lab-replay__win { min-width: 0; }
-.lab-map, .lab-strip, .lab-win { display: block; border: 1px solid var(--lab-border); border-radius: var(--tada-radius); }
-.lab-win, .lab-strip { background: #02060d; }
+/* radar | the agent's window (clearances), and under both the whole stream's landing deviation */
+.lab-replay__view { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 0.5rem; }
+.lab-replay__dev { grid-column: 1 / -1; }
+@media (max-width: 900px) { .lab-replay__view { grid-template-columns: minmax(0, 1fr); } }
+.lab-replay__map, .lab-replay__dev, .lab-replay__win { min-width: 0; }
+.lab-map, .lab-dev, .lab-win { display: block; border: 1px solid var(--lab-border); border-radius: var(--tada-radius); }
+.lab-win, .lab-dev { background: #02060d; }
+/* 3D view controls, at the bottom of the scope; the Radar / 3D switch heads the zoom buttons */
+.lab-zoom .lab-zoom__btn.lab-zoom__view { width: auto; min-width: 2rem; padding: 0 0.45rem; font-size: 0.62rem; font-weight: 600; white-space: nowrap; }
+.lab-view3d { position: absolute; bottom: 0.5rem; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+.lab-view3d[hidden] { display: none; }
+.lab-view3d__row { display: flex; align-items: center; gap: 0.3rem; }
+.lab-view3d .lab-zoom__btn.lab-view3d__preset { width: auto; padding: 0 0.55rem; font-size: 0.6rem; white-space: nowrap; }
+.lab-view3d .lab-layers__label { color: #9aabc6; }
+.lab-view3d__spin.is-on { color: #ffd23f; border-color: #ffd23f; }
 .lab-replay__ctl { display: flex; align-items: center; gap: 0.6rem; margin-top: 0.5rem; }
 .lab-tlabel { min-width: 9.5em; text-align: right; color: var(--md-default-fg-color--light); font-size: 0.66rem; }
 .lab-legend { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; margin-top: 0.45rem; font-size: 0.6rem; color: var(--lab-mute); }

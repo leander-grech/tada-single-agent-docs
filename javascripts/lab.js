@@ -1005,7 +1005,7 @@
     var TRAIL = 12;      // decisions of track history drawn behind each aircraft
     var LAYERS_KEY = "tada-lab-layers-v2";
     // starts quiet: call-sign tags only; full data blocks are one click away
-    var layers = { sectors: true, rings: true, routes: true, labels: "tags", plans: true };
+    var layers = { sectors: true, rings: true, routes: true, labels: "tags", plans: true, view: "2d", exag: 5 };
     // predicted rollouts of the search: their own palette, so they never read as real traffic. Only the latest
     // unbeaten plan (the one being flown) is gold; the other candidates stay muted.
     var PRED = { chosen: "#ffd23f", other: "#7d8fb3", los: "#b5677a", pruned: "#4c566a", text: "rgba(200,212,235,0.85)" };
@@ -1020,6 +1020,9 @@
     var plans = [];                                                             // search plans (in-browser engine)
     var cv, ctx, strip, sctx, slider, tlabel, playBtn, bounds, evByFrame, wrap, airport, procLabel, sectors;
     var segOf = {};                                                      // composed stream: callsign -> segment
+    var initialOf = {}, devHover = null, devGeo = null;                  // the whole-stream deviation chart
+    // the 3D view: an orbit camera around a ground point (yaw from north, pitch above the horizon, distance in NM)
+    var cam = null, spin = null, FT_NM = 1 / 6076.12;
     var wcv, wctx, evByCs, winN = 10, dtDec = 45, rowsNow = [];          // the agent's window (centre panel)
     var live = false, follow = false;                                   // a search in progress, radar following it
 
@@ -1137,6 +1140,7 @@
       });
 
       view = { zoom: 1, cx: (bounds.x0 + bounds.x1) / 2, cy: (bounds.y0 + bounds.y1) / 2 };
+      if (!cam || !opts.keep) cam = defaultCam();
       // per flight: when it came under control, when it landed and how far off
       life = {};
       d.trace.queue.forEach(function (cs) { life[cs] = { on: null, land: null, dev: null, seen: null }; });
@@ -1150,6 +1154,8 @@
         });
       });
       evByFrame.forEach(function (list, k) { list.forEach(function (e) { e.fi = k; }); });
+      initialOf = {};
+      (d.flights || []).forEach(function (f) { initialOf[f.callsign] = f.initial; });
       segOf = {};
       (d.composition || []).forEach(function (sg, k) { (sg.callsigns || []).forEach(function (cs) { segOf[cs] = k; }); });
       evByCs = {};
@@ -1158,7 +1164,7 @@
       plans.forEach(function (pl) {
         pl.cands.forEach(function (c) {
           c.byCs = {};
-          (c.track || []).forEach(function (f) { f.ac.forEach(function (r) { (c.byCs[r[0]] = c.byCs[r[0]] || []).push([f.t, r[1], r[2]]); }); });
+          (c.track || []).forEach(function (f) { f.ac.forEach(function (r) { (c.byCs[r[0]] = c.byCs[r[0]] || []).push([f.t, r[1], r[2], r[3] || 0]); }); });
         });
       });
       tl = h("canvas", { class: "lab-timeline", "aria-label": "clearance timeline: click or drag to seek" });
@@ -1166,7 +1172,8 @@
       attachTimeline(tl);
       cv = h("canvas", { class: "lab-map", "aria-label": "radar replay: Ctrl + scroll to zoom, drag to pan, double-click to reset" });
       attachZoom(cv);
-      strip = h("canvas", { class: "lab-strip", "aria-label": "predicted landing deviation of the flights in the window" });
+      strip = h("canvas", { class: "lab-dev", "aria-label": "landing deviation of every flight in the stream: click a flight to jump to its landing" });
+      attachDev(strip);
       wcv = h("canvas", { class: "lab-win", "aria-label": "clearances of the flights in the agent's window" });
       slider = h("input", { type: "range", min: 0, max: frames.length - 1, step: 1, value: 0, class: "lab-range lab-scrub", "aria-label": "time" });
       slider.addEventListener("input", function () { u = +slider.value; follow = false; draw(); });
@@ -1188,7 +1195,37 @@
         draw();
       });
       labelSeg.classList.add("lab-seg--sm");
-      var toggles = h("div", { class: "lab-layers", role: "toolbar", "aria-label": "radar display" }, layerList.map(function (l) {
+      // 2D scope or 3D view, and the 3D view's camera presets and vertical exaggeration
+      function setView(v) {
+        layers.view = v; saveLayers();
+        viewSeg.querySelectorAll("button").forEach(function (b, n) { var on = ["2d", "3d"][n] === v; b.classList.toggle("is-on", on); b.setAttribute("aria-checked", on ? "true" : "false"); });
+        view3d.hidden = v !== "3d"; if (v !== "3d") stopSpin();
+        viewBtn.textContent = v === "3d" ? "Radar" : "3D"; viewBtn.title = v === "3d" ? "Back to the radar (plan view)" : "3D view with altitudes";
+        draw();
+      }
+      var viewSeg = seg("view", [{ value: "2d", label: "Radar", title: "Plan view" }, { value: "3d", label: "3D", title: "3D view with altitudes: drag to rotate" }],
+        layers.view, setView);
+      // the same switch on the scope itself
+      var viewBtn = h("button", { type: "button", class: "lab-zoom__btn lab-zoom__view", onclick: function () { setView(layers.view === "3d" ? "2d" : "3d"); } },
+        [layers.view === "3d" ? "Radar" : "3D"]);
+      viewSeg.classList.add("lab-seg--sm");
+      var exagSeg = seg("altitude", [1, 3, 5, 10].map(function (x) { return { value: x, label: "×" + x, title: "Vertical exaggeration ×" + x }; }), layers.exag, function (v) {
+        layers.exag = v; saveLayers();
+        exagSeg.querySelectorAll("button").forEach(function (b) { b.classList.toggle("is-on", b.textContent === "×" + v); });
+        draw();
+      });
+      exagSeg.classList.add("lab-seg--sm");
+      var spinBtn = h("button", { type: "button", class: "lab-zoom__btn lab-view3d__spin", title: "Rotate slowly", "aria-pressed": "false", onclick: function () {
+        if (spin) stopSpin(); else startSpin(); spinBtn.setAttribute("aria-pressed", spin ? "true" : "false"); spinBtn.classList.toggle("is-on", !!spin);
+      } }, ["⟳"]);
+      var view3d = h("div", { class: "lab-view3d" }, [
+        h("div", { class: "lab-view3d__row" }, [["Top", 0, 89, 1.2], ["Oblique", -25, 32, 1.05], ["Side", 0, 4, 0.8]].map(function (p) {
+          return h("button", { type: "button", class: "lab-zoom__btn lab-view3d__preset", title: p[0] + " view", onclick: function () { flyCam(p[1], p[2], p[3]); } }, [p[0]]);
+        }).concat([spinBtn])),
+        h("div", { class: "lab-view3d__row" }, [h("span", { class: "lab-layers__label", text: "Altitude" }), exagSeg])
+      ]);
+      view3d.hidden = layers.view !== "3d";
+      var toggles = h("div", { class: "lab-layers", role: "toolbar", "aria-label": "radar display" }, [viewSeg, h("span", { class: "lab-layers__sep", "aria-hidden": "true" })].concat(layerList.map(function (l) {
         var b = h("button", { type: "button", class: "lab-tgl" + (layers[l[0]] ? " is-on" : ""), "aria-pressed": layers[l[0]] ? "true" : "false",
           title: (layers[l[0]] ? "Hide " : "Show ") + l[1].toLowerCase() }, [h("i", { class: "lab-tgl__dot", style: "background:" + l[2] }), l[1]]);
         b.addEventListener("click", function () {
@@ -1198,7 +1235,7 @@
           draw();
         });
         return b;
-      }).concat([h("span", { class: "lab-layers__sep", "aria-hidden": "true" }), h("span", { class: "lab-layers__label", text: "Labels" }), labelSeg]));
+      })).concat([h("span", { class: "lab-layers__sep", "aria-hidden": "true" }), h("span", { class: "lab-layers__label", text: "Labels" }), labelSeg]));
       var cats = [["SLOW_DOWN_LARGE", "slow down (1–3 steps)"], ["SPEED_UP_MEDIUM", "speed up"], ["TURN_LEFT_AND_RETURN_TO_ROUTE", "turn L/R + rejoin"],
         ["LENGTHEN_TROMBONE", "trombone ±"], ["SKIP_2_WAYPOINTS_NOT_NEXT", "skip n waypoints"],
         [procLabel === "BGY" ? "DIRECT_TO_MERGE_POINT" : "VECTOR_TO_ILS", procLabel === "BGY" ? "direct to merge point" : "vector to ILS"]];
@@ -1213,11 +1250,11 @@
       ]));
       wrap = h("div", { class: "lab-replay", tabindex: 0 }, [
         toggles,
-        h("div", { class: "lab-replay__view" }, [h("div", { class: "lab-replay__map" }, [cv, h("div", { class: "lab-zoom" }, [
+        h("div", { class: "lab-replay__view" }, [h("div", { class: "lab-replay__map" }, [cv, h("div", { class: "lab-zoom" }, [viewBtn,
           h("button", { type: "button", class: "lab-zoom__btn", title: "Zoom in", "aria-label": "zoom in", onclick: function () { zoomBy(1.5); } }, ["+"]),
           h("button", { type: "button", class: "lab-zoom__btn", title: "Zoom out", "aria-label": "zoom out", onclick: function () { zoomBy(1 / 1.5); } }, ["−"]),
           h("button", { type: "button", class: "lab-zoom__btn", title: "Fit the whole stream", "aria-label": "reset view", onclick: resetView }, ["⤢"])
-        ])]), h("div", { class: "lab-replay__win" }, [wcv]), h("div", { class: "lab-replay__strip" }, [strip])]),
+        ]), view3d]), h("div", { class: "lab-replay__win" }, [wcv]), h("div", { class: "lab-replay__dev" }, [strip])]),
         h("div", { class: "lab-timeline-wrap" }, [tl]),
         h("div", { class: "lab-replay__ctl" }, [playBtn, slider, tlabel, spd]),
         legend
@@ -1242,8 +1279,12 @@
       return wrap;
     }
     // ------------------------------------------------------------------ zoom / pan
-    function resetView() { view = { zoom: 1, cx: (bounds.x0 + bounds.x1) / 2, cy: (bounds.y0 + bounds.y1) / 2 }; draw(); }
+    function resetView() {
+      if (layers.view === "3d") cam = defaultCam(); else view = { zoom: 1, cx: (bounds.x0 + bounds.x1) / 2, cy: (bounds.y0 + bounds.y1) / 2 };
+      draw();
+    }
     function zoomBy(f, px, py) {
+      if (layers.view === "3d") { cam.dist = Math.max(10, Math.min(1500, cam.dist / f)); draw(); return; }
       if (!proj) return;
       var z = Math.max(1, Math.min(10, view.zoom * f));
       if (px != null) {  // keep the point under the cursor fixed
@@ -1265,17 +1306,33 @@
         if (!e.ctrlKey && !e.metaKey) { zoomHint(c); return; }
         e.preventDefault();
         var r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+        if (layers.view === "3d") { cam.dist = Math.max(10, Math.min(1500, cam.dist * Math.exp(e.deltaY * 0.0015))); draw(); return; }
         zoomBy(Math.exp(-e.deltaY * 0.0015), (e.clientX - r.left) * dpr, (e.clientY - r.top) * dpr);
       }, { passive: false });
-      c.addEventListener("pointerdown", function (e) { drag = { x: e.clientX, y: e.clientY }; c.setPointerCapture(e.pointerId); c.classList.add("is-dragging"); });
+      c.addEventListener("contextmenu", function (e) { if (layers.view === "3d") e.preventDefault(); });
+      c.addEventListener("pointerdown", function (e) {
+        drag = { x: e.clientX, y: e.clientY, pan: e.button === 2 || e.shiftKey }; c.setPointerCapture(e.pointerId); c.classList.add("is-dragging");
+      });
       c.addEventListener("pointermove", function (e) {
-        if (!drag || !proj) return;
+        if (!drag) return;
+        var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+        drag.x = e.clientX; drag.y = e.clientY;
+        if (layers.view === "3d") {
+          if (drag.pan) {  // move the ground point the camera looks at, in the screen's directions
+            var k = cam.dist / 700, co = Math.cos(cam.yaw), si = Math.sin(cam.yaw);
+            cam.cx += (-co * dx - si * dy) * k; cam.cy += (-si * dx + co * dy) * k;
+          } else {
+            cam.yaw -= dx * 0.008; cam.pitch = Math.max(2, Math.min(89, cam.pitch + dy * 0.35));
+          }
+          draw(); return;
+        }
+        if (!proj) return;
         var dpr = window.devicePixelRatio || 1;
-        view.cx -= (e.clientX - drag.x) * dpr / proj.sc; view.cy += (e.clientY - drag.y) * dpr / proj.sc;
-        drag = { x: e.clientX, y: e.clientY }; draw();
+        view.cx -= dx * dpr / proj.sc; view.cy += dy * dpr / proj.sc;
+        draw();
       });
       ["pointerup", "pointercancel"].forEach(function (ev) { c.addEventListener(ev, function () { drag = null; c.classList.remove("is-dragging"); }); });
-      c.addEventListener("dblclick", resetView);
+      c.addEventListener("dblclick", function () { if (layers.view === "3d") { cam = defaultCam(); draw(); } else resetView(); });
     }
 
     function resize() {
@@ -1286,10 +1343,10 @@
       cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.width = Math.round(w * dpr); cv.height = Math.round(hgt * dpr);
       // window and deviation panels: as tall as the scope when beside it, else a fixed height
       var side = Math.abs(wcv.parentNode.getBoundingClientRect().top - r.top) < 4, hw = side ? hgt : Math.max(300, Math.min(440, 40 + winN * 36));
-      [wcv, strip].forEach(function (c) {
-        var rc = c.parentNode.getBoundingClientRect(), wc = Math.max(180, rc.width);
-        c.style.width = wc + "px"; c.style.height = hw + "px"; c.width = Math.round(wc * dpr); c.height = Math.round(hw * dpr);
-      });
+      var rw = wcv.parentNode.getBoundingClientRect(), ww = Math.max(180, rw.width);
+      wcv.style.width = ww + "px"; wcv.style.height = hw + "px"; wcv.width = Math.round(ww * dpr); wcv.height = Math.round(hw * dpr);
+      var rd = strip.parentNode.getBoundingClientRect(), wd = Math.max(240, rd.width), hd = 210;
+      strip.style.width = wd + "px"; strip.style.height = hd + "px"; strip.width = Math.round(wd * dpr); strip.height = Math.round(hd * dpr);
       var rt = tl.parentNode.getBoundingClientRect(), wt = Math.max(240, rt.width), ht = 30 + d.trace.queue.length * tlRowPx() + 22;
       tl.style.width = wt + "px"; tl.style.height = ht + "px"; tl.width = Math.round(wt * dpr); tl.height = Math.round(ht * dpr);
       tlCache = null;
@@ -1323,7 +1380,8 @@
       slider.value = Math.round(u);
       tlabel.textContent = "t+" + fmtT(stateTime()) + " · " + (i + 1) + "/" + frames.length;
       rowsNow = windowRows();
-      drawMap(); drawWindow(); drawStrip(); drawTimeline();
+      if (layers.view === "3d") draw3D(); else drawMap();
+      drawWindow(); drawStrip(); drawTimeline();
     }
     // The agent's window at the continuous time u: one row per flight in AMAN order. Over a decision, rows slide to
     // their new slots; a flight leaving the window fades out (sliding up off the front), one joining fades in.
@@ -1699,6 +1757,255 @@
         ctx.fillStyle = col2; ctx.shadowColor = col2; ctx.shadowBlur = 10 * dpr; ctx.fillText(txt, W - tw2 - 2 * m, m * 2.4 + 19 * dpr); ctx.shadowBlur = 0;
       }
     }
+    // ------------------------------------------------------------------ the 3D view
+    // A hand-rolled orbit camera with perspective, drawn on the scope's canvas: the scene is lines, points and
+    // labels, so no 3D library is needed. Altitudes are exaggerated (×1 to ×10) so the vertical structure shows.
+    function defaultCam() {
+      var span = Math.max(bounds.x1 - bounds.x0, bounds.y1 - bounds.y0);
+      // looking at the middle between the stream's extent and the airport, where the traffic converges
+      return { cx: ((bounds.x0 + bounds.x1) / 2 + airport[0]) / 2, cy: ((bounds.y0 + bounds.y1) / 2 + airport[1]) / 2,
+               yaw: -25 * Math.PI / 180, pitch: 32, dist: span * 1.05 };
+    }
+    function flyCam(yawDeg, pitch, distF) {  // ease to a preset over ~0.6 s
+      var span = Math.max(bounds.x1 - bounds.x0, bounds.y1 - bounds.y0);
+      var a = { yaw: cam.yaw, pitch: cam.pitch, dist: cam.dist }, b = { yaw: yawDeg * Math.PI / 180, pitch: pitch, dist: span * distF }, t0 = performance.now();
+      var dyaw = ((b.yaw - a.yaw) % (2 * Math.PI) + 3 * Math.PI) % (2 * Math.PI) - Math.PI;
+      (function step() {
+        var f = Math.min(1, (performance.now() - t0) / 600), e = f * f * (3 - 2 * f);
+        cam.yaw = a.yaw + dyaw * e; cam.pitch = a.pitch + (b.pitch - a.pitch) * e; cam.dist = a.dist + (b.dist - a.dist) * e; draw();
+        if (f < 1) requestAnimationFrame(step);
+      })();
+    }
+    function startSpin() {
+      var last = performance.now();
+      spin = requestAnimationFrame(function go(ts) {
+        if (!cv || !cv.isConnected || layers.view !== "3d") { spin = null; return; }
+        cam.yaw += (ts - last) / 1000 * 0.12; last = ts;
+        if (!playing) draw();
+        spin = requestAnimationFrame(go);
+      });
+    }
+    function stopSpin() { if (spin) cancelAnimationFrame(spin); spin = null; }
+    function camera(W, H) {
+      var ph = cam.pitch * Math.PI / 180, cp = Math.cos(ph), sp = Math.sin(ph), sy = Math.sin(cam.yaw), cy = Math.cos(cam.yaw);
+      var eye = [cam.cx + cam.dist * cp * sy, cam.cy - cam.dist * cp * cy, cam.dist * sp];
+      var f = [-cp * sy, cp * cy, -sp], r = [cy, sy, 0], up = [r[1] * f[2] - r[2] * f[1], r[2] * f[0] - r[0] * f[2], r[0] * f[1] - r[1] * f[0]];
+      var focal = Math.min(W, H) * 1.25, ex = layers.exag * FT_NM;
+      return {
+        // world (NM, NM, ft) -> [screen x, screen y, depth]; null behind the camera
+        P: function (x, y, zft) {
+          var v0 = x - eye[0], v1 = y - eye[1], v2 = (zft || 0) * ex - eye[2];
+          var zc = v0 * f[0] + v1 * f[1] + v2 * f[2];
+          if (zc < 1) return null;
+          return [W / 2 + focal * (v0 * r[0] + v1 * r[1]) / zc, H / 2 - focal * (v0 * up[0] + v1 * up[1] + v2 * up[2]) / zc, zc];
+        },
+        focal: focal
+      };
+    }
+    function draw3D() {
+      var dpr = window.devicePixelRatio || 1, W = cv.width, H = cv.height, now = performance.now() / 1000;
+      var ok = css("--tada-ok"), warn = css("--tada-warn"), bad = css("--tada-bad");
+      var mono = css("--tada-font-mono"), head = css("--tada-font-head");
+      var i = Math.floor(u), fr = u - i, C = camera(W, H), P = C.P, m = 14 * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.shadowBlur = 0; ctx.setLineDash([]);
+      var sky = ctx.createLinearGradient(0, 0, 0, H);
+      sky.addColorStop(0, "#050b18"); sky.addColorStop(1, "#02060d");
+      ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+      function poly(pts, close) {  // a projected polyline (segments behind the camera are skipped)
+        var started = false;
+        ctx.beginPath();
+        pts.forEach(function (q) {
+          var s_ = P(q[0], q[1], q[2]);
+          if (!s_) { started = false; return; }
+          if (started) ctx.lineTo(s_[0], s_[1]); else { ctx.moveTo(s_[0], s_[1]); started = true; }
+        });
+        if (close) ctx.closePath();
+      }
+      // ground: range rings and bearings around the airport
+      var maxR = Math.max(Math.hypot(bounds.x0 - airport[0], bounds.y0 - airport[1]), Math.hypot(bounds.x1 - airport[0], bounds.y1 - airport[1]));
+      if (layers.rings) {
+        ctx.lineWidth = 1 * dpr;
+        for (var rr = 10; rr <= maxR; rr += 10) {
+          var ring = [];
+          for (var a_ = 0; a_ <= 64; a_++) ring.push([airport[0] + rr * Math.cos(a_ / 32 * Math.PI), airport[1] + rr * Math.sin(a_ / 32 * Math.PI), 0]);
+          ctx.strokeStyle = rr % 50 === 0 ? "rgba(63,208,255,0.22)" : "rgba(63,208,255,0.09)";
+          poly(ring); ctx.stroke();
+          var lab = P(airport[0] + rr * 0.7071, airport[1] - rr * 0.7071, 0);
+          if (lab && rr % 20 === 0) { ctx.fillStyle = "rgba(63,208,255,0.45)"; ctx.font = (9 * dpr) + "px " + mono; ctx.fillText(rr + " NM", lab[0] + 3 * dpr, lab[1]); }
+        }
+      }
+      // sectors on the ground
+      if (layers.sectors) sectors.forEach(function (sct, k) {
+        var col = SECTOR_HUES[k % SECTOR_HUES.length];
+        poly(sct.polygon.map(function (q) { return [q[0], q[1], 0]; }), true);
+        ctx.globalAlpha = 0.06; ctx.fillStyle = col; ctx.fill();
+        ctx.globalAlpha = 0.5; ctx.strokeStyle = col; ctx.lineWidth = 1.2 * dpr; ctx.setLineDash([6 * dpr, 4 * dpr]); ctx.stroke(); ctx.setLineDash([]);
+        var cx = 0, cy = 0; sct.polygon.forEach(function (q) { cx += q[0]; cy += q[1]; });
+        var lp = P(cx / sct.polygon.length, cy / sct.polygon.length, 0);
+        if (lp) { ctx.globalAlpha = 0.55; ctx.fillStyle = col; ctx.font = "600 " + (10 * dpr) + "px " + head; ctx.fillText(sct.name, lp[0] - ctx.measureText(sct.name).width / 2, lp[1]); }
+        ctx.globalAlpha = 1;
+      });
+      var ac = aircraftAt(), byNow = {}, landed = {};
+      ac.forEach(function (a) { byNow[a[0]] = a; if (a[5] === 2) landed[a[0]] = 1; });
+      // flight plans on the ground
+      if (layers.routes) Object.keys(d.trace.routes).forEach(function (cs) {
+        var r = d.trace.routes[cs];
+        if (r.length < 2 || landed[cs]) return;
+        ctx.strokeStyle = colors[cs]; ctx.globalAlpha = 0.18; ctx.lineWidth = 1.3 * dpr;
+        poly(r.map(function (q) { return [q[0], q[1], 0]; })); ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+      // airport and an altitude scale standing on it
+      var top = 0;
+      frames.forEach(function (f) { f.ac.forEach(function (a) { if (a[5] === 1 && a[3] > top) top = a[3]; }); });
+      top = Math.max(5000, Math.ceil(top / 5000) * 5000);
+      var base = P(airport[0], airport[1], 0), peak = P(airport[0], airport[1], top);
+      if (base && peak) {
+        ctx.strokeStyle = "rgba(233,241,255,0.45)"; ctx.lineWidth = 1.2 * dpr;
+        ctx.beginPath(); ctx.moveTo(base[0], base[1]); ctx.lineTo(peak[0], peak[1]); ctx.stroke();
+        ctx.font = (9 * dpr) + "px " + mono;
+        for (var fl = 5000; fl <= top; fl += 5000) {
+          var tk = P(airport[0], airport[1], fl);
+          if (!tk) continue;
+          ctx.fillStyle = "rgba(233,241,255,0.6)"; ctx.fillRect(tk[0] - 4 * dpr, tk[1] - 0.5 * dpr, 8 * dpr, 1.2 * dpr);
+          ctx.fillText("FL" + String(fl / 100).padStart(3, "0"), tk[0] + 6 * dpr, tk[1] + 3 * dpr);
+        }
+        ctx.strokeStyle = "#f4f8ff"; ctx.lineWidth = 1.6 * dpr;
+        ctx.beginPath(); ctx.arc(base[0], base[1], 4.5 * dpr, 0, 2 * Math.PI); ctx.stroke();
+        ctx.fillStyle = "#f4f8ff"; ctx.font = "600 " + (11 * dpr) + "px " + head; ctx.fillText(procLabel, base[0] + 9 * dpr, base[1] + 14 * dpr);
+      }
+      // trails at altitude, each with a faint curtain down to its ground shadow
+      Object.keys(colors).forEach(function (cs) {
+        var a0 = byNow[cs];
+        if (!a0 || a0[5] !== 1) return;
+        var pts = [];
+        for (var k = Math.max(0, i - TRAIL); k <= i; k++) { var a = frames[k].by[cs]; if (a && a[5] === 1) pts.push(a); }
+        pts.push(a0);
+        if (pts.length < 2) return;
+        var col = colors[cs];
+        for (var j = 1; j < pts.length; j++) {
+          var p0 = P(pts[j - 1][1], pts[j - 1][2], pts[j - 1][3]), p1 = P(pts[j][1], pts[j][2], pts[j][3]);
+          var g0 = P(pts[j - 1][1], pts[j - 1][2], 0), g1 = P(pts[j][1], pts[j][2], 0);
+          if (!p0 || !p1 || !g0 || !g1) continue;
+          var w = j / pts.length;
+          ctx.globalAlpha = 0.05 * w; ctx.fillStyle = col;
+          ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.lineTo(g1[0], g1[1]); ctx.lineTo(g0[0], g0[1]); ctx.closePath(); ctx.fill();
+          ctx.globalAlpha = 0.15 * w; ctx.strokeStyle = "#9aabc6"; ctx.lineWidth = 1 * dpr;
+          ctx.beginPath(); ctx.moveTo(g0[0], g0[1]); ctx.lineTo(g1[0], g1[1]); ctx.stroke();
+          ctx.globalAlpha = 0.1 + 0.8 * Math.pow(w, 1.5); ctx.strokeStyle = col; ctx.lineWidth = 2.2 * dpr;
+          ctx.beginPath(); ctx.moveTo(p0[0], p0[1]); ctx.lineTo(p1[0], p1[1]); ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      });
+      // the active search plan's predicted tracks, at their predicted altitudes (window flights only)
+      var nowT = stateTime(), active = null, prevPlan = null, wa = {};
+      rowsNow.forEach(function (r) { wa[r.cs] = Math.max(wa[r.cs] || 0, r.alpha); });
+      if (layers.plans) plans.forEach(function (pl) { if (pl.t <= nowT + 1e-6) { prevPlan = active; active = pl; } });
+      function plan3(pl, fade) {
+        pl.cands.slice().sort(function (a, b) { return (a.chosen ? 1 : 0) - (b.chosen ? 1 : 0); }).forEach(function (c) {
+          var col = c.pruned ? PRED.pruned : c.chosen ? PRED.chosen : c.los ? PRED.los : PRED.other;
+          var baseA = c.pruned ? 0.1 : c.chosen ? 0.95 : c.los ? 0.35 : 0.25;
+          ctx.strokeStyle = col; ctx.lineWidth = (c.chosen ? 2.2 : 1) * dpr; ctx.setLineDash(c.chosen ? [8 * dpr, 5 * dpr] : [2 * dpr, 5 * dpr]);
+          ctx.shadowColor = col; ctx.shadowBlur = c.chosen ? 8 * dpr : 0;
+          Object.keys(c.byCs).forEach(function (cs) {
+            var al = wa[cs] || 0;
+            if (al <= 0.01) return;
+            var pts = c.byCs[cs].filter(function (q) { return q[0] >= nowT - 1e-6; });
+            if (pts.length < 2) return;
+            var here = byNow[cs], line = (here && here[5] === 1 ? [[here[1], here[2], here[3]]] : []).concat(pts.map(function (q) { return [q[1], q[2], q[3]]; }));
+            ctx.globalAlpha = baseA * fade * al; poly(line); ctx.stroke();
+          });
+          ctx.setLineDash([]); ctx.shadowBlur = 0;
+        });
+        ctx.globalAlpha = 1;
+      }
+      if (active) {
+        var fin = prevPlan ? Math.max(0, Math.min(1, (nowT - active.t) / (0.7 * dtDec))) : 1;
+        if (fin < 1) plan3(prevPlan, 1 - fin);
+        plan3(active, fin);
+      }
+      // proximity between controlled pairs
+      var air = ac.filter(function (a) { return a[5] === 1; });
+      for (var p1_ = 0; p1_ < air.length; p1_++) for (var p2_ = p1_ + 1; p2_ < air.length; p2_++) {
+        var A = air[p1_], B = air[p2_], dh = Math.hypot(A[1] - B[1], A[2] - B[2]), dv = Math.abs(A[3] - B[3]);
+        if (dh >= 5 || dv >= 1000) continue;
+        var los = dh <= 3 && dv <= 500, sa = P(A[1], A[2], A[3]), sb = P(B[1], B[2], B[3]);
+        if (!sa || !sb) continue;
+        ctx.strokeStyle = los ? bad : warn; ctx.lineWidth = (los ? 3 : 1.8) * dpr;
+        if (!los) { ctx.setLineDash([5 * dpr, 4 * dpr]); ctx.lineDashOffset = -now * 20 * dpr; }
+        ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = los ? 12 * dpr : 0;
+        ctx.beginPath(); ctx.moveTo(sa[0], sa[1]); ctx.lineTo(sb[0], sb[1]); ctx.stroke();
+        ctx.setLineDash([]); ctx.lineDashOffset = 0; ctx.shadowBlur = 0;
+        ctx.fillStyle = ctx.strokeStyle; ctx.font = (los ? "700 " : "") + (9 * dpr) + "px " + mono;
+        ctx.fillText((los ? "LoS " : "") + dh.toFixed(1) + " NM / " + Math.round(dv) + " ft", (sa[0] + sb[0]) / 2 + 4 * dpr, (sa[1] + sb[1]) / 2 - 4 * dpr);
+      }
+      // clearances of the last few decisions, on their aircraft
+      var latest = {};
+      for (var kL = Math.max(0, i - FADE); kL <= i; kL++) evByFrame[kL].forEach(function (e) { latest[e.cs] = e; });
+      // aircraft, far to near: drop line, ground shadow, chevron at altitude, label with flight level
+      air.map(function (a) { return { a: a, s: P(a[1], a[2], a[3]) }; }).filter(function (o) { return o.s; })
+        .sort(function (x, y) { return y.s[2] - x.s[2]; }).forEach(function (o) {
+          var a = o.a, sp = o.s, cs = a[0], col = colors[cs], gp = P(a[1], a[2], 0);
+          if (gp) {
+            ctx.strokeStyle = col; ctx.globalAlpha = 0.4; ctx.lineWidth = 1 * dpr; ctx.setLineDash([2 * dpr, 3 * dpr]);
+            ctx.beginPath(); ctx.moveTo(sp[0], sp[1]); ctx.lineTo(gp[0], gp[1]); ctx.stroke(); ctx.setLineDash([]);
+            ctx.globalAlpha = 0.5; ctx.fillStyle = col; ctx.beginPath(); ctx.ellipse(gp[0], gp[1], 3 * dpr, 1.6 * dpr, 0, 0, 2 * Math.PI); ctx.fill();
+            ctx.globalAlpha = 1;
+          }
+          var ahead = P(a[1] + Math.cos(a.hd) * 2, a[2] + Math.sin(a.hd) * 2, a[3]), ang = ahead ? Math.atan2(ahead[1] - sp[1], ahead[0] - sp[0]) : 0;
+          var sz = Math.max(4.5, Math.min(10, 7.5 * cam.dist / sp[2])) * dpr;
+          var e = latest[cs];
+          if (e) {
+            var age = u - e.fi, fade = Math.max(0, 1 - age / FADE);
+            ctx.globalAlpha = fade; ctx.strokeStyle = e.cat.color; ctx.lineWidth = 1.6 * dpr; ctx.shadowColor = e.cat.color; ctx.shadowBlur = 8 * dpr;
+            ctx.beginPath(); ctx.arc(sp[0], sp[1], sz * 1.9, 0, 2 * Math.PI); ctx.stroke(); ctx.shadowBlur = 0;
+            drawGlyph(ctx, sp[0] + sz * 2.6, sp[1] - sz * 2.2, 13 * dpr, e.cat);
+            ctx.globalAlpha = 1;
+          }
+          ctx.save(); ctx.translate(sp[0], sp[1]); ctx.rotate(ang);
+          ctx.shadowColor = col; ctx.shadowBlur = 10 * dpr; ctx.fillStyle = col; ctx.strokeStyle = "#02060d"; ctx.lineWidth = 1.1 * dpr;
+          ctx.beginPath(); ctx.moveTo(sz * 1.5, 0); ctx.lineTo(-sz, sz * 0.9); ctx.lineTo(-sz * 0.45, 0); ctx.lineTo(-sz, -sz * 0.9); ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.restore();
+          if (layers.labels !== "off") {
+            var flv = "FL" + String(Math.round(a[3] / 100)).padStart(3, "0");
+            ctx.font = "600 " + (9 * dpr) + "px " + mono; ctx.fillStyle = "rgba(244,248,255,0.88)";
+            ctx.fillText(shortCs(cs) + " " + flv, sp[0] + sz + 3 * dpr, sp[1] - sz);
+            if (layers.labels === "full") {
+              ctx.fillStyle = Math.abs(a[6]) <= 60 ? ok : Math.abs(a[6]) <= 300 ? warn : bad;
+              ctx.fillText(sgn(a[6]) + " s · " + Math.round(a[4]) + " kt", sp[0] + sz + 3 * dpr, sp[1] - sz + 11 * dpr);
+            }
+          }
+        });
+      // HUD: clock, controls, compass, live / end state
+      ctx.fillStyle = "rgba(2,6,13,0.7)"; roundRect(ctx, m, m, 150 * dpr, 34 * dpr, 4 * dpr); ctx.fill();
+      ctx.fillStyle = "#f4f8ff"; ctx.font = "600 " + (15 * dpr) + "px " + mono; ctx.fillText("t+" + fmtT(stateTime()), m + 8 * dpr, m + 16 * dpr);
+      ctx.fillStyle = "rgba(63,208,255,0.85)"; ctx.font = (9 * dpr) + "px " + mono;
+      ctx.fillText("3D · altitude ×" + layers.exag + " · " + procLabel, m + 8 * dpr, m + 28 * dpr);
+      ctx.fillStyle = "rgba(154,171,198,0.75)";
+      ctx.fillText("drag rotate · right-drag pan · " + (/Mac/.test(navigator.platform) ? "⌘" : "Ctrl") + " + scroll zoom · double-click reset", m, m + 48 * dpr);
+      var nc = [W - m - 22 * dpr, H - m - 30 * dpr], c0 = P(cam.cx, cam.cy, 0), c1 = P(cam.cx, cam.cy + 5, 0);
+      if (c0 && c1) {
+        var na = Math.atan2(c1[1] - c0[1], c1[0] - c0[0]);
+        ctx.save(); ctx.translate(nc[0], nc[1]); ctx.rotate(na + Math.PI / 2);
+        ctx.fillStyle = "rgba(233,241,255,0.75)"; ctx.beginPath(); ctx.moveTo(0, -12 * dpr); ctx.lineTo(5 * dpr, 4 * dpr); ctx.lineTo(-5 * dpr, 4 * dpr); ctx.closePath(); ctx.fill();
+        ctx.restore();
+        ctx.font = "600 " + (10 * dpr) + "px " + head; ctx.fillText("N", nc[0] + Math.cos(na) * 20 * dpr - 3 * dpr, nc[1] + Math.sin(na) * 20 * dpr + 4 * dpr);
+      }
+      if (live) {
+        ctx.font = "700 " + (11 * dpr) + "px " + head;
+        var lt = "● LIVE · SEARCH RUNNING", ltw = ctx.measureText(lt).width, lx0 = (W - ltw) / 2;
+        ctx.fillStyle = "rgba(2,6,13,0.8)"; roundRect(ctx, lx0 - m, m, ltw + 2 * m, 22 * dpr, 4 * dpr); ctx.fill();
+        ctx.globalAlpha = 0.55 + 0.45 * Math.sin(now * 4); ctx.fillStyle = PRED.chosen; ctx.fillText(lt, lx0, m + 15 * dpr); ctx.globalAlpha = 1;
+      } else if (u >= frames.length - 1) {
+        var s0 = d.summary, txt = s0.los ? "LOSS OF SEPARATION" : (s0.solved ? "SOLVED · " : s0.end_reason.toUpperCase() + " · ") + s0.on_time + "/" + s0.n_flights + " ON TIME";
+        ctx.font = "700 " + (15 * dpr) + "px " + head;
+        var tw2 = ctx.measureText(txt).width, col2 = s0.los ? bad : s0.solved ? ok : warn;
+        ctx.fillStyle = "rgba(2,6,13,0.85)"; roundRect(ctx, W - tw2 - 3 * m, m * 2.4, tw2 + 2 * m, 28 * dpr, 4 * dpr); ctx.fill();
+        ctx.strokeStyle = col2; ctx.lineWidth = 1.5 * dpr; ctx.stroke();
+        ctx.fillStyle = col2; ctx.fillText(txt, W - tw2 - 2 * m, m * 2.4 + 19 * dpr);
+      }
+    }
+
     function roundRect(c, x, y, w, h_, r) {
       c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h_, r); c.arcTo(x + w, y + h_, x, y + h_, r);
       c.arcTo(x, y + h_, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
@@ -1940,53 +2247,118 @@
       x.beginPath(); x.moveTo(nowX, g.top - 6 * dpr); x.lineTo(nowX, g.bottom); x.stroke(); x.globalAlpha = 1;
     }
 
-    // ------------------------------------------------------------------ landing deviation (right), rows aligned with the window
+    // ------------------------------------------------------------------ landing deviation of the whole stream
+    // One column per flight in AMAN order: the bar is its landing deviation (up late, down early), predicted until it
+    // lands, then final (✓ / ✗); the tick is where it would land with no control at all. The window's flights are
+    // bracketed, flights cleared within the last decision glow, and a composed stream's segments are marked.
+    function devGeometry() {
+      var dpr = window.devicePixelRatio || 1, W = strip.width, H = strip.height, n = d.trace.queue.length;
+      var x0 = 46 * dpr, x1 = W - 10 * dpr, top = 34 * dpr, bottom = H - 30 * dpr, colW = (x1 - x0) / Math.max(1, n), lim = 300;
+      return { dpr: dpr, W: W, H: H, n: n, x0: x0, x1: x1, top: top, bottom: bottom, colW: colW, lim: lim, mid: (top + bottom) / 2,
+        Y: function (v) { return (top + bottom) / 2 - Math.max(-lim, Math.min(lim, v)) / lim * (bottom - top) / 2; } };
+    }
     function drawStrip() {
       if (!sctx || !strip.width) return;
-      var dpr = window.devicePixelRatio || 1, W = strip.width, H = strip.height, g = rowGeom(H, dpr);
-      var ok = css("--tada-ok"), warn = css("--tada-warn"), bad = css("--tada-bad"), mono = css("--tada-font-mono");
+      var g = devGeo = devGeometry(), dpr = g.dpr, W = g.W, H = g.H, x = sctx, Y = g.Y;
+      var ok = css("--tada-ok"), warn = css("--tada-warn"), bad = css("--tada-bad"), mono = css("--tada-font-mono"), head = css("--tada-font-head");
       var i = Math.floor(u), fr = u - i, A = frames[i], B = frames[Math.min(frames.length - 1, i + 1)];
-      sctx.setTransform(1, 0, 0, 1, 0, 0); sctx.globalAlpha = 1;
-      sctx.fillStyle = "#02060d"; sctx.fillRect(0, 0, W, H);
-      var valW = 42 * dpr, x0 = 6 * dpr, x1 = W - valW, lim = 300;
-      function X(v) { return x0 + (x1 - x0) * (0.5 + Math.max(-lim, Math.min(lim, v)) / (2 * lim)); }
-      sctx.font = "600 " + (10 * dpr) + "px " + css("--tada-font-head"); sctx.fillStyle = css("--tada-tile-label");
-      sctx.fillText("LANDING DEVIATION", x0, 13 * dpr);
-      var landed = 0, onT = 0;
-      A.ac.forEach(function (a) { if (a[5] === 2) { landed++; if (Math.abs(a[6]) <= 60) onT++; } });
-      sctx.font = (9 * dpr) + "px " + mono; sctx.fillStyle = "rgba(154,171,198,0.85)";
-      sctx.fillText("landed " + landed + "/" + d.trace.queue.length + " · " + onT + " on time", x0, 26 * dpr);
-      sctx.fillStyle = "rgba(62,224,122,0.10)"; sctx.fillRect(X(-60), g.top, X(60) - X(-60), g.bottom - g.top);
-      sctx.fillStyle = "rgba(62,224,122,0.14)"; sctx.fillRect(X(-30), g.top, X(30) - X(-30), g.bottom - g.top);
-      sctx.strokeStyle = "rgba(233,241,255,0.35)"; sctx.lineWidth = 1;
-      sctx.beginPath(); sctx.moveTo(X(0), g.top - 4 * dpr); sctx.lineTo(X(0), g.bottom); sctx.stroke();
-      sctx.fillStyle = "rgba(154,171,198,0.8)";
-      [-300, -60, 60, 300].forEach(function (v) { var t = sgn(v); sctx.fillText(t, Math.max(0, Math.min(W - sctx.measureText(t).width, X(v) - sctx.measureText(t).width / 2)), g.bottom + 14 * dpr); });
-      // flights cleared within the last decision light up
-      var fresh = {};
-      for (var k = Math.max(0, i - 1); k <= i; k++) evByFrame[k].forEach(function (e) { if (u - k < 1.5) fresh[e.cs] = e.cat.color; });
-      var bh = Math.min(g.rowH * 0.42, 12 * dpr);
-      sctx.save(); sctx.beginPath(); sctx.rect(0, g.top - 2 * dpr, W, g.bottom - g.top + 4 * dpr); sctx.clip();
-      rowsNow.forEach(function (r) {
-        var a = A.by[r.cs], b = B.by[r.cs] || a;
-        if (!a) return;
-        var y = g.top + (r.pos + 0.5) * g.rowH, dev = a[6] + ((b[6] - a[6]) * fr), st = fr < 0.5 ? a[5] : b[5];
-        var c = Math.abs(dev) <= 60 ? ok : Math.abs(dev) <= 300 ? warn : bad;
-        sctx.globalAlpha = r.alpha;
-        if (fresh[r.cs]) { sctx.fillStyle = fresh[r.cs]; sctx.globalAlpha = 0.14 * r.alpha; sctx.fillRect(0, y - g.rowH / 2, W, g.rowH); sctx.globalAlpha = r.alpha; }
-        sctx.globalAlpha = r.alpha * (st === 0 ? 0.45 : 1);
-        sctx.fillStyle = c;
-        var bx = Math.min(X(0), X(dev)), bwid = Math.max(2 * dpr, Math.abs(X(dev) - X(0)));
-        sctx.fillRect(bx, y - bh / 2, bwid, bh);
-        sctx.font = (9 * dpr) + "px " + mono;
-        if (Math.abs(dev) > lim) sctx.fillText(dev > 0 ? "▸" : "◂", dev > 0 ? x1 - 7 * dpr : x0, y + 3.5 * dpr);
-        sctx.globalAlpha = r.alpha;
-        sctx.fillStyle = st === 2 ? c : "rgba(233,241,255,0.85)";
-        sctx.font = Math.min(11, g.rowH / dpr * 0.42) * dpr + "px " + mono;
-        var label = (st === 2 ? (Math.abs(dev) > 60 ? "✗" : "✓") : "") + sgn(dev);
-        sctx.fillText(label, W - sctx.measureText(label).width - 4 * dpr, y + 4 * dpr);
+      x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.shadowBlur = 0;
+      x.fillStyle = "#02060d"; x.fillRect(0, 0, W, H);
+      // header and the running totals of the stream
+      var landedN = 0, onT = 0, sum = 0, worst = 0;
+      A.ac.forEach(function (a) { if (a[5] === 2) { landedN++; if (Math.abs(a[6]) <= 60) onT++; sum += Math.abs(a[6]); worst = Math.max(worst, Math.abs(a[6])); } });
+      x.font = "600 " + (10 * dpr) + "px " + head; x.fillStyle = css("--tada-tile-label");
+      x.fillText("LANDING DEVIATION · WHOLE STREAM", g.x0, 14 * dpr);
+      x.font = (9.5 * dpr) + "px " + mono;
+      var tot = "landed " + landedN + "/" + g.n + " · " + onT + " on time" + (landedN ? " · max |dev| " + Math.round(worst) + " s · Σ|dev| " + Math.round(sum) + " s" : "");
+      x.fillStyle = landedN && onT < landedN ? warn : landedN ? ok : "rgba(154,171,198,0.85)";
+      x.fillText(tot, g.x1 - x.measureText(tot).width, 14 * dpr);
+      x.fillStyle = "rgba(154,171,198,0.7)"; x.font = (8.5 * dpr) + "px " + mono;
+      x.fillText("bars: predicted until landing, then final · tick: no control", g.x0, 26 * dpr);
+      // bands, zero, axis
+      x.fillStyle = "rgba(62,224,122,0.08)"; x.fillRect(g.x0, Y(60), g.x1 - g.x0, Y(-60) - Y(60));
+      x.fillStyle = "rgba(62,224,122,0.10)"; x.fillRect(g.x0, Y(30), g.x1 - g.x0, Y(-30) - Y(30));
+      x.strokeStyle = "rgba(233,241,255,0.3)"; x.lineWidth = 1;
+      x.beginPath(); x.moveTo(g.x0, g.mid); x.lineTo(g.x1, g.mid); x.stroke();
+      x.font = (8.5 * dpr) + "px " + mono; x.fillStyle = "rgba(154,171,198,0.8)";
+      [[300, "+300"], [60, "+60"], [0, "0"], [-60, "−60"], [-300, "−300"]].forEach(function (t) {
+        x.fillText(t[1], g.x0 - 6 * dpr - x.measureText(t[1]).width, Y(t[0]) + 3 * dpr);
       });
-      sctx.restore();
+      x.save(); x.translate(10 * dpr, g.mid); x.rotate(-Math.PI / 2); x.fillStyle = "rgba(154,171,198,0.6)";
+      x.fillText("early ← s → late", -x.measureText("early ← s → late").width / 2, 0); x.restore();
+      // flights cleared within the last decision; the window's flights
+      var fresh = {}, wa = {};
+      for (var k = Math.max(0, i - 1); k <= i; k++) evByFrame[k].forEach(function (e) { if (u - k < 1.5) fresh[e.cs] = e.cat.color; });
+      rowsNow.forEach(function (r) { wa[r.cs] = Math.max(wa[r.cs] || 0, r.alpha); });
+      var bw = Math.max(2 * dpr, Math.min(g.colW * 0.62, 18 * dpr)), every = Math.max(1, Math.ceil(20 * dpr / g.colW));
+      d.trace.queue.forEach(function (cs, kk) {
+        var cx = g.x0 + (kk + 0.5) * g.colW, a = A.by[cs], b = B.by[cs] || a, L = life[cs];
+        if (wa[cs]) {
+          x.globalAlpha = wa[cs]; x.fillStyle = "rgba(63,208,255,0.07)"; x.fillRect(cx - g.colW / 2, g.top, g.colW, g.bottom - g.top);
+          x.fillStyle = "rgba(63,208,255,0.85)"; x.fillRect(cx - g.colW / 2 + 1, g.bottom + 2 * dpr, g.colW - 2, 2 * dpr); x.globalAlpha = 1;
+        }
+        if (fresh[cs]) { x.globalAlpha = 0.18; x.fillStyle = fresh[cs]; x.fillRect(cx - g.colW / 2, g.top, g.colW, g.bottom - g.top); x.globalAlpha = 1; }
+        if (devHover === kk) { x.fillStyle = "rgba(255,255,255,0.06)"; x.fillRect(cx - g.colW / 2, g.top, g.colW, g.bottom - g.top); }
+        // segment boundary of a composed stream
+        if (segOf[cs] != null && kk && segOf[cs] !== segOf[d.trace.queue[kk - 1]]) {
+          x.strokeStyle = "rgba(255,210,63,0.4)"; x.setLineDash([3 * dpr, 3 * dpr]); x.beginPath(); x.moveTo(cx - g.colW / 2, g.top - 4 * dpr); x.lineTo(cx - g.colW / 2, g.bottom); x.stroke(); x.setLineDash([]);
+          x.fillStyle = "rgba(255,210,63,0.75)"; x.font = "600 " + (8 * dpr) + "px " + mono; x.fillText("SEG " + (segOf[cs] + 1), cx - g.colW / 2 + 3 * dpr, g.top + 8 * dpr);
+        }
+        if (a) {
+          var st = fr < 0.5 ? a[5] : b[5], dev = a[5] === b[5] ? a[6] + (b[6] - a[6]) * fr : (fr < 0.5 ? a : b)[6];
+          var c = Math.abs(dev) <= 60 ? ok : Math.abs(dev) <= 300 ? warn : bad, y0 = g.mid, y1 = Y(dev);
+          x.globalAlpha = st === 2 ? 1 : st === 1 ? 0.75 : 0.3;
+          x.fillStyle = c; x.fillRect(cx - bw / 2, Math.min(y0, y1), bw, Math.max(1.5 * dpr, Math.abs(y1 - y0)));
+          if (st === 2) { x.shadowColor = c; x.shadowBlur = 6 * dpr; x.fillRect(cx - bw / 2, y1 - (dev >= 0 ? 1 : 0) * 1.5 * dpr, bw, 1.5 * dpr); x.shadowBlur = 0; }
+          x.globalAlpha = 1;
+          if (Math.abs(dev) > g.lim) { x.fillStyle = c; x.font = (9 * dpr) + "px " + mono; x.fillText(dev > 0 ? "▲" : "▼", cx - 4 * dpr, dev > 0 ? g.top - 2 * dpr : g.bottom + 12 * dpr); }
+          if (st === 2 && g.colW > 9 * dpr) {
+            x.font = "700 " + (9 * dpr) + "px " + mono; x.fillStyle = c;
+            var mk = Math.abs(dev) <= 60 ? "✓" : "✗";
+            x.fillText(mk, cx - x.measureText(mk).width / 2, dev >= 0 ? Math.max(g.top + 8 * dpr, y1 - 4 * dpr) : Math.min(g.bottom - 2 * dpr, y1 + 11 * dpr));
+          }
+        }
+        // no control at all
+        var ini = initialOf[cs];
+        if (ini != null) {
+          x.strokeStyle = "rgba(233,241,255,0.7)"; x.lineWidth = 1.5 * dpr;
+          x.beginPath(); x.moveTo(cx - g.colW * 0.4, Y(ini)); x.lineTo(cx + g.colW * 0.4, Y(ini)); x.stroke();
+        }
+        if (kk % every === 0) {
+          x.fillStyle = colors[cs]; x.fillRect(cx - 4 * dpr, g.bottom + 8 * dpr, 8 * dpr, 2 * dpr);
+          x.font = (8.5 * dpr) + "px " + mono; x.fillStyle = "rgba(233,241,255,0.75)";
+          var lb = shortCs(cs); x.fillText(lb, cx - x.measureText(lb).width / 2, g.bottom + 20 * dpr);
+        }
+      });
+      // hover: the flight's numbers
+      if (devHover != null && d.trace.queue[devHover]) {
+        var cs = d.trace.queue[devHover], a2 = A.by[cs], L2 = life[cs], ini2 = initialOf[cs];
+        var lines = [shortCs(cs) + (a2 ? (a2[5] === 2 ? " · landed " + sgn(a2[6]) + " s" : a2[5] === 1 ? " · predicted " + sgn(a2[6]) + " s" : " · not yet under control") : ""),
+          "no control " + (ini2 == null ? "–" : sgn(ini2) + " s") + " · " + ((evByCs[cs] || []).length) + " clearances" + (L2 && L2.land != null ? " · click: its landing" : "")];
+        x.font = "600 " + (10 * dpr) + "px " + mono;
+        var tw = Math.max.apply(null, lines.map(function (l) { return x.measureText(l).width; })), hx = g.x0 + (devHover + 0.5) * g.colW;
+        var bx = Math.min(Math.max(4 * dpr, hx + 10 * dpr), W - tw - 16 * dpr), by = g.top + 4 * dpr;
+        x.fillStyle = "rgba(2,6,13,0.92)"; roundRect(x, bx, by, tw + 12 * dpr, 32 * dpr, 4 * dpr); x.fill();
+        x.strokeStyle = colors[cs]; x.lineWidth = 1 * dpr; x.stroke();
+        x.fillStyle = "#f4f8ff"; x.fillText(lines[0], bx + 6 * dpr, by + 13 * dpr);
+        x.fillStyle = "rgba(154,171,198,0.95)"; x.font = (9 * dpr) + "px " + mono; x.fillText(lines[1], bx + 6 * dpr, by + 26 * dpr);
+      }
+    }
+    function attachDev(c) {
+      function col(ev) {
+        if (!devGeo) return null;
+        var r = c.getBoundingClientRect(), px = (ev.clientX - r.left) * devGeo.dpr, k = Math.floor((px - devGeo.x0) / devGeo.colW);
+        return k >= 0 && k < devGeo.n ? k : null;
+      }
+      c.addEventListener("pointermove", function (ev) { var k = col(ev); if (k !== devHover) { devHover = k; c.style.cursor = k == null ? "default" : "pointer"; draw(); } });
+      c.addEventListener("pointerleave", function () { if (devHover != null) { devHover = null; draw(); } });
+      c.addEventListener("click", function (ev) {  // jump to that flight's touchdown
+        var k = col(ev), L = k == null ? null : life[d.trace.queue[k]];
+        if (!L || L.land == null) return;
+        var best = 0;
+        frames.forEach(function (f, n) { if (Math.abs(f.t - L.land) < Math.abs(frames[best].t - L.land)) best = n; });
+        stop(); u = best; follow = false; draw();
+      });
     }
     return { mount: mount, resize: resize, isLive: isLive };
   })();
