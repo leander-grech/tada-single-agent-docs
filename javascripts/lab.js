@@ -159,7 +159,7 @@
   function seg(name, options, value, onPick) {
     return h("div", { class: "lab-seg", role: "radiogroup", "aria-label": name }, options.map(function (o) {
       return h("button", {
-        type: "button", class: "lab-seg__btn" + (o.value === value ? " is-on" : ""), title: o.title || null,
+        type: "button", class: "lab-seg__btn" + (o.value === value ? " is-on" : ""), title: o.title || null, disabled: o.disabled ? true : null,
         role: "radio", "aria-checked": o.value === value ? "true" : "false",
         onclick: function () { onPick(o.value); }
       }, [o.label]);
@@ -181,7 +181,9 @@
       renderGen(); renderAgents(); scenarioChanged();
     })));
     body.appendChild(field("Generator", seg("generator", Object.keys(cat.generators).map(function (k) {
-      return { value: k, label: cat.generators[k].label, title: cat.generators[k].detail };
+      var g = cat.generators[k], off = g.available === false;
+      return { value: k, label: g.label + (off ? " (n/a)" : ""), disabled: off,
+        title: off ? "This runner's code checkout has no " + g.label + " generator (see the setup notes above)" : g.detail };
     }), S.sc.generator, function (v) { S.sc.generator = v; renderGen(); scenarioChanged(); }),
       cat.generators[S.sc.generator].detail));
 
@@ -905,11 +907,16 @@
     root.appendChild(h("div", { class: "lab-offline" }, [
       h("div", { class: "lab-offline__head" }, [h("span", { class: "lab-conn__dot is-off", "aria-hidden": "true" }), "No lab runner found"]),
       h("p", { html: "The Lab flies agents with the simulator and the checkpoints on <b>your</b> machine, through a small " +
-        "local runner. Start it from the docs repo; this page connects by itself as soon as it is up:" }),
-      h("pre", { class: "lab-offline__cmd" }, [h("code", { text: "lab/run.sh" })]),
-      h("p", { class: "lab-field__hint", html: "It needs the single-agent code repo and its <code>tada</code> conda env " +
-        "(<code>TADA_CODE_REPO</code>, <code>TADA_PY</code> to override the paths) and listens on 127.0.0.1:8800. " +
-        "Chrome may ask to let this site reach apps on your device: allow it." +
+        "local runner. Set it up once (Linux x86-64, Python 3.12, access to the private TADA code repository), then start it; " +
+        "this page connects by itself as soon as it is up:" }),
+      h("pre", { class: "lab-offline__cmd" }, [h("code", { text:
+        "git clone https://github.com/leander-grech/tada-single-agent-docs.git\n" +
+        "git clone git@github.com:tada-sesarju/monorepo.git     # private: needs access\n" +
+        "cd tada-single-agent-docs\n" +
+        "lab/setup.sh ../monorepo/reinforcement_learning/single_agent_rllib   # once\n" +
+        "lab/run.sh" })]),
+      h("p", { class: "lab-field__hint", html: "<a href=\"#run-the-lab\">Full instructions and troubleshooting \u2193</a> " +
+        "\u00b7 The runner listens on 127.0.0.1:8800; <code>lab/run.sh --check</code> lists anything missing." +
         (https ? " From this https page only a runner on <code>localhost</code> can be reached; a runner on another " +
           "machine has to serve the page itself (<code>--host 0.0.0.0</code>, then open its <code>/lab/</code>)." : "") }),
       https ? h("div", { class: "lab-note", html:
@@ -940,9 +947,17 @@
         return;
       }
       if (S.agent && S.agent !== "do-nothing" && !agentById(S.agent)) S.agent = null;
+      var setup = cat.setup || { ok: true, checks: [] };
+      if (!setup.ok) { setupProblems(found, setup); return; }
+      if (!cat.generators[S.sc.generator].available) S.sc.generator = "legacy";
       root.innerHTML = "";
       build();
       root.insertBefore(connBar(found), root.firstChild);
+      var warns = setup.checks.filter(function (c) { return !c.ok; });
+      if (warns.length) root.insertBefore(h("details", { class: "lab-conn lab-conn--warn" }, [
+        h("summary", { text: "⚠ " + warns.length + " setup note" + (warns.length > 1 ? "s" : "") + " from this runner" }),
+        h("ul", {}, warns.map(function (c) { return h("li", {}, [h("b", { text: c.name + ": " }), c.msg, c.fix ? h("span", { class: "lab-field__hint", text: " Fix: " + c.fix }) : null]); }))
+      ]), root.children[1]);
       loadScenario();
       var q = new URLSearchParams(location.hash.slice(1));
       if (q.get("a") && q.get("a") !== "do-nothing") { S.autoFly = true; }
@@ -953,6 +968,17 @@
         renderGen(); renderAgents(); loadScenario();
       });
     });
+  }
+  function setupProblems(found, setup) {
+    root.innerHTML = "";
+    root.appendChild(h("div", { class: "lab-offline" }, [
+      h("div", { class: "lab-offline__head" }, [h("span", { class: "lab-conn__dot is-off" }), "Runner found at " + label(found.base) + ", but it cannot fly yet"]),
+      h("ul", { class: "lab-checks" }, setup.checks.map(function (c) {
+        return h("li", { class: "lab-check lab-check--" + c.level }, [h("b", { text: (c.ok ? "✓ " : c.level === "error" ? "✗ " : "⚠ ") + c.name + " " }), c.msg,
+          !c.ok && c.fix ? h("div", { class: "lab-field__hint", text: "Fix: " + c.fix }) : null]);
+      })),
+      h("p", { class: "lab-field__hint", html: "Fix the ✗ items, restart <code>lab/run.sh</code> and reload this page. <a href=\"#run-the-lab\">Setup instructions \u2193</a>" })
+    ]));
   }
   function boot(retry) {
     findRunner().then(start).catch(function (tried) {

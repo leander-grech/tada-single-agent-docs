@@ -2797,6 +2797,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -2813,6 +2831,36 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#run-the-lab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run the Lab on your machine
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -4112,6 +4160,25 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#run-the-lab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run the Lab on your machine
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -4138,6 +4205,51 @@ this page finds by itself. Renders made before the lab are in the <a href="../re
 <div id="lab-app" class="tada-lab" data-runners="http://localhost:8800 http://127.0.0.1:8800">
   <noscript>The lab needs JavaScript.</noscript>
 </div>
+
+<h2 id="run-the-lab">Run the Lab on your machine<a class="headerlink" href="#run-the-lab" title="Permanent link">&para;</a></h2>
+<p>This page never computes anything in your browser and never downloads model files into it. Flights run in
+the <strong>lab runner</strong>, a small local server that drives the simulator and the agents' checkpoints. You start
+it once, and this page finds it by itself on <code>http://localhost:8800</code>.</p>
+<p><strong>You need</strong></p>
+<ul>
+<li>Linux on x86-64. The simulator is a compiled wheel for that platform only. On Windows, WSL2 with Ubuntu
+  should work but is untested; on macOS use a Linux machine or VM.</li>
+<li><a href="https://docs.astral.sh/uv/">uv</a> (<code>curl -LsSf https://astral.sh/uv/install.sh | sh</code>), which also fetches
+  Python 3.12 for you. Without uv, setup uses a system Python 3.12 that has its <code>venv</code> module (on Ubuntu,
+  <code>sudo apt install python3.12-venv</code>).</li>
+<li>Access to the TADA code repository, <code>tada-sesarju/monorepo</code>. It is private, so ask the TADA team for access.
+  You need a checkout recent enough for the lab, with the single-agent paper code of late October 2026. The runner
+  checks this when it starts and tells you if your checkout is too old.</li>
+<li>About 1.5 GB of disk space and a few minutes for the first setup. No GPU is needed.</li>
+</ul>
+<p><strong>Set up once, then start the runner</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/leander-grech/tada-single-agent-docs.git
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:tada-sesarju/monorepo.git<span class="w">          </span><span class="c1"># private: needs access</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nb">cd</span><span class="w"> </span>tada-single-agent-docs
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>lab/setup.sh<span class="w"> </span>../monorepo/reinforcement_learning/single_agent_rllib
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>lab/run.sh
+</code></pre></div>
+<p><code>lab/setup.sh</code> creates a Python environment in <code>lab/.venv</code>. It holds CPU-only PyTorch, Stable-Baselines3, the
+simulator wheel from the code repository, and mkdocs. Setup ends with a check of everything the runner needs.
+After that, <code>lab/run.sh</code> is all you need to start the runner. Leave it running, then come back to this page:
+it connects within a few seconds.</p>
+<p><strong>First flight</strong></p>
+<p>The paper's agents, 1_76 (trombone) and 1_77 (point merge), are public bundles on the
+<a href="https://github.com/leander-grech/tada-single-agent-docs/releases/tag/paper-agents-v1"><code>paper-agents-v1</code> release</a>.
+Press <strong>Download</strong> in the agent panel. The runner, not your browser, fetches the bundle (under 1 MB), checks it
+against the published sha256 and installs it into <code>~/.cache/tada-lab/models/</code>. Then pick a scenario and press <strong>Fly</strong>.</p>
+<p><strong>If something does not work</strong></p>
+<ul>
+<li>Run <code>lab/run.sh --check</code>. It lists what the runner needs and how to fix anything missing. If your code checkout
+  has no MONAD-aligned generator, the runner says so and offers only the legacy generator, rather than
+  silently generating different scenarios.</li>
+<li>If the runner is up but this page does not connect, your browser is probably keeping this https page away
+  from <code>localhost</code>. Chrome asks first ("access other apps and services on this device"), and some browsers refuse
+  silently. The runner serves this same Lab at
+  <a href="http://localhost:8800/lab/">http://localhost:8800/lab/</a>, which needs no permission.</li>
+<li>To stop the runner, press Ctrl-C. Your flights and renders stay cached in <code>lab/cache/</code>, and downloaded agents
+  stay in <code>~/.cache/tada-lab/models/</code>.</li>
+</ul>
 
 
 
