@@ -63,6 +63,7 @@
     catalog: null,
     sc: { procedure: "tmb", generator: "monad", flights: 20, segments: 1, seed: 41 },
     agent: null, mode: "det", attempts: 10, difficulty: "any",
+    search: { K: 8, M: 10, J: 0, stop: true, prune: true, lookMin: 15 },
     preview: null, flight: null, flightKey: null, rows: [], filter: "", showAll: false,
     token: 0
   };
@@ -77,10 +78,19 @@
     if (q.get("a")) S.agent = q.get("a");
     if (q.get("m")) S.mode = q.get("m");
     if (q.get("k")) S.attempts = +q.get("k");
+    if (q.get("sK")) S.search = { K: +q.get("sK"), M: +q.get("sM") || 10, J: +q.get("sJ") || 0, stop: q.get("sS") !== "0",
+      prune: q.get("sP") !== "0", lookMin: +q.get("sL") || 15 };
   }
   function writeHash() {
     var q = new URLSearchParams({ p: S.sc.procedure, g: S.sc.generator, f: S.sc.flights, x: S.sc.segments, s: S.sc.seed });
-    if (S.agent) { q.set("a", S.agent); q.set("m", S.mode); if (S.mode === "sampled") q.set("k", S.attempts); }
+    if (S.agent) {
+      q.set("a", S.agent); q.set("m", S.mode);
+      if (S.mode === "sampled") q.set("k", S.attempts);
+      if (S.mode === "search" && S.catalog && S.catalog.search_params) {
+        q.set("sK", S.search.K); q.set("sM", S.search.M); q.set("sJ", S.search.J); q.set("sS", S.search.stop ? 1 : 0);
+        q.set("sP", S.search.prune ? 1 : 0); q.set("sL", S.search.lookMin);
+      }
+    }
     history.replaceState(null, "", "#" + q.toString());
   }
   function scQuery() {
@@ -264,7 +274,7 @@
 
     var modes = [{ value: "det", label: "Policy", title: "The deterministic policy, as deployed" },
       { value: "sampled", label: "Best of K", title: "Attempt 0 deterministic plus K sampled attempts; the best is kept (no LoS, then brackets, then fewest clearances)" },
-      { value: "search", label: "Policy + search", title: "Receding-horizon rollout search: K=8 full-episode rollouts every 10 decisions (the paper's best agent)" }];
+      { value: "search", label: "Policy + search", title: "Receding-horizon rollout search: K full-episode candidate rollouts every M decisions (the paper's best agent: K=8, M=10)" }];
     if (S.catalog.modes) modes = modes.filter(function (m) { return S.catalog.modes.indexOf(m.value) >= 0; });
     if (modes.every(function (m) { return m.value !== S.mode; })) S.mode = "det";
     body.appendChild(field("Mode", seg("mode", modes, S.mode, function (v) { S.mode = v; renderAgents(); syncFlightTitle(); })));
@@ -273,6 +283,7 @@
         [3, 5, 10, 20].map(function (n) { return h("option", { value: n, selected: n === S.attempts ? true : null, text: "K = " + n + " sampled" }); }));
       body.appendChild(k);
     }
+    if (S.mode === "search") body.appendChild(searchControls());
     var all = h("button", { type: "button", class: "lab-btn lab-btn--ghost", onclick: flyAll, title: "Deterministic policy of every installed agent of this procedure, on this scenario" }, ["Fly every agent"]);
     if (S.agent !== "do-nothing" && !isInstalled(S.agent)) {
       body.appendChild(downloadBtn(agentById(S.agent), S.agent + (ENGINE ? " is not loaded in this browser yet." : " is not on this runner yet.")));
@@ -326,6 +337,48 @@
       ]));
     }
     if (a && a.headline) body.appendChild(h("div", { class: "lab-field__hint", text: "Green / red: solved / losses of separation of 100 validation seeds, deterministic policy, legacy generator." }));
+  }
+
+  // ---------------------------------------------------------------- search parameters
+  function searchControls() {
+    if (!S.catalog.search_params) {
+      return h("div", { class: "lab-field__hint", text: "This runner flies the paper's search: K = 8 candidates every M = 10 decisions. " +
+        "The in-browser engine lets you set them, and draws the predicted rollouts on the radar." });
+    }
+    var sp = S.search, box = h("div", { class: "lab-search" });
+    function slider(key, label, min, max, fmt, hint) {
+      var out = h("output", { class: "lab-num", text: fmt(sp[key]) });
+      var r = h("input", { type: "range", min: min, max: max, step: 1, value: sp[key], class: "lab-range", "aria-label": label });
+      r.addEventListener("input", function () { sp[key] = +r.value; out.textContent = fmt(sp[key]); });
+      r.addEventListener("change", writeHash);
+      return h("div", { class: "lab-search__row", title: hint }, [h("span", { class: "lab-search__label", text: label }), r, out]);
+    }
+    function check(key, label, hint) {
+      var cb = h("input", { type: "checkbox", checked: sp[key] ? true : null });
+      cb.addEventListener("change", function () { sp[key] = cb.checked; writeHash(); });
+      return h("label", { class: "lab-search__check", title: hint }, [cb, " " + label]);
+    }
+    box.appendChild(slider("K", "Candidates K", 2, 24, String, "Full-episode rollouts per plan: the incumbent, the deterministic policy, then sampled ones"));
+    box.appendChild(slider("M", "Replan every M", 1, 30, function (v) { return v + " dec."; }, "Decisions executed from each plan before the next one"));
+    box.appendChild(slider("J", "Branch depth J", 0, 30, function (v) { return v ? v + " dec." : "all"; },
+      "Sampled candidates sample only their first J actions, then follow the deterministic policy (0 = sample throughout)"));
+    box.appendChild(slider("lookMin", "Show ahead", 3, 40, function (v) { return v + " min"; }, "How far ahead the radar draws each candidate's predicted tracks"));
+    box.appendChild(h("div", { class: "lab-row" }, [
+      check("stop", "stop when solved", "Stop generating candidates once one solves the episode (it cannot be beaten on the main criteria)"),
+      check("prune", "exact pruning", "Abandon a rollout as soon as it can no longer reach the best candidate's on-time count")]));
+    box.appendChild(h("div", { class: "lab-field__hint", text: "Paper: K = 8, M = 10, J = all, both on. Larger K and smaller M search harder and take longer." }));
+    return box;
+  }
+  function searchParamsForJob() {
+    var sp = S.search;
+    return { K: sp.K, M: sp.M, J: sp.J, stop: sp.stop, prune: sp.prune, look: Math.round(sp.lookMin * 60 / 45) };
+  }
+  function modeLabel(job) {
+    if (job.mode === "search" && job.search) {
+      var p = job.search;
+      return "policy + search (K " + p.K + ", M " + p.M + (p.J ? ", J " + p.J : "") + ")";
+    }
+    return MODE_LABEL[job.mode] || job.mode;
   }
 
   // ---------------------------------------------------------------- scenario preview (do-nothing)
@@ -427,6 +480,27 @@
     if (st.frac != null) { bar.style.width = Math.round(st.frac * 100) + "%"; bar.parentNode.classList.remove("is-indet"); }
     else bar.parentNode.classList.add("is-indet");
     if (st.stage && txt) txt.textContent = st.stage === "queued" ? "Queued…" : st.stage.charAt(0).toUpperCase() + st.stage.slice(1) + "…";
+    if (st.live) liveConsole(body, st.live);
+  }
+  // Live view of a running search: the plans so far, each a row of candidate chips.
+  function liveConsole(body, live) {
+    var box = body.querySelector(".lab-live");
+    if (!box) { box = h("div", { class: "lab-live" }); body.appendChild(box); box._plans = []; }
+    if (live.last_plan && (!box._plans.length || box._plans[box._plans.length - 1].t !== live.last_plan.t)) box._plans.push(live.last_plan);
+    box.innerHTML = "";
+    box.appendChild(h("div", { class: "lab-live__head", text: "PLANNING · " + live.rollouts + " rollouts so far" + (live.planning ? " · plan " + live.plan + ", candidate " + live.candidate + "/" + live.of : "") }));
+    box._plans.slice(-8).forEach(function (pl, n, arr) {
+      box.appendChild(h("div", { class: "lab-live__row" + (n === arr.length - 1 ? " is-latest" : "") }, [
+        h("span", { class: "lab-live__t", text: "t+" + fmtT(pl.t) }),
+        h("span", { class: "lab-live__chips" }, (pl.cands || []).map(function (c) {
+          var cls = c.pruned ? "pruned" : c.los ? "los" : c.on_time === S.sc.flights ? "solved" : "partial";
+          return h("span", { class: "lab-chip-k lab-chip-k--" + cls + (c.chosen ? " is-chosen" : ""),
+            title: "k" + c.k + " " + c.kind + (c.pruned ? " (pruned)" : ": " + c.on_time + "/" + S.sc.flights + " on time" + (c.los ? ", LoS" : "") + ", " + c.clearances + " clearances") },
+            [c.pruned ? "·" : c.los ? "✗" : String(c.on_time)]);
+        })),
+        h("span", { class: "lab-live__pick", text: "→ k" + pl.chosen + (pl.switched ? " (switched)" : "") })
+      ]));
+    });
   }
   function errBox(e) { return h("div", { class: "lab-error", text: "⚠ " + (e && e.message || e) }); }
 
@@ -439,7 +513,8 @@
     S.flying = true; S.autoFly = S.agent !== "do-nothing";
     var body = $("#lab-flight-body");
     var job = { scenario: S.sc, agent: S.agent, mode: S.agent === "do-nothing" ? "det" : S.mode, attempts: S.mode === "sampled" ? S.attempts : 0 };
-    $("#lab-flight-title").textContent = "Flight · " + S.agent + " · " + MODE_LABEL[job.mode];
+    if (job.mode === "search" && S.catalog.search_params) job.search = searchParamsForJob();
+    $("#lab-flight-title").textContent = "Flight · " + S.agent + " · " + modeLabel(job);
     body.innerHTML = ""; body.appendChild(progressBox("Flying…"));
     if (!quiet) body.scrollIntoView({ behavior: "smooth", block: "start" });
     var want = scKey(S.sc);
@@ -471,7 +546,7 @@
   function showFlight(d, key) {
     S.flight = d; S.flightKey = key;
     var j = d.job, s = d.summary;
-    $("#lab-flight-title").textContent = "Flight · " + j.agent + (j.agent === "do-nothing" ? " (scenario as generated)" : " · " + MODE_LABEL[j.mode]) +
+    $("#lab-flight-title").textContent = "Flight · " + j.agent + (j.agent === "do-nothing" ? " (scenario as generated)" : " · " + modeLabel(j)) +
       " · " + S.catalog.procedures[j.scenario.procedure].label + " seed " + j.scenario.seed;
     var body = $("#lab-flight-body"); body.innerHTML = "";
     var oc = s.los ? { v: "LoS", c: "bad", sub: "loss of separation (≤ 3 NM, ≤ 500 ft)" }
@@ -617,7 +692,7 @@
         });
       } : null }, s ? [
         h("td", { class: "tada-mono", text: r.agent }),
-        h("td", { text: r.mode.replace(/^sampled/, "best of ") }),
+        h("td", { text: r.mode.replace(/^sampled/, "best of ").replace(/^search-K(\d+)-M(\d+)-J(\d+)\w*-L\d+$/, function (_, k, m, jj) { return "search K" + k + " M" + m + (+jj ? " J" + jj : ""); }) }),
         h("td", {}, [outcomeChip(s)]),
         h("td", { class: "num", text: s.on_time + "/" + s.n_flights }),
         h("td", { class: "num", text: s.landed ? Math.round(s.max_dev) + " s" : "–" }),
@@ -641,11 +716,15 @@
     var FADE = 5;        // decisions a clearance glyph stays on the scope
     var TRAIL = 12;      // decisions of track history drawn behind each aircraft
     var LAYERS_KEY = "tada-lab-layers";
-    var layers = { sectors: true, rings: true, routes: true, labels: true };
+    var layers = { sectors: true, rings: true, routes: true, labels: true, plans: true };
+    // predicted rollouts of the search: their own palette, so they never read as real traffic
+    var PRED = { chosen: "#ffe66d", other: "#dff6ff", los: "#ff6b8b", pruned: "#8a94a6" };
     try { Object.assign(layers, JSON.parse(localStorage.getItem(LAYERS_KEY) || "{}")); } catch (e) {}
 
     var d, frames, colors, playing = false, speed = 2, u = 0, raf = null, lastTs = 0;
     var view = { zoom: 1, cx: null, cy: null }, proj = null;  // zoom/pan (world NM at the canvas centre)
+    var tl, tlCtx, tlCache = null, tlGeo = null, tlHover = null, life = {};    // the clearance timeline
+    var plans = [];                                                             // search plans (in-browser engine)
     var cv, ctx, strip, sctx, slider, tlabel, playBtn, bounds, evByFrame, wrap, airport, procLabel, sectors;
 
     // ------------------------------------------------------------------ clearance glyphs
@@ -749,6 +828,29 @@
       });
 
       view = { zoom: 1, cx: (bounds.x0 + bounds.x1) / 2, cy: (bounds.y0 + bounds.y1) / 2 };
+      // per flight: when it came under control, when it landed and how far off
+      life = {};
+      d.trace.queue.forEach(function (cs) { life[cs] = { on: null, land: null, dev: null, seen: null }; });
+      frames.forEach(function (f) {
+        f.ac.forEach(function (a) {
+          var L = life[a[0]];
+          if (!L) return;
+          if (L.seen == null) L.seen = f.t;
+          if (a[5] >= 1 && L.on == null) L.on = f.t;
+          if (a[5] === 2 && L.land == null) { L.land = f.t; L.dev = a[6]; }
+        });
+      });
+      evByFrame.forEach(function (list, k) { list.forEach(function (e) { e.fi = k; }); });
+      plans = (d.plans || []).slice().sort(function (a, b) { return a.t - b.t; });
+      plans.forEach(function (pl) {
+        pl.cands.forEach(function (c) {
+          c.byCs = {};
+          (c.track || []).forEach(function (f) { f.ac.forEach(function (r) { (c.byCs[r[0]] = c.byCs[r[0]] || []).push([f.t, r[1], r[2]]); }); });
+        });
+      });
+      tl = h("canvas", { class: "lab-timeline", "aria-label": "clearance timeline: click or drag to seek" });
+      tlCache = null; tlHover = null;
+      attachTimeline(tl);
       cv = h("canvas", { class: "lab-map", "aria-label": "radar replay: scroll to zoom, drag to pan, double-click to reset" });
       attachZoom(cv);
       strip = h("canvas", { class: "lab-strip", "aria-label": "deviation per flight" });
@@ -761,7 +863,9 @@
           speed = s; spd.querySelectorAll("button").forEach(function (b) { b.classList.toggle("is-on", +b.getAttribute("data-s") === s); });
         } }, [s + "×"]);
       }));
-      var toggles = h("div", { class: "lab-layers" }, [["sectors", "Sectors"], ["rings", "Range rings"], ["routes", "Flight plans"], ["labels", "Data blocks"]].map(function (l) {
+      var layerList = [["sectors", "Sectors"], ["rings", "Range rings"], ["routes", "Flight plans"], ["labels", "Data blocks"]];
+      if (plans.length) layerList.push(["plans", "Search plans (predicted)"]);
+      var toggles = h("div", { class: "lab-layers" }, layerList.map(function (l) {
         var cb = h("input", { type: "checkbox", checked: layers[l[0]] ? true : null });
         cb.addEventListener("change", function () {
           layers[l[0]] = cb.checked;
@@ -775,7 +879,10 @@
         [procLabel === "BGY" ? "DIRECT_TO_MERGE_POINT" : "VECTOR_TO_ILS", procLabel === "BGY" ? "direct to merge point" : "vector to ILS"]];
       var legend = h("div", { class: "lab-legend" }, cats.map(function (c) {
         return h("span", {}, [glyphIcon(category(c[0])), c[1]]);
-      }).concat([
+      }).concat(plans.length ? [
+        h("span", {}, [h("i", { class: "lab-lg lab-lg--plan" }), "chosen plan, predicted"]),
+        h("span", {}, [h("i", { class: "lab-lg lab-lg--cand" }), "other candidates (red: ends in LoS)"])
+      ] : []).concat([
         h("span", {}, [h("i", { class: "lab-lg lab-lg--warn" }), "< 5 NM & 1000 ft"]),
         h("span", {}, [h("i", { class: "lab-lg lab-lg--bad" }), "loss of separation"])
       ]));
@@ -786,6 +893,7 @@
           h("button", { type: "button", class: "lab-zoom__btn", title: "Zoom out", "aria-label": "zoom out", onclick: function () { zoomBy(1 / 1.5); } }, ["−"]),
           h("button", { type: "button", class: "lab-zoom__btn", title: "Fit the whole stream", "aria-label": "reset view", onclick: resetView }, ["⤢"])
         ])]), h("div", { class: "lab-replay__strip" }, [strip])]),
+        h("div", { class: "lab-timeline-wrap" }, [tl]),
         h("div", { class: "lab-replay__ctl" }, [playBtn, slider, tlabel, spd]),
         legend
       ]);
@@ -834,6 +942,9 @@
       cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.width = Math.round(w * dpr); cv.height = Math.round(hgt * dpr);
       var rs = strip.parentNode.getBoundingClientRect(), ws = Math.max(200, rs.width);
       strip.style.width = ws + "px"; strip.style.height = hgt + "px"; strip.width = Math.round(ws * dpr); strip.height = Math.round(hgt * dpr);
+      var rt = tl.parentNode.getBoundingClientRect(), wt = Math.max(240, rt.width), ht = 30 + d.trace.queue.length * 14 + 22;
+      tl.style.width = wt + "px"; tl.style.height = ht + "px"; tl.width = Math.round(wt * dpr); tl.height = Math.round(ht * dpr);
+      tlCache = null;
       draw();
     }
     window.addEventListener("resize", function () { clearTimeout(resize._t); resize._t = setTimeout(resize, 150); });
@@ -861,7 +972,7 @@
       var i = Math.min(frames.length - 1, Math.floor(u));
       slider.value = Math.round(u);
       tlabel.textContent = "t+" + fmtT(stateTime()) + " · " + (i + 1) + "/" + frames.length;
-      drawMap(); drawStrip(frames[i]);
+      drawMap(); drawStrip(frames[i]); drawTimeline();
     }
     function stateTime() {
       var i = Math.floor(u), f = u - i, a = frames[i], b = frames[Math.min(frames.length - 1, i + 1)];
@@ -1017,6 +1128,37 @@
         }
       }
 
+      // search: the active plan's candidate rollouts, ahead of the playhead
+      var nowT = stateTime(), active = null;
+      if (layers.plans) plans.forEach(function (pl) { if (pl.t <= nowT + 1e-6) active = pl; });
+      if (active) {
+        var order = active.cands.slice().sort(function (a, b) { return (a.chosen ? 1 : 0) - (b.chosen ? 1 : 0); }); // chosen on top
+        order.forEach(function (c) {
+          var col = c.pruned ? PRED.pruned : c.chosen ? PRED.chosen : c.los ? PRED.los : PRED.other;
+          ctx.strokeStyle = col;
+          ctx.lineWidth = (c.chosen ? 2.4 : 1.3) * dpr;
+          ctx.setLineDash(c.chosen ? [8 * dpr, 5 * dpr] : [2 * dpr, 4 * dpr]);
+          ctx.globalAlpha = c.pruned ? 0.18 : c.chosen ? 0.95 : c.los ? 0.55 : 0.32;
+          ctx.shadowColor = col; ctx.shadowBlur = c.chosen ? 10 * dpr : 0;
+          Object.keys(c.byCs).forEach(function (cs) {
+            var pts = c.byCs[cs].filter(function (q) { return q[0] >= nowT - 1e-6; });
+            if (pts.length < 2) return;
+            var here = byNow[cs];
+            ctx.beginPath();
+            if (here && here[5] === 1) ctx.moveTo(X(here[1]), Y(here[2])); else ctx.moveTo(X(pts[0][1]), Y(pts[0][2]));
+            pts.forEach(function (q) { ctx.lineTo(X(q[1]), Y(q[2])); });
+            ctx.stroke();
+            if (c.chosen) {
+              var e_ = pts[pts.length - 1];
+              ctx.setLineDash([]); ctx.beginPath(); ctx.arc(X(e_[1]), Y(e_[2]), 3.2 * dpr, 0, 2 * Math.PI); ctx.stroke();
+              ctx.setLineDash([8 * dpr, 5 * dpr]);
+            }
+          });
+          ctx.setLineDash([]); ctx.shadowBlur = 0;
+        });
+        ctx.globalAlpha = 1;
+      }
+
       // clearances. Life of a glyph: pops in with a ping where it was issued, sits as a badge with a label and a
       // tether to its aircraft, then shrinks back onto the track and fades out over FADE decisions.
       var halo = {}, placed = [], latest = {};
@@ -1135,6 +1277,22 @@
       ctx.fillStyle = "#f4f8ff"; ctx.font = "600 " + (15 * dpr) + "px " + mono; ctx.fillText("t+" + fmtT(stateTime()), m + 8 * dpr, m + 16 * dpr);
       ctx.fillStyle = "rgba(63,208,255,0.85)"; ctx.font = (9 * dpr) + "px " + mono;
       ctx.fillText("decision " + (i + 1) + "/" + frames.length + " · " + procLabel, m + 8 * dpr, m + 28 * dpr);
+      if (active) {  // the active plan's scoreboard
+        var rowsN = active.cands.length, bw2 = 196 * dpr, bh2 = (22 + rowsN * 13) * dpr, by2 = m + 40 * dpr;
+        ctx.fillStyle = "rgba(2,6,13,0.78)"; roundRect(ctx, m, by2, bw2, bh2, 4 * dpr); ctx.fill();
+        ctx.strokeStyle = "rgba(255,230,109,0.5)"; ctx.lineWidth = 1 * dpr; ctx.stroke();
+        ctx.fillStyle = PRED.chosen; ctx.font = "600 " + (10 * dpr) + "px " + head;
+        ctx.fillText("PLAN " + (plans.indexOf(active) + 1) + " · t+" + fmtT(active.t) + (active.switched ? " · SWITCHED" : ""), m + 8 * dpr, by2 + 14 * dpr);
+        ctx.font = (9.5 * dpr) + "px " + mono;
+        active.cands.forEach(function (c, n) {
+          var yy = by2 + (27 + n * 13) * dpr;
+          var col = c.pruned ? PRED.pruned : c.chosen ? PRED.chosen : c.los ? PRED.los : "rgba(223,246,255,0.85)";
+          ctx.fillStyle = col;
+          var txt = (c.chosen ? "▶ " : "  ") + "k" + c.k + " " + (c.kind + "         ").slice(0, 9) +
+            (c.pruned ? " pruned" : (c.los ? " LoS  " : " " + c.on_time + "/" + d.summary.n_flights + " ") + " " + c.clearances + " clr");
+          ctx.fillText(txt, m + 6 * dpr, yy);
+        });
+      }
       // scale bar: the round length closest to ~110 px
       var nmLen = [1, 2, 5, 10, 20, 50].reduce(function (b, v) { return Math.abs(v * sc - 110 * dpr) < Math.abs(b * sc - 110 * dpr) ? v : b; }, 10);
       var bl = nmLen * sc;
@@ -1158,6 +1316,142 @@
     function roundRect(c, x, y, w, h_, r) {
       c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h_, r); c.arcTo(x + w, y + h_, x, y + h_, r);
       c.arcTo(x, y + h_, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+    }
+
+    // ------------------------------------------------------------------ the clearance timeline
+    function tlGeometry() {
+      var dpr = window.devicePixelRatio || 1, W = tl.width, H = tl.height;
+      var t0 = frames[0].t, t1 = frames[frames.length - 1].t, x0 = 46 * dpr, x1 = W - 14 * dpr;
+      return { dpr: dpr, W: W, H: H, t0: t0, t1: t1, x0: x0, x1: x1, top: 26 * dpr, rowH: 14 * dpr,
+        X: function (t) { return x0 + (x1 - x0) * (t - t0) / Math.max(1, t1 - t0); },
+        T: function (px) { return t0 + (px - x0) / (x1 - x0) * (t1 - t0); } };
+    }
+    function buildTimeline() {
+      var g = tlGeo = tlGeometry(), dpr = g.dpr, W = g.W, H = g.H;
+      var c = document.createElement("canvas"); c.width = W; c.height = H;
+      var x = c.getContext("2d"), mono = css("--tada-font-mono"), head = css("--tada-font-head");
+      var ok = css("--tada-ok"), warn = css("--tada-warn"), bad = css("--tada-bad");
+      x.fillStyle = "#02060d"; x.fillRect(0, 0, W, H);
+      x.font = "600 " + (10 * dpr) + "px " + head; x.fillStyle = css("--tada-tile-label");
+      x.fillText("CLEARANCES OVER TIME", g.x0, 14 * dpr);
+      var nRows = d.trace.queue.length, bottom = g.top + nRows * g.rowH;
+      // minute grid
+      x.font = (9 * dpr) + "px " + mono;
+      var span = g.t1 - g.t0, stepS = span > 5400 ? 900 : span > 2400 ? 600 : 300;
+      for (var t = Math.ceil(g.t0 / stepS) * stepS; t <= g.t1; t += stepS) {
+        var px = g.X(t);
+        x.strokeStyle = "rgba(63,208,255,0.08)"; x.lineWidth = 1;
+        x.beginPath(); x.moveTo(px, g.top - 4 * dpr); x.lineTo(px, bottom); x.stroke();
+        x.fillStyle = "rgba(154,171,198,0.8)"; var lab = "t+" + fmtT(t), tw = x.measureText(lab).width;
+        x.fillText(lab, Math.min(px - tw / 2, W - tw - 2), bottom + 14 * dpr);
+      }
+      d.trace.queue.forEach(function (cs, k) {
+        var y = g.top + k * g.rowH + g.rowH / 2, L = life[cs], col = colors[cs];
+        if (k % 2 === 0) { x.fillStyle = "rgba(255,255,255,0.025)"; x.fillRect(0, y - g.rowH / 2, W, g.rowH); }
+        x.fillStyle = col; x.fillRect(4 * dpr, y - 3 * dpr, 3 * dpr, 6 * dpr);
+        x.fillStyle = "rgba(233,241,255,0.85)"; x.font = (9.5 * dpr) + "px " + mono; x.fillText(shortCs(cs), 11 * dpr, y + 3.5 * dpr);
+        var tEnd = L.land != null ? L.land : g.t1;
+        if (L.seen != null) {  // waiting to spawn / not yet under control: dim dotted
+          x.strokeStyle = col; x.globalAlpha = 0.25; x.lineWidth = 1 * dpr; x.setLineDash([2 * dpr, 3 * dpr]);
+          x.beginPath(); x.moveTo(g.X(L.seen), y); x.lineTo(g.X(L.on != null ? L.on : tEnd), y); x.stroke(); x.setLineDash([]);
+        }
+        if (L.on != null) {    // under control: solid in the flight's colour
+          x.globalAlpha = 0.7; x.lineWidth = 2 * dpr;
+          x.beginPath(); x.moveTo(g.X(L.on), y); x.lineTo(g.X(tEnd), y); x.stroke();
+        }
+        x.globalAlpha = 1;
+        if (L.land != null) {  // touchdown: on time or not, and by how much
+          var good = Math.abs(L.dev) <= 60, c2 = good ? ok : Math.abs(L.dev) <= 300 ? warn : bad, lx = g.X(L.land);
+          x.fillStyle = c2; x.font = "700 " + (10 * dpr) + "px " + mono;
+          x.fillText(good ? "✓" : "✗", lx + 3 * dpr, y + 3.5 * dpr);
+          x.font = (8.5 * dpr) + "px " + mono; x.fillText(sgn(L.dev), lx + 13 * dpr, y + 3 * dpr);
+        }
+      });
+      // every clearance as its glyph, where and when it was issued
+      d.trace.events.forEach(function (e) {
+        var k = d.trace.queue.indexOf(e.cs);
+        if (k < 0) return;
+        var y = g.top + k * g.rowH + g.rowH / 2;
+        e.tx = g.X(e.t); e.ty = y;
+        drawGlyph(x, e.tx, y, 9.5 * dpr, e.cat);
+      });
+      // search plans: a tick per plan (a star where it switched to a new candidate)
+      plans.forEach(function (pl) {
+        var px_ = g.X(pl.t);
+        x.fillStyle = PRED.chosen; x.globalAlpha = pl.switched ? 1 : 0.55;
+        x.beginPath(); x.moveTo(px_ - 3.5 * dpr, g.top - 9 * dpr); x.lineTo(px_ + 3.5 * dpr, g.top - 9 * dpr); x.lineTo(px_, g.top - 3 * dpr); x.closePath(); x.fill();
+        if (pl.switched) { x.font = "700 " + (9 * dpr) + "px " + mono; x.fillText("★", px_ - 3 * dpr, g.top - 11 * dpr); }
+        x.globalAlpha = 1;
+      });
+      // the episode's end
+      if (d.summary.los) {
+        x.fillStyle = bad; x.font = "700 " + (10 * dpr) + "px " + head;
+        x.fillText("LoS", g.x1 - 22 * dpr, g.top - 6 * dpr);
+      }
+      tlCache = c;
+    }
+    function drawTimeline() {
+      if (!tl || !tl.width) return;
+      if (!tlCtx || tlCtx.canvas !== tl) tlCtx = tl.getContext("2d");
+      if (!tlCache || tlCache.width !== tl.width || tlCache.height !== tl.height) buildTimeline();
+      var g = tlGeo, dpr = g.dpr, x = tlCtx, t = stateTime(), px = g.X(t), bottom = g.top + d.trace.queue.length * g.rowH;
+      x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.shadowBlur = 0;
+      x.drawImage(tlCache, 0, 0);
+      // the future, dimmed
+      x.fillStyle = "rgba(2,6,13,0.45)"; x.fillRect(px, g.top - 4 * dpr, g.x1 + 14 * dpr - px, bottom - g.top + 4 * dpr);
+      // clearances of the last decision glow
+      var i = Math.floor(u);
+      for (var k = Math.max(0, i - 1); k <= i; k++) evByFrame[k].forEach(function (e) {
+        var age = u - k;
+        if (age < 0 || age > 1.6 || e.tx == null) return;
+        x.globalAlpha = 1 - age / 1.6; x.strokeStyle = e.cat.color; x.lineWidth = 1.5 * dpr; x.shadowColor = e.cat.color; x.shadowBlur = 8 * dpr;
+        x.beginPath(); x.arc(e.tx, e.ty, (6 + 6 * age) * dpr, 0, 2 * Math.PI); x.stroke();
+      });
+      x.globalAlpha = 1; x.shadowBlur = 0;
+      // playhead
+      x.strokeStyle = css("--tada-champion"); x.lineWidth = 2 * dpr; x.shadowColor = x.strokeStyle; x.shadowBlur = 8 * dpr;
+      x.beginPath(); x.moveTo(px, g.top - 8 * dpr); x.lineTo(px, bottom); x.stroke(); x.shadowBlur = 0;
+      x.fillStyle = x.strokeStyle; x.beginPath(); x.moveTo(px - 5 * dpr, g.top - 12 * dpr); x.lineTo(px + 5 * dpr, g.top - 12 * dpr); x.lineTo(px, g.top - 5 * dpr); x.closePath(); x.fill();
+      // hover: what that glyph was
+      if (tlHover) {
+        var e = tlHover, txt = shortCs(e.cs) + " · " + pretty(e.name) + " · t+" + fmtT(e.t);
+        x.font = "600 " + (10 * dpr) + "px " + css("--tada-font-mono");
+        var tw = x.measureText(txt).width, bx = Math.min(e.tx + 10 * dpr, g.W - tw - 16 * dpr), by = e.ty - 24 * dpr < 2 ? e.ty + 10 * dpr : e.ty - 24 * dpr;
+        x.fillStyle = "rgba(2,6,13,0.92)"; roundRect(x, bx, by, tw + 12 * dpr, 17 * dpr, 4 * dpr); x.fill();
+        x.strokeStyle = e.cat.color; x.lineWidth = 1 * dpr; x.stroke();
+        x.fillStyle = "#f4f8ff"; x.fillText(txt, bx + 6 * dpr, by + 12 * dpr);
+        x.strokeStyle = e.cat.color; x.lineWidth = 1.5 * dpr; x.beginPath(); x.arc(e.tx, e.ty, 7 * dpr, 0, 2 * Math.PI); x.stroke();
+      }
+    }
+    function attachTimeline(c) {
+      var scrubbing = false;
+      function at(ev) {
+        var r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+        return [(ev.clientX - r.left) * dpr, (ev.clientY - r.top) * dpr];
+      }
+      function seek(ev) {
+        if (!tlGeo) return;
+        var p = at(ev), t = tlGeo.T(p[0]), best = 0;
+        frames.forEach(function (f, k) { if (Math.abs(f.t - t) < Math.abs(frames[best].t - t)) best = k; });
+        u = best; draw();
+      }
+      c.addEventListener("pointerdown", function (ev) {
+        scrubbing = true; c.setPointerCapture(ev.pointerId);
+        if (tlHover) { u = tlHover.fi; draw(); } else seek(ev);
+      });
+      c.addEventListener("pointermove", function (ev) {
+        if (scrubbing) { seek(ev); return; }
+        if (!tlGeo) return;
+        var p = at(ev), hit = null, bestD = 8 * tlGeo.dpr;
+        d.trace.events.forEach(function (e) {
+          if (e.tx == null) return;
+          var dd = Math.hypot(e.tx - p[0], e.ty - p[1]);
+          if (dd < bestD) { bestD = dd; hit = e; }
+        });
+        if (hit !== tlHover) { tlHover = hit; c.style.cursor = hit ? "pointer" : "crosshair"; drawTimeline(); }
+      });
+      ["pointerup", "pointercancel"].forEach(function (n) { c.addEventListener(n, function () { scrubbing = false; }); });
+      c.addEventListener("pointerleave", function () { if (tlHover) { tlHover = null; drawTimeline(); } });
     }
 
     function drawStrip(f) {
@@ -1242,7 +1536,12 @@
             " · ",
             h("button", { type: "button", class: "lab-btn lab-btn--link", title: "Remove the engine key from this browser",
               onclick: function () { storeKey(null); storeEngine(null); location.reload(); } }, ["forget key"])])
-        : h("button", { type: "button", class: "lab-btn lab-btn--link", onclick: function () { bar.replaceWith(runnerForm(found.base)); } }, ["change"])
+        : h("span", {}, [
+            h("button", { type: "button", class: "lab-btn lab-btn--link", onclick: function () { bar.replaceWith(runnerForm(found.base)); } }, ["change"]),
+            window.TadaBrowserEngine ? " · " : null,
+            window.TadaBrowserEngine ? h("button", { type: "button", class: "lab-btn lab-btn--link",
+              title: "Fly the paper agents with the encrypted in-browser engine instead of this runner",
+              onclick: function () { storeEngine("browser"); location.reload(); } }, ["use the in-browser engine"]) : null])
     ]);
     return bar;
   }
@@ -1265,8 +1564,18 @@
     ]);
   }
   var LAST_TRIED = [];
-  function offline(tried, keyError) {
+  function offline(tried, keyError, chosen) {
     LAST_TRIED = tried;
+    if (chosen) {
+      root.innerHTML = "";
+      root.appendChild(h("div", { class: "lab-offline lab-offline--engine" }, [
+        engineOffer(keyError),
+        h("p", { class: "lab-field__hint" }, ["You chose the in-browser engine. ",
+          h("button", { type: "button", class: "lab-btn lab-btn--link", onclick: function () { storeEngine(null); location.reload(); } }, ["Use a lab runner instead"]),
+          " (it is looked for on localhost:8800)."])
+      ]));
+      return;
+    }
     root.innerHTML = "";
     var https = location.protocol === "https:";
     root.appendChild(h("div", { class: "lab-offline" }, [
@@ -1379,12 +1688,22 @@
       return start({ base: "browser", info: eng.info() });
     }).catch(function (e) {
       ENGINE = null;
-      storeKey(null); storeEngine(null);
-      offline(LAST_TRIED, e.message);
+      var chosen = false;
+      try { chosen = localStorage.getItem(ENGINE_KEY) === "browser"; } catch (x) {}
+      storeKey(null);
+      offline(LAST_TRIED, e.message, chosen);
     });
   }
   function boot(retry) {
     if (ENGINE) return;
+    // The viewer's explicit choice wins: "browser" skips runner discovery altogether.
+    var choice = null;
+    try { choice = localStorage.getItem(ENGINE_KEY); } catch (e) {}
+    if (!retry && choice === "browser" && window.TadaBrowserEngine) {
+      if (savedKey()) startBrowser(savedKey(), true);
+      else offline([], null, true);
+      return;
+    }
     findRunner().then(start).catch(function (tried) {
       if (ENGINE) return;
       if (!retry) {

@@ -4,9 +4,12 @@
 // MONAD-aligned generator, single streams, policy and best-of-K modes; search and MP4 renders need a runner.
 (function () {
   "use strict";
-  function flightKey(sc, agent, mode, attempts) {
+  function searchTag(p) {
+    return "search-K" + p.K + "-M" + p.M + "-J" + (p.J || 0) + (p.stop ? "s" : "") + (p.prune ? "p" : "") + "-L" + p.look;
+  }
+  function flightKey(sc, agent, mode, attempts, search) {
     return sc.generator + "-" + sc.procedure + "-f" + sc.flights + "-x" + sc.segments + "-s" + sc.seed + "--" + agent +
-      "--" + (mode === "sampled" ? "sampled" + attempts : mode);
+      "--" + (mode === "sampled" ? "sampled" + attempts : mode === "search" ? searchTag(search) : mode);
   }
   function scenarioKey(sc) { return sc.generator + "-" + sc.procedure + "-f" + sc.flights + "-x" + sc.segments + "-s" + sc.seed; }
   function hex(buf) { return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, "0"); }).join(""); }
@@ -70,7 +73,7 @@
       ]).then(function (res) {
         var reg = res[0], curated = res[1], scene = res[2] || {};
         var catalog = {
-          engine: "browser", code_ok: true, setup: { ok: true, checks: [] }, max_segments: 1, modes: ["det", "sampled"],
+          engine: "browser", code_ok: true, setup: { ok: true, checks: [] }, max_segments: 1, modes: ["det", "sampled", "search"], search_params: true,
           sectors: scene.sectors || [],
           procedures: reg.procedures, reference: reg.reference, curated: curated,
           generators: {
@@ -86,7 +89,7 @@
         function agent(id) { return catalog.agents.filter(function (a) { return a.id === id; })[0]; }
         function status(key) {
           var j = jobs[key];
-          return j ? { key: key, kind: j.kind, status: j.status, stage: j.stage, frac: j.frac, error: j.error }
+          return j ? { key: key, kind: j.kind, status: j.status, stage: j.stage, frac: j.frac, error: j.error, live: j.live }
             : { key: key, status: results[key] ? "done" : "missing" };
         }
         function fly(body) {
@@ -94,16 +97,21 @@
           var attempts = mode === "sampled" ? (body.attempts | 0) : 0;
           if (sc.generator !== "monad") throw new Error("the in-browser engine has the MONAD-aligned generator only");
           if (sc.segments !== 1) throw new Error("stitched streams need a lab runner");
-          if (mode === "search") throw new Error("policy + search needs a lab runner");
+          var search = null;
+          if (mode === "search") {
+            var q = body.search || {};
+            search = { K: Math.max(1, Math.min(32, q.K | 0 || 8)), M: Math.max(1, Math.min(40, q.M | 0 || 10)), J: Math.max(0, q.J | 0),
+              stop: q.stop !== false, prune: q.prune !== false, look: Math.max(0, Math.min(60, q.look | 0 || 20)) };
+          }
           if (body.agent !== "do-nothing") { // do-nothing needs no weights: the MDP is built into the engine
             var a = agent(body.agent);
             if (!a || !a.installed) throw new Error("download " + (a ? a.id : body.agent) + " first");
           }
-          var key = flightKey(sc, body.agent, mode, attempts);
+          var key = flightKey(sc, body.agent, mode, attempts, search);
           if (results[key] || (jobs[key] && jobs[key].status === "running")) return status(key);
-          var job = { scenario: sc, agent: body.agent, mode: mode, attempts: attempts };
-          var j = jobs[key] = { kind: "fly", status: "running", stage: "queued", frac: null, error: null };
-          call({ cmd: "fly", job: job }, function (p) { j.stage = p.stage; j.frac = p.frac; }).then(function (r) {
+          var job = { scenario: sc, agent: body.agent, mode: mode, attempts: attempts, search: search };
+          var j = jobs[key] = { kind: "fly", status: "running", stage: "queued", frac: null, error: null, live: null };
+          call({ cmd: "fly", job: job }, function (p) { j.stage = p.stage; j.frac = p.frac; if (p.live) j.live = p.live; }).then(function (r) {
             r.job = job; r.search = null; results[key] = r; j.status = "done"; j.stage = "done"; j.frac = 1;
           }, function (e) { j.status = "error"; j.error = e.message; });
           return status(key);
@@ -133,7 +141,8 @@
           Object.keys(results).forEach(function (k) {
             if (k.indexOf(sk + "--") !== 0) return;
             var r = results[k];
-            out.push({ key: k, scenario: sk, agent: r.job.agent, mode: r.job.mode === "sampled" ? "sampled" + r.job.attempts : r.job.mode,
+            out.push({ key: k, scenario: sk, agent: r.job.agent, mode: r.job.mode === "sampled" ? "sampled" + r.job.attempts :
+              r.job.mode === "search" ? searchTag(r.job.search) : r.job.mode,
               attempts: r.job.attempts, summary: r.summary, chosen_attempt: r.chosen_attempt, has_video: false });
           });
           Object.keys(jobs).forEach(function (k) {
