@@ -47,8 +47,8 @@
   }
   function sgn(v) { v = Math.round(v); return (v > 0 ? "+" : v < 0 ? "−" : "±") + Math.abs(v); }
   function css(name) { return getComputedStyle(document.body).getPropertyValue(name).trim() || "#888"; }
-  var TAB20 = ["#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#98df8a", "#d62728", "#ff9896", "#9467bd", "#c5b0d5",
-    "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f", "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5"];
+  var TAB20 = ["#4cc9f0", "#f72585", "#7bf1a8", "#ffd166", "#b388ff", "#ff8c42", "#06d6a0", "#ef476f", "#a0c4ff", "#f9c74f",
+    "#90e0ef", "#ff70a6", "#c3f73a", "#ffadad", "#9b5de5", "#00f5d4", "#fee440", "#f15bb5", "#00bbf9", "#e9ff70"];  // the radar's flight colours
   var ABBR = {
     DO_NOTHING: "·", SLOW_DOWN_SMALL: "S−1", SLOW_DOWN_MEDIUM: "S−2", SLOW_DOWN_LARGE: "S−3", SPEED_UP_SMALL: "S+1",
     SPEED_UP_MEDIUM: "S+2", TURN_LEFT_AND_RETURN_TO_ROUTE: "TL", TURN_RIGHT_AND_RETURN_TO_ROUTE: "TR",
@@ -634,194 +634,530 @@
 
   // ---------------------------------------------------------------- replay (canvas)
   var Replay = (function () {
-    var d, frames, colors, idx, playing = false, speed = 2, i = 0, raf = null, lastTs = 0, acc = 0;
-    var cv, ctx, strip, sctx, slider, tlabel, playBtn, bounds, evByFrame, wrap;
+    // Bright flight colours for a dark scope, in AMAN order (the strip and the map share them).
+    var BRIGHT = ["#4cc9f0", "#f72585", "#7bf1a8", "#ffd166", "#b388ff", "#ff8c42", "#06d6a0", "#ef476f", "#a0c4ff", "#f9c74f",
+      "#90e0ef", "#ff70a6", "#c3f73a", "#ffadad", "#9b5de5", "#00f5d4", "#fee440", "#f15bb5", "#00bbf9", "#e9ff70"];
+    var SECTOR_HUES = ["#66c2a5", "#fc8d62", "#8da0cb", "#e78ac3", "#a6d854", "#ffd92f", "#e5c494", "#80b1d3", "#fb8072", "#bebada"];
+    var FADE = 5;        // decisions a clearance glyph stays on the scope
+    var TRAIL = 12;      // decisions of track history drawn behind each aircraft
+    var LAYERS_KEY = "tada-lab-layers";
+    var layers = { sectors: true, rings: true, routes: true, labels: true };
+    try { Object.assign(layers, JSON.parse(localStorage.getItem(LAYERS_KEY) || "{}")); } catch (e) {}
 
+    var d, frames, colors, playing = false, speed = 2, u = 0, raf = null, lastTs = 0;
+    var view = { zoom: 1, cx: null, cy: null }, proj = null;  // zoom/pan (world NM at the canvas centre)
+    var cv, ctx, strip, sctx, slider, tlabel, playBtn, bounds, evByFrame, wrap, airport, procLabel, sectors;
+
+    // ------------------------------------------------------------------ clearance glyphs
+    function category(name) {
+      var n = { SMALL: 1, MEDIUM: 2, LARGE: 3 };
+      if (/^SLOW_DOWN_/.test(name)) return { kind: "slow", n: n[name.slice(10)] || 1, color: "#ffb627", label: "slow down" };
+      if (/^SPEED_UP_/.test(name)) return { kind: "fast", n: n[name.slice(9)] || 1, color: "#3fd0ff", label: "speed up" };
+      if (/^TURN_LEFT/.test(name)) return { kind: "turn", dir: -1, color: "#ff4fd8", label: "turn left, rejoin" };
+      if (/^TURN_RIGHT/.test(name)) return { kind: "turn", dir: 1, color: "#ff4fd8", label: "turn right, rejoin" };
+      if (name === "LENGTHEN_TROMBONE") return { kind: "tromb", plus: true, color: "#c39bff", label: "lengthen trombone" };
+      if (name === "SHORTEN_TROMBONE") return { kind: "tromb", plus: false, color: "#c39bff", label: "shorten trombone" };
+      if (/^SKIP_/.test(name)) return { kind: "skip", n: +name.charAt(5) || 1, color: "#3ee07a", label: "skip waypoints" };
+      if (name === "VECTOR_TO_ILS") return { kind: "ils", color: "#f4f8ff", label: "vector to ILS" };
+      if (name === "DIRECT_TO_MERGE_POINT") return { kind: "merge", color: "#f4f8ff", label: "direct to merge point" };
+      return { kind: "dot", color: "#ffffff", label: name };
+    }
+    // One glyph, centred on (x, y), about s pixels across.
+    function drawGlyph(c, x, y, s, cat) {
+      c.save();
+      c.translate(x, y);
+      c.strokeStyle = cat.color; c.fillStyle = cat.color;
+      c.lineWidth = Math.max(1.5, s * 0.14); c.lineJoin = "round"; c.lineCap = "round";
+      var h = s / 2;
+      if (cat.kind === "slow" || cat.kind === "fast") {
+        var k = cat.n, step = s * 0.3, top = -((k - 1) * step) / 2, sign = cat.kind === "slow" ? 1 : -1;
+        for (var j = 0; j < k; j++) {
+          var cy = top + j * step;
+          c.beginPath(); c.moveTo(-h * 0.8, cy - sign * s * 0.16); c.lineTo(0, cy + sign * s * 0.16); c.lineTo(h * 0.8, cy - sign * s * 0.16); c.stroke();
+        }
+      } else if (cat.kind === "turn") {
+        var r = h * 0.72, a0 = -Math.PI / 2, a1 = a0 + cat.dir * Math.PI * 1.35;
+        c.beginPath(); c.arc(0, 0, r, a0, a1, cat.dir < 0); c.stroke();
+        var ex = r * Math.cos(a1), ey = r * Math.sin(a1), tang = a1 + cat.dir * Math.PI / 2;
+        c.beginPath();
+        c.moveTo(ex + Math.cos(tang) * s * 0.28, ey + Math.sin(tang) * s * 0.28);
+        c.lineTo(ex + Math.cos(tang + 2.5) * s * 0.24, ey + Math.sin(tang + 2.5) * s * 0.24);
+        c.lineTo(ex + Math.cos(tang - 2.5) * s * 0.24, ey + Math.sin(tang - 2.5) * s * 0.24);
+        c.closePath(); c.fill();
+      } else if (cat.kind === "tromb") {
+        c.beginPath(); c.moveTo(-h * 0.55, -h * 0.8); c.lineTo(-h * 0.55, h * 0.1);
+        c.arc(0, h * 0.1, h * 0.55, Math.PI, 0, true); c.lineTo(h * 0.55, -h * 0.8); c.stroke();
+        c.beginPath(); c.moveTo(-h * 0.28, -h * 0.35); c.lineTo(h * 0.28, -h * 0.35);
+        if (cat.plus) { c.moveTo(0, -h * 0.63); c.lineTo(0, -h * 0.07); }
+        c.stroke();
+      } else if (cat.kind === "skip") {
+        for (var q = 0; q < 2; q++) {
+          var ox = -h * 0.45 + q * h * 0.55;
+          c.beginPath(); c.moveTo(ox - h * 0.25, -h * 0.55); c.lineTo(ox + h * 0.25, 0); c.lineTo(ox - h * 0.25, h * 0.55); c.stroke();
+        }
+        c.font = "700 " + Math.round(s * 0.5) + "px " + css("--tada-font-mono");
+        c.fillText(String(cat.n), h * 0.62, h * 0.85);
+      } else if (cat.kind === "ils") {
+        c.beginPath(); c.moveTo(0, -h); c.lineTo(h * 0.7, 0); c.lineTo(0, h); c.lineTo(-h * 0.7, 0); c.closePath(); c.stroke();
+        c.beginPath(); c.moveTo(0, -h * 0.45); c.lineTo(0, h * 0.45); c.stroke();
+      } else if (cat.kind === "merge") {
+        c.beginPath(); c.arc(0, 0, h * 0.8, 0, 2 * Math.PI); c.stroke();
+        c.beginPath(); c.arc(0, 0, h * 0.3, 0, 2 * Math.PI); c.fill();
+      } else {
+        c.beginPath(); c.arc(0, 0, h * 0.4, 0, 2 * Math.PI); c.fill();
+      }
+      c.restore();
+    }
+    function glyphIcon(cat) {
+      var dpr = window.devicePixelRatio || 1, px = 18, c = h("canvas", { class: "lab-lg-glyph", width: px * dpr, height: px * dpr });
+      c.style.width = px + "px"; c.style.height = px + "px";
+      drawGlyph(c.getContext("2d"), px * dpr / 2, px * dpr / 2, 13 * dpr, cat);
+      return c;
+    }
+    function shortCs(cs) { return cs.replace(/^[A-Z]+0*/, "#"); }
+
+    // ------------------------------------------------------------------ setup
     function mount(data) {
       stop();
-      d = data; frames = d.trace.frames; i = 0;
-      colors = {}; idx = {};
-      d.trace.queue.forEach(function (cs, k) { colors[cs] = TAB20[k % 20]; idx[cs] = k; });
-      // bounds over routes and every airborne position
+      d = data; frames = d.trace.frames; u = 0;
+      colors = {};
+      d.trace.queue.forEach(function (cs, k) { colors[cs] = BRIGHT[k % BRIGHT.length]; });
+      frames.forEach(function (f) { f.by = {}; f.ac.forEach(function (a) { f.by[a[0]] = a; }); });
+      sectors = (S.catalog && S.catalog.sectors) || [];
+      procLabel = ((d.job && d.job.scenario && d.job.scenario.procedure) || "") === "pms" ? "BGY" : "MXP";
+      // the airport: where the flight plans end
+      var ends = [];
+      Object.keys(d.trace.routes).forEach(function (cs) { var r = d.trace.routes[cs]; if (r.length) ends.push(r[r.length - 1]); });
+      airport = ends.length ? [ends.reduce(function (s, p) { return s + p[0]; }, 0) / ends.length,
+        ends.reduce(function (s, p) { return s + p[1]; }, 0) / ends.length] : [0, 0];
+      // bounds: flight plans and every airborne position
       var xs = [], ys = [];
       Object.keys(d.trace.routes).forEach(function (cs) { d.trace.routes[cs].forEach(function (p) { xs.push(p[0]); ys.push(p[1]); }); });
       frames.forEach(function (f) { f.ac.forEach(function (a) { if (a[5] === 1) { xs.push(a[1]); ys.push(a[2]); } }); });
       if (!xs.length) { xs = [-50, 50]; ys = [-50, 50]; }
-      bounds = { x0: Math.min.apply(null, xs), x1: Math.max.apply(null, xs), y0: Math.min.apply(null, ys), y1: Math.max.apply(null, ys) };
-      // clearance events attached to the first frame at or after their time
+      var pad = 4;
+      bounds = { x0: Math.min.apply(null, xs) - pad, x1: Math.max.apply(null, xs) + pad, y0: Math.min.apply(null, ys) - pad, y1: Math.max.apply(null, ys) + pad };
+      // clearances attach to the first frame at or after their time (the state they produced)
       evByFrame = frames.map(function () { return []; });
       var fi = 0;
       d.trace.events.forEach(function (e) {
         while (fi < frames.length - 1 && frames[fi].t < e.t - 1e-6) fi++;
+        e.cat = category(d.clearance_names[String(e.clr)] || "");
+        e.name = d.clearance_names[String(e.clr)] || "";
+        e.slot = evByFrame[fi].filter(function (o) { return o.cs === e.cs; }).length;
         evByFrame[fi].push(e);
       });
 
-      cv = h("canvas", { class: "lab-map", "aria-label": "map replay" });
+      view = { zoom: 1, cx: (bounds.x0 + bounds.x1) / 2, cy: (bounds.y0 + bounds.y1) / 2 };
+      cv = h("canvas", { class: "lab-map", "aria-label": "radar replay: scroll to zoom, drag to pan, double-click to reset" });
+      attachZoom(cv);
       strip = h("canvas", { class: "lab-strip", "aria-label": "deviation per flight" });
-      slider = h("input", { type: "range", min: 0, max: frames.length - 1, value: 0, class: "lab-range lab-scrub", "aria-label": "time" });
-      slider.addEventListener("input", function () { i = +slider.value; draw(); });
+      slider = h("input", { type: "range", min: 0, max: frames.length - 1, step: 1, value: 0, class: "lab-range lab-scrub", "aria-label": "time" });
+      slider.addEventListener("input", function () { u = +slider.value; draw(); });
       tlabel = h("span", { class: "lab-num lab-tlabel" });
       playBtn = h("button", { type: "button", class: "lab-btn lab-btn--play", onclick: toggle, "aria-label": "play" }, ["▶"]);
-      var spd = h("div", { class: "lab-seg lab-seg--sm" }, [1, 2, 4, 8].map(function (s) {
-        return h("button", { type: "button", class: "lab-seg__btn" + (s === speed ? " is-on" : ""), onclick: function () {
-          speed = s; spd.querySelectorAll("button").forEach(function (b) { b.classList.toggle("is-on", b.textContent === s + "×"); });
+      var spd = h("div", { class: "lab-seg lab-seg--sm" }, [0.5, 1, 2, 4, 8].map(function (s) {
+        return h("button", { type: "button", class: "lab-seg__btn" + (s === speed ? " is-on" : ""), "data-s": s, onclick: function () {
+          speed = s; spd.querySelectorAll("button").forEach(function (b) { b.classList.toggle("is-on", +b.getAttribute("data-s") === s); });
         } }, [s + "×"]);
       }));
-      var legend = h("div", { class: "lab-legend" }, [
-        h("span", {}, [h("i", { class: "lab-lg lab-lg--ac" }), "under control"]),
-        h("span", {}, [h("i", { class: "lab-lg lab-lg--pre" }), "not yet under control"]),
-        h("span", {}, [h("i", { class: "lab-lg lab-lg--clr" }), "clearance (S± speed, TL/TR turn, TB± trombone, SKn skip, ILS, DMP merge)"]),
+      var toggles = h("div", { class: "lab-layers" }, [["sectors", "Sectors"], ["rings", "Range rings"], ["routes", "Flight plans"], ["labels", "Data blocks"]].map(function (l) {
+        var cb = h("input", { type: "checkbox", checked: layers[l[0]] ? true : null });
+        cb.addEventListener("change", function () {
+          layers[l[0]] = cb.checked;
+          try { localStorage.setItem(LAYERS_KEY, JSON.stringify(layers)); } catch (e) {}
+          draw();
+        });
+        return h("label", { class: "lab-layers__item" }, [cb, " " + l[1]]);
+      }));
+      var cats = [["SLOW_DOWN_LARGE", "slow down (1–3 steps)"], ["SPEED_UP_MEDIUM", "speed up"], ["TURN_LEFT_AND_RETURN_TO_ROUTE", "turn L/R + rejoin"],
+        ["LENGTHEN_TROMBONE", "trombone ±"], ["SKIP_2_WAYPOINTS_NOT_NEXT", "skip n waypoints"],
+        [procLabel === "BGY" ? "DIRECT_TO_MERGE_POINT" : "VECTOR_TO_ILS", procLabel === "BGY" ? "direct to merge point" : "vector to ILS"]];
+      var legend = h("div", { class: "lab-legend" }, cats.map(function (c) {
+        return h("span", {}, [glyphIcon(category(c[0])), c[1]]);
+      }).concat([
         h("span", {}, [h("i", { class: "lab-lg lab-lg--warn" }), "< 5 NM & 1000 ft"]),
-        h("span", {}, [h("i", { class: "lab-lg lab-lg--bad" }), "LoS"])
-      ]);
+        h("span", {}, [h("i", { class: "lab-lg lab-lg--bad" }), "loss of separation"])
+      ]));
       wrap = h("div", { class: "lab-replay", tabindex: 0 }, [
-        h("div", { class: "lab-replay__view" }, [h("div", { class: "lab-replay__map" }, [cv]), h("div", { class: "lab-replay__strip" }, [strip])]),
+        toggles,
+        h("div", { class: "lab-replay__view" }, [h("div", { class: "lab-replay__map" }, [cv, h("div", { class: "lab-zoom" }, [
+          h("button", { type: "button", class: "lab-zoom__btn", title: "Zoom in", "aria-label": "zoom in", onclick: function () { zoomBy(1.5); } }, ["+"]),
+          h("button", { type: "button", class: "lab-zoom__btn", title: "Zoom out", "aria-label": "zoom out", onclick: function () { zoomBy(1 / 1.5); } }, ["−"]),
+          h("button", { type: "button", class: "lab-zoom__btn", title: "Fit the whole stream", "aria-label": "reset view", onclick: resetView }, ["⤢"])
+        ])]), h("div", { class: "lab-replay__strip" }, [strip])]),
         h("div", { class: "lab-replay__ctl" }, [playBtn, slider, tlabel, spd]),
         legend
       ]);
       wrap.addEventListener("keydown", function (e) {
         if (e.key === " ") { e.preventDefault(); toggle(); }
-        else if (e.key === "ArrowRight") { i = Math.min(frames.length - 1, i + 1); draw(); }
-        else if (e.key === "ArrowLeft") { i = Math.max(0, i - 1); draw(); }
+        else if (e.key === "ArrowRight") { u = Math.min(frames.length - 1, Math.floor(u) + 1); draw(); }
+        else if (e.key === "ArrowLeft") { u = Math.max(0, Math.ceil(u) - 1); draw(); }
       });
       setTimeout(resize, 0);
       return wrap;
     }
+    // ------------------------------------------------------------------ zoom / pan
+    function resetView() { view = { zoom: 1, cx: (bounds.x0 + bounds.x1) / 2, cy: (bounds.y0 + bounds.y1) / 2 }; draw(); }
+    function zoomBy(f, px, py) {
+      if (!proj) return;
+      var z = Math.max(1, Math.min(10, view.zoom * f));
+      if (px != null) {  // keep the point under the cursor fixed
+        var wx = proj.ix(px), wy = proj.iy(py);
+        view.cx = wx - (wx - view.cx) * view.zoom / z; view.cy = wy - (wy - view.cy) * view.zoom / z;
+      }
+      view.zoom = z; draw();
+    }
+    function attachZoom(c) {
+      var drag = null;
+      c.addEventListener("wheel", function (e) {
+        e.preventDefault();
+        var r = c.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+        zoomBy(Math.exp(-e.deltaY * 0.0015), (e.clientX - r.left) * dpr, (e.clientY - r.top) * dpr);
+      }, { passive: false });
+      c.addEventListener("pointerdown", function (e) { drag = { x: e.clientX, y: e.clientY }; c.setPointerCapture(e.pointerId); c.classList.add("is-dragging"); });
+      c.addEventListener("pointermove", function (e) {
+        if (!drag || !proj) return;
+        var dpr = window.devicePixelRatio || 1;
+        view.cx -= (e.clientX - drag.x) * dpr / proj.sc; view.cy += (e.clientY - drag.y) * dpr / proj.sc;
+        drag = { x: e.clientX, y: e.clientY }; draw();
+      });
+      ["pointerup", "pointercancel"].forEach(function (ev) { c.addEventListener(ev, function () { drag = null; c.classList.remove("is-dragging"); }); });
+      c.addEventListener("dblclick", resetView);
+    }
+
     function resize() {
       if (!cv || !cv.isConnected) return;
       var dpr = window.devicePixelRatio || 1;
-      [cv, strip].forEach(function (c) {
-        var r = c.parentNode.getBoundingClientRect();
-        var w = Math.max(200, r.width), hgt = c === cv ? Math.min(Math.max(320, w * 0.78), 640) : null;
-        if (c === strip) hgt = cv.height / dpr;
-        c.style.width = w + "px"; c.style.height = hgt + "px";
-        c.width = Math.round(w * dpr); c.height = Math.round(hgt * dpr);
-      });
-      // strip height follows the map
-      var sh = cv.height / dpr; strip.style.height = sh + "px"; strip.height = Math.round(sh * dpr);
+      var r = cv.parentNode.getBoundingClientRect(), w = Math.max(240, r.width);
+      var hgt = Math.min(Math.max(360, w * 0.8), 720);
+      cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.width = Math.round(w * dpr); cv.height = Math.round(hgt * dpr);
+      var rs = strip.parentNode.getBoundingClientRect(), ws = Math.max(200, rs.width);
+      strip.style.width = ws + "px"; strip.style.height = hgt + "px"; strip.width = Math.round(ws * dpr); strip.height = Math.round(hgt * dpr);
       draw();
     }
     window.addEventListener("resize", function () { clearTimeout(resize._t); resize._t = setTimeout(resize, 150); });
     new MutationObserver(function () { draw(); }).observe(document.body, { attributes: true, attributeFilter: ["data-md-color-scheme"] });
 
-    function toggle() { if (playing) stop(); else { if (i >= frames.length - 1) i = 0; playing = true; playBtn.textContent = "❚❚"; lastTs = 0; acc = 0; raf = requestAnimationFrame(tick); } }
+    function toggle() {
+      if (playing) { stop(); return; }
+      if (u >= frames.length - 1) u = 0;
+      playing = true; playBtn.textContent = "❚❚"; lastTs = 0; raf = requestAnimationFrame(tick);
+    }
     function stop() { playing = false; if (raf) cancelAnimationFrame(raf); raf = null; if (playBtn) playBtn.textContent = "▶"; }
     function tick(ts) {
       if (!playing) return;
       if (!cv.isConnected) { stop(); return; }
-      if (lastTs) acc += (ts - lastTs) / 1000 * speed;
+      if (lastTs) u = Math.min(frames.length - 1, u + (ts - lastTs) / 1000 * speed); // 1 decision (45 s) per second at 1×
       lastTs = ts;
-      // ~1 decision (45 s simulated) per second at 1×
-      while (acc >= 1 && i < frames.length - 1) { acc -= 1; i++; }
       draw();
-      if (i >= frames.length - 1) { stop(); return; }
+      if (u >= frames.length - 1) { stop(); return; }
       raf = requestAnimationFrame(tick);
     }
-
     function draw() {
       if (!ctx || ctx.canvas !== cv) ctx = cv && cv.getContext("2d");
       if (!sctx || sctx.canvas !== strip) sctx = strip && strip.getContext("2d");
       if (!ctx || !frames.length || !cv.width) return;
-      slider.value = i;
-      var f = frames[i], fprev = frames[Math.max(0, i - 1)];
-      tlabel.textContent = "t+" + fmtT(f.t) + " · " + (i + 1) + "/" + frames.length;
-      drawMap(f, fprev); drawStrip(f);
+      var i = Math.min(frames.length - 1, Math.floor(u));
+      slider.value = Math.round(u);
+      tlabel.textContent = "t+" + fmtT(stateTime()) + " · " + (i + 1) + "/" + frames.length;
+      drawMap(); drawStrip(frames[i]);
+    }
+    function stateTime() {
+      var i = Math.floor(u), f = u - i, a = frames[i], b = frames[Math.min(frames.length - 1, i + 1)];
+      return a.t + (b.t - a.t) * f;
+    }
+    // aircraft rows at the continuous time u: positions interpolated between decisions
+    function aircraftAt() {
+      var i = Math.floor(u), fr = u - i, A = frames[i], B = frames[Math.min(frames.length - 1, i + 1)], out = [];
+      A.ac.forEach(function (a) {
+        var b = B.by[a[0]] || a, row;
+        if (a[5] === b[5]) {
+          row = [a[0], a[1] + (b[1] - a[1]) * fr, a[2] + (b[2] - a[2]) * fr, a[3] + (b[3] - a[3]) * fr, a[4] + (b[4] - a[4]) * fr, a[5], fr < 0.5 ? a[6] : b[6]];
+        } else {
+          row = fr < 0.5 ? a.slice() : b.slice();
+        }
+        // heading: the direction of travel over this interval (else the previous one)
+        var p = (b !== a && (b[1] !== a[1] || b[2] !== a[2])) ? [a, b] : [frames[Math.max(0, i - 1)].by[a[0]] || a, a];
+        row.hd = Math.atan2(p[1][2] - p[0][2], p[1][1] - p[0][1]);
+        out.push(row);
+      });
+      return out;
     }
 
-    function drawMap(f, fprev) {
-      var dpr = window.devicePixelRatio || 1, W = cv.width, H = cv.height;
-      var fg = css("--md-default-fg-color"), fgl = css("--md-default-fg-color--lighter"), rule = css("--tada-rule");
-      var ok = css("--tada-ok"), warn = css("--tada-warn"), bad = css("--tada-bad"), champ = css("--tada-champion");
+    // ------------------------------------------------------------------ the scope
+    function drawMap() {
+      var dpr = window.devicePixelRatio || 1, W = cv.width, H = cv.height, now = performance.now() / 1000;
+      var ok = css("--tada-ok"), warn = css("--tada-warn"), bad = css("--tada-bad");
+      var mono = css("--tada-font-mono"), head = css("--tada-font-head");
+      var i = Math.floor(u), fr = u - i;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.fillStyle = css("--tada-tile-bg"); ctx.fillRect(0, 0, W, H);
-      var m = 18 * dpr, bw = bounds.x1 - bounds.x0 || 1, bh = bounds.y1 - bounds.y0 || 1;
-      var sc = Math.min((W - 2 * m) / bw, (H - 2 * m) / bh);
-      var ox = (W - bw * sc) / 2, oy = (H - bh * sc) / 2;
-      function X(x) { return ox + (x - bounds.x0) * sc; }
-      function Y(y) { return H - (oy + (y - bounds.y0) * sc); }
-      // grid every 10 NM
-      ctx.strokeStyle = "rgba(63,208,255,0.07)"; ctx.lineWidth = 1;
-      for (var gx = Math.ceil(bounds.x0 / 10) * 10; gx <= bounds.x1; gx += 10) { ctx.beginPath(); ctx.moveTo(X(gx), Y(bounds.y0)); ctx.lineTo(X(gx), Y(bounds.y1)); ctx.stroke(); }
-      for (var gy = Math.ceil(bounds.y0 / 10) * 10; gy <= bounds.y1; gy += 10) { ctx.beginPath(); ctx.moveTo(X(bounds.x0), Y(gy)); ctx.lineTo(X(bounds.x1), Y(gy)); ctx.stroke(); }
-      // scale bar
-      ctx.strokeStyle = "rgba(233,241,255,0.5)"; ctx.lineWidth = 1.5 * dpr;
-      ctx.beginPath(); ctx.moveTo(m, H - m); ctx.lineTo(m + 20 * sc, H - m); ctx.stroke();
-      ctx.fillStyle = "rgba(233,241,255,0.6)"; ctx.font = (10 * dpr) + "px " + css("--tada-font-mono");
-      ctx.fillText("20 NM", m, H - m - 5 * dpr);
-      // flight plans (as filed at t = 0)
-      ctx.lineWidth = 1 * dpr;
-      Object.keys(d.trace.routes).forEach(function (cs) {
-        var r = d.trace.routes[cs]; if (r.length < 2) return;
-        ctx.strokeStyle = colors[cs] || fgl; ctx.globalAlpha = 0.16;
-        ctx.beginPath(); r.forEach(function (p, k) { if (k) ctx.lineTo(X(p[0]), Y(p[1])); else ctx.moveTo(X(p[0]), Y(p[1])); }); ctx.stroke();
+      ctx.globalAlpha = 1; ctx.shadowBlur = 0; ctx.setLineDash([]);
+      // background: deep scope with a soft centre
+      var m = 14 * dpr, bw = bounds.x1 - bounds.x0, bh = bounds.y1 - bounds.y0;
+      var sc = Math.min((W - 2 * m) / bw, (H - 2 * m) / bh) * view.zoom;
+      function X(x) { return W / 2 + (x - view.cx) * sc; }
+      function Y(y) { return H / 2 - (y - view.cy) * sc; }
+      proj = { sc: sc, ix: function (px) { return view.cx + (px - W / 2) / sc; }, iy: function (py) { return view.cy - (py - H / 2) / sc; } };
+      var ax = X(airport[0]), ay = Y(airport[1]);
+      ctx.fillStyle = "#02060d"; ctx.fillRect(0, 0, W, H);
+      var g = ctx.createRadialGradient(ax, ay, 0, ax, ay, Math.max(W, H) * 0.75);
+      g.addColorStop(0, "rgba(22,52,92,0.55)"); g.addColorStop(1, "rgba(2,6,13,0)");
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+      // range rings and bearings around the airport
+      if (layers.rings) {
+        var maxR = Math.max(Math.hypot(bounds.x0 - airport[0], bounds.y0 - airport[1]), Math.hypot(bounds.x1 - airport[0], bounds.y1 - airport[1]));
+        ctx.lineWidth = 1 * dpr;
+        for (var rr = 10; rr <= maxR; rr += 10) {
+          ctx.strokeStyle = rr % 50 === 0 ? "rgba(63,208,255,0.22)" : "rgba(63,208,255,0.09)";
+          ctx.beginPath(); ctx.arc(ax, ay, rr * sc, 0, 2 * Math.PI); ctx.stroke();
+          if (rr % 20 === 0) {
+            ctx.fillStyle = "rgba(63,208,255,0.45)"; ctx.font = (9 * dpr) + "px " + mono;
+            ctx.fillText(rr + " NM", ax + rr * sc * 0.7071 + 3 * dpr, ay - rr * sc * 0.7071 - 3 * dpr);
+          }
+        }
+        ctx.strokeStyle = "rgba(63,208,255,0.06)";
+        for (var deg = 0; deg < 360; deg += 30) {
+          var ra = deg * Math.PI / 180;
+          ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax + Math.sin(ra) * maxR * sc, ay - Math.cos(ra) * maxR * sc); ctx.stroke();
+        }
+      }
+
+      // airspace sectors
+      if (layers.sectors && sectors.length) {
+        sectors.forEach(function (s, k) {
+          var col = SECTOR_HUES[k % SECTOR_HUES.length];
+          ctx.beginPath();
+          s.polygon.forEach(function (p, n) { if (n) ctx.lineTo(X(p[0]), Y(p[1])); else ctx.moveTo(X(p[0]), Y(p[1])); });
+          ctx.closePath();
+          ctx.globalAlpha = 0.07; ctx.fillStyle = col; ctx.fill();
+          ctx.globalAlpha = 0.55; ctx.strokeStyle = col; ctx.lineWidth = 1.3 * dpr; ctx.setLineDash([6 * dpr, 4 * dpr]); ctx.stroke();
+          ctx.setLineDash([]);
+          var cx = 0, cy = 0;
+          s.polygon.forEach(function (p) { cx += p[0]; cy += p[1]; });
+          cx /= s.polygon.length; cy /= s.polygon.length;
+          ctx.globalAlpha = 0.6; ctx.fillStyle = col; ctx.font = "600 " + (10 * dpr) + "px " + head;
+          var tw = ctx.measureText(s.name).width;
+          ctx.fillText(s.name, X(cx) - tw / 2, Y(cy) + 4 * dpr);
+        });
+        ctx.globalAlpha = 1;
+      }
+
+      var ac = aircraftAt();
+      var landedSet = {};
+      ac.forEach(function (a) { if (a[5] === 2) landedSet[a[0]] = 1; });
+
+      // flight plans (as filed at t = 0) of flights still airborne
+      if (layers.routes) {
+        ctx.lineWidth = 1.6 * dpr; ctx.lineJoin = "round";
+        Object.keys(d.trace.routes).forEach(function (cs) {
+          var r = d.trace.routes[cs];
+          if (r.length < 2 || landedSet[cs]) return;
+          ctx.strokeStyle = colors[cs] || "#9aabc6"; ctx.globalAlpha = 0.26;
+          ctx.beginPath(); r.forEach(function (p, n) { if (n) ctx.lineTo(X(p[0]), Y(p[1])); else ctx.moveTo(X(p[0]), Y(p[1])); }); ctx.stroke();
+          ctx.globalAlpha = 0.45; ctx.fillStyle = colors[cs];
+          r.forEach(function (p) { ctx.beginPath(); ctx.arc(X(p[0]), Y(p[1]), 1.6 * dpr, 0, 2 * Math.PI); ctx.fill(); });
+        });
+        ctx.globalAlpha = 1;
+      }
+
+      // airport
+      ctx.strokeStyle = "#f4f8ff"; ctx.lineWidth = 1.6 * dpr;
+      ctx.beginPath(); ctx.arc(ax, ay, 5 * dpr, 0, 2 * Math.PI); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ax - 9 * dpr, ay); ctx.lineTo(ax + 9 * dpr, ay); ctx.moveTo(ax, ay - 9 * dpr); ctx.lineTo(ax, ay + 9 * dpr); ctx.stroke();
+      ctx.fillStyle = "#f4f8ff"; ctx.font = "600 " + (11 * dpr) + "px " + head; ctx.fillText(procLabel, ax + 10 * dpr, ay + 14 * dpr);
+
+      // track history: fading trails with radar returns
+      var byNow = {};
+      ac.forEach(function (a) { byNow[a[0]] = a; });
+      Object.keys(colors).forEach(function (cs) {
+        var now_ = byNow[cs];
+        if (!now_ || now_[5] !== 1) return;
+        var pts = [];
+        for (var k = Math.max(0, i - TRAIL); k <= i; k++) { var a = frames[k].by[cs]; if (a && a[5] === 1) pts.push(a); }
+        pts.push(now_);
+        var n = pts.length;
+        ctx.lineWidth = 2.4 * dpr; ctx.lineCap = "round"; ctx.strokeStyle = colors[cs];
+        for (var j = 1; j < n; j++) {
+          var w = (j + (j === n - 1 ? fr : 0)) / n;
+          ctx.globalAlpha = 0.06 + 0.8 * Math.pow(w, 1.6);
+          ctx.shadowColor = colors[cs]; ctx.shadowBlur = j > n - 4 ? 8 * dpr : 0;
+          ctx.beginPath(); ctx.moveTo(X(pts[j - 1][1]), Y(pts[j - 1][2])); ctx.lineTo(X(pts[j][1]), Y(pts[j][2])); ctx.stroke();
+        }
+        ctx.shadowBlur = 0; ctx.fillStyle = colors[cs];
+        for (var q = 0; q < n - 1; q++) {
+          ctx.globalAlpha = 0.1 + 0.6 * Math.pow((q + 1) / n, 1.6);
+          ctx.beginPath(); ctx.arc(X(pts[q][1]), Y(pts[q][2]), 1.8 * dpr, 0, 2 * Math.PI); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
       });
-      ctx.globalAlpha = 1;
-      // trails: the last 10 decisions
-      var lo = Math.max(0, i - 10), byCs = {};
-      for (var k = lo; k <= i; k++) frames[k].ac.forEach(function (a) { if (a[5] === 1) (byCs[a[0]] = byCs[a[0]] || []).push(a); });
-      Object.keys(byCs).forEach(function (cs) {
-        var pts = byCs[cs]; if (pts.length < 2) return;
-        ctx.strokeStyle = colors[cs]; ctx.lineWidth = 1.6 * dpr; ctx.globalAlpha = 0.55;
-        ctx.beginPath(); pts.forEach(function (a, n) { if (n) ctx.lineTo(X(a[1]), Y(a[2])); else ctx.moveTo(X(a[1]), Y(a[2])); }); ctx.stroke();
-      });
-      ctx.globalAlpha = 1;
-      // clearance markers: last 6 decisions, fading
-      for (var e = Math.max(0, i - 6); e <= i; e++) {
-        var age = i - e;
-        evByFrame[e].forEach(function (ev) {
-          if (ev.x == null) return;
-          var name = d.clearance_names[String(ev.clr)] || "";
-          ctx.globalAlpha = Math.max(0.15, 1 - age / 7);
-          ctx.strokeStyle = champ; ctx.lineWidth = 1.5 * dpr;
-          var x = X(ev.x), y = Y(ev.y), s = 4 * dpr;
-          ctx.beginPath(); ctx.moveTo(x - s, y - s); ctx.lineTo(x + s, y + s); ctx.moveTo(x + s, y - s); ctx.lineTo(x - s, y + s); ctx.stroke();
-          ctx.fillStyle = champ; ctx.font = "600 " + (10 * dpr) + "px " + css("--tada-font-mono");
-          ctx.fillText(ABBR[name] || name, x + 6 * dpr, y + 12 * dpr);
+
+      // proximity: under-control pairs within 5 NM and 1000 ft (amber, marching dashes), LoS 3 NM / 500 ft (red, pulsing)
+      var air = ac.filter(function (a) { return a[5] === 1; });
+      for (var p1 = 0; p1 < air.length; p1++) for (var p2 = p1 + 1; p2 < air.length; p2++) {
+        var A = air[p1], B = air[p2], dh = Math.hypot(A[1] - B[1], A[2] - B[2]), dv = Math.abs(A[3] - B[3]);
+        if (dh >= 5 || dv >= 1000) continue;
+        var los = dh <= 3 && dv <= 500;
+        var mx = (X(A[1]) + X(B[1])) / 2, my = (Y(A[2]) + Y(B[2])) / 2;
+        if (los) {
+          var pulse = 0.5 + 0.5 * Math.sin(now * 6);
+          ctx.strokeStyle = bad; ctx.lineWidth = 3 * dpr; ctx.shadowColor = bad; ctx.shadowBlur = 12 * dpr;
+          ctx.beginPath(); ctx.moveTo(X(A[1]), Y(A[2])); ctx.lineTo(X(B[1]), Y(B[2])); ctx.stroke();
+          ctx.globalAlpha = 0.35 + 0.5 * pulse; ctx.lineWidth = 2 * dpr;
+          ctx.beginPath(); ctx.arc(mx, my, 3 * sc * (1 + 0.15 * pulse), 0, 2 * Math.PI); ctx.stroke();
+          ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+          ctx.fillStyle = bad; ctx.font = "700 " + (10 * dpr) + "px " + head;
+          ctx.fillText("LoS " + dh.toFixed(1) + " NM", mx + 3 * sc + 4 * dpr, my);
+        } else {
+          ctx.strokeStyle = warn; ctx.lineWidth = 1.8 * dpr; ctx.setLineDash([5 * dpr, 4 * dpr]); ctx.lineDashOffset = -now * 20 * dpr;
+          ctx.beginPath(); ctx.moveTo(X(A[1]), Y(A[2])); ctx.lineTo(X(B[1]), Y(B[2])); ctx.stroke();
+          ctx.setLineDash([]); ctx.lineDashOffset = 0;
+          ctx.fillStyle = warn; ctx.font = (9 * dpr) + "px " + mono; ctx.fillText(dh.toFixed(1) + " NM", mx + 4 * dpr, my - 4 * dpr);
+        }
+      }
+
+      // clearances. Life of a glyph: pops in with a ping where it was issued, sits as a badge with a label and a
+      // tether to its aircraft, then shrinks back onto the track and fades out over FADE decisions.
+      var halo = {}, placed = [], latest = {};
+      for (var kL = Math.max(0, i - FADE); kL <= i; kL++) evByFrame[kL].forEach(function (e) { latest[e.cs] = e; });
+      for (var k2 = Math.max(0, i - FADE); k2 <= i; k2++) {
+        evByFrame[k2].forEach(function (e) {
+          if (e.x == null) return;
+          var age = u - k2;
+          if (age < 0 || age > FADE) return;
+          var ex = X(e.x), ey = Y(e.y);
+          var shrink = age < 1 ? 1 : Math.max(0.42, 1 - (age - 1) / 1.6 * 0.58);  // 1 -> 0.42 between ages 1 and 2.6
+          var pop = 1 + 0.55 * Math.max(0, 1 - age / 0.22);
+          var alpha = age < 2.6 ? 1 : Math.max(0, 1 - (age - 2.6) / (FADE - 2.6));
+          var off = shrink > 0.5 ? (shrink - 0.42) / 0.58 : 0;                       // badge offset collapses onto the track
+          var gx = ex + (16 + 22 * e.slot) * dpr * off, gy = ey - 18 * dpr * off;
+          var badge = age < 2.2, isLatest = latest[e.cs] === e;
+          if (age < 1.4) {  // ping
+            ctx.globalAlpha = 1 - age / 1.4; ctx.strokeStyle = e.cat.color; ctx.lineWidth = 2.2 * dpr;
+            ctx.beginPath(); ctx.arc(ex, ey, (5 + 38 * (age / 1.4)) * dpr, 0, 2 * Math.PI); ctx.stroke();
+            ctx.beginPath(); ctx.arc(ex, ey, (5 + 20 * (age / 1.4)) * dpr, 0, 2 * Math.PI); ctx.stroke();
+            halo[e.cs] = e.cat.color;
+          }
+          var tgt = byNow[e.cs];
+          if (tgt && tgt[5] === 1 && age < 2 && isLatest) {  // tether to the aircraft it went to
+            ctx.globalAlpha = 0.6 * (1 - age / 2); ctx.strokeStyle = e.cat.color; ctx.lineWidth = 1.2 * dpr; ctx.setLineDash([2 * dpr, 3 * dpr]);
+            ctx.beginPath(); ctx.moveTo(gx, gy); ctx.lineTo(X(tgt[1]), Y(tgt[2])); ctx.stroke(); ctx.setLineDash([]);
+          }
+          var r0 = 11 * dpr * shrink * pop;
+          ctx.globalAlpha = alpha;
+          if (badge) {
+            var ba = age < 1.6 ? 1 : 1 - (age - 1.6) / 0.6;
+            ctx.globalAlpha = alpha * ba;
+            ctx.fillStyle = "rgba(2,6,13,0.85)"; ctx.beginPath(); ctx.arc(gx, gy, r0, 0, 2 * Math.PI); ctx.fill();
+            ctx.shadowColor = e.cat.color; ctx.shadowBlur = 12 * dpr;
+            ctx.strokeStyle = e.cat.color; ctx.lineWidth = 1.4 * dpr; ctx.beginPath(); ctx.arc(gx, gy, r0, 0, 2 * Math.PI); ctx.stroke();
+            ctx.globalAlpha = alpha;
+          } else {
+            ctx.shadowColor = e.cat.color; ctx.shadowBlur = 6 * dpr;
+          }
+          drawGlyph(ctx, gx, gy, 13.5 * dpr * shrink * pop, e.cat);
+          ctx.shadowBlur = 0;
+          if (age < 2 && isLatest) {  // label pill: which flight, which clearance
+            var txt = shortCs(e.cs) + " " + (ABBR[e.name] || e.name);
+            ctx.font = "600 " + (10 * dpr) + "px " + mono;
+            var tw = ctx.measureText(txt).width, lx = gx + r0 + 5 * dpr, ly = gy - 8 * dpr;
+            ctx.globalAlpha = age < 1.4 ? 1 : 1 - (age - 1.4) / 0.6;
+            ctx.fillStyle = "rgba(2,6,13,0.88)"; roundRect(ctx, lx - 4 * dpr, ly - 1 * dpr, tw + 14 * dpr, 16 * dpr, 4 * dpr); ctx.fill();
+            ctx.strokeStyle = e.cat.color; ctx.lineWidth = 1 * dpr; ctx.stroke();
+            ctx.fillStyle = colors[e.cs]; ctx.beginPath(); ctx.arc(lx + 2 * dpr, ly + 7 * dpr, 2.6 * dpr, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = "#f4f8ff"; ctx.fillText(txt, lx + 8 * dpr, ly + 11 * dpr);
+            placed.push([lx - 4 * dpr, ly - 1 * dpr, tw + 14 * dpr, 16 * dpr]);
+          }
+          if (badge) placed.push([gx - r0, gy - r0, 2 * r0, 2 * r0]);
+          ctx.globalAlpha = 1;
         });
       }
-      ctx.globalAlpha = 1;
-      // proximity: under-control pairs within 5 NM and 1000 ft (amber), LoS 3 NM / 500 ft (red)
-      var air = f.ac.filter(function (a) { return a[5] === 1; });
-      for (var p = 0; p < air.length; p++) for (var q = p + 1; q < air.length; q++) {
-        var A = air[p], B = air[q], dh = Math.hypot(A[1] - B[1], A[2] - B[2]), dv = Math.abs(A[3] - B[3]);
-        if (dh < 5 && dv < 1000) {
-          var los = dh <= 3 && dv <= 500;
-          ctx.strokeStyle = los ? bad : warn; ctx.lineWidth = (los ? 2.5 : 1.5) * dpr; ctx.setLineDash(los ? [] : [4 * dpr, 3 * dpr]);
-          ctx.beginPath(); ctx.moveTo(X(A[1]), Y(A[2])); ctx.lineTo(X(B[1]), Y(B[2])); ctx.stroke(); ctx.setLineDash([]);
-          if (los) { ctx.beginPath(); ctx.arc((X(A[1]) + X(B[1])) / 2, (Y(A[2]) + Y(B[2])) / 2, 3 * sc, 0, 2 * Math.PI); ctx.stroke(); }
-        }
-      }
-      // aircraft
-      var prev = {}; fprev.ac.forEach(function (a) { prev[a[0]] = a; });
-      ctx.font = (10 * dpr) + "px " + css("--tada-font-mono");
-      f.ac.forEach(function (a) {
-        var cs = a[0], x = X(a[1]), y = Y(a[2]);
+
+      // aircraft: glowing chevrons, speed leaders, data blocks
+      ac.forEach(function (a) {
+        var cs = a[0], x = X(a[1]), y = Y(a[2]), col = colors[cs];
         if (a[5] === 2) return;
         if (a[5] === 0) {
-          ctx.strokeStyle = colors[cs]; ctx.globalAlpha = 0.45; ctx.lineWidth = 1 * dpr;
-          ctx.beginPath(); ctx.arc(x, y, 3 * dpr, 0, 2 * Math.PI); ctx.stroke(); ctx.globalAlpha = 1; return;
+          ctx.globalAlpha = 0.55; ctx.strokeStyle = col; ctx.lineWidth = 1.2 * dpr;
+          ctx.beginPath(); ctx.arc(x, y, 3.5 * dpr, 0, 2 * Math.PI); ctx.stroke();
+          if (layers.labels) { ctx.fillStyle = "rgba(154,171,198,0.7)"; ctx.font = (9 * dpr) + "px " + mono; ctx.fillText(shortCs(cs), x + 6 * dpr, y + 3 * dpr); }
+          ctx.globalAlpha = 1; return;
         }
-        var pa = prev[cs], hd = pa && (pa[1] !== a[1] || pa[2] !== a[2]) ? Math.atan2(-(a[2] - pa[2]), a[1] - pa[1]) : 0;
-        ctx.save(); ctx.translate(x, y); ctx.rotate(hd);
-        ctx.fillStyle = colors[cs]; ctx.strokeStyle = "#02060d"; ctx.lineWidth = 1 * dpr;
-        var s = 6 * dpr; ctx.beginPath(); ctx.moveTo(s * 1.4, 0); ctx.lineTo(-s, s * 0.8); ctx.lineTo(-s * 0.5, 0); ctx.lineTo(-s, -s * 0.8); ctx.closePath(); ctx.fill(); ctx.stroke();
+        if (halo[cs]) {
+          var hp = 0.5 + 0.5 * Math.sin(now * 8);
+          ctx.strokeStyle = halo[cs]; ctx.lineWidth = 2 * dpr; ctx.globalAlpha = 0.4 + 0.5 * hp;
+          ctx.beginPath(); ctx.arc(x, y, (11 + 3 * hp) * dpr, 0, 2 * Math.PI); ctx.stroke(); ctx.globalAlpha = 1;
+        }
+        // one minute ahead at ground speed
+        var lead = a[4] / 60 * sc;
+        ctx.strokeStyle = col; ctx.globalAlpha = 0.6; ctx.lineWidth = 1.2 * dpr;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(a.hd) * lead, y - Math.sin(a.hd) * lead); ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.save(); ctx.translate(x, y); ctx.rotate(-a.hd);
+        ctx.shadowColor = col; ctx.shadowBlur = 12 * dpr; ctx.fillStyle = col; ctx.strokeStyle = "#02060d"; ctx.lineWidth = 1.2 * dpr;
+        var s = 7.5 * dpr;
+        ctx.beginPath(); ctx.moveTo(s * 1.5, 0); ctx.lineTo(-s, s * 0.9); ctx.lineTo(-s * 0.45, 0); ctx.lineTo(-s, -s * 0.9); ctx.closePath(); ctx.fill(); ctx.stroke();
         ctx.restore();
-        var dev = a[6], dc = Math.abs(dev) <= 60 ? ok : Math.abs(dev) <= 300 ? warn : bad;
-        ctx.fillStyle = "rgba(233,241,255,0.85)";
-        var label = cs.replace(/^[A-Z]+0*/, "#");
-        ctx.fillText(label, x + 8 * dpr, y - 4 * dpr);
-        ctx.fillStyle = dc; ctx.fillText(sgn(dev) + "s", x + 8 * dpr + ctx.measureText(label + " ").width, y - 4 * dpr);
-        ctx.fillStyle = "rgba(154,171,198,0.8)"; ctx.fillText("FL" + Math.round(a[3] / 100) + " " + a[4] + "kt", x + 8 * dpr, y + 8 * dpr);
+        if (layers.labels) {
+          var dev = a[6], dc = Math.abs(dev) <= 60 ? ok : Math.abs(dev) <= 300 ? warn : bad;
+          var l1 = shortCs(cs), l1b = sgn(dev) + "s", l2 = "FL" + Math.round(a[3] / 100) + " " + Math.round(a[4]) + "kt";
+          ctx.font = "700 " + (10 * dpr) + "px " + mono;
+          var w1 = ctx.measureText(l1 + " ").width, w1b = ctx.measureText(l1b).width;
+          ctx.font = (9 * dpr) + "px " + mono;
+          var w2 = ctx.measureText(l2).width, bwid = Math.max(w1 + w1b, w2) + 8 * dpr, bh_ = 25 * dpr;
+          var cands = [[12, -32], [12, 8], [-12, -32], [-12, 8], [24, -12], [-24, -12]].map(function (o) {
+            return [o[0] < 0 ? x + o[0] * dpr - bwid : x + o[0] * dpr, y + o[1] * dpr];
+          });
+          var best = cands[0], bestHit = Infinity;
+          cands.forEach(function (c) {
+            var hit = placed.reduce(function (acc, r) {
+              var ox_ = Math.max(0, Math.min(c[0] + bwid, r[0] + r[2]) - Math.max(c[0], r[0]));
+              var oy_ = Math.max(0, Math.min(c[1] + bh_, r[1] + r[3]) - Math.max(c[1], r[1]));
+              return acc + ox_ * oy_;
+            }, 0);
+            if (hit < bestHit - 1) { best = c; bestHit = hit; }
+          });
+          var bx = best[0], by = best[1];
+          placed.push([bx, by, bwid, bh_]);
+          ctx.strokeStyle = col; ctx.globalAlpha = 0.5; ctx.lineWidth = 1 * dpr;
+          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(bx < x ? bx + bwid : bx, by + (by < y ? bh_ : 0)); ctx.stroke();
+          ctx.globalAlpha = 0.9; ctx.fillStyle = "rgba(2,6,13,0.7)"; roundRect(ctx, bx, by, bwid, bh_, 3 * dpr); ctx.fill();
+          ctx.globalAlpha = 1; ctx.fillStyle = col; ctx.fillRect(bx, by, 2 * dpr, bh_);
+          ctx.font = "700 " + (10 * dpr) + "px " + mono; ctx.fillStyle = "#f4f8ff"; ctx.fillText(l1, bx + 5 * dpr, by + 10 * dpr);
+          ctx.fillStyle = dc; ctx.fillText(l1b, bx + 5 * dpr + w1, by + 10 * dpr);
+          ctx.font = (9 * dpr) + "px " + mono; ctx.fillStyle = "rgba(154,171,198,0.95)"; ctx.fillText(l2, bx + 5 * dpr, by + 21 * dpr);
+        }
       });
-      // end banner
-      if (i === frames.length - 1) {
+
+      // HUD: clock, scale, end state
+      ctx.fillStyle = "rgba(2,6,13,0.7)"; roundRect(ctx, m, m, 128 * dpr, 34 * dpr, 4 * dpr); ctx.fill();
+      ctx.fillStyle = "#f4f8ff"; ctx.font = "600 " + (15 * dpr) + "px " + mono; ctx.fillText("t+" + fmtT(stateTime()), m + 8 * dpr, m + 16 * dpr);
+      ctx.fillStyle = "rgba(63,208,255,0.85)"; ctx.font = (9 * dpr) + "px " + mono;
+      ctx.fillText("decision " + (i + 1) + "/" + frames.length + " · " + procLabel, m + 8 * dpr, m + 28 * dpr);
+      // scale bar: the round length closest to ~110 px
+      var nmLen = [1, 2, 5, 10, 20, 50].reduce(function (b, v) { return Math.abs(v * sc - 110 * dpr) < Math.abs(b * sc - 110 * dpr) ? v : b; }, 10);
+      var bl = nmLen * sc;
+      ctx.strokeStyle = "rgba(233,241,255,0.7)"; ctx.lineWidth = 1.5 * dpr;
+      ctx.beginPath(); ctx.moveTo(m, H - m); ctx.lineTo(m + bl, H - m); ctx.moveTo(m, H - m - 4 * dpr); ctx.lineTo(m, H - m); ctx.moveTo(m + bl, H - m - 4 * dpr); ctx.lineTo(m + bl, H - m); ctx.stroke();
+      ctx.fillStyle = "rgba(233,241,255,0.75)"; ctx.font = (9 * dpr) + "px " + mono; ctx.fillText(nmLen + " NM", m, H - m - 6 * dpr);
+      if (view.zoom > 1.01) { ctx.fillStyle = "rgba(63,208,255,0.8)"; ctx.fillText("×" + view.zoom.toFixed(1) + " · double-click to fit", m + bl + 10 * dpr, H - m); }
+      // north
+      ctx.fillStyle = "rgba(233,241,255,0.7)"; ctx.font = "600 " + (10 * dpr) + "px " + head;
+      ctx.fillText("N", W - m - 6 * dpr, H - m - 18 * dpr);
+      ctx.beginPath(); ctx.moveTo(W - m - 2 * dpr, H - m - 14 * dpr); ctx.lineTo(W - m - 6 * dpr, H - m - 4 * dpr); ctx.lineTo(W - m + 2 * dpr, H - m - 4 * dpr); ctx.closePath(); ctx.fill();
+      if (u >= frames.length - 1) {
         var s0 = d.summary, txt = s0.los ? "LOSS OF SEPARATION" : s0.solved ? "SOLVED · " + s0.on_time + "/" + s0.n_flights + " ON TIME" : s0.end_reason.toUpperCase() + " · " + s0.on_time + "/" + s0.n_flights + " ON TIME";
-        ctx.font = "600 " + (14 * dpr) + "px " + css("--tada-font-head");
-        var tw = ctx.measureText(txt).width;
-        ctx.fillStyle = "rgba(2,6,13,0.8)"; ctx.fillRect(W - tw - 3 * m, m * 0.6, tw + 2 * m, 26 * dpr);
-        ctx.fillStyle = s0.los ? bad : s0.solved ? ok : warn; ctx.fillText(txt, W - tw - 2 * m, m * 0.6 + 18 * dpr);
+        ctx.font = "700 " + (15 * dpr) + "px " + head;
+        var tw2 = ctx.measureText(txt).width, col2 = s0.los ? bad : s0.solved ? ok : warn;
+        ctx.fillStyle = "rgba(2,6,13,0.85)"; roundRect(ctx, W - tw2 - 3 * m, m * 2.4, tw2 + 2 * m, 28 * dpr, 4 * dpr); ctx.fill();
+        ctx.strokeStyle = col2; ctx.lineWidth = 1.5 * dpr; ctx.stroke();
+        ctx.fillStyle = col2; ctx.shadowColor = col2; ctx.shadowBlur = 10 * dpr; ctx.fillText(txt, W - tw2 - 2 * m, m * 2.4 + 19 * dpr); ctx.shadowBlur = 0;
       }
-      void fg; void rule;
+    }
+    function roundRect(c, x, y, w, h_, r) {
+      c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h_, r); c.arcTo(x + w, y + h_, x, y + h_, r);
+      c.arcTo(x, y + h_, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
     }
 
     function drawStrip(f) {
@@ -829,37 +1165,39 @@
       var dpr = window.devicePixelRatio || 1, W = strip.width, H = strip.height;
       var ok = css("--tada-ok"), warn = css("--tada-warn"), bad = css("--tada-bad");
       sctx.setTransform(1, 0, 0, 1, 0, 0);
-      sctx.fillStyle = css("--tada-tile-bg"); sctx.fillRect(0, 0, W, H);
-      var n = d.trace.queue.length, top = 22 * dpr, rowH = Math.min(22 * dpr, (H - top - 18 * dpr) / n);
-      var labW = 44 * dpr, valW = 46 * dpr, x0 = labW, x1 = W - valW, lim = 300;
+      sctx.fillStyle = "#02060d"; sctx.fillRect(0, 0, W, H);
+      var n = d.trace.queue.length, top = 22 * dpr, rowH = Math.min(24 * dpr, (H - top - 18 * dpr) / n);
+      var labW = 44 * dpr, valW = 48 * dpr, x0 = labW, x1 = W - valW, lim = 300;
       function X(v) { return x0 + (x1 - x0) * (0.5 + Math.max(-lim, Math.min(lim, v)) / (2 * lim)); }
       sctx.fillStyle = "rgba(62,224,122,0.10)"; sctx.fillRect(X(-60), top, X(60) - X(-60), rowH * n);
-      sctx.fillStyle = "rgba(62,224,122,0.12)"; sctx.fillRect(X(-30), top, X(30) - X(-30), rowH * n);
+      sctx.fillStyle = "rgba(62,224,122,0.14)"; sctx.fillRect(X(-30), top, X(30) - X(-30), rowH * n);
       sctx.strokeStyle = "rgba(233,241,255,0.35)"; sctx.lineWidth = 1;
       sctx.beginPath(); sctx.moveTo(X(0), top - 4 * dpr); sctx.lineTo(X(0), top + rowH * n); sctx.stroke();
       sctx.font = "600 " + (10 * dpr) + "px " + css("--tada-font-head"); sctx.fillStyle = css("--tada-tile-label");
       sctx.fillText("PREDICTED LANDING DEVIATION", x0, 13 * dpr);
       sctx.font = (9 * dpr) + "px " + css("--tada-font-mono"); sctx.fillStyle = "rgba(154,171,198,0.8)";
       [-300, -60, 60, 300].forEach(function (v) { var t = sgn(v); sctx.fillText(t, X(v) - sctx.measureText(t).width / 2, top + rowH * n + 12 * dpr); });
-      var byCs = {}; f.ac.forEach(function (a) { byCs[a[0]] = a; });
+      // flights cleared within the last decision light up
+      var fresh = {}, i = Math.floor(u);
+      for (var k = Math.max(0, i - 1); k <= i; k++) evByFrame[k].forEach(function (e) { if (u - k < 1.5) fresh[e.cs] = e.cat.color; });
       sctx.font = (Math.min(11, rowH / dpr - 2) * dpr) + "px " + css("--tada-font-mono");
-      d.trace.queue.forEach(function (cs, k) {
-        var a = byCs[cs], y = top + k * rowH;
+      d.trace.queue.forEach(function (cs, kk) {
+        var a = f.by[cs], y = top + kk * rowH;
         if (!a) return;
         var dev = a[6], st = a[5], c = Math.abs(dev) <= 60 ? ok : Math.abs(dev) <= 300 ? warn : bad;
-        sctx.fillStyle = colors[cs]; sctx.fillRect(2 * dpr, y + rowH * 0.2, 4 * dpr, rowH * 0.6);
-        sctx.fillStyle = st === 0 ? "rgba(154,171,198,0.55)" : "rgba(233,241,255,0.9)";
-        sctx.fillText(cs.replace(/^[A-Z]+0*/, "#"), 9 * dpr, y + rowH * 0.72);
+        if (fresh[cs]) { sctx.fillStyle = fresh[cs]; sctx.globalAlpha = 0.16; sctx.fillRect(0, y, W, rowH); sctx.globalAlpha = 1; }
+        sctx.fillStyle = colors[cs]; sctx.fillRect(2 * dpr, y + rowH * 0.18, 4 * dpr, rowH * 0.64);
+        sctx.fillStyle = st === 0 ? "rgba(154,171,198,0.55)" : "rgba(233,241,255,0.92)";
+        sctx.fillText(shortCs(cs), 9 * dpr, y + rowH * 0.7);
         sctx.globalAlpha = st === 0 ? 0.45 : 1;
         sctx.fillStyle = c;
         var bx = Math.min(X(0), X(dev)), bwid = Math.max(2 * dpr, Math.abs(X(dev) - X(0)));
-        sctx.fillRect(bx, y + rowH * 0.22, bwid, rowH * 0.56);
-        if (Math.abs(dev) > lim) { sctx.fillText(dev > 0 ? "▸" : "◂", dev > 0 ? x1 - 8 * dpr : x0, y + rowH * 0.72); }
+        sctx.fillRect(bx, y + rowH * 0.24, bwid, rowH * 0.52);
+        if (Math.abs(dev) > lim) { sctx.fillText(dev > 0 ? "▸" : "◂", dev > 0 ? x1 - 8 * dpr : x0, y + rowH * 0.7); }
         sctx.globalAlpha = 1;
-        sctx.fillStyle = st === 2 ? c : "rgba(233,241,255,0.75)";
-        var label = (st === 2 ? "✓" : "") + sgn(dev);
-        if (st === 2 && Math.abs(dev) > 60) label = "✗" + sgn(dev);
-        sctx.fillText(label, W - sctx.measureText(label).width - 4 * dpr, y + rowH * 0.72);
+        sctx.fillStyle = st === 2 ? c : "rgba(233,241,255,0.8)";
+        var label = (st === 2 ? (Math.abs(dev) > 60 ? "✗" : "✓") : "") + sgn(dev);
+        sctx.fillText(label, W - sctx.measureText(label).width - 4 * dpr, y + rowH * 0.7);
       });
     }
     return { mount: mount, resize: resize };

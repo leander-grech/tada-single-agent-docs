@@ -38,6 +38,10 @@ async function loadTadaEngine(source) {
     rank(ep) { return JSON.parse(readOut(x.tada_episode_rank(ep))); },
     result(ep) { return JSON.parse(readOut(x.tada_episode_result(ep))); },
     free(ep) { x.tada_episode_free(ep); },
+    sectors() {
+      const cat = JSON.parse(readOut(x.tada_sectors())).sectors || {};
+      return Object.keys(cat).map((name) => ({ name, polygon: cat[name].polygon }));
+    },
   };
 }
 if (typeof self !== "undefined") self.loadTadaEngine = loadTadaEngine;
