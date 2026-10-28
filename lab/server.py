@@ -622,7 +622,8 @@ def main():
                     help="list only the public registry agents, as on a machine without the experiments")
     args = ap.parse_args()
     if args.build:
-        subprocess.run([MKDOCS, "build", "-q"], cwd=DOCS, check=True)
+        mkdocs = MKDOCS if Path(MKDOCS).exists() else [os.environ.get("TADA_PY", sys.executable), "-m", "mkdocs"]
+        subprocess.run(([mkdocs] if isinstance(mkdocs, str) else mkdocs) + ["build", "-q"], cwd=DOCS, check=False)
     Handler.allowed_origins = set(PUBLIC_ORIGINS) | {o.rstrip("/") for o in args.allow_origin}
     Handler.lab = Lab(registry_only=args.registry_only)
     server = ThreadingHTTPServer((args.host, args.port), Handler)

@@ -56,7 +56,12 @@ private-network preflight for `https://leander-grech.github.io` and localhost pa
 others); POSTs must be JSON from an allowed origin. From the https page only localhost is reachable; to use a runner
 on another machine, serve the page from it: `lab/run.sh --build --host 0.0.0.0`, then open `http://<host>:8800/lab/`.
 `--build` runs `mkdocs build` first; the server serves `site/` (if built), the job API and `lab/cache/` (flights as
-JSON, renders as MP4, gitignored). Each job is one `lab/worker.py` process with the agent's
+JSON, renders as MP4, gitignored).
+
+Chrome (Local Network Access) asks before an https page may reach `localhost`; embedded browsers may refuse silently,
+and then the requests never reach the runner. The Lab page says so when it finds no runner and links to
+`http://localhost:8800/lab/`: the runner serves the whole docs site itself (`lab/run.sh` builds `site/` on first start),
+and that page needs no permission. Each job is one `lab/worker.py` process with the agent's
 environment variables from its `run_meta.json`; episodes are flown exactly as `analysis/score_windowed.py` scores
 them, and a render replays the flight's executed actions and refuses to write a video if the replay diverges.
 Agents come from `models.yaml` (windowed track, checkpoint present; point-merge runs before the v2pms action set
