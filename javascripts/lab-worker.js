@@ -28,7 +28,7 @@ onmessage = async (e) => {
       if (pol === undefined) throw new Error("download " + j.agent + " first");
       if (j.mode === "search") {
         const ep = engine.newSearchEpisode(sc.procedure, sc.seed, sc.flights, pol, j.search, sc.segments);
-        let done = false, last = 0, yielded = performance.now();
+        let done = false, last = 0, yielded = performance.now(), plansSeen = 0, lastPartial = 0, lastDec = 0;
         while (!done) {
           done = engine.step(ep, 1);
           const now = performance.now();
@@ -40,9 +40,16 @@ onmessage = async (e) => {
           if (now - last > 120 || done) {
             last = now;
             const st = engine.status(ep);
-            const b = st.best;
-            postMessage({ id: m.id, frac: st.progress, live: st,
-              stage: st.planning ? `plan ${st.plan}: candidate ${st.candidate}/${st.of}` + (b ? ` · best ${b.on_time}/${sc.flights} on time${b.los ? ", LoS" : ""}` : "")
+            const b = st.best, total = st.n_flights || sc.flights * (sc.segments || 1);
+            // the episode so far, after each finished plan and every 0.7 s of flying: the page follows it on the radar
+            let partial = null;
+            const newPlan = (st.history || []).length > plansSeen, moved = st.decisions > lastDec;
+            if (!done && ((newPlan && now - lastPartial > 400) || (moved && now - lastPartial > 700))) {
+              plansSeen = (st.history || []).length; lastPartial = now; lastDec = st.decisions;
+              partial = engine.result(ep);  // ~80 ms for a 60-flight stream
+            }
+            postMessage({ id: m.id, frac: st.progress, live: st, partial: partial,
+              stage: st.planning ? `plan ${st.plan}: candidate ${st.candidate}/${st.of}` + (b ? ` · best ${b.on_time}/${total} on time${b.los ? ", LoS" : ""}` : "")
                 : `flying the plan (decision ${st.decisions})` });
           }
         }

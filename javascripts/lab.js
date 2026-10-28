@@ -382,7 +382,7 @@
     var live = h("input", { type: "checkbox", checked: S.liveSearch !== false ? true : null });
     live.addEventListener("change", function () { S.liveSearch = live.checked; });
     box.appendChild(h("div", { class: "lab-search__toggles" }, [
-      toggle("stop", "stop when solved", "Stop generating candidates once one solves the episode (it cannot be beaten on the main criteria)"),
+      toggle("stop", "stop when unbeatable", "Skip the rest of a plan once a candidate has no loss of separation and puts every still-recoverable flight on time (flights already landed late stay late): nothing can beat it on the main criteria"),
       toggle("prune", "exact pruning", "Abandon a rollout as soon as it can no longer reach the best candidate's on-time count"),
       h("label", { class: "lab-search__check", title: "Re-run the search on the shown flight as soon as a parameter changes" }, [live, " apply live"])]));
     // worst-case cost: every plan rolls K - 1 fresh candidates to the end of the stream
@@ -391,7 +391,7 @@
     box.appendChild(h("div", { class: "lab-search__cost" }, [
       "every " + fmtT(sp.M * 45) + " of flight · up to ~" + worst + " rollouts · ",
       h("span", { class: tier[1], text: tier[0] }),
-      sp.stop ? h("span", { class: "lab-field__hint", text: " (stop-when-solved usually needs far fewer)" }) : null]));
+      sp.stop ? h("span", { class: "lab-field__hint", text: " (stopping when unbeatable usually needs far fewer)" }) : null]));
     return box;
   }
   var liveTimer = null;
@@ -516,25 +516,89 @@
     if (st.stage && txt) txt.textContent = st.stage === "queued" ? "Queued…" : st.stage.charAt(0).toUpperCase() + st.stage.slice(1) + "…";
     if (st.live) liveConsole(body, st.live);
   }
-  // Live view of a running search: the plans so far, each a row of candidate chips.
+  // Live view of a running search: where the executed episode is, how good the latest unbeaten plan is
+  // (and how that evolved, plan by plan), the candidates of the plan being built, and the last plans as chips.
+  // Every "x/N" counts the whole (stitched) stream.
   function liveConsole(body, live) {
     var box = body.querySelector(".lab-live");
-    if (!box) { box = h("div", { class: "lab-live" }); body.appendChild(box); box._plans = []; }
+    if (!box) { box = h("div", { class: "lab-live" }); var pb = body.querySelector(".lab-progress"); body.insertBefore(box, pb ? pb.nextSibling : null); box._plans = []; }
+    var N = live.n_flights || S.sc.flights * (S.sc.segments || 1);
     if (live.last_plan && (!box._plans.length || box._plans[box._plans.length - 1].t !== live.last_plan.t)) box._plans.push(live.last_plan);
+    function chip(c, chosen) {
+      var cls = c.pruned ? "pruned" : c.los ? "los" : c.on_time === N ? "solved" : "partial";
+      return h("span", { class: "lab-chip-k lab-chip-k--" + cls + (chosen ? " is-chosen" : ""),
+        title: "k" + c.k + " " + c.kind + (c.pruned ? " (pruned: could not beat the best)" : ": " + c.on_time + "/" + N + " on time" + (c.los ? ", ends in LoS" : "") +
+          (c.dev_sum != null ? ", Σ|dev| " + Math.round(c.dev_sum) + " s" : "") + ", " + c.clearances + " clearances") },
+        [c.pruned ? "·" : c.los ? "✗" : String(c.on_time)]);
+    }
     box.innerHTML = "";
-    box.appendChild(h("div", { class: "lab-live__head", text: "PLANNING · " + live.rollouts + " rollouts so far" + (live.planning ? " · plan " + live.plan + ", candidate " + live.candidate + "/" + live.of : "") }));
-    box._plans.slice(-8).forEach(function (pl, n, arr) {
-      box.appendChild(h("div", { class: "lab-live__row" + (n === arr.length - 1 ? " is-latest" : "") }, [
+    box.appendChild(h("div", { class: "lab-live__head" }, [
+      h("b", { text: live.planning ? "PLANNING · plan " + live.plan + ", candidate " + live.candidate + "/" + live.of : "FLYING THE PLAN" }),
+      h("span", { text: live.rollouts + " rollouts · " + (live.pruned || 0) + " pruned · " + (live.switches || 0) + " switches" })]));
+    // the executed episode so far
+    var landed = live.landed || 0, onT = live.on_time || 0;
+    box.appendChild(h("div", { class: "lab-live__now" }, [
+      h("span", {}, ["t+", h("b", { text: fmtT(live.t || 0) })]),
+      h("span", {}, ["decision ", h("b", { text: String(live.decisions || 0) })]),
+      h("span", {}, ["landed ", h("b", { text: landed + "/" + N })]),
+      h("span", { class: landed && onT < landed ? "is-warn" : landed ? "is-ok" : null }, ["on time so far ", h("b", { text: onT + "/" + landed })]),
+      h("span", {}, ["clearances ", h("b", { text: String(live.clearances || 0) })]),
+      h("span", { class: "lab-live__bar" }, [h("i", { style: "width:" + Math.round(100 * landed / Math.max(1, N)) + "%" })])
+    ]));
+    // the latest unbeaten plan: what it predicts for the whole stream
+    var b = live.best || (live.history && live.history.length ? live.history[live.history.length - 1] : null);
+    if (b) box.appendChild(h("div", { class: "lab-live__best" + (b.los ? " is-los" : b.on_time === N ? " is-solved" : "") }, [
+      h("span", { class: "lab-live__tag", text: live.planning && live.best ? "BEST SO FAR" : "LATEST UNBEATEN PLAN" }),
+      h("b", { text: b.on_time + "/" + N }), " on time · ",
+      h("b", { text: b.los ? "ends in LoS" : "no LoS" }),
+      b.dev_sum != null ? h("span", {}, [" · Σ|dev| ", h("b", { text: Math.round(b.dev_sum) + " s" })]) : null,
+      " · ", h("b", { text: String(b.clearances) }), " clearances",
+      b.k != null ? h("span", { class: "lab-live__k", text: " (k" + b.k + " " + b.kind + ")" }) : null]));
+    // how the chosen plan's prediction evolved
+    var hist = live.history || [];
+    if (hist.length > 1) {
+      var cvs = h("canvas", { class: "lab-live__spark", "aria-label": "predicted on-time flights of the chosen plan, plan by plan" });
+      box.appendChild(h("div", { class: "lab-live__sparkrow" }, [h("span", { class: "lab-live__t", text: "per plan" }), cvs]));
+      if (cvs.isConnected) spark(cvs, hist, N); else requestAnimationFrame(function () { spark(cvs, hist, N); });
+    }
+    // the plan being built
+    if (live.planning && (live.cands_now || []).length)
+      box.appendChild(h("div", { class: "lab-live__row is-latest is-now" }, [
+        h("span", { class: "lab-live__t", text: "now" }),
+        h("span", { class: "lab-live__chips" }, live.cands_now.map(function (c) { return chip(c, live.best && c.k === live.best.k); })
+          .concat(live.candidate < live.of ? [h("span", { class: "lab-chip-k lab-chip-k--pending", text: "…" })] : [])),
+        h("span", { class: "lab-live__pick", text: "of " + live.of })]));
+    box._plans.slice(-6).reverse().forEach(function (pl, n) {
+      box.appendChild(h("div", { class: "lab-live__row" + (n === 0 && !live.planning ? " is-latest" : "") }, [
         h("span", { class: "lab-live__t", text: "t+" + fmtT(pl.t) }),
-        h("span", { class: "lab-live__chips" }, (pl.cands || []).map(function (c) {
-          var cls = c.pruned ? "pruned" : c.los ? "los" : c.on_time === S.sc.flights ? "solved" : "partial";
-          return h("span", { class: "lab-chip-k lab-chip-k--" + cls + (c.chosen ? " is-chosen" : ""),
-            title: "k" + c.k + " " + c.kind + (c.pruned ? " (pruned)" : ": " + c.on_time + "/" + S.sc.flights + " on time" + (c.los ? ", LoS" : "") + ", " + c.clearances + " clearances") },
-            [c.pruned ? "·" : c.los ? "✗" : String(c.on_time)]);
-        })),
-        h("span", { class: "lab-live__pick", text: "→ k" + pl.chosen + (pl.switched ? " (switched)" : "") })
+        h("span", { class: "lab-live__chips" }, (pl.cands || []).map(function (c) { return chip(c, c.chosen); })),
+        h("span", { class: "lab-live__pick", text: "→ k" + pl.chosen + (pl.switched ? " ★ switched" : "") })
       ]));
     });
+  }
+  // sparkline: on-time flights of the chosen plan at every plan (gold), Σ|dev| (muted, lower is better), LoS in red
+  function spark(c, hist, N) {
+    var dpr = window.devicePixelRatio || 1, w = c.clientWidth || 300, hh = 44;
+    c.width = w * dpr; c.height = hh * dpr; c.style.height = hh + "px";
+    var x = c.getContext("2d"), n = hist.length, W = c.width, H = c.height, p = 4 * dpr;
+    var lo = Math.min.apply(null, hist.map(function (q) { return q.on_time; })), hi = N;
+    if (hi - lo < 2) lo = hi - 2;
+    var dmax = Math.max.apply(null, hist.map(function (q) { return q.dev_sum || 0; })) || 1;
+    function X(k) { return p + (W - 2 * p - 40 * dpr) * k / Math.max(1, n - 1); }
+    function Y(v) { return H - p - (H - 2 * p) * (v - lo) / Math.max(1, hi - lo); }
+    x.fillStyle = "#02060d"; x.fillRect(0, 0, W, H);
+    x.strokeStyle = "rgba(62,224,122,0.25)"; x.setLineDash([3 * dpr, 3 * dpr]); x.beginPath(); x.moveTo(p, Y(N)); x.lineTo(X(n - 1), Y(N)); x.stroke(); x.setLineDash([]);
+    x.strokeStyle = "rgba(125,143,179,0.7)"; x.lineWidth = 1 * dpr; x.beginPath();
+    hist.forEach(function (q, k) { var yy = H - p - (H - 2 * p) * (1 - (q.dev_sum || 0) / dmax); if (k) x.lineTo(X(k), yy); else x.moveTo(X(k), yy); }); x.stroke();
+    x.strokeStyle = "#ffd23f"; x.lineWidth = 2 * dpr; x.beginPath();
+    hist.forEach(function (q, k) { if (k) { x.lineTo(X(k), Y(hist[k - 1].on_time)); x.lineTo(X(k), Y(q.on_time)); } else x.moveTo(X(k), Y(q.on_time)); }); x.stroke();
+    hist.forEach(function (q, k) {
+      if (q.los) { x.fillStyle = "#ff6b8b"; x.beginPath(); x.arc(X(k), Y(q.on_time), 2.6 * dpr, 0, 7); x.fill(); }
+      else if (q.switched) { x.fillStyle = "#ffd23f"; x.beginPath(); x.arc(X(k), Y(q.on_time), 2.2 * dpr, 0, 7); x.fill(); }
+    });
+    var last = hist[n - 1];
+    x.fillStyle = "#ffd23f"; x.font = "600 " + (10 * dpr) + "px " + css("--tada-font-mono");
+    x.fillText(last.on_time + "/" + N, X(n - 1) + 5 * dpr, Math.max(11 * dpr, Y(last.on_time) + 3 * dpr));
   }
   function errBox(e) { return h("div", { class: "lab-error", text: "⚠ " + (e && e.message || e) }); }
 
@@ -554,7 +618,18 @@
     body.innerHTML = ""; body.appendChild(progressBox("Flying…"));
     if (!quiet) body.scrollIntoView({ behavior: "smooth", block: "start" });
     var want = scKey(S.sc);
-    runJob("fly", job, function (st) { if (token === S.flyToken) setProgress(body, st); })
+    runJob("fly", job, function (st) {
+      if (token !== S.flyToken) return;
+      setProgress(body, st);
+      // the episode so far, after each finished plan: the radar follows it live
+      if (st.partial && st.partialN !== body._partialN) {
+        body._partialN = st.partialN;
+        var host = body.querySelector(".lab-livereplay");
+        if (!host) { host = h("div", { class: "lab-livereplay" }); body.appendChild(host); }
+        var el = Replay.mount(st.partial, { live: true, keep: !!host.firstChild });
+        if (host.firstChild) host.replaceChild(el, host.firstChild); else host.appendChild(el);
+      }
+    })
       .then(function (st) { return loadFlight(st.key).then(function (d) {
         if (token !== S.flyToken) return;
         S.flying = false;
@@ -614,7 +689,7 @@
     });
     body.appendChild(bar); body.appendChild(panes);
     function pane(id, el) { var p = h("div", { class: "lab-pane", "data-pane": id }, [el]); p.hidden = id !== current; panes.appendChild(p); }
-    pane("replay", Replay.mount(d));
+    pane("replay", Replay.mount(d, { keep: Replay.isLive() && current === "replay" }));
     pane("video", videoPane(d, key));
     pane("flights", flightsTable(d));
     pane("clearances", clearancesPane(d));
@@ -756,8 +831,10 @@
     var LAYERS_KEY = "tada-lab-layers-v2";
     // starts quiet: call-sign tags only; full data blocks are one click away
     var layers = { sectors: true, rings: true, routes: true, labels: "tags", plans: true };
-    // predicted rollouts of the search: their own palette, so they never read as real traffic
-    var PRED = { chosen: "#ffe66d", other: "#dff6ff", los: "#ff6b8b", pruned: "#8a94a6" };
+    // predicted rollouts of the search: their own palette, so they never read as real traffic. Only the latest
+    // unbeaten plan (the one being flown) is gold; the other candidates stay muted.
+    var PRED = { chosen: "#ffd23f", other: "#7d8fb3", los: "#b5677a", pruned: "#4c566a", text: "rgba(200,212,235,0.85)" };
+    var PAST = 720, AHEAD = 240;   // the clearance window: 12 min of history, 4 min ahead of now
     try { Object.assign(layers, JSON.parse(localStorage.getItem(LAYERS_KEY) || "{}")); } catch (e) {}
     if (["off", "tags", "full"].indexOf(layers.labels) < 0) layers.labels = "tags";
     function saveLayers() { try { localStorage.setItem(LAYERS_KEY, JSON.stringify(layers)); } catch (e) {} }
@@ -767,6 +844,8 @@
     var tl, tlCtx, tlCache = null, tlGeo = null, tlHover = null, life = {};    // the clearance timeline
     var plans = [];                                                             // search plans (in-browser engine)
     var cv, ctx, strip, sctx, slider, tlabel, playBtn, bounds, evByFrame, wrap, airport, procLabel, sectors;
+    var wcv, wctx, evByCs, winN = 10, dtDec = 45, rowsNow = [];          // the agent's window (centre panel)
+    var live = false, follow = false;                                   // a search in progress, radar following it
 
     // ------------------------------------------------------------------ clearance glyphs
     function category(name) {
@@ -837,12 +916,25 @@
     function shortCs(cs) { return cs.replace(/^[A-Z]+0*/, "#"); }
 
     // ------------------------------------------------------------------ setup
-    function mount(data) {
+    function isLive() { return live && !!(wrap && wrap.isConnected); }
+    function mount(data, opts) {
+      opts = opts || {};
+      var keep = !!(opts.keep && frames && frames.length), was = { u: u, playing: playing, view: view, n: keep ? frames.length : 0,
+        follow: follow || (keep && u >= frames.length - 1.01), cv: cv, win: wcv, strip: strip, tl: tl };
       stop();
       d = data; frames = d.trace.frames; u = 0;
+      live = !!opts.live;
       colors = {};
       d.trace.queue.forEach(function (cs, k) { colors[cs] = BRIGHT[k % BRIGHT.length]; });
       frames.forEach(function (f) { f.by = {}; f.ac.forEach(function (a) { f.by[a[0]] = a; }); });
+      // the agent's window at each decision (AMAN order); older flights without it: the first 10 not yet landed
+      winN = 10;
+      frames.forEach(function (f) {
+        if (!f.win) f.win = d.trace.queue.filter(function (cs) { return f.by[cs] && f.by[cs][5] !== 2; }).slice(0, 10);
+        f.slot = {}; f.win.forEach(function (cs, k) { f.slot[cs] = k; });
+        winN = Math.max(winN, f.win.length);
+      });
+      dtDec = frames.length > 1 ? (frames[frames.length - 1].t - frames[0].t) / (frames.length - 1) : 45;
       sectors = (S.catalog && S.catalog.sectors) || [];
       procLabel = ((d.job && d.job.scenario && d.job.scenario.procedure) || "") === "pms" ? "BGY" : "MXP";
       // the airport: where the flight plans end
@@ -882,6 +974,8 @@
         });
       });
       evByFrame.forEach(function (list, k) { list.forEach(function (e) { e.fi = k; }); });
+      evByCs = {};
+      d.trace.events.forEach(function (e) { (evByCs[e.cs] = evByCs[e.cs] || []).push(e); });
       plans = (d.plans || []).slice().sort(function (a, b) { return a.t - b.t; });
       plans.forEach(function (pl) {
         pl.cands.forEach(function (c) {
@@ -894,9 +988,10 @@
       attachTimeline(tl);
       cv = h("canvas", { class: "lab-map", "aria-label": "radar replay: Ctrl + scroll to zoom, drag to pan, double-click to reset" });
       attachZoom(cv);
-      strip = h("canvas", { class: "lab-strip", "aria-label": "deviation per flight" });
+      strip = h("canvas", { class: "lab-strip", "aria-label": "predicted landing deviation of the flights in the window" });
+      wcv = h("canvas", { class: "lab-win", "aria-label": "clearances of the flights in the agent's window" });
       slider = h("input", { type: "range", min: 0, max: frames.length - 1, step: 1, value: 0, class: "lab-range lab-scrub", "aria-label": "time" });
-      slider.addEventListener("input", function () { u = +slider.value; draw(); });
+      slider.addEventListener("input", function () { u = +slider.value; follow = false; draw(); });
       tlabel = h("span", { class: "lab-num lab-tlabel" });
       playBtn = h("button", { type: "button", class: "lab-btn lab-btn--play", onclick: toggle, "aria-label": "play" }, ["▶"]);
       var spd = h("div", { class: "lab-seg lab-seg--sm" }, [0.5, 1, 2, 4, 8].map(function (s) {
@@ -906,7 +1001,7 @@
       }));
       // display toolbar: layer toggle buttons and the label density
       var layerList = [["sectors", "Sectors", "#8da0cb"], ["rings", "Range rings", "#3fd0ff"], ["routes", "Flight plans", "#9aabc6"]];
-      if (plans.length) layerList.push(["plans", "Search plans", "#ffe66d"]);
+      if (plans.length) layerList.push(["plans", "Search plans", PRED.chosen]);
       var labelSeg = seg("labels", [{ value: "off", label: "Off", title: "No aircraft labels" },
         { value: "tags", label: "Tags", title: "Call signs only" },
         { value: "full", label: "Full", title: "Data blocks: call sign, deviation, flight level, speed" }], layers.labels, function (v) {
@@ -932,8 +1027,8 @@
       var legend = h("div", { class: "lab-legend" }, cats.map(function (c) {
         return h("span", {}, [glyphIcon(category(c[0])), c[1]]);
       }).concat(plans.length ? [
-        h("span", {}, [h("i", { class: "lab-lg lab-lg--plan" }), "chosen plan, predicted"]),
-        h("span", {}, [h("i", { class: "lab-lg lab-lg--cand" }), "other candidates (red: ends in LoS)"])
+        h("span", {}, [h("i", { class: "lab-lg lab-lg--plan" }), "latest unbeaten plan, predicted"]),
+        h("span", {}, [h("i", { class: "lab-lg lab-lg--cand" }), "other candidates (rose: ends in LoS)"])
       ] : []).concat([
         h("span", {}, [h("i", { class: "lab-lg lab-lg--warn" }), "< 5 NM & 1000 ft"]),
         h("span", {}, [h("i", { class: "lab-lg lab-lg--bad" }), "loss of separation"])
@@ -944,16 +1039,27 @@
           h("button", { type: "button", class: "lab-zoom__btn", title: "Zoom in", "aria-label": "zoom in", onclick: function () { zoomBy(1.5); } }, ["+"]),
           h("button", { type: "button", class: "lab-zoom__btn", title: "Zoom out", "aria-label": "zoom out", onclick: function () { zoomBy(1 / 1.5); } }, ["−"]),
           h("button", { type: "button", class: "lab-zoom__btn", title: "Fit the whole stream", "aria-label": "reset view", onclick: resetView }, ["⤢"])
-        ])]), h("div", { class: "lab-replay__strip" }, [strip])]),
+        ])]), h("div", { class: "lab-replay__win" }, [wcv]), h("div", { class: "lab-replay__strip" }, [strip])]),
         h("div", { class: "lab-timeline-wrap" }, [tl]),
         h("div", { class: "lab-replay__ctl" }, [playBtn, slider, tlabel, spd]),
         legend
       ]);
       wrap.addEventListener("keydown", function (e) {
         if (e.key === " ") { e.preventDefault(); toggle(); }
-        else if (e.key === "ArrowRight") { u = Math.min(frames.length - 1, Math.floor(u) + 1); draw(); }
-        else if (e.key === "ArrowLeft") { u = Math.max(0, Math.ceil(u) - 1); draw(); }
+        else if (e.key === "ArrowRight") { u = Math.min(frames.length - 1, Math.floor(u) + 1); follow = false; draw(); }
+        else if (e.key === "ArrowLeft") { u = Math.max(0, Math.ceil(u) - 1); follow = false; draw(); }
       });
+      if (keep) {
+        // the same flight, further along (a live search) or finished: keep the view and the playhead, no flash
+        view = was.view; u = Math.min(was.u, frames.length - 1);
+        [[was.cv, cv], [was.win, wcv], [was.strip, strip], [was.tl, tl]].forEach(function (pr) {
+          if (!pr[0]) return; pr[1].width = pr[0].width; pr[1].height = pr[0].height; pr[1].style.width = pr[0].style.width; pr[1].style.height = pr[0].style.height;
+        });
+        follow = was.follow;
+        if (live && follow) u = Math.max(u, frames.length - 4);  // never trail a live search by more than a few decisions
+        draw();
+        if (u < frames.length - 1 && (was.playing || follow)) { playing = true; playBtn.textContent = "❚❚"; lastTs = 0; raf = requestAnimationFrame(tick); }
+      } else if (live) { u = frames.length - 1; follow = true; }
       setTimeout(resize, 0);
       return wrap;
     }
@@ -1000,9 +1106,13 @@
       var r = cv.parentNode.getBoundingClientRect(), w = Math.max(240, r.width);
       var hgt = Math.min(Math.max(360, w * 0.8), 720);
       cv.style.width = w + "px"; cv.style.height = hgt + "px"; cv.width = Math.round(w * dpr); cv.height = Math.round(hgt * dpr);
-      var rs = strip.parentNode.getBoundingClientRect(), ws = Math.max(200, rs.width);
-      strip.style.width = ws + "px"; strip.style.height = hgt + "px"; strip.width = Math.round(ws * dpr); strip.height = Math.round(hgt * dpr);
-      var rt = tl.parentNode.getBoundingClientRect(), wt = Math.max(240, rt.width), ht = 30 + d.trace.queue.length * 14 + 22;
+      // window and deviation panels: as tall as the scope when beside it, else a fixed height
+      var side = Math.abs(wcv.parentNode.getBoundingClientRect().top - r.top) < 4, hw = side ? hgt : Math.max(300, Math.min(440, 40 + winN * 36));
+      [wcv, strip].forEach(function (c) {
+        var rc = c.parentNode.getBoundingClientRect(), wc = Math.max(180, rc.width);
+        c.style.width = wc + "px"; c.style.height = hw + "px"; c.width = Math.round(wc * dpr); c.height = Math.round(hw * dpr);
+      });
+      var rt = tl.parentNode.getBoundingClientRect(), wt = Math.max(240, rt.width), ht = 30 + d.trace.queue.length * tlRowPx() + 22;
       tl.style.width = wt + "px"; tl.style.height = ht + "px"; tl.width = Math.round(wt * dpr); tl.height = Math.round(ht * dpr);
       tlCache = null;
       draw();
@@ -1019,10 +1129,12 @@
     function tick(ts) {
       if (!playing) return;
       if (!cv.isConnected) { stop(); return; }
-      if (lastTs) u = Math.min(frames.length - 1, u + (ts - lastTs) / 1000 * speed); // 1 decision (45 s) per second at 1×
+      // 1 decision (45 s) per second at 1×; following a live search, catch up with its edge in about a second
+      var sp = live && follow ? Math.max(speed, (frames.length - 1 - u) / 1.2) : speed;
+      if (lastTs) u = Math.min(frames.length - 1, u + (ts - lastTs) / 1000 * sp);
       lastTs = ts;
       draw();
-      if (u >= frames.length - 1) { stop(); return; }
+      if (u >= frames.length - 1) { stop(); if (live) follow = true; return; }
       raf = requestAnimationFrame(tick);
     }
     function draw() {
@@ -1032,8 +1144,26 @@
       var i = Math.min(frames.length - 1, Math.floor(u));
       slider.value = Math.round(u);
       tlabel.textContent = "t+" + fmtT(stateTime()) + " · " + (i + 1) + "/" + frames.length;
-      drawMap(); drawStrip(frames[i]); drawTimeline();
+      rowsNow = windowRows();
+      drawMap(); drawWindow(); drawStrip(); drawTimeline();
     }
+    // The agent's window at the continuous time u: one row per flight in AMAN order. Over a decision, rows slide to
+    // their new slots; a flight leaving the window fades out (sliding up off the front), one joining fades in.
+    function windowRows() {
+      var i = Math.floor(u), fr = u - i, e = fr * fr * (3 - 2 * fr), out = [], seen = {};
+      var A = frames[i], B = frames[Math.min(frames.length - 1, i + 1)];
+      A.win.forEach(function (cs, k) {
+        seen[cs] = 1;
+        var kb = B.slot[cs];
+        if (kb != null) out.push({ cs: cs, pos: k + (kb - k) * e, alpha: 1 });
+        else out.push({ cs: cs, pos: k === 0 ? -0.7 * e : k, alpha: 1 - e, leaving: true });
+      });
+      B.win.forEach(function (cs, k) {
+        if (!seen[cs]) out.push({ cs: cs, pos: k === B.win.length - 1 ? k + 0.7 * (1 - e) : k, alpha: e, entering: true });
+      });
+      return out;
+    }
+    function rowGeom(H, dpr) { var top = 38 * dpr, bot = 22 * dpr; return { top: top, rowH: (H - top - bot) / winN, bottom: H - bot }; }
     function stateTime() {
       var i = Math.floor(u), f = u - i, a = frames[i], b = frames[Math.min(frames.length - 1, i + 1)];
       return a.t + (b.t - a.t) * f;
@@ -1188,21 +1318,26 @@
         }
       }
 
-      // search: the active plan's candidate rollouts, ahead of the playhead
-      var nowT = stateTime(), active = null;
-      if (layers.plans) plans.forEach(function (pl) { if (pl.t <= nowT + 1e-6) active = pl; });
-      if (active) {
-        var order = active.cands.slice().sort(function (a, b) { return (a.chosen ? 1 : 0) - (b.chosen ? 1 : 0); }); // chosen on top
+      // search: the active plan's candidate rollouts, ahead of the playhead, for the flights in the window only
+      // (a flight's prediction fades out as it leaves the window). A new plan cross-fades over the old one.
+      var nowT = stateTime(), active = null, prevPlan = null, wa = {};
+      rowsNow.forEach(function (r) { wa[r.cs] = Math.max(wa[r.cs] || 0, r.alpha); });
+      if (layers.plans) plans.forEach(function (pl) { if (pl.t <= nowT + 1e-6) { prevPlan = active; active = pl; } });
+      function drawPlan(pl, fade) {
+        var order = pl.cands.slice().sort(function (a, b) { return (a.chosen ? 1 : 0) - (b.chosen ? 1 : 0); }); // chosen on top
         order.forEach(function (c) {
           var col = c.pruned ? PRED.pruned : c.chosen ? PRED.chosen : c.los ? PRED.los : PRED.other;
+          var base = c.pruned ? 0.12 : c.chosen ? 0.95 : c.los ? 0.4 : 0.3;
           ctx.strokeStyle = col;
-          ctx.lineWidth = (c.chosen ? 2.4 : 1.3) * dpr;
-          ctx.setLineDash(c.chosen ? [8 * dpr, 5 * dpr] : [2 * dpr, 4 * dpr]);
-          ctx.globalAlpha = c.pruned ? 0.18 : c.chosen ? 0.95 : c.los ? 0.55 : 0.32;
-          ctx.shadowColor = col; ctx.shadowBlur = c.chosen ? 10 * dpr : 0;
+          ctx.lineWidth = (c.chosen ? 2.4 : 1) * dpr;
+          ctx.setLineDash(c.chosen ? [8 * dpr, 5 * dpr] : [2 * dpr, 5 * dpr]);
+          ctx.shadowColor = col; ctx.shadowBlur = c.chosen ? 8 * dpr : 0;
           Object.keys(c.byCs).forEach(function (cs) {
+            var a_ = wa[cs] || 0;
+            if (a_ <= 0.01) return;
             var pts = c.byCs[cs].filter(function (q) { return q[0] >= nowT - 1e-6; });
             if (pts.length < 2) return;
+            ctx.globalAlpha = base * fade * a_;
             var here = byNow[cs];
             ctx.beginPath();
             if (here && here[5] === 1) ctx.moveTo(X(here[1]), Y(here[2])); else ctx.moveTo(X(pts[0][1]), Y(pts[0][2]));
@@ -1217,6 +1352,11 @@
           ctx.setLineDash([]); ctx.shadowBlur = 0;
         });
         ctx.globalAlpha = 1;
+      }
+      if (active) {
+        var fin = prevPlan ? Math.max(0, Math.min(1, (nowT - active.t) / (0.7 * dtDec))) : 1;
+        if (fin < 1) drawPlan(prevPlan, 1 - fin);
+        drawPlan(active, fin);
       }
 
       // clearances. Life of a glyph: pops in with a ping where it was issued, sits as a badge with a label and a
@@ -1343,13 +1483,13 @@
       if (active) {  // the active plan's scoreboard
         var rowsN = active.cands.length, bw2 = 196 * dpr, bh2 = (22 + rowsN * 13) * dpr, by2 = m + 40 * dpr;
         ctx.fillStyle = "rgba(2,6,13,0.78)"; roundRect(ctx, m, by2, bw2, bh2, 4 * dpr); ctx.fill();
-        ctx.strokeStyle = "rgba(255,230,109,0.5)"; ctx.lineWidth = 1 * dpr; ctx.stroke();
+        ctx.strokeStyle = "rgba(255,210,63,0.5)"; ctx.lineWidth = 1 * dpr; ctx.stroke();
         ctx.fillStyle = PRED.chosen; ctx.font = "600 " + (10 * dpr) + "px " + head;
         ctx.fillText("PLAN " + (plans.indexOf(active) + 1) + " · t+" + fmtT(active.t) + (active.switched ? " · SWITCHED" : ""), m + 8 * dpr, by2 + 14 * dpr);
         ctx.font = (9.5 * dpr) + "px " + mono;
         active.cands.forEach(function (c, n) {
           var yy = by2 + (27 + n * 13) * dpr;
-          var col = c.pruned ? PRED.pruned : c.chosen ? PRED.chosen : c.los ? PRED.los : "rgba(223,246,255,0.85)";
+          var col = c.pruned ? PRED.pruned : c.chosen ? PRED.chosen : c.los ? "#d9899b" : PRED.text;
           ctx.fillStyle = col;
           var txt = (c.chosen ? "▶ " : "  ") + "k" + c.k + " " + (c.kind + "         ").slice(0, 9) +
             (c.pruned ? " pruned" : (c.los ? " LoS  " : " " + c.on_time + "/" + d.summary.n_flights + " ") + " " + c.clearances + " clr");
@@ -1367,7 +1507,12 @@
       ctx.fillStyle = "rgba(233,241,255,0.7)"; ctx.font = "600 " + (10 * dpr) + "px " + head;
       ctx.fillText("N", W - m - 6 * dpr, H - m - 18 * dpr);
       ctx.beginPath(); ctx.moveTo(W - m - 2 * dpr, H - m - 14 * dpr); ctx.lineTo(W - m - 6 * dpr, H - m - 4 * dpr); ctx.lineTo(W - m + 2 * dpr, H - m - 4 * dpr); ctx.closePath(); ctx.fill();
-      if (u >= frames.length - 1) {
+      if (live) {  // a search still running: this is the episode so far
+        ctx.font = "700 " + (11 * dpr) + "px " + head;
+        var lt = "● LIVE · SEARCH RUNNING", ltw = ctx.measureText(lt).width, pulse = 0.55 + 0.45 * Math.sin(now * 4), lx0 = (W - ltw) / 2;
+        ctx.fillStyle = "rgba(2,6,13,0.8)"; roundRect(ctx, lx0 - m, m, ltw + 2 * m, 22 * dpr, 4 * dpr); ctx.fill();
+        ctx.globalAlpha = pulse; ctx.fillStyle = PRED.chosen; ctx.fillText(lt, lx0, m + 15 * dpr); ctx.globalAlpha = 1;
+      } else if (u >= frames.length - 1) {
         var s0 = d.summary, txt = s0.los ? "LOSS OF SEPARATION" : s0.solved ? "SOLVED · " + s0.on_time + "/" + s0.n_flights + " ON TIME" : s0.end_reason.toUpperCase() + " · " + s0.on_time + "/" + s0.n_flights + " ON TIME";
         ctx.font = "700 " + (15 * dpr) + "px " + head;
         var tw2 = ctx.measureText(txt).width, col2 = s0.los ? bad : s0.solved ? ok : warn;
@@ -1385,10 +1530,11 @@
     function tlGeometry() {
       var dpr = window.devicePixelRatio || 1, W = tl.width, H = tl.height;
       var t0 = frames[0].t, t1 = frames[frames.length - 1].t, x0 = 46 * dpr, x1 = W - 14 * dpr;
-      return { dpr: dpr, W: W, H: H, t0: t0, t1: t1, x0: x0, x1: x1, top: 26 * dpr, rowH: 14 * dpr,
+      return { dpr: dpr, W: W, H: H, t0: t0, t1: t1, x0: x0, x1: x1, top: 26 * dpr, rowH: tlRowPx() * dpr,
         X: function (t) { return x0 + (x1 - x0) * (t - t0) / Math.max(1, t1 - t0); },
         T: function (px) { return t0 + (px - x0) / (x1 - x0) * (t1 - t0); } };
     }
+    function tlRowPx() { var n = d.trace.queue.length; return n > 40 ? 9 : n > 24 ? 11 : 14; }
     function buildTimeline() {
       var g = tlGeo = tlGeometry(), dpr = g.dpr, W = g.W, H = g.H;
       var c = document.createElement("canvas"); c.width = W; c.height = H;
@@ -1412,7 +1558,7 @@
         var y = g.top + k * g.rowH + g.rowH / 2, L = life[cs], col = colors[cs];
         if (k % 2 === 0) { x.fillStyle = "rgba(255,255,255,0.025)"; x.fillRect(0, y - g.rowH / 2, W, g.rowH); }
         x.fillStyle = col; x.fillRect(4 * dpr, y - 3 * dpr, 3 * dpr, 6 * dpr);
-        x.fillStyle = "rgba(233,241,255,0.85)"; x.font = (9.5 * dpr) + "px " + mono; x.fillText(shortCs(cs), 11 * dpr, y + 3.5 * dpr);
+        x.fillStyle = "rgba(233,241,255,0.85)"; x.font = Math.min(9.5, g.rowH / dpr - 1) * dpr + "px " + mono; x.fillText(shortCs(cs), 11 * dpr, y + g.rowH * 0.28);
         var tEnd = L.land != null ? L.land : g.t1;
         if (L.seen != null) {  // waiting to spawn / not yet under control: dim dotted
           x.strokeStyle = col; x.globalAlpha = 0.25; x.lineWidth = 1 * dpr; x.setLineDash([2 * dpr, 3 * dpr]);
@@ -1436,7 +1582,7 @@
         if (k < 0) return;
         var y = g.top + k * g.rowH + g.rowH / 2;
         e.tx = g.X(e.t); e.ty = y;
-        drawGlyph(x, e.tx, y, 9.5 * dpr, e.cat);
+        drawGlyph(x, e.tx, y, Math.min(9.5 * dpr, g.rowH * 0.72), e.cat);
       });
       // search plans: a tick per plan (a star where it switched to a new candidate)
       plans.forEach(function (pl) {
@@ -1462,6 +1608,14 @@
       x.drawImage(tlCache, 0, 0);
       // the future, dimmed
       x.fillStyle = "rgba(2,6,13,0.45)"; x.fillRect(px, g.top - 4 * dpr, g.x1 + 14 * dpr - px, bottom - g.top + 4 * dpr);
+      // the flights in the agent's window right now (the centre panel), bracketed on the left
+      rowsNow.forEach(function (r) {
+        var k = d.trace.queue.indexOf(r.cs);
+        if (k < 0) return;
+        x.globalAlpha = r.alpha; x.fillStyle = "rgba(63,208,255,0.07)"; x.fillRect(0, g.top + k * g.rowH, g.W, g.rowH);
+        x.fillStyle = "rgba(63,208,255,0.8)"; x.fillRect(0, g.top + k * g.rowH, 2 * dpr, g.rowH);
+      });
+      x.globalAlpha = 1;
       // clearances of the last decision glow
       var i = Math.floor(u);
       for (var k = Math.max(0, i - 1); k <= i; k++) evByFrame[k].forEach(function (e) {
@@ -1496,11 +1650,11 @@
         if (!tlGeo) return;
         var p = at(ev), t = tlGeo.T(p[0]), best = 0;
         frames.forEach(function (f, k) { if (Math.abs(f.t - t) < Math.abs(frames[best].t - t)) best = k; });
-        u = best; draw();
+        u = best; follow = false; draw();
       }
       c.addEventListener("pointerdown", function (ev) {
         scrubbing = true; c.setPointerCapture(ev.pointerId);
-        if (tlHover) { u = tlHover.fi; draw(); } else seek(ev);
+        if (tlHover) { u = tlHover.fi; follow = false; draw(); } else seek(ev);
       });
       c.addEventListener("pointermove", function (ev) {
         if (scrubbing) { seek(ev); return; }
@@ -1517,47 +1671,138 @@
       c.addEventListener("pointerleave", function () { if (tlHover) { tlHover = null; drawTimeline(); } });
     }
 
-    function drawStrip(f) {
-      if (!sctx) return;
-      var dpr = window.devicePixelRatio || 1, W = strip.width, H = strip.height;
-      var ok = css("--tada-ok"), warn = css("--tada-warn"), bad = css("--tada-bad");
-      sctx.setTransform(1, 0, 0, 1, 0, 0);
+    // ------------------------------------------------------------------ the agent's window: clearances (centre)
+    function drawWindow() {
+      if (!wcv || !wcv.width) return;
+      if (!wctx || wctx.canvas !== wcv) wctx = wcv.getContext("2d");
+      var x = wctx, dpr = window.devicePixelRatio || 1, W = wcv.width, H = wcv.height, g = rowGeom(H, dpr);
+      var mono = css("--tada-font-mono"), head = css("--tada-font-head"), ok = css("--tada-ok"), warn = css("--tada-warn"), bad = css("--tada-bad");
+      var t = stateTime(), labW = 46 * dpr, x0 = labW, x1 = W - 6 * dpr, i = Math.floor(u);
+      function X(tt) { return x0 + (x1 - x0) * (tt - (t - PAST)) / (PAST + AHEAD); }
+      var nowX = X(t), gs = Math.min(g.rowH * 0.6, 17 * dpr);
+      x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.shadowBlur = 0; x.setLineDash([]);
+      x.fillStyle = "#02060d"; x.fillRect(0, 0, W, H);
+      x.font = "600 " + (10 * dpr) + "px " + head; x.fillStyle = css("--tada-tile-label");
+      x.fillText("CLEARANCES · AGENT'S WINDOW", 8 * dpr, 13 * dpr);
+      x.font = (9 * dpr) + "px " + mono; x.fillStyle = "rgba(154,171,198,0.85)";
+      x.fillText(frames[i].win.length + " flights, AMAN order · first to land on top", 8 * dpr, 26 * dpr);
+      // the future, and a minute grid relative to now
+      x.fillStyle = "rgba(255,255,255,0.025)"; x.fillRect(nowX, g.top - 4 * dpr, x1 - nowX, g.bottom - g.top + 4 * dpr);
+      for (var m_ = -Math.floor(PAST / 120) * 120; m_ <= AHEAD; m_ += 120) {
+        var gx = X(t + m_); if (gx < x0) continue;
+        x.strokeStyle = "rgba(63,208,255,0.07)"; x.lineWidth = 1; x.beginPath(); x.moveTo(gx, g.top - 4 * dpr); x.lineTo(gx, g.bottom); x.stroke();
+        var gl = m_ === 0 ? "now" : (m_ > 0 ? "+" : "−") + Math.abs(m_ / 60) + "′";
+        x.fillStyle = m_ === 0 ? css("--tada-champion") : "rgba(154,171,198,0.75)"; x.fillText(gl, gx - x.measureText(gl).width / 2, g.bottom + 14 * dpr);
+      }
+      // rows: zebra by slot, then each flight at its (sliding) position
+      for (var k = 0; k < winN; k++) if (k % 2 === 0) { x.fillStyle = "rgba(255,255,255,0.022)"; x.fillRect(0, g.top + k * g.rowH, W, g.rowH); }
+      x.save(); x.beginPath(); x.rect(0, g.top - 2 * dpr, W, g.bottom - g.top + 4 * dpr); x.clip();
+      rowsNow.forEach(function (r) {
+        var cs = r.cs, y = g.top + (r.pos + 0.5) * g.rowH, L = life[cs], col = colors[cs], evs = evByCs[cs] || [];
+        x.globalAlpha = r.alpha;
+        x.fillStyle = col; x.fillRect(4 * dpr, y - g.rowH * 0.3, 3 * dpr, g.rowH * 0.6);
+        x.fillStyle = "rgba(233,241,255,0.92)"; x.font = "600 " + Math.min(11, g.rowH / dpr * 0.42) * dpr + "px " + mono;
+        x.fillText(shortCs(cs), 11 * dpr, y + 4 * dpr);
+        // life line: waiting (dotted) then under control (solid), up to now or touchdown
+        var tEnd = L.land != null && L.land <= t ? L.land : t, ta = Math.max(t - PAST, L.seen != null ? L.seen : t);
+        x.save(); x.beginPath(); x.rect(x0, 0, x1 - x0, H); x.clip();
+        if (L.on == null || L.on > ta) {
+          x.strokeStyle = col; x.globalAlpha = r.alpha * 0.3; x.lineWidth = 1 * dpr; x.setLineDash([2 * dpr, 3 * dpr]);
+          x.beginPath(); x.moveTo(X(ta), y); x.lineTo(X(Math.min(tEnd, L.on != null ? L.on : tEnd)), y); x.stroke(); x.setLineDash([]);
+        }
+        if (L.on != null && L.on < tEnd) {
+          x.strokeStyle = col; x.globalAlpha = r.alpha * 0.55; x.lineWidth = 2 * dpr;
+          x.beginPath(); x.moveTo(X(Math.max(L.on, t - PAST)), y); x.lineTo(X(tEnd), y); x.stroke();
+        }
+        x.globalAlpha = r.alpha;
+        // its clearances, as glyphs where they were issued; the last decision's glow
+        var lastE = null;
+        evs.forEach(function (e) {
+          if (e.t > t + 1e-6) return;
+          lastE = e;
+          if (e.t < t - PAST - 30) return;
+          var ex = X(e.t) + e.slot * gs * 0.95;
+          var age = u - e.fi;
+          if (age >= 0 && age < 1.6) {
+            x.save(); x.globalAlpha = r.alpha * (1 - age / 1.6); x.strokeStyle = e.cat.color; x.lineWidth = 1.5 * dpr; x.shadowColor = e.cat.color; x.shadowBlur = 8 * dpr;
+            x.beginPath(); x.arc(ex, y, gs * (0.65 + 0.5 * age), 0, 2 * Math.PI); x.stroke(); x.restore();
+          }
+          drawGlyph(x, ex, y, gs, e.cat);
+        });
+        // touchdown
+        if (L.land != null && L.land <= t) {
+          var good = Math.abs(L.dev) <= 60, c2 = good ? ok : Math.abs(L.dev) <= 300 ? warn : bad;
+          x.fillStyle = c2; x.font = "700 " + (10 * dpr) + "px " + mono; x.fillText((good ? "✓ " : "✗ ") + sgn(L.dev), X(L.land) + 4 * dpr, y + 4 * dpr);
+        }
+        x.restore();
+        // ahead of now: the last clearance in words, fading with age
+        if (lastE) {
+          var ageD = Math.max(0, u - lastE.fi), aa = Math.max(0.35, 1 - ageD / (FADE * 2));
+          x.globalAlpha = r.alpha * aa; x.fillStyle = lastE.cat.color; x.font = (9.5 * dpr) + "px " + mono;
+          var txt = pretty(lastE.name), ago = fmtT(Math.max(0, t - lastE.t)) + " ago";
+          var tx0 = nowX + gs * 0.7 + 4 * dpr;
+          x.fillText(txt, tx0, y - 1 * dpr);
+          x.fillStyle = "rgba(154,171,198,0.9)"; x.font = (8.5 * dpr) + "px " + mono; x.fillText(ago, tx0, y + 9 * dpr);
+        } else if (L.on != null && L.on <= t) {
+          x.globalAlpha = r.alpha * 0.5; x.fillStyle = "rgba(154,171,198,0.9)"; x.font = (9 * dpr) + "px " + mono; x.fillText("on its flight plan", nowX + 6 * dpr, y + 3 * dpr);
+        }
+        x.globalAlpha = 1;
+      });
+      x.restore();
+      // now
+      x.strokeStyle = css("--tada-champion"); x.lineWidth = 1.5 * dpr; x.globalAlpha = 0.9;
+      x.beginPath(); x.moveTo(nowX, g.top - 6 * dpr); x.lineTo(nowX, g.bottom); x.stroke(); x.globalAlpha = 1;
+    }
+
+    // ------------------------------------------------------------------ landing deviation (right), rows aligned with the window
+    function drawStrip() {
+      if (!sctx || !strip.width) return;
+      var dpr = window.devicePixelRatio || 1, W = strip.width, H = strip.height, g = rowGeom(H, dpr);
+      var ok = css("--tada-ok"), warn = css("--tada-warn"), bad = css("--tada-bad"), mono = css("--tada-font-mono");
+      var i = Math.floor(u), fr = u - i, A = frames[i], B = frames[Math.min(frames.length - 1, i + 1)];
+      sctx.setTransform(1, 0, 0, 1, 0, 0); sctx.globalAlpha = 1;
       sctx.fillStyle = "#02060d"; sctx.fillRect(0, 0, W, H);
-      var n = d.trace.queue.length, top = 22 * dpr, rowH = Math.min(24 * dpr, (H - top - 18 * dpr) / n);
-      var labW = 44 * dpr, valW = 48 * dpr, x0 = labW, x1 = W - valW, lim = 300;
+      var valW = 42 * dpr, x0 = 6 * dpr, x1 = W - valW, lim = 300;
       function X(v) { return x0 + (x1 - x0) * (0.5 + Math.max(-lim, Math.min(lim, v)) / (2 * lim)); }
-      sctx.fillStyle = "rgba(62,224,122,0.10)"; sctx.fillRect(X(-60), top, X(60) - X(-60), rowH * n);
-      sctx.fillStyle = "rgba(62,224,122,0.14)"; sctx.fillRect(X(-30), top, X(30) - X(-30), rowH * n);
-      sctx.strokeStyle = "rgba(233,241,255,0.35)"; sctx.lineWidth = 1;
-      sctx.beginPath(); sctx.moveTo(X(0), top - 4 * dpr); sctx.lineTo(X(0), top + rowH * n); sctx.stroke();
       sctx.font = "600 " + (10 * dpr) + "px " + css("--tada-font-head"); sctx.fillStyle = css("--tada-tile-label");
-      sctx.fillText("PREDICTED LANDING DEVIATION", x0, 13 * dpr);
-      sctx.font = (9 * dpr) + "px " + css("--tada-font-mono"); sctx.fillStyle = "rgba(154,171,198,0.8)";
-      [-300, -60, 60, 300].forEach(function (v) { var t = sgn(v); sctx.fillText(t, X(v) - sctx.measureText(t).width / 2, top + rowH * n + 12 * dpr); });
+      sctx.fillText("LANDING DEVIATION", x0, 13 * dpr);
+      var landed = 0, onT = 0;
+      A.ac.forEach(function (a) { if (a[5] === 2) { landed++; if (Math.abs(a[6]) <= 60) onT++; } });
+      sctx.font = (9 * dpr) + "px " + mono; sctx.fillStyle = "rgba(154,171,198,0.85)";
+      sctx.fillText("landed " + landed + "/" + d.trace.queue.length + " · " + onT + " on time", x0, 26 * dpr);
+      sctx.fillStyle = "rgba(62,224,122,0.10)"; sctx.fillRect(X(-60), g.top, X(60) - X(-60), g.bottom - g.top);
+      sctx.fillStyle = "rgba(62,224,122,0.14)"; sctx.fillRect(X(-30), g.top, X(30) - X(-30), g.bottom - g.top);
+      sctx.strokeStyle = "rgba(233,241,255,0.35)"; sctx.lineWidth = 1;
+      sctx.beginPath(); sctx.moveTo(X(0), g.top - 4 * dpr); sctx.lineTo(X(0), g.bottom); sctx.stroke();
+      sctx.fillStyle = "rgba(154,171,198,0.8)";
+      [-300, -60, 60, 300].forEach(function (v) { var t = sgn(v); sctx.fillText(t, Math.max(0, Math.min(W - sctx.measureText(t).width, X(v) - sctx.measureText(t).width / 2)), g.bottom + 14 * dpr); });
       // flights cleared within the last decision light up
-      var fresh = {}, i = Math.floor(u);
+      var fresh = {};
       for (var k = Math.max(0, i - 1); k <= i; k++) evByFrame[k].forEach(function (e) { if (u - k < 1.5) fresh[e.cs] = e.cat.color; });
-      sctx.font = (Math.min(11, rowH / dpr - 2) * dpr) + "px " + css("--tada-font-mono");
-      d.trace.queue.forEach(function (cs, kk) {
-        var a = f.by[cs], y = top + kk * rowH;
+      var bh = Math.min(g.rowH * 0.42, 12 * dpr);
+      sctx.save(); sctx.beginPath(); sctx.rect(0, g.top - 2 * dpr, W, g.bottom - g.top + 4 * dpr); sctx.clip();
+      rowsNow.forEach(function (r) {
+        var a = A.by[r.cs], b = B.by[r.cs] || a;
         if (!a) return;
-        var dev = a[6], st = a[5], c = Math.abs(dev) <= 60 ? ok : Math.abs(dev) <= 300 ? warn : bad;
-        if (fresh[cs]) { sctx.fillStyle = fresh[cs]; sctx.globalAlpha = 0.16; sctx.fillRect(0, y, W, rowH); sctx.globalAlpha = 1; }
-        sctx.fillStyle = colors[cs]; sctx.fillRect(2 * dpr, y + rowH * 0.18, 4 * dpr, rowH * 0.64);
-        sctx.fillStyle = st === 0 ? "rgba(154,171,198,0.55)" : "rgba(233,241,255,0.92)";
-        sctx.fillText(shortCs(cs), 9 * dpr, y + rowH * 0.7);
-        sctx.globalAlpha = st === 0 ? 0.45 : 1;
+        var y = g.top + (r.pos + 0.5) * g.rowH, dev = a[6] + ((b[6] - a[6]) * fr), st = fr < 0.5 ? a[5] : b[5];
+        var c = Math.abs(dev) <= 60 ? ok : Math.abs(dev) <= 300 ? warn : bad;
+        sctx.globalAlpha = r.alpha;
+        if (fresh[r.cs]) { sctx.fillStyle = fresh[r.cs]; sctx.globalAlpha = 0.14 * r.alpha; sctx.fillRect(0, y - g.rowH / 2, W, g.rowH); sctx.globalAlpha = r.alpha; }
+        sctx.globalAlpha = r.alpha * (st === 0 ? 0.45 : 1);
         sctx.fillStyle = c;
         var bx = Math.min(X(0), X(dev)), bwid = Math.max(2 * dpr, Math.abs(X(dev) - X(0)));
-        sctx.fillRect(bx, y + rowH * 0.24, bwid, rowH * 0.52);
-        if (Math.abs(dev) > lim) { sctx.fillText(dev > 0 ? "▸" : "◂", dev > 0 ? x1 - 8 * dpr : x0, y + rowH * 0.7); }
-        sctx.globalAlpha = 1;
-        sctx.fillStyle = st === 2 ? c : "rgba(233,241,255,0.8)";
+        sctx.fillRect(bx, y - bh / 2, bwid, bh);
+        sctx.font = (9 * dpr) + "px " + mono;
+        if (Math.abs(dev) > lim) sctx.fillText(dev > 0 ? "▸" : "◂", dev > 0 ? x1 - 7 * dpr : x0, y + 3.5 * dpr);
+        sctx.globalAlpha = r.alpha;
+        sctx.fillStyle = st === 2 ? c : "rgba(233,241,255,0.85)";
+        sctx.font = Math.min(11, g.rowH / dpr * 0.42) * dpr + "px " + mono;
         var label = (st === 2 ? (Math.abs(dev) > 60 ? "✗" : "✓") : "") + sgn(dev);
-        sctx.fillText(label, W - sctx.measureText(label).width - 4 * dpr, y + rowH * 0.7);
+        sctx.fillText(label, W - sctx.measureText(label).width - 4 * dpr, y + 4 * dpr);
       });
+      sctx.restore();
     }
-    return { mount: mount, resize: resize };
+    return { mount: mount, resize: resize, isLive: isLive };
   })();
 
   // ---------------------------------------------------------------- boot
