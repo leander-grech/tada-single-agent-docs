@@ -2,6 +2,7 @@
 importScripts("tada-wasm.js");
 let engine = null;
 const policies = {};
+const cancelled = new Set();
 
 function better(a, b) { // lexicographic: no LoS, bracket score, fewest clearances
   for (let i = 0; i < a.length; i++) {
@@ -13,6 +14,7 @@ function better(a, b) { // lexicographic: no LoS, bracket score, fewest clearanc
 
 onmessage = async (e) => {
   const m = e.data;
+  if (m.cmd === "cancel") { cancelled.add(m.target); return; }
   try {
     if (m.cmd === "init") {
       engine = await loadTadaEngine(m.bytes || m.wasm);
@@ -25,11 +27,16 @@ onmessage = async (e) => {
       const pol = j.agent === "do-nothing" ? 0 : policies[j.agent];
       if (pol === undefined) throw new Error("download " + j.agent + " first");
       if (j.mode === "search") {
-        const ep = engine.newSearchEpisode(sc.procedure, sc.seed, sc.flights, pol, j.search);
-        let done = false, last = 0;
+        const ep = engine.newSearchEpisode(sc.procedure, sc.seed, sc.flights, pol, j.search, sc.segments);
+        let done = false, last = 0, yielded = performance.now();
         while (!done) {
           done = engine.step(ep, 1);
           const now = performance.now();
+          if (now - yielded > 30) {  // let a cancel message in
+            await new Promise((r) => setTimeout(r, 0));
+            yielded = performance.now();
+            if (cancelled.has(m.id)) { cancelled.delete(m.id); engine.free(ep); postMessage({ id: m.id, error: "cancelled" }); return; }
+          }
           if (now - last > 120 || done) {
             last = now;
             const st = engine.status(ep);
@@ -51,7 +58,7 @@ onmessage = async (e) => {
       let best = null, bestRank = null;
       const attempts = [];
       for (let a = 0; a < n; a++) {
-        const ep = engine.newEpisode(sc.procedure, sc.seed, sc.flights, pol, a === 0, sc.seed * 1009 + a);
+        const ep = engine.newEpisode(sc.procedure, sc.seed, sc.flights, pol, a === 0, sc.seed * 1009 + a, sc.segments);
         let done = false;
         while (!done) {
           done = engine.step(ep, 4);

@@ -30,12 +30,12 @@ async function loadTadaEngine(source) {
       return check(h);
     },
     // procedure: "tmb" | "pms"; policy: handle or 0 for do-nothing
-    newEpisode(procedure, seed, flights, policy, deterministic, sampleSeed) {
-      return check(x.tada_episode_new(procedure === "pms" ? 1 : 0, seed, flights, policy || 0, deterministic ? 1 : 0, sampleSeed || 0));
+    newEpisode(procedure, seed, flights, policy, deterministic, sampleSeed, segments) {
+      return check(x.tada_episode_new(procedure === "pms" ? 1 : 0, seed, flights, segments || 1, policy || 0, deterministic ? 1 : 0, sampleSeed || 0));
     },
     // policy + rollout search: { K, M, J (0 = sample all), stop (bool), prune (bool), look (clock steps of predicted tracks) }
-    newSearchEpisode(procedure, seed, flights, policy, p) {
-      return check(x.tada_episode_new_search(procedure === "pms" ? 1 : 0, seed, flights, policy, p.K, p.M, p.J || 0,
+    newSearchEpisode(procedure, seed, flights, policy, p, segments) {
+      return check(x.tada_episode_new_search(procedure === "pms" ? 1 : 0, seed, flights, segments || 1, policy, p.K, p.M, p.J || 0,
         (p.stop ? 1 : 0) | (p.prune ? 2 : 0), p.look || 0));
     },
     status(ep) { return JSON.parse(readOut(x.tada_episode_status(ep))); },

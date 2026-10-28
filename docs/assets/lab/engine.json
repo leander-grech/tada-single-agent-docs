@@ -2,7 +2,7 @@
  "format": "TADAENC1",
  "aad": "tada-browser-engine",
  "key_id": "6e0c44eaeaff5e96",
- "plain_size": 1436161,
- "plain_sha256": "1119b83129b33780696c2c83528b6bbfa67307cee59241cad194293185bed460",
- "built": "2026-10-28T15:12Z"
+ "plain_size": 1614647,
+ "plain_sha256": "07a4929b476d0ed43f0db74b6f197e57bd7266622ea9b7a98170ef3f16872db7",
+ "built": "2026-10-28T15:26Z"
 }
